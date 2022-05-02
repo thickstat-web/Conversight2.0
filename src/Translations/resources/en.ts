@@ -11,5 +11,8 @@ export default {
   },
   signin: {
     orgName: 'Org name is {{name}}',
+    buttons: {
+      signIn: 'SignIn',
+    },
   },
 }

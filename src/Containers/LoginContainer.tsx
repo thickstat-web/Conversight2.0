@@ -48,7 +48,7 @@ const LoginContainer = () => {
         )}
         <TouchableOpacity onPress={handleSignIn} style={styles.signInButton}>
           <Text style={[Fonts.textRegular, styles.signInButtonText]}>
-            {'SignIn'}
+            {'signin.buttons.signIn'}
           </Text>
         </TouchableOpacity>
       </View>
