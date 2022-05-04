@@ -21,7 +21,8 @@ export const Colors: ThemeColors = {
   inputBackground: '#FFFFFF',
   white: '#ffffff',
   text: '#212529',
-  primary: '#E14032',
+  primary: '#00AA39',
+  darkPrimary: '#004438',
   success: '#28a745',
   error: '#dc3545',
 }
@@ -34,9 +35,11 @@ export const NavigationColors: Partial<ThemeNavigationColors> = {
  * FontSize
  */
 export const FontSize: ThemeFontSize = {
-  small: 16,
-  regular: 20,
-  large: 40,
+  xsmall: 10,
+  small: 12,
+  normal: 14,
+  large: 16,
+  xlarge: 20,
 }
 
 /**

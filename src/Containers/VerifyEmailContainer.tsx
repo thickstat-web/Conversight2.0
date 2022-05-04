@@ -1,13 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import {
-  View,
-  ActivityIndicator,
-  Text,
-  TextInput,
-  ScrollView,
-} from 'react-native'
+import React, { useState } from 'react'
+import { View, Text, TextInput, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Brand } from '@/Components'
+import { Brand, Button } from '@/Components'
 import { useTheme } from '@/Hooks'
 import { useLazyVerifyEmailQuery } from '@/Services/modules/auth'
 
@@ -23,51 +17,62 @@ const VerifyEmailContainer = () => {
 
   const isSuccess = data?.code === 200
 
-  useEffect(() => {
-    verifyEmail(emailId)
-  }, [verifyEmail, emailId])
+  // useEffect(() => {
+  //   verifyEmail(emailId)
+  // }, [verifyEmail, emailId])
 
   return (
     <ScrollView
       style={Layout.fill}
       contentContainerStyle={[
         Layout.fill,
-        Layout.colCenter,
-        Gutters.smallHPadding,
+        Layout.colHCenter,
+        Gutters.largeHMargin,
       ]}
     >
-      <View style={[[Layout.colCenter, Gutters.smallHPadding]]}>
+      <View style={[Layout.fill, Layout.rowCenter]}>
         <Brand />
-        {(isLoading || isFetching) && <ActivityIndicator />}
-        {!isSuccess ? (
-          <Text style={Fonts.textRegular}>
-            {data ? data.errors[0].message : ''}
-          </Text>
-        ) : (
-          <Text style={Fonts.textRegular}>
-            {t('verifyEmail.firstOrgName', { name: data?.orgData[0].name })}
-          </Text>
-        )}
       </View>
-      <View
-        style={[
-          Layout.row,
-          Layout.rowHCenter,
-          Gutters.smallHPadding,
-          Gutters.largeVMargin,
-        ]}
-      >
-        <Text style={[Layout.fill, Fonts.textCenter, Fonts.textSmall]}>
-          {t('verifyEmail.labels.emailId')}
-        </Text>
-        <TextInput
-          onChangeText={setEmailId}
-          editable={!isLoading}
-          maxLength={100}
-          value={emailId}
-          selectTextOnFocus
-          style={[Layout.fill, Common.textInput]}
-        />
+      <View style={[Layout.fill]}>
+        {!(isLoading || isFetching) && (
+          <View style={[Layout.colCenter]}>
+            {!isSuccess ? (
+              <Text style={Fonts.textNormal}>
+                {data ? data.errors[0].message : ''}
+              </Text>
+            ) : (
+              <Text style={Fonts.textNormal}>
+                {'Email is valid!'}
+                {/* {t('verifyEmail.orgName', {
+                  name: data?.orgData[0].name,
+                })} */}
+              </Text>
+            )}
+          </View>
+        )}
+
+        <View style={Gutters.largeVMargin}>
+          <Text style={Fonts.textNormal}>
+            {t('verifyEmail.labels.emailId')}
+          </Text>
+          <TextInput
+            onChangeText={setEmailId}
+            editable={!isLoading}
+            maxLength={100}
+            value={emailId}
+            selectTextOnFocus
+            style={Common.textInput}
+          />
+        </View>
+
+        <Button
+          block={true}
+          dark={true}
+          loading={isLoading || isFetching}
+          onPress={() => verifyEmail(emailId)}
+        >
+          {t('verifyEmail.buttons.verifyEmail')}
+        </Button>
       </View>
     </ScrollView>
   )

@@ -18,6 +18,9 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
       backgroundPrimary: {
         backgroundColor: Colors.primary,
       },
+      backgroundDarkPrimary: {
+        backgroundColor: Colors.darkPrimary,
+      },
       backgroundReset: {
         backgroundColor: Colors.transparent,
       },
@@ -30,6 +33,10 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         textAlign: 'center',
         marginTop: 10,
         marginBottom: 10,
+        borderRadius: 8,
+      },
+      curved: {
+        borderRadius: 8,
       },
     }),
   }

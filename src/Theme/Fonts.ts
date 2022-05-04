@@ -15,9 +15,24 @@ export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
       fontSize: FontSize.small,
       color: Colors.text,
     },
-    textRegular: {
-      fontSize: FontSize.regular,
+    textNormal: {
+      fontSize: FontSize.normal,
       color: Colors.text,
+    },
+    textNormalContrast: {
+      fontSize: FontSize.normal,
+      color: Colors.white,
+    },
+    textBold: {
+      fontSize: FontSize.normal,
+      fontWeight: 'bold',
+      lineHeight: 20,
+    },
+    textBoldContrast: {
+      fontSize: FontSize.normal,
+      fontWeight: 'bold',
+      color: Colors.white,
+      lineHeight: 20,
     },
     textLarge: {
       fontSize: FontSize.large,
@@ -29,7 +44,7 @@ export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
       color: Colors.text,
     },
     titleRegular: {
-      fontSize: FontSize.regular * 2,
+      fontSize: FontSize.normal * 2,
       fontWeight: 'bold',
       color: Colors.text,
     },
@@ -49,6 +64,15 @@ export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
     },
     textRight: {
       textAlign: 'right',
+    },
+    textPrimary: {
+      color: Colors.primary,
+    },
+    textDarkPrimary: {
+      color: Colors.darkPrimary,
+    },
+    textContrast: {
+      color: Colors.white,
     },
   })
 }

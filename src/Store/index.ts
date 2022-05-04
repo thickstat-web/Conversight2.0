@@ -13,7 +13,7 @@ import {
 import { configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 
-import { api } from '@/Services/api'
+import { csApi, botApi } from '@/Services/api'
 import * as modules from '@/Services/modules'
 import theme from './Theme'
 
@@ -43,7 +43,7 @@ const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(api.middleware as Middleware)
+    }).concat([csApi.middleware as Middleware, botApi.middleware as Middleware])
 
     if (__DEV__ && !process.env.JEST_WORKER_ID) {
       const createDebugger = require('redux-flipper').default

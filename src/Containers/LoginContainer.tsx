@@ -1,16 +1,9 @@
 import React from 'react'
-import {
-  View,
-  ActivityIndicator,
-  Text,
-  ScrollView,
-  StyleSheet,
-} from 'react-native'
+import { View, Text, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Brand } from '@/Components'
+import { Brand, Button } from '@/Components'
 import { useTheme } from '@/Hooks'
 import { useSignInMutation } from '@/Services/modules/auth'
-import { TouchableOpacity } from 'react-native-gesture-handler'
 
 const LoginContainer = () => {
   const { t } = useTranslation()
@@ -25,46 +18,40 @@ const LoginContainer = () => {
     orgId: 'a8440c42-0aff-4619-be31-ee4d0eec6440',
   }
 
-  const handleSignIn = () => {
-    signIn(authData)
-  }
+  const handleSignIn = () => signIn(authData)
 
   return (
     <ScrollView
       style={Layout.fill}
-      contentContainerStyle={[
-        Layout.fill,
-        Layout.colCenter,
-        Gutters.smallHPadding,
-      ]}
+      contentContainerStyle={[Layout.fill, Gutters.largeHMargin]}
     >
-      <View style={[[Layout.colCenter, Gutters.smallHPadding]]}>
+      <View style={[Layout.fill, Layout.center]}>
         <Brand />
-        {isLoading && <ActivityIndicator />}
+      </View>
+      <View style={[Layout.fill, Layout.justifyContentEnd]}>
         {isSuccess && (
-          <Text style={Fonts.textRegular}>
-            {t('signin.orgName', { name: data?.displayName })}
-          </Text>
+          <View style={[Gutters.largeBMargin, Layout.center]}>
+            <Text style={Fonts.textNormal}>
+              {t('signin.orgName', { name: data?.displayName })}
+            </Text>
+          </View>
         )}
-        <TouchableOpacity onPress={handleSignIn} style={styles.signInButton}>
-          <Text style={[Fonts.textRegular, styles.signInButtonText]}>
-            {'signin.buttons.signIn'}
+        <Button
+          block={true}
+          dark={true}
+          loading={isLoading}
+          onPress={handleSignIn}
+        >
+          {t('signin.buttons.signIn')}
+        </Button>
+        <View style={[Gutters.largeVMargin, Layout.center]}>
+          <Text style={[Fonts.textBold, Fonts.textPrimary]}>
+            {t('signin.signupLater')}
           </Text>
-        </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   )
 }
 
 export default LoginContainer
-
-const styles = StyleSheet.create({
-  signInButton: {
-    backgroundColor: '#196F3D',
-    borderRadius: 8,
-    margin: 24,
-    paddingHorizontal: 48,
-    paddingVertical: 12,
-  },
-  signInButtonText: { color: 'white' },
-})

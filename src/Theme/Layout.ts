@@ -6,7 +6,7 @@ import { ThemeLayout, ThemeVariables } from '@/Theme/theme.type'
  * @param Theme can be spread like {Colors, NavigationColors, Gutters, Layout, Common, ...args}
  * @return {*}
  */
-export default function ({}: ThemeVariables): ThemeLayout {
+export default function ({ }: ThemeVariables): ThemeLayout {
   return StyleSheet.create({
     /* Column Layouts */
     column: {
@@ -59,6 +59,9 @@ export default function ({}: ThemeVariables): ThemeLayout {
     alignItemsStart: {
       alignItems: 'flex-start',
     },
+    alignItemsEnd: {
+      alignItems: 'flex-end',
+    },
     alignItemsStretch: {
       alignItems: 'stretch',
     },
@@ -70,6 +73,9 @@ export default function ({}: ThemeVariables): ThemeLayout {
     },
     justifyContentBetween: {
       justifyContent: 'space-between',
+    },
+    justifyContentEnd: {
+      justifyContent: 'flex-end',
     },
     scrollSpaceAround: {
       flexGrow: 1,

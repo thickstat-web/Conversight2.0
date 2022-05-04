@@ -5,17 +5,28 @@ export default function ({ Colors, Gutters, Layout }: ThemeCommonParams) {
   const base = {
     ...Layout.center,
     ...Gutters.largeHPadding,
-    height: 40,
+    ...Gutters.regularVPadding,
     backgroundColor: Colors.primary,
   }
   const rounded = {
     ...base,
-    borderRadius: 20,
+    borderRadius: 50,
+  }
+  const curved = {
+    ...base,
+    borderRadius: 8,
+  }
+  const block = {
+    ...base,
+    ...Layout.fill,
+    ...Layout.row,
   }
 
   return StyleSheet.create({
     base,
+    curved,
     rounded,
+    block,
     outline: {
       ...base,
       backgroundColor: Colors.transparent,

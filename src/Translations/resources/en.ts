@@ -3,10 +3,17 @@ export default {
   actions: {
     continue: 'Continue',
   },
+  bottomTabs: {
+    signIn: 'Sign In',
+    verifyEmail: 'Verify Email',
+  },
   verifyEmail: {
-    firstOrgName: 'Org name is {{name}}',
+    orgName: 'Org name is {{name}}',
     labels: {
-      emailId: 'Enter emailId',
+      emailId: 'Enter Email Id',
+    },
+    buttons: {
+      verifyEmail: 'Verify Email',
     },
   },
   signin: {
@@ -14,5 +21,6 @@ export default {
     buttons: {
       signIn: 'SignIn',
     },
+    signupLater: "I'll Sign up later",
   },
 }
