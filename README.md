@@ -10,6 +10,11 @@ yarn install
 # To run in Android eimulator or device
 yarn android
 
+# Pod install for the first time
+cd ios
+pod install
+cd ..
+
 # To run in iOS simulator
 yarn ios
 ```
