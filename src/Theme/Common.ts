@@ -22,15 +22,29 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         backgroundColor: Colors.transparent,
       },
       textInput: {
-        borderWidth: 1,
-        borderColor: Colors.text,
-        backgroundColor: Colors.inputBackground,
-        color: Colors.text,
+        fontFamily: "Montserrat-Regular",
+        fontSize: 18,
+        minWidth: 300,
+        borderWidth: 2,
+        borderColor: Colors.GREEN_DARK,
+        backgroundColor: Colors.WHITE,
+        color: Colors.GREEN_DARK,
         minHeight: 50,
         textAlign: 'center',
         marginTop: 10,
         marginBottom: 10,
+        borderRadius: 8
+
       },
+      inputIcon: {
+        position: 'absolute',
+        right: 15,
+      },
+      inputBox: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }
     }),
   }
 }

@@ -17,13 +17,20 @@ import {
  */
 export const Colors: ThemeColors = {
   // Example colors:
-  transparent: 'rgba(0,0,0,0)',
-  inputBackground: '#FFFFFF',
-  white: '#ffffff',
-  text: '#212529',
-  primary: '#E14032',
-  success: '#28a745',
-  error: '#dc3545',
+  GREEN_LIGHTER: "#27DC61",
+  GREEN_LIGHT: "#00581E",
+  GREEN_MAIN: "#00AA39",
+  GREEN_DARK: "#004438",
+  LIGHT_BLUE: "#00C1FA",
+  DARK_BLUE: "#0097C4",
+  ORANGE_LIGHT: "#FFCD4B",
+  ORANGE_DARK: "#FF6F14",
+  PURPLE: "#7A7AF7",
+  WHITE: "#FFFFFF",
+  RED: "#F06F5F",
+  GRAY: "#F2F2F3",
+  DARK: "#201D1D",
+  NOTIFICATION_BGR: "#E0F0E5"
 }
 
 export const NavigationColors: Partial<ThemeNavigationColors> = {
@@ -35,7 +42,7 @@ export const NavigationColors: Partial<ThemeNavigationColors> = {
  */
 export const FontSize: ThemeFontSize = {
   small: 16,
-  regular: 20,
+  regular: 18,
   large: 40,
 }
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { VerifyEmailContainer } from '@/Containers'
-import LoginContainer from '@/Containers/LoginContainer'
+import { EnterEmailContainer } from '@/Containers'
+import LandingContainer from '@/Containers/LandingContainer'
 
 const Tab = createBottomTabNavigator()
 
@@ -11,7 +11,7 @@ const MainNavigator = () => {
     <Tab.Navigator>
       <Tab.Screen
         name="Sign In"
-        component={LoginContainer}
+        component={LandingContainer}
         options={{
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
@@ -19,7 +19,7 @@ const MainNavigator = () => {
       />
       <Tab.Screen
         name="Verify Email"
-        component={VerifyEmailContainer}
+        component={EnterEmailContainer}
         options={{
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',

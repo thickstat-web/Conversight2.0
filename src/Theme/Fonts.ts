@@ -12,42 +12,58 @@ import { ThemeVariables, ThemeFonts } from '@/Theme/theme.type'
 export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
   return StyleSheet.create({
     textSmall: {
+      fontFamily: "Montserrat-Regular",
       fontSize: FontSize.small,
-      color: Colors.text,
+      color: Colors.GREEN_DARK,
     },
     textRegular: {
+      fontFamily: "Montserrat-Regular",
       fontSize: FontSize.regular,
-      color: Colors.text,
+      color: Colors.GREEN_DARK,
     },
     textLarge: {
+      fontFamily: "Montserrat-Regular",
       fontSize: FontSize.large,
-      color: Colors.text,
+      color: Colors.GREEN_DARK,
     },
     titleSmall: {
+      fontFamily: "Montserrat-Regular",
       fontSize: FontSize.small * 2,
       fontWeight: 'bold',
-      color: Colors.text,
+      color: Colors.GREEN_DARK,
     },
     titleRegular: {
+      fontFamily: "Montserrat-Regular",
+
       fontSize: FontSize.regular * 2,
       fontWeight: 'bold',
-      color: Colors.text,
+      color: Colors.GREEN_DARK,
     },
     titleLarge: {
+      fontFamily: "Montserrat-Regular",
+
       fontSize: FontSize.large * 2,
       fontWeight: 'bold',
-      color: Colors.text,
+      color: Colors.GREEN_DARK,
     },
     textCenter: {
+      fontFamily: "Montserrat-Regular",
+
       textAlign: 'center',
     },
     textJustify: {
+      fontFamily: "Montserrat-Regular",
+
       textAlign: 'justify',
     },
     textLeft: {
+      fontFamily: "Montserrat-Regular",
+
       textAlign: 'left',
     },
     textRight: {
+      fontFamily: "Montserrat-Regular",
+
       textAlign: 'right',
     },
   })

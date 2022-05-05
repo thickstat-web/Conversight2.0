@@ -6,6 +6,8 @@ import { StartupContainer } from '@/Containers'
 import { useTheme } from '@/Hooks'
 import MainNavigator from './Main'
 import { navigationRef } from './utils'
+import { STARTUP_SCREEN } from '@/Constants/screens'
+import LoginNavigator from './Login'
 
 const Stack = createStackNavigator()
 
@@ -18,11 +20,15 @@ const ApplicationNavigator = () => {
     <SafeAreaView style={[Layout.fill, { backgroundColor: colors.card }]}>
       <NavigationContainer theme={NavigationTheme} ref={navigationRef}>
         <StatusBar barStyle={darkMode ? 'light-content' : 'dark-content'} />
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Startup" component={StartupContainer} />
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name={STARTUP_SCREEN} component={StartupContainer} />
           <Stack.Screen
             name="Main"
-            component={MainNavigator}
+            component={LoginNavigator}
             options={{
               animationEnabled: false,
             }}

@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Image } from 'react-native'
+import { View, Image, StyleSheet } from 'react-native'
 import { useTheme } from '@/Hooks'
 
 interface Props {
@@ -9,19 +9,25 @@ interface Props {
 }
 
 const Brand = ({ height, width, mode }: Props) => {
-  const { Layout, Images } = useTheme()
+  const { Images } = useTheme()
 
   return (
     <View style={{ height, width }}>
-      <Image style={Layout.fullSize} source={Images.logo} resizeMode={mode} />
+      <Image
+        style={{ alignSelf: 'center' }}
+        source={Images.logo}
+        resizeMode={mode}
+      />
     </View>
   )
 }
 
+const styles = StyleSheet.create({})
+
 Brand.defaultProps = {
   height: 200,
   mode: 'contain',
-  width: 200,
+  width: 250,
 }
 
 export default Brand
