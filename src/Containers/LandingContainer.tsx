@@ -3,7 +3,6 @@ import { ScrollView, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { Brand, ButtonCustom } from '@/Components'
 import { useTheme } from '@/Hooks'
-import { useSignInMutation } from '@/Services/modules/auth'
 import { ENTER_EMAIL_SCREEN } from '@/Constants/screens'
 import { Colors } from '@/Theme/Variables'
 import { Text, View } from 'react-native-ui-lib'
@@ -15,18 +14,8 @@ type LoginProps = {
 const LandingContainer = ({ navigation }: LoginProps) => {
   const { t } = useTranslation()
   const { Fonts, Gutters, Layout } = useTheme()
-  const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
-
-  const authData = {
-    email: 'athena@conversight.ai',
-    password: 'Login!23',
-    deviceId: 'Web',
-    deviceName: 'mobile',
-    orgId: 'a8440c42-0aff-4619-be31-ee4d0eec6440',
-  }
 
   const handleRedirect = () => {
-    // signIn(authData)
     navigation.navigate(ENTER_EMAIL_SCREEN)
   }
 
@@ -55,9 +44,20 @@ const LandingContainer = ({ navigation }: LoginProps) => {
           <ButtonCustom
             action={handleRedirect}
             label="Login"
+            labelColor={Colors.WHITE}
             color={Colors.GREEN_MAIN}
           />
-          <ButtonCustom label="Request a Demo" color={Colors.GREEN_DARK} />
+          <ButtonCustom
+            label="Request a Demo"
+            labelColor={Colors.WHITE}
+            color={Colors.GREEN_DARK}
+          />
+          <ButtonCustom
+            action={() => {}}
+            label="I'll Sign up later"
+            labelColor={Colors.GREEN_LIGHTER}
+            color="transparent"
+          />
         </View>
       </View>
     </ScrollView>

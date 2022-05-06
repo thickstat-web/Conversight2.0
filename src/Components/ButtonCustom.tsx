@@ -1,4 +1,4 @@
-import { Button } from 'react-native-ui-lib'
+import { Button, Colors } from 'react-native-ui-lib'
 import React from 'react'
 import { StyleSheet } from 'react-native'
 
@@ -19,13 +19,12 @@ const ButtonCustom = ({
 }: Props) => {
   return (
     <Button
-      labelProps={{ color: labelColor }}
       marginT-10
       disabled={disabled}
       onPress={action}
       label={label}
       style={{ ...styles.root, backgroundColor: color }}
-      labelStyle={{ ...styles.label }}
+      labelStyle={{ ...styles.label, color: labelColor }}
     />
   )
 }
@@ -35,13 +34,13 @@ ButtonCustom.defaultProps = {
   action: () => {},
   color: '#FFFFFF',
   disabled: false,
-  labelColor: '#000000',
+  labelColor: '#FFFFFF',
 }
 
 const styles = StyleSheet.create({
   root: {
     borderRadius: 8,
-    marginHorizontal: 30,
+    // marginHorizontal: 30,
     width: 300,
     height: 50,
   },

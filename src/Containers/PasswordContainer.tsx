@@ -14,7 +14,7 @@ import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 
 const PasswordContainer = () => {
-  const { Layout, Colors, Common, Fonts } = useTheme()
+  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
   const [password, setPassword] = useState<string>('')
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(true)
@@ -26,15 +26,18 @@ const PasswordContainer = () => {
   return (
     <View style={Layout.fill}>
       <View flex style={Layout.column}>
-        <View center>
-          {isLoading && <ActivityIndicator />}
+        <View style={[Layout.rowCenter, Gutters.largeTMargin]}>
           <Brand />
+        </View>
+        <View flex center>
+          {isLoading && <ActivityIndicator />}
+
           {error && (
             <TouchableOpacity
               style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
               onPress={() => setError(false)}
             >
-              <Text style={[Fonts.regular]} color="#fff">
+              <Text style={[Fonts.regular]} color={Colors.WHITE}>
                 Wrong Password
               </Text>
               <CloseIcon style={{ marginLeft: 20 }} />

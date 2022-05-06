@@ -24,7 +24,7 @@ interface Props {
 }
 
 const EnterEmailContainer = ({ navigation }: Props) => {
-  const { Common, Layout, Fonts } = useTheme()
+  const { Common, Gutters, Layout, Fonts } = useTheme()
 
   const [email, setEmail] = useState('athena@conversight.ai')
   const [emailInvalid, setEmailInvalid] = useState<boolean>(false)
@@ -70,23 +70,25 @@ const EnterEmailContainer = ({ navigation }: Props) => {
 
   console.log(store.getState().authReducer)
   return (
-    <View style={[[Layout.fill]]}>
-      <View style={[[Layout.colCenter]]}>
+    <View style={[Layout.fill, { marginHorizontal: '14%' }]}>
+      <View style={[Layout.fill, Layout.rowVCenter, Gutters.largeTMargin]}>
         <Brand />
-        {(isLoading || isFetching) && <ActivityIndicator />}
-        {errorHintOpen && (
-          <TouchableOpacity
-            style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
-            onPress={() => setErrorHintOpen(false)}
-          >
-            <Text style={[Fonts.regular]} color="#fff">
-              Email doesn't exist in the database.
-            </Text>
-            <CloseIcon style={{ marginLeft: 20 }} />
-          </TouchableOpacity>
-        )}
-        <View style={Common.inputBox}>
-          <View>
+      </View>
+      <View style={[Layout.fill, Layout.colVCenter]}>
+        <View style={Layout.colCenter}>
+          {(isLoading || isFetching) && <ActivityIndicator />}
+          {errorHintOpen && (
+            <TouchableOpacity
+              style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
+              onPress={() => setErrorHintOpen(false)}
+            >
+              <Text style={[Fonts.regular]} color="#fff">
+                Email doesn't exist in the database.
+              </Text>
+              <CloseIcon style={{ marginLeft: 20 }} />
+            </TouchableOpacity>
+          )}
+          <View style={[Layout.row, Layout.colCenter]}>
             <TextInput
               onChangeText={e => setAndCheckEmail(e)}
               value={email}
@@ -96,19 +98,20 @@ const EnterEmailContainer = ({ navigation }: Props) => {
                 ...errorStyle,
               }}
             />
+            {emailInvalid || emailUnknown ? (
+              <InputErrorIcon style={Common.inputIcon} />
+            ) : (
+              <EmailOkIcon style={Common.inputIcon} />
+            )}
           </View>
-          {emailInvalid || emailUnknown ? (
-            <InputErrorIcon style={Common.inputIcon} />
-          ) : (
-            <EmailOkIcon style={Common.inputIcon} />
-          )}
-        </View>
 
-        <ButtonCustom
-          action={handlePress}
-          label="Next"
-          color={Colors.GREEN_DARK}
-        />
+          <ButtonCustom
+            action={handlePress}
+            label="Next"
+            color={Colors.GREEN_DARK}
+            labelColor={Colors.WHITE}
+          />
+        </View>
       </View>
     </View>
   )

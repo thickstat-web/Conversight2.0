@@ -8,7 +8,7 @@ import {
   Easing,
 } from 'react-native'
 import { useTheme } from '@/Hooks'
-import { ButtonCustom } from '@/Components'
+import { Brand, ButtonCustom } from '@/Components'
 import { store } from '@/Store'
 import PickerIcon from '@/Assets/Images/iconsSVG/pickerIcon.svg'
 import SelectedOptionIcon from '@/Assets/Images/iconsSVG/selectedOptionArrow.svg'
@@ -33,7 +33,7 @@ interface Props {
 }
 
 const ChooseOrganizationContainer = ({ navigation }: Props) => {
-  const { Layout, Colors, Fonts } = useTheme()
+  const { Gutters, Layout, Colors, Fonts } = useTheme()
   console.log(store.getState().authReducer.allOrganizations.length)
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
@@ -86,6 +86,9 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
 
   return (
     <View style={Layout.fill}>
+      <View style={[Layout.center, Gutters.largeTMargin]}>
+        <Brand />
+      </View>
       <View flex center style={{ borderColor: Colors.GREEN_DARK }}>
         <Picker
           mode={Picker.modes.SINGLE}
@@ -164,7 +167,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
                       {
                         translateY: animatedValue.interpolate({
                           inputRange: [0, 1],
-                          outputRange: [0, 300],
+                          outputRange: [0, 100],
                         }),
                       },
                     ],
@@ -227,12 +230,13 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
               <PickerIcon style={styles.pickerIcon} width={20} />
             </View>
           )}
-        ></Picker>
+        />
         <ButtonCustom
           disabled={!selectedOrg?.name.length}
           action={handleRedirect}
           label="Next"
           color={Colors.GREEN_DARK}
+          labelColor={Colors.WHITE}
         />
       </View>
     </View>

@@ -22,7 +22,7 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         backgroundColor: Colors.transparent,
       },
       textInput: {
-        fontFamily: "Montserrat-Regular",
+        fontFamily: 'Montserrat-Regular',
         fontSize: 18,
         minWidth: 300,
         borderWidth: 2,
@@ -33,8 +33,8 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         textAlign: 'center',
         marginTop: 10,
         marginBottom: 10,
-        borderRadius: 8
-
+        borderRadius: 8,
+        paddingRight: 15,
       },
       inputIcon: {
         position: 'absolute',
@@ -44,7 +44,7 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-      }
+      },
     }),
   }
 }

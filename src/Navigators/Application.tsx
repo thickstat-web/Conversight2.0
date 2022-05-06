@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
 import { StartupContainer } from '@/Containers'
 import { useTheme } from '@/Hooks'
-import MainNavigator from './Main'
+// import MainNavigator from './Main'
 import { navigationRef } from './utils'
 import { STARTUP_SCREEN } from '@/Constants/screens'
 import LoginNavigator from './Login'
@@ -27,7 +27,7 @@ const ApplicationNavigator = () => {
         >
           <Stack.Screen name={STARTUP_SCREEN} component={StartupContainer} />
           <Stack.Screen
-            name="Main"
+            name="Welcome"
             component={LoginNavigator}
             options={{
               animationEnabled: false,

@@ -1,33 +1,23 @@
 import React from 'react'
-import { View, Image, StyleSheet } from 'react-native'
-import { useTheme } from '@/Hooks'
+import { View } from 'react-native'
+import Logo from '@/Assets/Images/logo.svg'
 
 interface Props {
   height?: number | string
   width?: number | string
-  mode?: 'contain' | 'cover' | 'stretch' | 'repeat' | 'center'
 }
 
-const Brand = ({ height, width, mode }: Props) => {
-  const { Images } = useTheme()
-
+const Brand = ({ height, width }: Props) => {
   return (
     <View style={{ height, width }}>
-      <Image
-        style={{ alignSelf: 'center' }}
-        source={Images.logo}
-        resizeMode={mode}
-      />
+      <Logo />
     </View>
   )
 }
 
-const styles = StyleSheet.create({})
-
 Brand.defaultProps = {
-  height: 200,
-  mode: 'contain',
-  width: 250,
+  height: 100,
+  width: 220,
 }
 
 export default Brand
