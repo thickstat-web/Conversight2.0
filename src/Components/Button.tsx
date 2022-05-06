@@ -8,12 +8,18 @@ interface Props {
   children?: string
   loading?: boolean
   onPress?: () => void
+  style?: any
 }
 
-const Button = ({ dark, block, loading, children, onPress }: Props) => {
+const Button = ({ dark, block, loading, children, onPress, style }: Props) => {
   const { Colors, Common, Fonts, Gutters, Layout } = useTheme()
   return (
-    <View style={[!block && Layout.rowCenter]}>
+    <View
+      style={[
+        !block && Layout.rowCenter,
+        Array.isArray(style) ? style : { ...style },
+      ]}
+    >
       <TouchableOpacity
         onPress={onPress}
         style={[
@@ -41,6 +47,7 @@ Button.defaultProps = {
   children: '',
   loading: false,
   onPress: () => {},
+  style: {},
 }
 
 export default Button
