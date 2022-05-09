@@ -12,6 +12,8 @@ target 'ConverSight' do
     :hermes_enabled => true
   )
 
+  pod 'RNReanimated', :path => '../node_modules/react-native-reanimated'
+
   target 'ConverSightTests' do
     inherit! :complete
     # Pods for testing

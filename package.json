@@ -2,6 +2,11 @@
   "name": "boilerplate",
   "version": "3.2.0",
   "private": true,
+  "rnpm": {
+    "assets": [
+      "./Assets/fonts/"
+    ]
+  },
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -13,6 +18,7 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.15.14",
     "@react-native-masked-view/masked-view": "^0.2.6",
+    "@react-native-picker/picker": "^2.4.1",
     "@react-navigation/bottom-tabs": "^6.0.9",
     "@react-navigation/native": "^6.0.6",
     "@react-navigation/stack": "^6.0.11",
@@ -20,16 +26,18 @@
     "i18next": "^21.6.5",
     "prop-types": "^15.8.1",
     "react": "17.0.2",
-    "react-dom": "17.0.2",
     "react-i18next": "^11.15.3",
     "react-native": "0.66.4",
     "react-native-flipper": "^0.127.0",
-    "react-native-gesture-handler": "^2.1.0",
+    "react-native-gesture-handler": "^2.4.1",
     "react-native-quick-base64": "^2.0.2",
     "react-native-react-bridge": "^0.10.0",
-    "react-native-reanimated": "^2.3.1",
+    "react-native-reanimated": "^2.8.0",
     "react-native-safe-area-context": "^3.3.2",
     "react-native-screens": "^3.10.1",
+    "react-native-svg": "^12.3.0",
+    "react-native-svg-transformer": "^1.0.0",
+    "react-native-ui-lib": "^6.14.1",
     "react-native-webview": "^11.18.2",
     "react-redux": "^7.2.6",
     "redux": "^4.1.2",
@@ -42,7 +50,8 @@
     "@react-native-community/eslint-config": "^2.0.0",
     "@types/fbemitter": "^2.0.32",
     "@types/jest": "^27.4.1",
-    "@types/react": "17.0.44",
+    "@types/lodash": "^4.14.182",
+    "@types/react": "^17.0.44",
     "@types/react-native": "^0.67.4",
     "@types/react-redux": "^7.1.24",
     "@types/react-test-renderer": "^18.0.0",
