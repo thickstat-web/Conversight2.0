@@ -15,25 +15,35 @@ export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
       fontFamily: 'Montserrat-Regular',
       fontSize: FontSize.small,
       color: Colors.GREEN_DARK,
+      lineHeight: 20,
+    },
+    textSmallContrast: {
+      fontFamily: 'Montserrat-Regular',
+      fontSize: FontSize.small,
+      color: Colors.WHITE,
+      lineHeight: 20,
     },
     textRegular: {
       fontFamily: 'Montserrat-Regular',
       fontSize: FontSize.regular,
       color: Colors.GREEN_DARK,
+      lineHeight: 20,
     },
     textNormalContrast: {
-      fontSize: FontSize.normal,
-      color: Colors.white,
+      fontFamily: 'Montserrat-Regular',
+      fontSize: FontSize.regular,
+      color: Colors.WHITE,
+      lineHeight: 20,
     },
     textBold: {
-      fontSize: FontSize.normal,
+      fontSize: FontSize.regular,
       fontWeight: 'bold',
       lineHeight: 20,
     },
     textBoldContrast: {
-      fontSize: FontSize.normal,
+      fontSize: FontSize.regular,
       fontWeight: 'bold',
-      color: Colors.white,
+      color: Colors.WHITE,
       lineHeight: 20,
     },
     textLarge: {
@@ -79,10 +89,10 @@ export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
       color: Colors.primary,
     },
     textDarkPrimary: {
-      color: Colors.darkPrimary,
+      color: Colors.GREEN_DARK,
     },
     textContrast: {
-      color: Colors.white,
+      color: Colors.WHITE,
     },
   })
 }

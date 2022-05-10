@@ -1,3 +1,5 @@
+import { Error } from './Common'
+
 export interface TrialSettings {
   expiresAt: string
   fileUploadSizeLimit: string
@@ -15,18 +17,23 @@ export interface Access {
   showTower: boolean
 }
 
-export interface AuthResponseData {
-  authentication: string
-  token: string
-  uid: string
-  orgId: string
-  displayName: string
-  role: string
-  accessList: string[]
-  isFirstTimeLogin: boolean
-  athenaId: string
-  isTrialUser: boolean
-  trialSettings: TrialSettings
-  allowTrialAccess: boolean
-  access: Access
+export interface Data {
+  authentication?: 'success'
+  token?: string
+  uid?: string
+  orgId?: string
+  displayName?: string
+  role?: string
+  accessList?: string[]
+  isFirstTimeLogin?: boolean
+  athenaId?: string
+  isTrialUser?: boolean
+  trialSetting?: TrialSettings
+  allowTrialAccess?: boolean
+  access?: Access
+}
+
+export interface SignInResponseData {
+  data?: Data
+  errors?: Error[]
 }

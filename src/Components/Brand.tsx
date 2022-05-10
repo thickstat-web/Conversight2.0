@@ -16,8 +16,8 @@ const Brand = ({ height, width }: Props) => {
 }
 
 Brand.defaultProps = {
-  height: 100,
-  width: 220,
+  height: 200,
+  width: 280,
 }
 
 export default Brand

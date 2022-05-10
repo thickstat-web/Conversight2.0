@@ -19,7 +19,6 @@ import theme from './Theme'
 import authReducer from './Auth'
 import { AUTH_REDUCER, THEME_REDUCER } from '@/Constants/redux'
 
-
 const reducers = combineReducers({
   theme,
   authReducer,
