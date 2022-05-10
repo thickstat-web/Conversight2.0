@@ -7,6 +7,8 @@ import { Brand, Button, ButtonCustom } from '@/Components'
 import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
 import { selectSignInEmail, selectSelectedOrg, setAuthData } from '@/Store/Auth'
+import { navigateAndSimpleReset } from '@/Navigators/utils'
+import { MAIN_SCREEN } from '@/Constants/screens'
 import PasswordSecuredIcon from '@/Assets/Images/iconsSVG/passwordHide.svg'
 import PasswordVisibleIcon from '@/Assets/Images/iconsSVG/passwordShow.svg'
 import PasswordSecuredIconError from '@/Assets/Images/iconsSVG/passwordHideError.svg'
@@ -22,7 +24,7 @@ const PasswordContainer = () => {
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
-  const signInEail = useAppSelector(selectSignInEmail)
+  const signInEmail = useAppSelector(selectSignInEmail)
   const signInOrg = useAppSelector(selectSelectedOrg)
 
   const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
@@ -31,7 +33,7 @@ const PasswordContainer = () => {
 
   const handleSignIn = () => {
     const authData: SignInRequestData = {
-      email: signInEail,
+      email: signInEmail,
       password: password,
       deviceId: 'Web',
       deviceName: 'mobile',
@@ -44,6 +46,7 @@ const PasswordContainer = () => {
     if (isSuccess && data && data.success) {
       dispatch(setAuthData(data.data))
       // ToDo: Redirect to Main/HomeScreen (or Walk through screens)
+      navigateAndSimpleReset(MAIN_SCREEN)
       console.log(`[PasswordContainer] auth data: ${JSON.stringify(data.data)}`)
     } else if (isSuccess && !data?.success) {
       console.log(`[PasswordContainer] auth error: ${data?.error}`)
@@ -100,7 +103,7 @@ const PasswordContainer = () => {
             )}
           </View>
         </View>
-        <View width={300}>
+        <View marginT-16 width={300}>
           <Button
             dark={true}
             block={true}

@@ -9,8 +9,9 @@ export default {
     continue: 'Continue',
   },
   bottomTabs: {
-    signIn: 'Sign In',
-    verifyEmail: 'Verify Email',
+    insights: 'Insights',
+    chat: 'Chat',
+    dashboard: 'Dashboard',
   },
   enterEmail: {
     buttons: {

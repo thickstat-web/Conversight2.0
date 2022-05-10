@@ -216,7 +216,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
             </View>
           )}
         />
-        <View marginT-10 width={300}>
+        <View marginT-16 width={300}>
           <Button
             dark={true}
             block={true}

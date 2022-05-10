@@ -1,12 +1,15 @@
 import React from 'react'
 import { createStackNavigator } from '@react-navigation/stack'
+import { useTheme } from '@/Hooks'
 import {
   CHOOSE_ORGANIZATION,
   ENTER_EMAIL_SCREEN,
   LANDING_SCREEN,
   PASSWORD_SCREEN,
+  MAIN_SCREEN,
 } from '@/Constants/screens'
 import LandingContainer from '@/Containers/LandingContainer'
+import MainNavigator from './Main'
 import {
   ChooseOrganizationContainer,
   EnterEmailContainer,
@@ -16,14 +19,23 @@ import {
 const Stack = createStackNavigator()
 
 const LoginNavigator = () => {
+  const { Colors, Fonts } = useTheme()
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerTitleAlign: 'center',
+        headerStyle: { backgroundColor: Colors.GRAY },
+        headerTitleStyle: {
+          ...Fonts.textRegularBold,
+          fontSize: 20,
+        },
+      }}
+    >
       <Stack.Screen
         name={LANDING_SCREEN}
         component={LandingContainer}
         options={{
           title: 'Welcome',
-          headerTitleAlign: 'center',
         }}
       />
       <Stack.Screen
@@ -47,6 +59,15 @@ const LoginNavigator = () => {
         component={PasswordContainer}
         options={{
           title: 'Login',
+          headerTitleAlign: 'center',
+        }}
+      />
+      <Stack.Screen
+        name={MAIN_SCREEN}
+        component={MainNavigator}
+        options={{
+          headerShown: false,
+          title: 'Home',
           headerTitleAlign: 'center',
         }}
       />

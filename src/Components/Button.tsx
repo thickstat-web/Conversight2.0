@@ -46,7 +46,7 @@ const Button = ({
             style={[Gutters.smallRMargin]}
           />
         )}
-        <Text style={[Fonts.textNormalContrast]}>{label}</Text>
+        <Text style={[Fonts.text18BoldContrast]}>{label}</Text>
       </Pressable>
     </View>
   )
