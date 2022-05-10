@@ -8,9 +8,11 @@ import { useSignInMutation } from '@/Services/modules/auth'
 import { selectSignInEmail, selectSelectedOrg, setAuthData } from '@/Store/Auth'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 
-const ChatContainer = () => {
+const DashboardContainer = () => {
   const { t } = useTranslation()
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+  // ToDo: Need to remove default password
+  const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
   const signInEmail = useAppSelector(selectSignInEmail)
 
@@ -33,7 +35,7 @@ const ChatContainer = () => {
       </View>
       <View flex-6 centerH margin-20>
         <View flex center>
-          <Text text60>Chat Container - In Progress</Text>
+          <Text text60>Dashboard Container - In Progress</Text>
         </View>
       </View>
     </View>
@@ -52,4 +54,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default ChatContainer
+export default DashboardContainer

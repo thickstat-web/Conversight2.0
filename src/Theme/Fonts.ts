@@ -35,9 +35,25 @@ export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
       color: Colors.WHITE,
       lineHeight: 20,
     },
-    textBold: {
+    textRegularBold: {
+      fontFamily: 'Montserrat-SemiBold',
       fontSize: FontSize.regular,
-      fontWeight: 'bold',
+      lineHeight: 20,
+    },
+    text20Bold: {
+      fontFamily: 'Montserrat-SemiBold',
+      fontSize: 20,
+      lineHeight: 20,
+    },
+    text18BoldContrast: {
+      fontFamily: 'Montserrat-SemiBold',
+      fontSize: FontSize.regular,
+      lineHeight: 20,
+      color: Colors.WHITE,
+    },
+    text15Bold: {
+      fontFamily: 'Montserrat-SemiBold',
+      fontSize: 15,
       lineHeight: 20,
     },
     textBoldContrast: {

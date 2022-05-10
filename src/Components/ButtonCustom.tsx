@@ -19,7 +19,7 @@ const ButtonCustom = ({
 }: Props) => {
   return (
     <Button
-      marginT-10
+      marginT-16
       disabled={disabled}
       onPress={action}
       label={label}
@@ -40,13 +40,11 @@ ButtonCustom.defaultProps = {
 const styles = StyleSheet.create({
   root: {
     borderRadius: 8,
-    // marginHorizontal: 30,
     width: 300,
     height: 50,
   },
   label: {
-    fontFamily: 'Montserrat-Regular',
-    fontStyle: 'normal',
+    fontFamily: 'Montserrat-SemiBold',
     fontWeight: '600',
     fontSize: 18,
   },

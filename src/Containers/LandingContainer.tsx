@@ -54,7 +54,7 @@ const LandingContainer = ({ navigation }: LoginProps) => {
           <ButtonCustom
             action={() => {}}
             label="I'll Sign up later"
-            labelColor={Colors.GREEN_LIGHTER}
+            labelColor={Colors.GREEN_MAIN}
             color="transparent"
           />
         </View>

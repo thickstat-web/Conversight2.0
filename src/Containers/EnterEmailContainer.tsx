@@ -105,14 +105,16 @@ const EnterEmailContainer = ({ navigation }: Props) => {
               <EmailOkIcon style={Common.inputIcon} />
             )}
           </View>
-          <Button
-            block={true}
-            dark={true}
-            disabled={emailInvalid || emailUnknown}
-            loading={isLoading || isFetching}
-            label={t('enterEmail.buttons.next')}
-            onPress={handleVerifyEmail}
-          />
+          <View marginT-16 width={300}>
+            <Button
+              block={true}
+              dark={true}
+              disabled={emailInvalid || emailUnknown}
+              loading={isLoading || isFetching}
+              label={t('enterEmail.buttons.next')}
+              onPress={handleVerifyEmail}
+            />
+          </View>
         </View>
       </View>
     </View>
