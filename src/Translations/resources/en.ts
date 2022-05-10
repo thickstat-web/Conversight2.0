@@ -1,11 +1,21 @@
 export default {
   welcome: 'Welcome to ConverSight!',
+  common: {
+    buttons: {
+      next: 'Next',
+    }
+  },
   actions: {
     continue: 'Continue',
   },
   bottomTabs: {
     signIn: 'Sign In',
     verifyEmail: 'Verify Email',
+  },
+  enterEmail: {
+    buttons: {
+      next: 'Next',
+    },
   },
   verifyEmail: {
     orgName: 'Org name is {{name}}',

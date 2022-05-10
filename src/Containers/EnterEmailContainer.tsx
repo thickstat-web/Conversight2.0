@@ -1,17 +1,13 @@
-import React, { FC, useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  TextInput,
-  StyleSheet,
-  Touchable,
-} from 'react-native'
-import { Brand, ButtonCustom } from '@/Components'
-import { useTheme } from '@/Hooks'
+import React, { useState } from 'react'
+import { TextInput, StyleSheet } from 'react-native'
+import { useTranslation } from 'react-i18next'
+import { Brand, Button } from '@/Components'
+import { useTheme, useAppDispatch } from '@/Hooks'
+import { setSignInEmail } from '@/Store/Auth'
 import { useLazyVerifyEmailQuery } from '@/Services/modules/auth'
 import { Text, View } from 'react-native-ui-lib'
 import { Colors } from '@/Theme/Variables'
 import { validateEmail } from '@/Utils/validations/string'
-import { store } from '@/Store'
 import EmailOkIcon from '@/Assets/Images/iconsSVG/emailOk.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
@@ -24,14 +20,17 @@ interface Props {
 }
 
 const EnterEmailContainer = ({ navigation }: Props) => {
+  const { t } = useTranslation()
   const { Common, Gutters, Layout, Fonts } = useTheme()
-
+  const dispatch = useAppDispatch()
+  // ToDo: Need to remove default email
   const [email, setEmail] = useState('athena@conversight.ai')
   const [emailInvalid, setEmailInvalid] = useState<boolean>(false)
   const [emailUnknown, setEmailUnknown] = useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = useState<boolean>(false)
 
-  const [verifyEmail, { isLoading, isFetching }] = useLazyVerifyEmailQuery()
+  const [verifyEmail, { data, isLoading, isFetching }] =
+    useLazyVerifyEmailQuery()
 
   const setAndCheckEmail = (val: string) => {
     const isValid = validateEmail(val)
@@ -41,20 +40,21 @@ const EnterEmailContainer = ({ navigation }: Props) => {
     setEmail(val)
   }
 
-  const handlePress = async () => {
-    const { data } = await verifyEmail(email)
-    const code = data?.code
-    store.dispatch(setAllOrganizations([]))
-    if (code === 200) {
+  const handleVerifyEmail = async () => {
+    const { success, data: orgData } = await verifyEmail(email).unwrap()
+    if (success) {
       setEmailUnknown(false)
       setErrorHintOpen(false)
       setEmailInvalid(false)
-      store.dispatch(setAllOrganizations(data?.orgData))
+      dispatch(setSignInEmail(email))
+      dispatch(setAllOrganizations(orgData))
       navigation.navigate(CHOOSE_ORGANIZATION)
     } else {
       setEmailUnknown(true)
       setErrorHintOpen(true)
       setEmailInvalid(true)
+      dispatch(setSignInEmail(''))
+      dispatch(setAllOrganizations([]))
     }
   }
 
@@ -68,27 +68,28 @@ const EnterEmailContainer = ({ navigation }: Props) => {
       ? { borderColor: Colors.GREEN_MAIN, color: Colors.GREEN_MAIN }
       : {}
 
-  console.log(store.getState().authReducer)
   return (
-    <View style={[Layout.fill, { marginHorizontal: '14%' }]}>
-      <View style={[Layout.fill, Layout.rowVCenter, Gutters.largeTMargin]}>
-        <Brand />
+    <View flex>
+      <View flex-4 center>
+        <Brand width={'60%'} />
       </View>
-      <View style={[Layout.fill, Layout.colVCenter]}>
-        <View style={Layout.colCenter}>
-          {(isLoading || isFetching) && <ActivityIndicator />}
-          {errorHintOpen && (
+      <View flex-6 centerH>
+        <View>
+          {errorHintOpen && data?.error && (
             <TouchableOpacity
               style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
               onPress={() => setErrorHintOpen(false)}
             >
-              <Text style={[Fonts.regular]} color="#fff">
-                Email doesn't exist in the database.
+              <Text
+                style={[Fonts.textRegular, { lineHeight: 20 }]}
+                color={Colors.WHITE}
+              >
+                {data?.error}
               </Text>
-              <CloseIcon style={{ marginLeft: 20 }} />
+              <CloseIcon style={{ marginLeft: 10 }} />
             </TouchableOpacity>
           )}
-          <View style={[Layout.row, Layout.colCenter]}>
+          <View row centerV>
             <TextInput
               onChangeText={e => setAndCheckEmail(e)}
               value={email}
@@ -104,12 +105,13 @@ const EnterEmailContainer = ({ navigation }: Props) => {
               <EmailOkIcon style={Common.inputIcon} />
             )}
           </View>
-
-          <ButtonCustom
-            action={handlePress}
-            label="Next"
-            color={Colors.GREEN_DARK}
-            labelColor={Colors.WHITE}
+          <Button
+            block={true}
+            dark={true}
+            disabled={emailInvalid || emailUnknown}
+            loading={isLoading || isFetching}
+            label={t('enterEmail.buttons.next')}
+            onPress={handleVerifyEmail}
           />
         </View>
       </View>
@@ -125,7 +127,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
 })
 

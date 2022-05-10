@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { Brand, ButtonCustom } from '@/Components'
 import { useTheme } from '@/Hooks'
 import { ENTER_EMAIL_SCREEN } from '@/Constants/screens'
-import { Colors } from '@/Theme/Variables'
 import { Text, View } from 'react-native-ui-lib'
 
 type LoginProps = {
@@ -13,7 +12,7 @@ type LoginProps = {
 
 const LandingContainer = ({ navigation }: LoginProps) => {
   const { t } = useTranslation()
-  const { Fonts, Gutters, Layout } = useTheme()
+  const { Colors, Fonts, Gutters, Layout } = useTheme()
 
   const handleRedirect = () => {
     navigation.navigate(ENTER_EMAIL_SCREEN)
@@ -28,19 +27,19 @@ const LandingContainer = ({ navigation }: LoginProps) => {
         Gutters.smallHPadding,
       ]}
     >
-      <View style={[[Layout.colCenter, Gutters.smallHPadding]]}>
-        <View marginT-30>
+      <View>
+        <View flex-5 center>
           <Brand />
         </View>
-        <View flex bottom>
-          <Text style={{ ...Fonts.textRegular, color: Colors.GREEN_DARK }}>
+        <View flex-2 center>
+          <Text style={[Fonts.textRegular, styles.tagLineStyle]}>
             Actionable Insights.
           </Text>
-          <Text style={{ ...Fonts.textRegular, color: Colors.GREEN_DARK }}>
+          <Text style={[Fonts.textRegular, styles.tagLineStyle]}>
             Instantly. Anywhere.
           </Text>
         </View>
-        <View flex bottom style={styles.btnBox}>
+        <View flex-3 bottom style={styles.btnBox}>
           <ButtonCustom
             action={handleRedirect}
             label="Login"
@@ -65,6 +64,9 @@ const LandingContainer = ({ navigation }: LoginProps) => {
 }
 
 const styles = StyleSheet.create({
+  tagLineStyle: {
+    lineHeight: 24,
+  },
   btnBox: {
     marginBottom: 30,
   },

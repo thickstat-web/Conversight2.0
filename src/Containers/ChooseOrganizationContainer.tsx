@@ -1,4 +1,4 @@
-import React, { FC, ReactElement, useRef, useEffect, useState } from 'react'
+import React, { ReactElement, useRef, useEffect, useState } from 'react'
 import { View, Text, Picker, Modal } from 'react-native-ui-lib'
 import {
   FlatList,
@@ -7,9 +7,10 @@ import {
   Animated,
   Easing,
 } from 'react-native'
-import { useTheme } from '@/Hooks'
-import { Brand, ButtonCustom } from '@/Components'
-import { store } from '@/Store'
+import { useTranslation } from 'react-i18next'
+import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
+import { Brand, Button } from '@/Components'
+import { selectAllOrganizations, selectSelectedOrg } from '@/Store/Auth'
 import PickerIcon from '@/Assets/Images/iconsSVG/pickerIcon.svg'
 import SelectedOptionIcon from '@/Assets/Images/iconsSVG/selectedOptionArrow.svg'
 import NotSelectedOptionIcon from '@/Assets/Images/iconsSVG/notSelectedOptionArrow.svg'
@@ -33,20 +34,19 @@ interface Props {
 }
 
 const ChooseOrganizationContainer = ({ navigation }: Props) => {
-  const { Gutters, Layout, Colors, Fonts } = useTheme()
-  console.log(store.getState().authReducer.allOrganizations.length)
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
-
-  const organizations = store.getState().authReducer.allOrganizations
-  const selectedOrg = store.getState().authReducer.selectedOrg
+  const { t } = useTranslation()
+  const { Gutters, Layout, Colors, Fonts } = useTheme()
+  const dispatch = useAppDispatch()
+  const organizations = useAppSelector(selectAllOrganizations)
+  const selectedOrg = useAppSelector(selectSelectedOrg)
 
   const animatedValue = useRef(new Animated.Value(0)).current
   const [animationIn, setAnimationIn] = useState<boolean>(false)
 
   const handleSelectOrg = (org: any) => {
     const current = getOrgByOrgId(organizations, org)
-    store.dispatch(setSelectedOrg(current))
-    console.log(current)
+    dispatch(setSelectedOrg(current))
     setAnimationIn(false)
   }
 
@@ -77,7 +77,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   }, [animationIn])
 
   useEffect(() => {
-    store.dispatch(setSelectedOrg({ name: '', orgId: '' }))
+    dispatch(setSelectedOrg({ name: '', orgId: '' }))
   }, [])
 
   const handleRedirect = () => {
@@ -85,11 +85,11 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   }
 
   return (
-    <View style={Layout.fill}>
-      <View style={[Layout.center, Gutters.largeTMargin]}>
-        <Brand />
+    <View flex>
+      <View flex-4 center>
+        <Brand width={'60%'} />
       </View>
-      <View flex center style={{ borderColor: Colors.GREEN_DARK }}>
+      <View flex-6 centerH marginT-20>
         <Picker
           mode={Picker.modes.SINGLE}
           value={selectedOrg?.orgId}
@@ -116,19 +116,16 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
                   </View>
                   <View style={{ width: screenWidth / 1.5 }}>
                     <Text
-                      style={
-                        isSelected
-                          ? {
-                              ...styles.selectedOptionText,
-                              color: Colors.GREEN_DARK,
-                            }
-                          : styles.optionText
-                      }
+                      style={[
+                        styles.optionText,
+                        isSelected && styles.selectedOption,
+                        isSelected && { color: Colors.GREEN_DARK },
+                      ]}
                     >
                       {label}
                     </Text>
                     <Text
-                      style={{ ...styles.optionText, color: Colors.GREEN_DARK }}
+                      style={[styles.optionText, { color: Colors.GREEN_DARK }]}
                     >
                       {currentOrg?.name}
                     </Text>
@@ -138,13 +135,10 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
                   </View>
                 </View>
                 <View
-                  style={{
-                    borderBottomColor: Colors.GRAY,
-                    height: 1,
-                    marginVertical: 10,
-                    opacity: 0.5,
-                    borderBottomWidth: 1,
-                  }}
+                  style={[
+                    styles.orgNameSeparator,
+                    { borderBottomColor: Colors.GRAY },
+                  ]}
                 />
               </View>
             )
@@ -159,27 +153,28 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
                 transparent
               >
                 <Animated.View
-                  style={{
-                    height: screenHeight - 270,
-                    width: screenWidth,
-                    ...styles.modalView,
-                    transform: [
-                      {
-                        translateY: animatedValue.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, 100],
-                        }),
-                      },
-                    ],
-                  }}
+                  style={[
+                    styles.modalView,
+                    {
+                      height: screenHeight - (screenHeight * 42) / 100,
+                      width: screenWidth,
+                      transform: [
+                        {
+                          translateY: animatedValue.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, 100],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
                 >
                   <Text
-                    style={{
-                      ...styles.modalTitle,
-                      ...Fonts.textRegular,
-                      fontFamily: 'Montserrat-SemiBold',
-                      color: Colors.GREEN_MAIN,
-                    }}
+                    style={[
+                      Fonts.textRegular,
+                      styles.modalTitle,
+                      { color: Colors.GREEN_MAIN },
+                    ]}
                   >
                     Choose Organization
                   </Text>
@@ -199,30 +194,20 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
               </Modal>
             )
           }}
-          onChange={org => handleSelectOrg(org)}
+          onChange={handleSelectOrg}
           renderPicker={() => (
             <View
-              style={
-                selectedOrg?.name
-                  ? {
-                      ...styles.pickerBox,
-                      borderColor: Colors.GREEN_MAIN,
-                    }
-                  : styles.pickerBox
-              }
+              style={[
+                styles.pickerBox,
+                !!selectedOrg?.name && { borderColor: Colors.GREEN_MAIN },
+              ]}
             >
               <Text
-                style={
-                  selectedOrg?.name
-                    ? {
-                        ...styles.pickerLabel,
-                        color: Colors.GREEN_MAIN,
-                      }
-                    : {
-                        ...Fonts.textRegular,
-                        ...styles.pickerLabel,
-                      }
-                }
+                style={[
+                  Fonts.textRegular,
+                  styles.pickerLabel,
+                  !!selectedOrg?.name && { color: Colors.GREEN_MAIN },
+                ]}
                 center
               >
                 {selectedOrg?.name || 'Choose Organization'}
@@ -231,13 +216,15 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
             </View>
           )}
         />
-        <ButtonCustom
-          disabled={!selectedOrg?.name.length}
-          action={handleRedirect}
-          label="Next"
-          color={Colors.GREEN_DARK}
-          labelColor={Colors.WHITE}
-        />
+        <View marginT-10 width={300}>
+          <Button
+            dark={true}
+            block={true}
+            label={t('common.buttons.next')}
+            disabled={!selectedOrg?.name.length}
+            onPress={handleRedirect}
+          />
+        </View>
       </View>
     </View>
   )
@@ -248,6 +235,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  orgNameSeparator: {
+    height: 1,
+    marginVertical: 10,
+    opacity: 0.5,
+    borderBottomWidth: 1,
   },
   pickerBox: {
     width: 300,
@@ -273,19 +266,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
   },
-  selectedOptionText: {
-    fontFamily: 'Montserrat-Medium',
-    fontSize: 16,
-    fontWeight: '700',
-  },
   optionText: {
     fontFamily: 'Montserrat-Medium',
     fontSize: 16,
     fontWeight: '400',
   },
+  selectedOption: {
+    fontWeight: '700',
+  },
   modalTitle: {
+    fontFamily: 'Montserrat-SemiBold',
     alignSelf: 'center',
-    top: -30,
+    top: -40,
     fontSize: 18,
   },
 })

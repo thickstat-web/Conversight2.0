@@ -1,95 +1,121 @@
-import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
-import React, { useState } from 'react'
-import { useTheme } from '@/Hooks'
-import { Brand, ButtonCustom } from '@/Components'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
+import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
+import { useTranslation } from 'react-i18next'
+import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
+import { Brand, Button, ButtonCustom } from '@/Components'
+import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
-import { ActivityIndicator } from 'react-native'
+import { selectSignInEmail, selectSelectedOrg, setAuthData } from '@/Store/Auth'
 import PasswordSecuredIcon from '@/Assets/Images/iconsSVG/passwordHide.svg'
 import PasswordVisibleIcon from '@/Assets/Images/iconsSVG/passwordShow.svg'
 import PasswordSecuredIconError from '@/Assets/Images/iconsSVG/passwordHideError.svg'
 import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError.svg'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
-
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 
 const PasswordContainer = () => {
+  const { t } = useTranslation()
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
-  const [password, setPassword] = useState<string>('')
+  // ToDo: Need to remove default password
+  const [password, setPassword] = useState<string>('Login!23')
   const [passSecured, setPassSecured] = useState<boolean>(true)
-  const [error, setError] = useState<boolean>(true)
+  const [error, setError] = useState<boolean>(false)
+  const dispatch = useAppDispatch()
+  const signInEail = useAppSelector(selectSignInEmail)
+  const signInOrg = useAppSelector(selectSelectedOrg)
 
-  const [signIn, { data, isLoading }] = useSignInMutation()
+  const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
 
-  //   console.log(password)
+  const togglePasswordEye = () => setPassSecured(show => !show)
+
+  const handleSignIn = () => {
+    const authData: SignInRequestData = {
+      email: signInEail,
+      password: password,
+      deviceId: 'Web',
+      deviceName: 'mobile',
+      orgId: signInOrg.orgId,
+    }
+    signIn(authData)
+  }
+
+  useEffect(() => {
+    if (isSuccess && data && data.success) {
+      dispatch(setAuthData(data.data))
+      // ToDo: Redirect to Main/HomeScreen (or Walk through screens)
+      console.log(`[PasswordContainer] auth data: ${JSON.stringify(data.data)}`)
+    } else if (isSuccess && !data?.success) {
+      console.log(`[PasswordContainer] auth error: ${data?.error}`)
+    }
+  }, [isSuccess, data, dispatch])
 
   return (
-    <View style={Layout.fill}>
-      <View flex style={Layout.column}>
-        <View style={[Layout.rowCenter, Gutters.largeTMargin]}>
-          <Brand />
-        </View>
-        <View flex center>
-          {isLoading && <ActivityIndicator />}
+    <View flex>
+      <View flex-4 center>
+        <Brand width={'60%'} />
+      </View>
+      <View flex-6 centerH marginT-20>
+        {error && (
+          <TouchableOpacity
+            style={[styles.hint, { backgroundColor: Colors.DARK_BLUE }]}
+            onPress={() => setError(false)}
+          >
+            <Text style={[Fonts.regular]} color={Colors.WHITE}>
+              Wrong Password
+            </Text>
+            <CloseIcon style={{ marginLeft: 20 }} />
+          </TouchableOpacity>
+        )}
 
-          {error && (
-            <TouchableOpacity
-              style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
-              onPress={() => setError(false)}
-            >
-              <Text style={[Fonts.regular]} color={Colors.WHITE}>
-                Wrong Password
-              </Text>
-              <CloseIcon style={{ marginLeft: 20 }} />
-            </TouchableOpacity>
-          )}
-          <View style={Common.inputBox}>
-            <TextInput
-              onChangeText={x => setPassword(x)}
-              style={
-                error
-                  ? {
-                      ...Common.textInput,
-                      borderColor: Colors.DARK_BLUE,
-                      color: Colors.DARK_BLUE,
-                    }
-                  : Common.textInput
-              }
-              secureTextEntry={passSecured}
-            />
-            <View style={Common.inputIcon}>
-              {error && (
-                <InputErrorIcon
-                  style={{ ...Common.inputIcon, right: 25, top: 2 }}
-                />
-              )}
-              {passSecured ? (
-                error ? (
-                  <PasswordSecuredIconError
-                    onPress={() => setPassSecured(x => !x)}
-                  />
-                ) : (
-                  <PasswordSecuredIcon
-                    onPress={() => setPassSecured(x => !x)}
-                  />
-                )
-              ) : error ? (
-                <PasswordVisibleIconError
-                  onPress={() => setPassSecured(x => !x)}
-                />
-              ) : (
-                <PasswordVisibleIcon onPress={() => setPassSecured(x => !x)} />
-              )}
-            </View>
+        <View style={Common.inputBox}>
+          <TextInput
+            onChangeText={x => setPassword(x)}
+            style={[
+              Common.textInput,
+              error && {
+                borderColor: Colors.DARK_BLUE,
+                color: Colors.DARK_BLUE,
+              },
+            ]}
+            value={password}
+            secureTextEntry={passSecured}
+          />
+          <View style={Common.inputIcon}>
+            {error && (
+              <InputErrorIcon
+                style={[Common.inputIcon, { right: 25, top: 2 }]}
+              />
+            )}
+            {error && passSecured && (
+              <PasswordSecuredIconError onPress={togglePasswordEye} />
+            )}
+            {error && !passSecured && (
+              <PasswordVisibleIconError onPress={togglePasswordEye} />
+            )}
+            {passSecured ? (
+              <PasswordVisibleIcon onPress={togglePasswordEye} />
+            ) : (
+              <PasswordSecuredIcon onPress={togglePasswordEye} />
+            )}
           </View>
-          <ButtonCustom label="Next" color={Colors.GREEN_DARK} />
-          <ButtonCustom
-            action={() => {}}
-            labelColor={Colors.GREEN_DARK}
-            color="transparent"
-            label="Recover Credentials?"
+        </View>
+        <View width={300}>
+          <Button
+            dark={true}
+            block={true}
+            label={t('common.buttons.next')}
+            disabled={!password.length}
+            onPress={handleSignIn}
+            loading={isLoading}
           />
         </View>
+        <ButtonCustom
+          action={() => {}}
+          labelColor={Colors.GREEN_DARK}
+          color="transparent"
+          label="Recover Credentials?"
+        />
       </View>
     </View>
   )

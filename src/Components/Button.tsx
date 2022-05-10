@@ -1,18 +1,28 @@
 import React from 'react'
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { useTheme } from '@/Hooks'
 
 interface Props {
   dark?: boolean
   block?: boolean
-  children?: string
+  label?: string
   loading?: boolean
-  onPress?: () => void
+  disabled?: boolean
+  onPress?: (...args: any) => any
   style?: any
 }
 
-const Button = ({ dark, block, loading, children, onPress, style }: Props) => {
+const Button = ({
+  dark,
+  block,
+  loading,
+  disabled,
+  label,
+  onPress,
+  style,
+}: Props) => {
   const { Colors, Common, Fonts, Gutters, Layout } = useTheme()
+  const disabledStyle = { opacity: 0.6 }
   return (
     <View
       style={[
@@ -20,23 +30,24 @@ const Button = ({ dark, block, loading, children, onPress, style }: Props) => {
         Array.isArray(style) ? style : { ...style },
       ]}
     >
-      <TouchableOpacity
-        onPress={onPress}
+      <Pressable
+        onPress={loading || disabled ? null : onPress}
         style={[
           Common.button.curved,
           Layout.row,
           Layout.rowHCenter,
-          dark && Common.backgroundDarkPrimary,
+          dark ? Common.backgroundDarkPrimary : Common.backgroundPrimary,
+          (loading || disabled) && disabledStyle,
         ]}
       >
         {loading && (
           <ActivityIndicator
-            color={Colors.white}
+            color={Colors.WHITE}
             style={[Gutters.smallRMargin]}
           />
         )}
-        <Text style={[Fonts.textBoldContrast]}>{children}</Text>
-      </TouchableOpacity>
+        <Text style={[Fonts.textNormalContrast]}>{label}</Text>
+      </Pressable>
     </View>
   )
 }
@@ -44,7 +55,8 @@ const Button = ({ dark, block, loading, children, onPress, style }: Props) => {
 Button.defaultProps = {
   dark: false,
   block: false,
-  children: '',
+  label: '',
+  disabled: false,
   loading: false,
   onPress: () => {},
   style: {},

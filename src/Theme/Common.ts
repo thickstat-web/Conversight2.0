@@ -16,10 +16,10 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
     button: buttonStyles({ Colors, ...args }),
     ...StyleSheet.create({
       backgroundPrimary: {
-        backgroundColor: Colors.primary,
+        backgroundColor: Colors.GREEN_MAIN,
       },
       backgroundDarkPrimary: {
-        backgroundColor: Colors.darkPrimary,
+        backgroundColor: Colors.GREEN_DARK,
       },
       backgroundReset: {
         backgroundColor: Colors.transparent,
@@ -47,6 +47,9 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+      },
+      curved: {
+        borderRadius: 8,
       },
     }),
   }

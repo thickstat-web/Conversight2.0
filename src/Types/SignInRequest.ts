@@ -1,4 +1,4 @@
-export interface AuthRequestData {
+export interface SignInRequestData {
   email: string
   password: string
   deviceId: string
