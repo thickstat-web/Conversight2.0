@@ -8,7 +8,7 @@ import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
 import { selectSignInEmail, selectSelectedOrg, setAuthData } from '@/Store/Auth'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
-import { MAIN_SCREEN } from '@/Constants/screens'
+import { MAIN_SCREEN, WALK_THROUGH } from '@/Constants/screens'
 import PasswordSecuredIcon from '@/Assets/Images/iconsSVG/passwordHide.svg'
 import PasswordVisibleIcon from '@/Assets/Images/iconsSVG/passwordShow.svg'
 import PasswordSecuredIconError from '@/Assets/Images/iconsSVG/passwordHideError.svg'
@@ -16,7 +16,11 @@ import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 
-const PasswordContainer = () => {
+interface Props {
+  navigation: any
+}
+
+const PasswordContainer = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
   // ToDo: Need to remove default password
@@ -45,8 +49,12 @@ const PasswordContainer = () => {
   useEffect(() => {
     if (isSuccess && data && data.success) {
       dispatch(setAuthData(data.data))
+      if (data.data && !data.data.isFirstTimeLogin) {
+        navigation.navigate(WALK_THROUGH)
+      } else {
+        navigateAndSimpleReset(MAIN_SCREEN)
+      }
       // ToDo: Redirect to Main/HomeScreen (or Walk through screens)
-      navigateAndSimpleReset(MAIN_SCREEN)
       console.log(`[PasswordContainer] auth data: ${JSON.stringify(data.data)}`)
     } else if (isSuccess && !data?.success) {
       console.log(`[PasswordContainer] auth error: ${data?.error}`)
