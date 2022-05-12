@@ -19,7 +19,6 @@ const InsightsContainer = () => {
   useEffect(() => {
     if (isSuccess && data && data.success) {
       dispatch(setAuthData(data.data))
-      // ToDo: Redirect to Main/HomeScreen (or Walk through screens)
       console.log(`[PasswordContainer] auth data: ${JSON.stringify(data.data)}`)
     } else if (isSuccess && !data?.success) {
       console.log(`[PasswordContainer] auth error: ${data?.error}`)
