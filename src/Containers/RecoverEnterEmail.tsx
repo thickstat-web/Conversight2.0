@@ -22,17 +22,6 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
   const [emailUnknown, setEmailUnknown] = React.useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = React.useState<boolean>(false)
 
-  useEffect(() => {
-    const keyboardDidHideListener = Keyboard.addListener(
-      'keyboardDidHide',
-      () => {
-        handleVerifyEmail()
-      },
-    )
-
-    return () => keyboardDidHideListener.remove()
-  }, [email])
-
   const [verifyEmail, { isLoading, isFetching }] = useLazyVerifyEmailQuery()
 
   const setAndCheckEmail = (val: string) => {
@@ -73,7 +62,7 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
 
   return (
     <View style={Layout.colCenter}>
-      <LockIcon />
+      <LockIcon width={150} height={150} />
       <Text
         marginB-20
         style={{ ...Fonts.textRegularBold, color: Colors.GREEN_DARK }}
@@ -84,6 +73,7 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
         <TextInput
           onChangeText={e => setAndCheckEmail(e)}
           value={email}
+          onSubmitEditing={() => handleVerifyEmail()}
           style={{
             ...Common.textInput,
             ...emailValidStyle,
