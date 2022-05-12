@@ -8,7 +8,11 @@ import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
 import { selectSignInEmail, selectSelectedOrg, setAuthData } from '@/Store/Auth'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
-import { MAIN_SCREEN, WALK_THROUGH } from '@/Constants/screens'
+import {
+  MAIN_SCREEN,
+  RECOVER_ENTER_EMAIL,
+  WALK_THROUGH,
+} from '@/Constants/screens'
 import PasswordSecuredIcon from '@/Assets/Images/iconsSVG/passwordHide.svg'
 import PasswordVisibleIcon from '@/Assets/Images/iconsSVG/passwordShow.svg'
 import PasswordSecuredIconError from '@/Assets/Images/iconsSVG/passwordHideError.svg'
@@ -34,6 +38,8 @@ const PasswordContainer = ({ navigation }: Props) => {
   const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
 
   const togglePasswordEye = () => setPassSecured(show => !show)
+
+  const handleRecover = () => navigation.navigate(RECOVER_ENTER_EMAIL)
 
   const handleSignIn = () => {
     const authData: SignInRequestData = {
@@ -122,7 +128,7 @@ const PasswordContainer = ({ navigation }: Props) => {
           />
         </View>
         <ButtonCustom
-          action={() => {}}
+          action={handleRecover}
           labelColor={Colors.GREEN_DARK}
           color="transparent"
           label="Recover Credentials?"

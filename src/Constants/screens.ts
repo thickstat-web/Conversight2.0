@@ -5,3 +5,6 @@ export const CHOOSE_ORGANIZATION: string = 'ChooseOrganizationScreen'
 export const PASSWORD_SCREEN: string = 'PasswordScreen'
 export const MAIN_SCREEN: string = 'MainScreen'
 export const WALK_THROUGH: string = "WalkThroughScreen"
+export const RECOVER_ENTER_EMAIL: string = "RecoverEmailScreen"
+export const RECOVER_ENTER_PASSWORD: string = "RecoverPasswordScreen"
+export const RECOVER_COMPLETED: string = "RecoverCompleted"
