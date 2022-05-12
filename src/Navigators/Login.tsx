@@ -9,14 +9,14 @@ import {
   MAIN_SCREEN,
   WALK_THROUGH,
 } from '@/Constants/screens'
-import LandingContainer from '@/Containers/LandingContainer'
-import MainNavigator from './Main'
 import {
+  LandingContainer,
   ChooseOrganizationContainer,
   EnterEmailContainer,
   PasswordContainer,
+  WalkThroughContainer,
 } from '@/Containers'
-import WalkThrough from '@/Containers/WalkThrough'
+import MainNavigator from './Main'
 
 const Stack = createStackNavigator()
 
@@ -65,20 +65,20 @@ const LoginNavigator = () => {
         }}
       />
       <Stack.Screen
+        name={WALK_THROUGH}
+        component={WalkThroughContainer}
+        options={{
+          headerShown: false,
+          title: '',
+          headerTitleAlign: 'center',
+        }}
+      />
+      <Stack.Screen
         name={MAIN_SCREEN}
         component={MainNavigator}
         options={{
           headerShown: false,
           title: 'Home',
-          headerTitleAlign: 'center',
-        }}
-      />
-      <Stack.Screen
-        name={WALK_THROUGH}
-        component={WalkThrough}
-        options={{
-          headerShown: false,
-          title: '',
           headerTitleAlign: 'center',
         }}
       />
