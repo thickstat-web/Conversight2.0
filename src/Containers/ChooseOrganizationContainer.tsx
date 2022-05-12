@@ -10,7 +10,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button } from '@/Components'
-import { selectAllOrganizations, selectSelectedOrg } from '@/Store/Auth'
+import { selectAllOrganizations, selectSignInOrg } from '@/Store/Auth'
 import PickerIcon from '@/Assets/Images/iconsSVG/pickerIcon.svg'
 import SelectedOptionIcon from '@/Assets/Images/iconsSVG/selectedOptionArrow.svg'
 import NotSelectedOptionIcon from '@/Assets/Images/iconsSVG/notSelectedOptionArrow.svg'
@@ -39,7 +39,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const { Gutters, Layout, Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
   const organizations = useAppSelector(selectAllOrganizations)
-  const selectedOrg = useAppSelector(selectSelectedOrg)
+  const selectedOrg = useAppSelector(selectSignInOrg)
 
   const animatedValue = useRef(new Animated.Value(0)).current
   const [animationIn, setAnimationIn] = useState<boolean>(false)

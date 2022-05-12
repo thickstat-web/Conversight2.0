@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button, ButtonCustom } from '@/Components'
 import { useSignInMutation } from '@/Services/modules/auth'
-import { selectSignInEmail, selectSelectedOrg, setAuthData } from '@/Store/Auth'
+import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 
 const InsightsContainer = () => {

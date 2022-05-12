@@ -10,15 +10,15 @@ type Org = {
 
 interface AuthState {
   email: string
-  allOrganizations: any[]
-  selectedOrg: Org
+  organizations: any[]
+  signInOrg: Org
   authData: SignInResponseData
 }
 
 const initialState: AuthState = {
   email: '',
-  allOrganizations: [],
-  selectedOrg: { name: '', orgId: '' },
+  organizations: [],
+  signInOrg: { name: '', orgId: '' },
   authData: {},
 }
 
@@ -30,10 +30,10 @@ const authSlice = createSlice({
       state.email = payload
     },
     setAllOrganizations: (state, { payload }) => {
-      state.allOrganizations = [...payload]
+      state.organizations = [...payload]
     },
     setSelectedOrg: (state, { payload }) => {
-      state.selectedOrg = { ...payload }
+      state.signInOrg = { ...payload }
     },
     setAuthData: (state, { payload }) => {
       state.authData = payload
@@ -43,9 +43,8 @@ const authSlice = createSlice({
 
 export const selectSignInEmail = (state: RootState) => state.authReducer.email
 export const selectAllOrganizations = (state: RootState) =>
-  state.authReducer.allOrganizations
-export const selectSelectedOrg = (state: RootState) =>
-  state.authReducer.selectedOrg
+  state.authReducer.organizations
+export const selectSignInOrg = (state: RootState) => state.authReducer.signInOrg
 export const selectAuthData = (state: RootState) => state.authReducer.authData
 
 export const {

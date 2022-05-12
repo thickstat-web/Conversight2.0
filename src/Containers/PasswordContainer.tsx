@@ -6,7 +6,7 @@ import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button, ButtonCustom } from '@/Components'
 import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
-import { selectSignInEmail, selectSelectedOrg, setAuthData } from '@/Store/Auth'
+import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
 import { MAIN_SCREEN } from '@/Constants/screens'
 import PasswordSecuredIcon from '@/Assets/Images/iconsSVG/passwordHide.svg'
@@ -25,7 +25,7 @@ const PasswordContainer = () => {
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
   const signInEmail = useAppSelector(selectSignInEmail)
-  const signInOrg = useAppSelector(selectSelectedOrg)
+  const signInOrg = useAppSelector(selectSignInOrg)
 
   const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
 
