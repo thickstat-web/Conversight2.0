@@ -1,11 +1,17 @@
 import { View, Text } from 'react-native-ui-lib'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useTheme, useAppDispatch } from '@/Hooks'
 import LockIcon from '@/Assets/Images/lock.svg'
-import { TextInput, Keyboard, ActivityIndicator } from 'react-native'
+import {
+  TextInput,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+} from 'react-native'
 import { validateEmail } from '@/Utils/validations/string'
 import EmailOkIcon from '@/Assets/Images/iconsSVG/emailOk.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
+import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import { useLazyVerifyEmailQuery } from '@/Services/modules/auth'
 import { setSignInEmail } from '@/Store/Auth'
 import { RECOVER_ENTER_PASSWORD } from '@/Constants/screens'
@@ -22,7 +28,8 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
   const [emailUnknown, setEmailUnknown] = React.useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = React.useState<boolean>(false)
 
-  const [verifyEmail, { isLoading, isFetching }] = useLazyVerifyEmailQuery()
+  const [verifyEmail, { data, isLoading, isFetching }] =
+    useLazyVerifyEmailQuery()
 
   const setAndCheckEmail = (val: string) => {
     const isValid = validateEmail(val)
@@ -69,6 +76,19 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
       >
         What's your Email?
       </Text>
+      {errorHintOpen && data?.error && (
+        <TouchableOpacity
+          style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
+          onPress={() => setErrorHintOpen(false)}
+        >
+          <Text
+            style={[Fonts.textRegular, { lineHeight: 20, color: Colors.WHITE }]}
+          >
+            {data?.error}
+          </Text>
+          <CloseIcon style={{ marginLeft: 10 }} />
+        </TouchableOpacity>
+      )}
       <View row centerV>
         <TextInput
           onChangeText={e => setAndCheckEmail(e)}
@@ -93,4 +113,16 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
   )
 }
 
+const styles = StyleSheet.create({
+  hint: {
+    fontFamily: 'Montserrat-Regular',
+    padding: 13,
+    width: 300,
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
+  },
+})
 export default RecoverEnterEmail
