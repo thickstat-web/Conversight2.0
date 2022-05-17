@@ -7,7 +7,7 @@ import {
   InsightsContainer,
   DashboardContainer,
 } from '@/Containers'
-import { Text } from 'react-native-ui-lib'
+import { Text, View } from 'react-native-ui-lib'
 
 const Tab = createBottomTabNavigator()
 
@@ -19,6 +19,13 @@ const MainNavigator = () => {
     <Tab.Navigator
       initialRouteName={t('bottomTabs.chat')}
       screenOptions={({ route }) => ({
+        tabBarStyle: {
+          borderTopEndRadius: 20,
+          borderTopStartRadius: 20,
+          borderColor: Colors.WHITE,
+          borderWidth: 10,
+          backgroundColor: 'transparent',
+        },
         tabBarLabel: ({ focused, color }) => (
           <Text
             style={[

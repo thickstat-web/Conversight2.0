@@ -3,10 +3,9 @@ import { StyleSheet, TextInput } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { Brand, Button, ButtonCustom } from '@/Components'
+import { Brand, Button, ButtonCustom, TopAppBarAuthorized } from '@/Components'
 import { useSignInMutation } from '@/Services/modules/auth'
 import { selectSignInEmail, selectSelectedOrg, setAuthData } from '@/Store/Auth'
-import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 
 const InsightsContainer = () => {
   const { t } = useTranslation()
@@ -27,6 +26,7 @@ const InsightsContainer = () => {
 
   return (
     <View flex>
+      <TopAppBarAuthorized />
       <View flex-4 center>
         <Brand width={'60%'} />
       </View>

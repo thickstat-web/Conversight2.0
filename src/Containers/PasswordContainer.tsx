@@ -55,7 +55,7 @@ const PasswordContainer = ({ navigation }: Props) => {
   useEffect(() => {
     if (isSuccess && data && data.success) {
       dispatch(setAuthData(data.data))
-      if (data.data && !data.data.isFirstTimeLogin) {
+      if (data.data && data.data.isFirstTimeLogin) {
         navigation.navigate(WALK_THROUGH)
       } else {
         navigateAndSimpleReset(MAIN_SCREEN)
