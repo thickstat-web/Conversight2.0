@@ -23,6 +23,8 @@ import WalkThrough from '@/Containers/WalkThrough'
 import RecoverEnterEmail from '@/Containers/RecoverEnterEmail'
 import RecoverEnterPassword from '@/Containers/RecoverEnterPassword'
 import RecoverComplete from '@/Containers/RecoverComplete'
+import DrawerNav from './DrawerNav'
+import TabNavigator from './Tabs'
 
 const Stack = createStackNavigator()
 
@@ -72,7 +74,7 @@ const LoginNavigator = () => {
       />
       <Stack.Screen
         name={MAIN_SCREEN}
-        component={MainNavigator}
+        component={DrawerNav}
         options={{
           headerShown: false,
           title: 'Home',
