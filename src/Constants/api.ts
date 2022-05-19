@@ -1,0 +1,1 @@
+export const GET_SETTING_QUERY:string = "{ myProfile { fName id lname role mobileNum designation email displayName chatPageDisabled orgId preference { sound_cues voice_speed allow_athena provide_suggestion save_conversation}} }"

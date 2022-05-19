@@ -34,7 +34,8 @@ export interface Data {
 }
 
 export interface SignInResponseData {
-  displayName: string
+  token?: any
+  displayName?: string
   data?: Data
   errors?: Error[]
 }

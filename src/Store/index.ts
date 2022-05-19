@@ -17,11 +17,13 @@ import { csApi, botApi } from '@/Services/api'
 import * as modules from '@/Services/modules'
 import theme from './Theme'
 import authReducer from './Auth'
-import { AUTH_REDUCER, THEME_REDUCER } from '@/Constants/redux'
+import settingsReducer from './Settings'
+import { AUTH_REDUCER, THEME_REDUCER, SETTING_REDUCER } from '@/Constants/redux'
 
 const reducers = combineReducers({
   theme,
   authReducer,
+  settingsReducer,
   ...Object.values(modules).reduce(
     (acc, module) => ({
       ...acc,
@@ -35,6 +37,7 @@ const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
   whitelist: [THEME_REDUCER, AUTH_REDUCER],
+  blackList: [SETTING_REDUCER],
 }
 
 const persistedReducer = persistReducer(persistConfig, reducers)
