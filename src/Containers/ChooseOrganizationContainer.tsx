@@ -1,5 +1,19 @@
-import React, { ReactElement, useRef, useEffect, useState } from 'react'
-import { View, Text, Picker, Modal } from 'react-native-ui-lib'
+import React, {
+  ReactElement,
+  useRef,
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+} from 'react'
+import {
+  View,
+  Text,
+  Picker,
+  PickerValue,
+  PickerItemProps,
+  Modal,
+} from 'react-native-ui-lib'
 import {
   FlatList,
   StyleSheet,
@@ -33,55 +47,175 @@ interface Props {
   navigation: any
 }
 
+declare type RenderCustomModalProps = {
+  visible: boolean
+  toggleModal: (show: boolean) => void
+  onSearchChange: (searchValue: string) => void
+  children: ReactNode
+  onDone: () => void
+  onCancel: () => void
+}
+
 const ChooseOrganizationContainer = ({ navigation }: Props) => {
-  const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
+  const MODAL_TITLE = 'Choose Organization'
+  const ORG_INIT_STATE = { name: '', orgId: '' }
   const { t } = useTranslation()
+  const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
   const { Gutters, Layout, Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
   const organizations = useAppSelector(selectAllOrganizations)
   const selectedOrg = useAppSelector(selectSignInOrg)
 
-  const animatedValue = useRef(new Animated.Value(0)).current
-  const [animationIn, setAnimationIn] = useState<boolean>(false)
+  const [openModal, setOpenModal] = useState(false)
+  const openModalAnim = useRef(new Animated.Value(0)).current
+
+  const toggleModal = useCallback(
+    (toValue = 0) => {
+      Animated.timing(openModalAnim, {
+        toValue,
+        duration: 600,
+        useNativeDriver: true,
+        easing: Easing.elastic(1.2),
+      }).start()
+    },
+    [openModalAnim],
+  )
+
+  useEffect(() => {
+    toggleModal(openModal ? 0 : 1)
+  }, [openModal, toggleModal])
+
+  const showModal = () => setOpenModal(true)
+
+  const hideModal = () => setOpenModal(false)
+
+  useEffect(() => {
+    dispatch(setSelectedOrg(ORG_INIT_STATE))
+  }, [])
 
   const handleSelectOrg = (org: any) => {
     const current = getOrgByOrgId(organizations, org)
     dispatch(setSelectedOrg(current))
-    setAnimationIn(false)
+    hideModal()
   }
 
-  const hideModal = () => {
-    Animated.timing(animatedValue, {
-      toValue: 0,
-      duration: 600,
-      useNativeDriver: true,
-      easing: Easing.elastic(1.2),
-    }).start()
-  }
+  const handleRedirect = () => navigation.navigate(PASSWORD_SCREEN)
 
-  const showModal = () => {
-    Animated.timing(animatedValue, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-      easing: Easing.elastic(1.2),
-    }).start()
-  }
-
-  useEffect(() => {
-    if (animationIn) {
-      hideModal()
-    } else {
-      showModal()
+  const renderCustomPickerModal = ({ visible }: RenderCustomModalProps) => {
+    const animationStyles = {
+      height: (screenHeight * 58) / 100,
+      width: screenWidth,
+      transform: [
+        {
+          translateY: openModalAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 100],
+          }),
+        },
+      ],
     }
-  }, [animationIn])
 
-  useEffect(() => {
-    dispatch(setSelectedOrg({ name: '', orgId: '' }))
-  }, [])
+    return (
+      <Modal
+        visible={visible}
+        presentationStyle="overFullScreen"
+        style={styles.modalView}
+        animationType="slide"
+        transparent
+      >
+        <Animated.View style={[styles.modalView, animationStyles]}>
+          <Text
+            style={[
+              Fonts.textRegular,
+              styles.modalTitle,
+              { color: Colors.GREEN_MAIN },
+            ]}
+          >
+            {MODAL_TITLE}
+          </Text>
 
-  const handleRedirect = () => {
-    navigation.navigate(PASSWORD_SCREEN)
+          <FlatList
+            data={organizations}
+            renderItem={(org: Org): ReactElement => (
+              <Picker.Item
+                key={org.item.orgId}
+                value={org.item.orgId}
+                label={org.item.name}
+                disabled={false}
+              />
+            )}
+          />
+        </Animated.View>
+      </Modal>
+    )
+  }
+
+  const renderCustomPicker = () => (
+    <View
+      style={[
+        styles.pickerBox,
+        !!selectedOrg?.name && { borderColor: Colors.GREEN_MAIN },
+      ]}
+    >
+      <Text
+        center
+        style={[
+          Fonts.textRegular,
+          styles.pickerLabel,
+          !!selectedOrg?.name && { color: Colors.GREEN_MAIN },
+        ]}
+      >
+        {selectedOrg?.name || MODAL_TITLE}
+      </Text>
+      <PickerIcon style={styles.pickerIcon} width={20} />
+    </View>
+  )
+
+  const renderCustomPickerItem = (
+    value: PickerValue,
+    props: PickerItemProps & {
+      isSelected: boolean
+    },
+    label: string,
+  ) => {
+    const { isSelected } = props
+    const currentOrg = getOrgByOrgId(organizations, value)
+    return (
+      <View key={label}>
+        <View
+          style={[
+            styles.orgOption,
+            {
+              width: screenWidth - 70,
+            },
+          ]}
+        >
+          <View style={{ width: screenWidth / 20 }}>
+            {isSelected ? <SelectedOptionIcon /> : <NotSelectedOptionIcon />}
+          </View>
+          <View style={{ width: screenWidth / 1.5 }}>
+            <Text
+              style={[
+                styles.optionText,
+                isSelected && styles.selectedOption,
+                isSelected && { color: Colors.GREEN_DARK },
+              ]}
+            >
+              {label}
+            </Text>
+            <Text style={[styles.optionText, { color: Colors.GREEN_DARK }]}>
+              {currentOrg?.name}
+            </Text>
+          </View>
+          <View>
+            <NewLabel />
+          </View>
+        </View>
+        <View
+          style={[styles.orgNameSeparator, { borderBottomColor: Colors.GRAY }]}
+        />
+      </View>
+    )
   }
 
   return (
@@ -95,126 +229,11 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
           value={selectedOrg?.orgId}
           migrateTextField
           migrate
-          onPress={() => setAnimationIn(true)}
-          renderItem={(value, itemProps, label) => {
-            const { isSelected } = itemProps
-            const currentOrg = getOrgByOrgId(organizations, value)
-            return (
-              <View key={label}>
-                <View
-                  style={{
-                    ...styles.orgOption,
-                    width: screenWidth - 70,
-                  }}
-                >
-                  <View style={{ width: screenWidth / 20 }}>
-                    {isSelected ? (
-                      <SelectedOptionIcon />
-                    ) : (
-                      <NotSelectedOptionIcon />
-                    )}
-                  </View>
-                  <View style={{ width: screenWidth / 1.5 }}>
-                    <Text
-                      style={[
-                        styles.optionText,
-                        isSelected && styles.selectedOption,
-                        isSelected && { color: Colors.GREEN_DARK },
-                      ]}
-                    >
-                      {label}
-                    </Text>
-                    <Text
-                      style={[styles.optionText, { color: Colors.GREEN_DARK }]}
-                    >
-                      {currentOrg?.name}
-                    </Text>
-                  </View>
-                  <View>
-                    <NewLabel />
-                  </View>
-                </View>
-                <View
-                  style={[
-                    styles.orgNameSeparator,
-                    { borderBottomColor: Colors.GRAY },
-                  ]}
-                />
-              </View>
-            )
-          }}
-          renderCustomModal={({ visible, children, toggleModal }) => {
-            return (
-              <Modal
-                visible={visible}
-                presentationStyle="overFullScreen"
-                style={styles.modalView}
-                animationType="slide"
-                transparent
-              >
-                <Animated.View
-                  style={[
-                    styles.modalView,
-                    {
-                      height: screenHeight - (screenHeight * 42) / 100,
-                      width: screenWidth,
-                      transform: [
-                        {
-                          translateY: animatedValue.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, 100],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      Fonts.textRegular,
-                      styles.modalTitle,
-                      { color: Colors.GREEN_MAIN },
-                    ]}
-                  >
-                    Choose Organization
-                  </Text>
-
-                  <FlatList
-                    data={organizations}
-                    renderItem={(org: Org): ReactElement => (
-                      <Picker.Item
-                        key={org.item.orgId}
-                        value={org.item.orgId}
-                        label={org.item.name}
-                        disabled={false}
-                      />
-                    )}
-                  />
-                </Animated.View>
-              </Modal>
-            )
-          }}
+          onPress={showModal}
           onChange={handleSelectOrg}
-          renderPicker={() => (
-            <View
-              style={[
-                styles.pickerBox,
-                !!selectedOrg?.name && { borderColor: Colors.GREEN_MAIN },
-              ]}
-            >
-              <Text
-                style={[
-                  Fonts.textRegular,
-                  styles.pickerLabel,
-                  !!selectedOrg?.name && { color: Colors.GREEN_MAIN },
-                ]}
-                center
-              >
-                {selectedOrg?.name || 'Choose Organization'}
-              </Text>
-              <PickerIcon style={styles.pickerIcon} width={20} />
-            </View>
-          )}
+          renderPicker={renderCustomPicker}
+          renderCustomModal={renderCustomPickerModal}
+          renderItem={renderCustomPickerItem}
         />
         <View marginT-16 width={300}>
           <Button

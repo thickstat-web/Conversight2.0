@@ -3,7 +3,7 @@ export default {
   common: {
     buttons: {
       next: 'Next',
-    }
+    },
   },
   actions: {
     continue: 'Continue',

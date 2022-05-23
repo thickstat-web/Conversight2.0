@@ -16,50 +16,43 @@ import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 
-interface Props {
-  navigation: any
-}
-
-const PasswordContainer = ({ navigation }: Props) => {
+const PasswordContainer = () => {
   const { t } = useTranslation()
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
   // ToDo: Need to remove default password
-  const [password, setPassword] = useState<string>('Login!23')
+  const [password, setPassword] = useState<string>('sakthi')
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
   const signInEmail = useAppSelector(selectSignInEmail)
   const signInOrg = useAppSelector(selectSignInOrg)
 
-  const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
+  const [signIn, { data: resp, isLoading, isSuccess }] = useSignInMutation()
 
   const togglePasswordEye = () => setPassSecured(show => !show)
 
   const handleSignIn = () => {
-    const authData: SignInRequestData = {
-      email: signInEmail,
-      password: password,
-      deviceId: 'Web',
-      deviceName: 'mobile',
-      orgId: signInOrg.orgId,
+    if (signInEmail && password && signInOrg) {
+      const authData: SignInRequestData = {
+        email: signInEmail,
+        password: password,
+        deviceId: 'Web',
+        deviceName: 'mobile',
+        orgId: signInOrg?.orgId,
+      }
+      signIn(authData)
     }
-    signIn(authData)
   }
 
   useEffect(() => {
-    if (isSuccess && data && data.success) {
-      dispatch(setAuthData(data.data))
-      if (data.data && !data.data.isFirstTimeLogin) {
-        navigation.navigate(WALK_THROUGH)
-      } else {
-        navigateAndSimpleReset(MAIN_SCREEN)
-      }
-      // ToDo: Redirect to Main/HomeScreen (or Walk through screens)
-      console.log(`[PasswordContainer] auth data: ${JSON.stringify(data.data)}`)
-    } else if (isSuccess && !data?.success) {
-      console.log(`[PasswordContainer] auth error: ${data?.error}`)
+    if (isSuccess && resp && resp.success && resp.data) {
+      dispatch(setAuthData(resp.data))
+      const navigateTo = resp.data.isFirstTimeLogin ? WALK_THROUGH : MAIN_SCREEN
+      navigateAndSimpleReset(navigateTo)
+    } else if (isSuccess && !resp?.success) {
+      console.log(`[PasswordContainer] auth error: ${resp?.error}`)
     }
-  }, [isSuccess, data, dispatch])
+  }, [isSuccess, resp, dispatch])
 
   return (
     <View flex>

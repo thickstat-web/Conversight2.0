@@ -35,7 +35,7 @@ const DashboardContainer = () => {
       </View>
       <View flex-6 centerH margin-20>
         <View flex center>
-          <Text text60>Dashboard Container - In Progress</Text>
+          <Text text60>Dashboard - In Progress</Text>
         </View>
       </View>
     </View>

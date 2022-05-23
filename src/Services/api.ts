@@ -1,4 +1,3 @@
-import { Config } from '@/Config'
 import {
   BaseQueryFn,
   FetchArgs,
@@ -7,6 +6,9 @@ import {
   FetchBaseQueryError,
   FetchBaseQueryMeta,
 } from '@reduxjs/toolkit/query/react'
+import { isStringExists } from '@/Utils/common'
+import { Config } from '@/Config'
+import { RootState } from '@/Store'
 import { logRequestResponse } from './logging'
 
 const csApiBaseQuery = fetchBaseQuery({ baseUrl: Config.CS_API_URL })
@@ -26,12 +28,25 @@ const buildBaseQueryWithInterceptor = (
     unknown,
     FetchBaseQueryError
   > = async (args, api, extraOptions) => {
-    let result = await baseQuery(args, api, extraOptions)
-    if (result.error && result.error.status === 401) {
+    let adjustedArgs = args
+
+    // Inject auth token i.e ?token=<token>
+    const state = api.getState() as RootState
+    const token = state.authReducer.authData?.token
+    const urlEnd = typeof args === 'string' ? args : args.url
+    if (token && !isStringExists(urlEnd, 'token=')) {
+      const joinChar = isStringExists(urlEnd, '?') ? '&' : '?'
+      const encodedToken = encodeURIComponent(token)
+      const adjustedUrl = `${urlEnd}${joinChar}token=${encodedToken}`
+      adjustedArgs =
+        typeof args === 'string' ? adjustedUrl : { ...args, url: adjustedUrl }
     }
 
+    let result = await baseQuery(adjustedArgs, api, extraOptions)
     if (__DEV__) {
       logRequestResponse(result)
+    }
+    if (result.error && result.error.status === 401) {
     }
 
     return result

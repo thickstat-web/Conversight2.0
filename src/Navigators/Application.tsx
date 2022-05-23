@@ -3,15 +3,21 @@ import { SafeAreaView, StatusBar } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
 import { StartupContainer } from '@/Containers'
-import { useTheme } from '@/Hooks'
+import { useAuth, useTheme } from '@/Hooks'
+import {
+  LOGIN_NAVIGATOR,
+  MAIN_SCREEN,
+  STARTUP_SCREEN,
+} from '@/Constants/screens'
 import { navigationRef } from './utils'
-import { STARTUP_SCREEN } from '@/Constants/screens'
 import LoginNavigator from './Login'
+import MainNavigator from './Main'
 
 const Stack = createStackNavigator()
 
 // @refresh reset
 const ApplicationNavigator = () => {
+  const { isSignedIn } = useAuth()
   const { Colors, Layout, darkMode, NavigationTheme } = useTheme()
   const { colors } = NavigationTheme
 
@@ -28,14 +34,33 @@ const ApplicationNavigator = () => {
             headerShown: false,
           }}
         >
-          <Stack.Screen name={STARTUP_SCREEN} component={StartupContainer} />
-          <Stack.Screen
-            name="Welcome"
-            component={LoginNavigator}
-            options={{
-              animationEnabled: false,
-            }}
-          />
+          {isSignedIn ? (
+            <>
+              <Stack.Screen
+                name={STARTUP_SCREEN}
+                component={StartupContainer}
+              />
+              <Stack.Screen
+                name={MAIN_SCREEN}
+                component={MainNavigator}
+                options={{
+                  headerShown: false,
+                  title: 'Home',
+                  headerTitleAlign: 'center',
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Stack.Screen
+                name={LOGIN_NAVIGATOR}
+                component={LoginNavigator}
+                options={{
+                  animationEnabled: false,
+                }}
+              />
+            </>
+          )}
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>

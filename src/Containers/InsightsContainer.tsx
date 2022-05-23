@@ -32,7 +32,7 @@ const InsightsContainer = () => {
       </View>
       <View flex-6 centerH margin-20>
         <View flex center>
-          <Text text60>Insights Container - In Progress</Text>
+          <Text text60>Insights - In Progress</Text>
         </View>
       </View>
     </View>

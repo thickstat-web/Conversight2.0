@@ -28,21 +28,14 @@ export interface OrgData {
   apiConfig: ApiConfig
 }
 
-// type ResponseCode = 200 | 401
+type ResponseCode = 200 | 401
 
-// interface ErrorMessage {
-//   message: string
-// }
-
-// export interface VerifyEmailResponse {
-//   code: ResponseCode
-//   error: ErrorMessage[]
-//   orgData: OrgData[]
-// }
+interface ErrorMessage {
+  message: string
+}
 
 export interface VerifyEmailResponse {
-  // code: ResponseCode
-  success: boolean
-  error: string
-  data: OrgData[]
+  code: ResponseCode
+  errors: ErrorMessage[]
+  orgData: OrgData[]
 }

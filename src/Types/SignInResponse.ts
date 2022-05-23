@@ -17,7 +17,7 @@ export interface Access {
   showTower: boolean
 }
 
-export interface Data {
+export interface AuthData {
   authentication?: 'success'
   token?: string
   uid?: string
@@ -34,6 +34,6 @@ export interface Data {
 }
 
 export interface SignInResponseData {
-  data?: Data
+  data?: AuthData
   errors?: Error[]
 }

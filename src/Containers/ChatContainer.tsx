@@ -1,30 +1,31 @@
-import React, { useEffect, useState } from 'react'
-import { StyleSheet, TextInput } from 'react-native'
-import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
+import React, { useEffect, useRef, useState } from 'react'
+import { StyleSheet, Platform } from 'react-native'
+import { View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button, ButtonCustom } from '@/Components'
-import { useSignInMutation } from '@/Services/modules/auth'
-import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
-import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
+import { useLazyLogoutQuery } from '@/Services/modules/auth'
+import { cleanupAuthData } from '@/Store/Auth'
+import AthenaChatContainer, { RefProps } from './Chat/AthenaChatContainer'
 
 const ChatContainer = () => {
   const { t } = useTranslation()
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
   const dispatch = useAppDispatch()
-  const signInEmail = useAppSelector(selectSignInEmail)
+  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+  const chatRef = useRef<RefProps>()
 
-  const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
+  const [logout, { isLoading, isFetching }] = useLazyLogoutQuery()
 
-  useEffect(() => {
-    if (isSuccess && data && data.success) {
-      dispatch(setAuthData(data.data))
-      // ToDo: Redirect to Main/HomeScreen (or Walk through screens)
-      console.log(`[PasswordContainer] auth data: ${JSON.stringify(data.data)}`)
-    } else if (isSuccess && !data?.success) {
-      console.log(`[PasswordContainer] auth error: ${data?.error}`)
+  const openChat = () => {
+    if (chatRef && chatRef.current) {
+      chatRef.current.open()
     }
-  }, [isSuccess, data, dispatch])
+  }
+
+  const handleLogout = async () => {
+    await logout()
+    dispatch(cleanupAuthData())
+  }
 
   return (
     <View flex>
@@ -33,22 +34,37 @@ const ChatContainer = () => {
       </View>
       <View flex-6 centerH margin-20>
         <View flex center>
-          <Text text60>Chat Container - In Progress</Text>
+          <Text text60>Chat - In Progress</Text>
+        </View>
+        <View flex center>
+          <Button label="Chat" onPress={openChat} />
+        </View>
+        <View flex center>
+          <Button
+            label="Logout"
+            loading={isLoading || isFetching}
+            onPress={handleLogout}
+          />
         </View>
       </View>
+      <AthenaChatContainer ref={chatRef} />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  hint: {
-    fontFamily: 'Montserrat-Regular',
-    padding: 13,
-    width: 300,
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  userMessageWrapper: {
+    flex: 1,
+    marginLeft: '10%',
+    marginRight: 16,
+    marginVertical: 8,
+    padding: 16,
+    borderRadius: 16,
+    borderBottomRightRadius: 0,
+  },
+  gcanvas: {
+    flex: 1,
+    width: '100%',
   },
 })
 

@@ -6,3 +6,7 @@ export const cleanseColumn = (str: string) => {
   }
   return str
 }
+
+export const isStringExists = (str: string, subStr: string) => {
+  return !(str.indexOf(subStr) === -1)
+}

@@ -1,23 +1,23 @@
 {
   "images" : [
     {
-      "filename" : "Webp.net-resizeimage (2).png",
+      "filename" : "Splash_icon@1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Webp.net-resizeimage (1).png",
+      "filename" : "Splash_icon@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Webp.net-resizeimage.png",
+      "filename" : "Splash_icon@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
   ],
   "info" : {
-    "author" : "xcode",
+    "author" : "www.conversight.ai",
     "version" : 1
   }
 }

@@ -24,7 +24,7 @@ const EnterEmailContainer = ({ navigation }: Props) => {
   const { Common, Gutters, Layout, Fonts } = useTheme()
   const dispatch = useAppDispatch()
   // ToDo: Need to remove default email
-  const [email, setEmail] = useState('athena@conversight.ai')
+  const [email, setEmail] = useState('sakthivel.murugasamy@conversight.ai')
   const [emailInvalid, setEmailInvalid] = useState<boolean>(false)
   const [emailUnknown, setEmailUnknown] = useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = useState<boolean>(false)
@@ -89,7 +89,7 @@ const EnterEmailContainer = ({ navigation }: Props) => {
               <CloseIcon style={{ marginLeft: 10 }} />
             </TouchableOpacity>
           )}
-          <View row centerV>
+          <View row centerV width={300}>
             <TextInput
               onChangeText={e => setAndCheckEmail(e)}
               value={email}
