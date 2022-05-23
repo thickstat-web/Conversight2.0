@@ -1,6 +1,6 @@
 import React from 'react';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
-import { READ_FAQ, MAIN_SCREEN, SETTINGS } from '@/Constants/screens';
+import { READ_FAQ, MAIN_SCREEN, SETTINGS, WALK_THROUGH_AUTHORIZED, REQUEST_DEMO } from '@/Constants/screens';
 import { ReadFAQ } from '@/Containers';
 import TabNavigator from './Tabs';
 import { Avatar, Text, TouchableOpacity, View } from 'react-native-ui-lib';
@@ -20,6 +20,8 @@ import RequestDemoIcon from "@/Assets/Images/drawer/demo.svg"
 import FaqIcon from "@/Assets/Images/drawer/faq.svg"
 import { ButtonCustom } from '@/Components';
 import SettingsContainer from '@/Containers/SettingsContainer';
+import WalkThroughAuthorizes from '@/Containers/WalkThroughAuthorizesContainer';
+import RequestDemoContainer from '@/Containers/RequestDemoContainer';
 
 interface Props {
 
@@ -81,7 +83,7 @@ export default function DrawerNav({ navigation }: Props2) {
                         <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
                         <TouchableOpacity
-                            //  onPress={() => handleRedirect("todo")} 
+                             onPress={() => handleRedirect(WALK_THROUGH_AUTHORIZED)} 
                             style={styles.screenLink}>
                             <WalkThroughIcon />
                             <Text marginL-25>Walkthrough</Text>
@@ -89,7 +91,7 @@ export default function DrawerNav({ navigation }: Props2) {
                         <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
                         <TouchableOpacity
-                            // onPress={() => handleRedirect("todo")} 
+                            onPress={() => handleRedirect(REQUEST_DEMO)} 
                             style={styles.screenLink}>
                             <RequestDemoIcon />
                             <Text marginL-25>Request a Demo</Text>
@@ -115,6 +117,8 @@ export default function DrawerNav({ navigation }: Props2) {
             <Drawer.Screen name={t('bottomTabs.insights')} component={TabNavigator} />
             <Drawer.Screen name={READ_FAQ} component={ReadFAQ} />
             <Drawer.Screen name={SETTINGS} component={SettingsContainer} />
+            <Drawer.Screen name={WALK_THROUGH_AUTHORIZED} component={WalkThroughAuthorizes} />
+            <Drawer.Screen name={REQUEST_DEMO} component={RequestDemoContainer} />
         </Drawer.Navigator>
     );
 }
