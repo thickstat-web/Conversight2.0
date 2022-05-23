@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, Switch } from 'react-native-ui-lib'
-import React, { useEffect } from 'react'
-import { ScrollView, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, Switch, Slider } from 'react-native-ui-lib'
+import React, { useEffect, useState } from 'react'
+import { ScrollView, StyleSheet, Dimensions } from 'react-native'
 import { useTheme } from '@/Hooks'
 import { useGetSettingsMutation } from '@/Services/modules/settings'
 import { store } from '@/Store'
@@ -11,13 +11,18 @@ const SettingsContainer = () => {
   const { Colors, Fonts } = useTheme()
   const [getSettings, { data, error }] = useGetSettingsMutation()
   const { authData: { token } } = store.getState().authReducer
-  const { displayName, email, designation, mobileNum, chatPageDisabled} = store.getState().settingsReducer
+  const { displayName, email, designation, mobileNum, chatPageDisabled } = store.getState().settingsReducer
   const { allow_athena, voice_speed, provide_suggestion, save_conversation, sound_cues } = store.getState().settingsReducer?.preference
+  const [loading, setLoading] = useState<boolean>(true)
+  const { width: screenWidth } = Dimensions.get('screen')
+
   useEffect(() => {
     if (error) {
+      setLoading(false)
       // set some error here
       console.log(error)
     } else if (data?.data) {
+      setLoading(false)
       store.dispatch(setCurrentSettings(data.data))
     }
   }, [data, error])
@@ -40,7 +45,7 @@ const SettingsContainer = () => {
           </View>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Name</Text>
-            <Text style={textStyle}>{displayName || "..."}</Text>
+            <Text style={textStyle}>{displayName}</Text>
           </View>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Email</Text>
@@ -60,31 +65,67 @@ const SettingsContainer = () => {
         <View backgroundColor={Colors.WHITE}>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Athena's Voice</Text>
-            <Text>xxx</Text>
+
           </View>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Speed</Text>
-            <Text>{voice_speed}</Text>
+            <View width={screenWidth / 3}>
+            <Slider
+                value={4}
+                maximumValue={10}
+                minimumValue={0}
+                maximumTrackTintColor={Colors.GRAY}
+                minimumTrackTintColor={Colors.GREEN_MAIN}
+                thumbTintColor={Colors.GREEN_MAIN}
+                thumbStyle={{borderWidth:0}}
+                activeThumbStyle={{borderWidth:0}}
+                disableActiveStyling
+              />
+              </View>
           </View>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Pitch</Text>
-            <Text>xxx</Text>
+            <View width={screenWidth / 3}>
+            <Slider
+                value={4}
+                maximumValue={10}
+                minimumValue={0}
+                maximumTrackTintColor={Colors.GRAY}
+                minimumTrackTintColor={Colors.GREEN_MAIN}
+                thumbTintColor={Colors.GREEN_MAIN}
+                thumbStyle={{borderWidth:0}}
+                activeThumbStyle={{borderWidth:0}}
+                disableActiveStyling
+              />
+              </View>
           </View>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Read Messages</Text>
-            <Switch value={chatPageDisabled} onColor={Colors.GREEN_MAIN} />
+            <Switch offColor={Colors.GRAY} value={chatPageDisabled} onColor={Colors.GREEN_MAIN} />
           </View>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Proactive Insights</Text>
-            <Switch value={allow_athena} onColor={Colors.GREEN_MAIN} />
+            <Switch offColor={Colors.GRAY} value={allow_athena} onColor={Colors.GREEN_MAIN} />
           </View>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Walkthrough in Menu</Text>
-            <Switch value={true} onColor={Colors.GREEN_MAIN} />
+            <Switch offColor={Colors.GRAY} value={true} onColor={Colors.GREEN_MAIN} />
           </View>
           <View marginH-25 paddingV-14 style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}>
             <Text style={textStyle}>Delay (sec)</Text>
-            <Text>xxx</Text>
+            <View width={screenWidth / 3}>
+              <Slider
+                value={4}
+                maximumValue={10}
+                minimumValue={0}
+                maximumTrackTintColor={Colors.GRAY}
+                minimumTrackTintColor={Colors.GREEN_MAIN}
+                thumbTintColor={Colors.GREEN_MAIN}
+                thumbStyle={{borderWidth:0}}
+                activeThumbStyle={{borderWidth:0}}
+                disableActiveStyling
+              />
+            </View>
           </View>
         </View>
       </View>
