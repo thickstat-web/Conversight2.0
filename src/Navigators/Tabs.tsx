@@ -7,14 +7,26 @@ import {
   InsightsContainer,
   DashboardContainer,
 } from '@/Containers'
-import { Text, View } from 'react-native-ui-lib'
-
+import { Button, Text, TouchableOpacity, View } from 'react-native-ui-lib'
+import BurgerIcon from "@/Assets/Images/drawer/burger.svg"
 const Tab = createBottomTabNavigator()
 
+interface Props {
+  navigation: any
+}
+
 // @refresh reset
-const TabNavigator = () => {
+const TabNavigator = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const { Colors, Fonts } = useTheme()
+
+  const OpenDrawer = () => (
+    <TouchableOpacity onPress={() => navigation.openDrawer()} padding-15>
+      <BurgerIcon />
+    </TouchableOpacity>
+  )
+
+
   return (
     <Tab.Navigator
       initialRouteName={t('bottomTabs.chat')}
@@ -41,7 +53,8 @@ const TabNavigator = () => {
         name={t('bottomTabs.insights')}
         component={InsightsContainer}
         options={{
-          headerShown: false,
+          headerLeft: () => <OpenDrawer />,
+          headerTitleAlign: "center",
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
         }}
@@ -50,7 +63,8 @@ const TabNavigator = () => {
         name={t('bottomTabs.chat')}
         component={ChatContainer}
         options={{
-          headerShown: false,
+          headerLeft: () => <OpenDrawer />,
+          headerTitleAlign: "center",
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
         }}
@@ -59,7 +73,8 @@ const TabNavigator = () => {
         name={t('bottomTabs.dashboard')}
         component={DashboardContainer}
         options={{
-          headerShown: false,
+          headerLeft: () => <OpenDrawer />,
+          headerTitleAlign: "center",
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
         }}

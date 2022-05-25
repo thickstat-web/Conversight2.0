@@ -13,7 +13,6 @@ import {
   RECOVER_COMPLETED,
 } from '@/Constants/screens'
 import LandingContainer from '@/Containers/LandingContainer'
-import MainNavigator from './Main'
 import {
   ChooseOrganizationContainer,
   EnterEmailContainer,
@@ -24,7 +23,6 @@ import RecoverEnterEmail from '@/Containers/RecoverEnterEmail'
 import RecoverEnterPassword from '@/Containers/RecoverEnterPassword'
 import RecoverComplete from '@/Containers/RecoverComplete'
 import DrawerNav from './DrawerNav'
-import TabNavigator from './Tabs'
 
 const Stack = createStackNavigator()
 

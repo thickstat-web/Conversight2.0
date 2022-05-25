@@ -1,10 +1,9 @@
 import React from 'react';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
-import { READ_FAQ, MAIN_SCREEN, SETTINGS, WALK_THROUGH_AUTHORIZED, REQUEST_DEMO } from '@/Constants/screens';
-import { ReadFAQ } from '@/Containers';
+import { READ_FAQ, MAIN_SCREEN, SETTINGS, WALK_THROUGH_AUTHORIZED, REQUEST_DEMO, CHANGE_ORGANIZATION, CHANGE_ORGANIZATION_PASSWORD } from '@/Constants/screens';
 import TabNavigator from './Tabs';
 import { Avatar, Text, TouchableOpacity, View } from 'react-native-ui-lib';
-import { Alert, Dimensions } from 'react-native';
+import { Dimensions } from 'react-native';
 import { useTranslation } from 'react-i18next'
 import { DrawerDescriptorMap, DrawerNavigationHelpers, } from '@react-navigation/drawer/lib/typescript/src/types';
 import { DrawerNavigationState, ParamListBase } from '@react-navigation/native';
@@ -19,12 +18,10 @@ import WalkThroughIcon from "@/Assets/Images/drawer/walkthrough.svg"
 import RequestDemoIcon from "@/Assets/Images/drawer/demo.svg"
 import FaqIcon from "@/Assets/Images/drawer/faq.svg"
 import { ButtonCustom } from '@/Components';
-import SettingsContainer from '@/Containers/SettingsContainer';
-import WalkThroughAuthorizes from '@/Containers/WalkThroughAuthorizesContainer';
-import RequestDemoContainer from '@/Containers/RequestDemoContainer';
+import DownArrow from "@/Assets/Images/drawer/down-arrow.svg";
+
 
 interface Props {
-
     state: DrawerNavigationState<ParamListBase>; navigation: DrawerNavigationHelpers; descriptors: DrawerDescriptorMap;
 }
 
@@ -37,9 +34,10 @@ const Drawer = createDrawerNavigator();
 export default function DrawerNav({ navigation }: Props2) {
     const { Fonts, Colors, Layout } = useTheme()
     const { t } = useTranslation()
-    const { authData } = store.getState().authReducer;
+    const { authData, selectedOrg } = store.getState().authReducer;
     const { height: windowHeight, width: windowWidth } = Dimensions.get("window")
 
+    
     const handleRedirect = (screen: string) => {
         navigation.navigate(screen)
     }
@@ -60,9 +58,10 @@ export default function DrawerNav({ navigation }: Props2) {
                     <View center style={styles.avatar}>
                         <Avatar size={100} />
                         <Text marginT-20 style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}>{authData.displayName}</Text>
-                        <View>
-                            <Text color={Colors.GREEN_MAIN} >Org</Text>
-                        </View>
+                        <TouchableOpacity onPress={() => handleRedirect(CHANGE_ORGANIZATION)} style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                            <Text color={Colors.GREEN_MAIN} >{selectedOrg.name}</Text>
+                            <DownArrow style={{ marginLeft: 5 }} />
+                        </TouchableOpacity>
                     </View>
 
                     <View style={{ ...styles.screensLinks, width: windowWidth - 130 }}>
@@ -83,7 +82,7 @@ export default function DrawerNav({ navigation }: Props2) {
                         <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
                         <TouchableOpacity
-                             onPress={() => handleRedirect(WALK_THROUGH_AUTHORIZED)} 
+                            onPress={() => handleRedirect(WALK_THROUGH_AUTHORIZED)}
                             style={styles.screenLink}>
                             <WalkThroughIcon />
                             <Text marginL-25>Walkthrough</Text>
@@ -91,7 +90,7 @@ export default function DrawerNav({ navigation }: Props2) {
                         <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
                         <TouchableOpacity
-                            onPress={() => handleRedirect(REQUEST_DEMO)} 
+                            onPress={() => handleRedirect(REQUEST_DEMO)}
                             style={styles.screenLink}>
                             <RequestDemoIcon />
                             <Text marginL-25>Request a Demo</Text>
@@ -114,11 +113,7 @@ export default function DrawerNav({ navigation }: Props2) {
 
     return (
         <Drawer.Navigator screenOptions={{ drawerStyle: { width: "90%" } }} drawerContent={(props) => <DrawerView {...props} />} initialRouteName={MAIN_SCREEN}>
-            <Drawer.Screen name={t('bottomTabs.insights')} component={TabNavigator} />
-            <Drawer.Screen name={READ_FAQ} component={ReadFAQ} />
-            <Drawer.Screen name={SETTINGS} component={SettingsContainer} />
-            <Drawer.Screen name={WALK_THROUGH_AUTHORIZED} component={WalkThroughAuthorizes} />
-            <Drawer.Screen name={REQUEST_DEMO} component={RequestDemoContainer} />
+            <Drawer.Screen options={{ headerShown: false }} name={t('bottomTabs.insights')} component={TabNavigator} />
         </Drawer.Navigator>
     );
 }
