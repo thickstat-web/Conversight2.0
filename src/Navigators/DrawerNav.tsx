@@ -59,7 +59,7 @@ export default function DrawerNav({ navigation }: Props2) {
                         <Avatar size={100} />
                         <Text marginT-20 style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}>{authData.displayName}</Text>
                         <TouchableOpacity onPress={() => handleRedirect(CHANGE_ORGANIZATION)} style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                            <Text color={Colors.GREEN_MAIN} >{selectedOrg.name}</Text>
+                            <Text color={Colors.GREEN_MAIN} >{selectedOrg?.name}</Text>
                             <DownArrow style={{ marginLeft: 5 }} />
                         </TouchableOpacity>
                     </View>

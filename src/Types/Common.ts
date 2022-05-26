@@ -14,3 +14,9 @@ export interface ResponseTypeSettings {
   data?: any
   error?: string
 }
+
+export interface ResponseTypeFAQ {
+  status?: string
+  data?: any
+  error?: string
+}

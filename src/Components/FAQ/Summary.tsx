@@ -3,7 +3,12 @@ import React from 'react'
 import { useTheme } from '@/Hooks'
 import { StyleSheet } from 'react-native'
 
-const Summary = () => {
+interface Props {
+  title: string
+  content: string
+}
+
+const Summary = ({ title, content }: Props) => {
   const { Colors, Fonts } = useTheme()
 
   return (
@@ -19,7 +24,7 @@ const Summary = () => {
           color: Colors.GREEN_DARK,
         }}
       >
-        Title
+      {title}
       </Text>
       <Text style={{ ...Fonts.textSmall, fontSize: 14 }}>
         Content Content Content Content Content Content Content Content Content

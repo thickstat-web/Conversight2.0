@@ -52,7 +52,7 @@ const ApplicationNavigator = () => {
               headerTitleStyle: { fontFamily: "Montserrat-regular" },
               title: "Need Help?",
               headerTitleAlign: "center",
-              headerBackImage: () => <BackArrow />,
+              headerBackImage: () => <BackArrowWhite />,
               headerTintColor: Colors.WHITE,
               headerStyle: {
                 backgroundColor: Colors.GREEN_MAIN
@@ -105,6 +105,10 @@ const ApplicationNavigator = () => {
             name={REQUEST_DEMO}
             component={RequestDemoContainer}
             options={{
+              headerBackImage:() => <BackArrow />,
+              title: "Request a Demo",
+              headerTitleAlign: "center",
+              headerTransparent:true,
               headerShown: true,
               animationEnabled: true,
             }}
