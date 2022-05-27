@@ -35,7 +35,7 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const { Colors, Common, Fonts } = useTheme()
   // ToDo: Need to remove default password
-  const [password, setPassword] = useState<string>('Login!23')
+  const [password, setPassword] = useState<string>("sakthi")
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()

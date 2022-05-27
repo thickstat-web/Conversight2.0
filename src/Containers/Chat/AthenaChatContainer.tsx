@@ -15,7 +15,7 @@ import {
 import { Modal, View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector, useTheme } from '@/Hooks'
-import BackIcon from '@/Assets/Images/iconsSVG/back.svg'
+import BackIconWhite from '@/Assets/Images/iconsSVG/back-white.svg'
 import SearchIcon from '@/Assets/Images/iconsSVG/search.svg'
 import SendIcon from '@/Assets/Images/iconsSVG/send.svg'
 import FaqIcon from '@/Assets/Images/iconsSVG/faq.svg'
@@ -115,7 +115,7 @@ const AthenaChatContainer: ForwardRefRenderFunction<
       title="Ask Athena"
       onCancel={close}
       onDone={openSearch}
-      cancelIcon={BackIcon}
+      cancelIcon={BackIconWhite}
       doneIcon={SearchIcon}
       doneButtonProps={{
         label: '',

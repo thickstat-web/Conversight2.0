@@ -12,7 +12,7 @@ const ChatContainer = () => {
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
-  const chatRef = useRef<RefProps>()
+  const chatRef = useRef<any>()
 
   // const [logout, { isLoading, isFetching }] = useLazyLogoutQuery()
 
