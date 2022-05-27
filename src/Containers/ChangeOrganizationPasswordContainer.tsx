@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
-import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
+import { TouchableOpacity, View, Text, Avatar } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button, ButtonCustom } from '@/Components'
 import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
-import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
+import {
+  selectSignInEmail,
+  setAuthData,
+  selectTempOrg,
+  setSelectedOrg,
+  selectAuthData,
+} from '@/Store/Auth'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
 import {
+  DRAWER_NAVIGATOR,
   RECOVER_ENTER_EMAIL,
   WALK_THROUGH,
-  DRAWER_NAVIGATOR,
 } from '@/Constants/screens'
 import PasswordSecuredIcon from '@/Assets/Images/iconsSVG/passwordHide.svg'
 import PasswordVisibleIcon from '@/Assets/Images/iconsSVG/passwordShow.svg'
@@ -19,53 +25,84 @@ import PasswordSecuredIconError from '@/Assets/Images/iconsSVG/passwordHideError
 import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError.svg'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
+import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 
-const PasswordContainer = ({ navigation }: { navigation: any }) => {
+interface Props {
+  navigation: any
+}
+
+const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
   const { t } = useTranslation()
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+  const { Colors, Common, Fonts } = useTheme()
   // ToDo: Need to remove default password
-  const [password, setPassword] = useState<string>('sakthi')
+  const [password, setPassword] = useState<string>('Login!23')
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
   const signInEmail = useAppSelector(selectSignInEmail)
-  const signInOrg = useAppSelector(selectSignInOrg)
+  const orgToBeChanged = useAppSelector(selectTempOrg)
+  const authData = useAppSelector(selectAuthData)
 
-  const [signIn, { data: resp, isLoading, isSuccess }] = useSignInMutation()
+  const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
 
   const togglePasswordEye = () => setPassSecured(show => !show)
 
   const handleRecover = () => navigation.navigate(RECOVER_ENTER_EMAIL)
 
   const handleSignIn = () => {
-    if (signInEmail && password && signInOrg) {
-      const authData: SignInRequestData = {
-        email: signInEmail,
-        password: password,
-        deviceId: 'Web',
-        deviceName: 'mobile',
-        orgId: signInOrg?.orgId,
-      }
-      signIn(authData)
+    const signInReqData: SignInRequestData = {
+      email: signInEmail,
+      password: password,
+      deviceId: 'Web',
+      deviceName: 'mobile',
+      orgId: orgToBeChanged.orgId,
     }
+    signIn(signInReqData)
   }
 
   useEffect(() => {
-    if (isSuccess && resp && resp.success && resp.data) {
-      dispatch(setAuthData(resp.data))
-      const navigateTo = resp.data.isFirstTimeLogin
-        ? WALK_THROUGH
-        : DRAWER_NAVIGATOR
-      navigateAndSimpleReset(navigateTo)
-    } else if (isSuccess && !resp?.success) {
-      console.log(`[PasswordContainer] auth error: ${resp?.error}`)
+    if (isSuccess && data && data.success) {
+      dispatch(setAuthData(data.data))
+      dispatch(setSelectedOrg(orgToBeChanged))
+      if (data.data && data.data.isFirstTimeLogin) {
+        navigation.navigate(WALK_THROUGH)
+      } else {
+        navigation.navigate(DRAWER_NAVIGATOR)
+      }
+
+      console.log(
+        `[ChangeOrganizationPasswordContainer] auth data: ${JSON.stringify(
+          data.data,
+        )}`,
+      )
+    } else if (isSuccess && !data?.success) {
+      setError(true)
+      console.log(
+        `[ChangeOrganizationPasswordContainer] auth error: ${data?.error}`,
+      )
     }
-  }, [isSuccess, resp, dispatch])
+  }, [isSuccess, data, dispatch, navigation])
 
   return (
     <View flex>
       <View flex-4 center>
-        <Brand width={'60%'} />
+        <Avatar size={100} />
+        <Text
+          marginT-20
+          style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}
+        >
+          {authData?.displayName}
+        </Text>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+        >
+          <Text color={Colors.GREEN_MAIN}>Login to {orgToBeChanged.name}</Text>
+          <DownArrow style={{ marginLeft: 5 }} />
+        </View>
       </View>
       <View flex-6 centerH marginT-20>
         {error && (
@@ -105,11 +142,9 @@ const PasswordContainer = ({ navigation }: { navigation: any }) => {
             {error && !passSecured && (
               <PasswordVisibleIconError onPress={togglePasswordEye} />
             )}
-            {passSecured ? (
-              <PasswordVisibleIcon onPress={togglePasswordEye} />
-            ) : (
-              <PasswordSecuredIcon onPress={togglePasswordEye} />
-            )}
+            {passSecured
+              ? !error && <PasswordVisibleIcon onPress={togglePasswordEye} />
+              : !error && <PasswordSecuredIcon onPress={togglePasswordEye} />}
           </View>
         </View>
         <View marginT-16 width={300}>
@@ -145,4 +180,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default PasswordContainer
+export default ChangeOrganizationPasswordContainer

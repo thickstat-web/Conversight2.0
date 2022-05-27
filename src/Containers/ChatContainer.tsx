@@ -4,8 +4,8 @@ import { View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button, ButtonCustom } from '@/Components'
-import { useLazyLogoutQuery } from '@/Services/modules/auth'
-import { cleanupAuthData } from '@/Store/Auth'
+// import { useLazyLogoutQuery } from '@/Services/modules/auth'
+// import { cleanupAuthData } from '@/Store/Auth'
 import AthenaChatContainer, { RefProps } from './Chat/AthenaChatContainer'
 
 const ChatContainer = () => {
@@ -14,7 +14,7 @@ const ChatContainer = () => {
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
   const chatRef = useRef<RefProps>()
 
-  const [logout, { isLoading, isFetching }] = useLazyLogoutQuery()
+  // const [logout, { isLoading, isFetching }] = useLazyLogoutQuery()
 
   const openChat = () => {
     if (chatRef && chatRef.current) {
@@ -22,10 +22,10 @@ const ChatContainer = () => {
     }
   }
 
-  const handleLogout = async () => {
-    await logout()
-    dispatch(cleanupAuthData())
-  }
+  // const handleLogout = async () => {
+  //   await logout()
+  //   dispatch(cleanupAuthData())
+  // }
 
   return (
     <View flex>
@@ -39,13 +39,13 @@ const ChatContainer = () => {
         <View flex center>
           <Button label="Chat" onPress={openChat} />
         </View>
-        <View flex center>
+        {/* <View flex center>
           <Button
             label="Logout"
             loading={isLoading || isFetching}
             onPress={handleLogout}
           />
-        </View>
+        </View> */}
       </View>
       <AthenaChatContainer ref={chatRef} />
     </View>

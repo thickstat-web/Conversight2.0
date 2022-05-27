@@ -14,6 +14,9 @@ interface AuthState {
   signInOrg: Org | null
   authData: AuthData | null
   selectedDatasetId: string | null
+  allOrganizations: any[]
+  selectedOrg: Org
+  tempOrg: Org
 }
 
 const initialState: AuthState = {
@@ -22,6 +25,9 @@ const initialState: AuthState = {
   signInOrg: null,
   authData: null,
   selectedDatasetId: null,
+  allOrganizations: [],
+  selectedOrg: { name: '', orgId: '' },
+  tempOrg: { name: '', orgId: '' },
 }
 
 const authSlice = createSlice({
@@ -36,6 +42,7 @@ const authSlice = createSlice({
     },
     setSelectedOrg: (state, { payload }) => {
       state.signInOrg = { ...payload }
+      state.selectedOrg = { ...payload }
     },
     setAuthData: (state, { payload }) => {
       state.authData = payload
@@ -46,16 +53,27 @@ const authSlice = createSlice({
     cleanupAuthData: state => {
       Object.assign(state, initialState)
     },
+    setTempOrg: (state, { payload }) => {
+      state.tempOrg = { ...payload }
+    },
   },
 })
 
 export const selectSignInEmail = (state: RootState) => state.authReducer.email
+
 export const selectAllOrganizations = (state: RootState) =>
   state.authReducer.organizations
+
 export const selectSignInOrg = (state: RootState) => state.authReducer.signInOrg
+
+export const selectSelectedOrg = (state: RootState) =>
+  state.authReducer.selectedOrg
+
 export const selectAuthData = (state: RootState) => state.authReducer.authData
 export const selectDatasetId = (state: RootState) =>
   state.authReducer.selectedDatasetId
+
+export const selectTempOrg = (state: RootState) => state.authReducer.tempOrg
 
 export const {
   setSignInEmail,
@@ -64,6 +82,7 @@ export const {
   setAuthData,
   setSelectedDatasetId,
   cleanupAuthData,
+  setTempOrg,
 } = authSlice.actions
 
 export default authSlice.reducer

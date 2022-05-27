@@ -6,8 +6,11 @@ import {
   ENTER_EMAIL_SCREEN,
   LANDING_SCREEN,
   PASSWORD_SCREEN,
-  MAIN_SCREEN,
+  DRAWER_NAVIGATOR,
   WALK_THROUGH,
+  RECOVER_ENTER_EMAIL,
+  RECOVER_ENTER_PASSWORD,
+  RECOVER_COMPLETED,
 } from '@/Constants/screens'
 import {
   LandingContainer,
@@ -16,7 +19,10 @@ import {
   PasswordContainer,
   WalkThroughContainer,
 } from '@/Containers'
-import MainNavigator from './Main'
+import RecoverEnterEmail from '@/Containers/RecoverEnterEmail'
+import RecoverEnterPassword from '@/Containers/RecoverEnterPassword'
+import RecoverComplete from '@/Containers/RecoverComplete'
+import DrawerNavigator from './DrawerNavigator'
 
 const Stack = createStackNavigator()
 
@@ -74,11 +80,36 @@ const LoginNavigator = () => {
         }}
       />
       <Stack.Screen
-        name={MAIN_SCREEN}
-        component={MainNavigator}
+        name={DRAWER_NAVIGATOR}
+        component={DrawerNavigator}
+        // component={MainNavigator}
         options={{
           headerShown: false,
           title: 'Home',
+          headerTitleAlign: 'center',
+        }}
+      />
+      <Stack.Screen
+        name={RECOVER_ENTER_EMAIL}
+        component={RecoverEnterEmail}
+        options={{
+          title: 'Recover Credentials',
+          headerTitleAlign: 'center',
+        }}
+      />
+      <Stack.Screen
+        name={RECOVER_ENTER_PASSWORD}
+        component={RecoverEnterPassword}
+        options={{
+          title: 'Recover Credentials',
+          headerTitleAlign: 'center',
+        }}
+      />
+      <Stack.Screen
+        name={RECOVER_COMPLETED}
+        component={RecoverComplete}
+        options={{
+          title: 'Recover Credentials',
           headerTitleAlign: 'center',
         }}
       />

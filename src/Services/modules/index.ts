@@ -1,3 +1,5 @@
 export { authApi } from './auth'
 export { chatApi } from './chat'
 export { botApiSlice } from './bot'
+export { settingsApi } from './settings'
+export { faqAPI } from './FAQ'

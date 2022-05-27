@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { ActivityIndicator, View, Text } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { MAIN_SCREEN } from '@/Constants/screens'
+import { DRAWER_NAVIGATOR } from '@/Constants/screens'
 import { useTheme, useAppDispatch } from '@/Hooks'
 import { Brand } from '@/Components'
 import { setSelectedDatasetId } from '@/Store/Auth'
@@ -33,7 +33,7 @@ const StartupContainer = () => {
     }
 
     setDefaultTheme({ theme: 'default', darkMode: null })
-    navigateAndSimpleReset(MAIN_SCREEN)
+    navigateAndSimpleReset(DRAWER_NAVIGATOR)
   }, [dispatch, getDatasets])
 
   useEffect(() => {

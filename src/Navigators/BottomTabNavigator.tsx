@@ -7,18 +7,36 @@ import {
   InsightsContainer,
   DashboardContainer,
 } from '@/Containers'
-import { Text } from 'react-native-ui-lib'
+import { Button, Text, TouchableOpacity, View } from 'react-native-ui-lib'
+import BurgerIcon from '@/Assets/Images/drawer/burger.svg'
 
 const Tab = createBottomTabNavigator()
 
+interface Props {
+  navigation: any
+}
+
 // @refresh reset
-const MainNavigator = () => {
+const BottomTabNavigator = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const { Colors, Fonts } = useTheme()
+
+  const OpenDrawer = () => (
+    <TouchableOpacity onPress={() => navigation.openDrawer()} padding-15>
+      <BurgerIcon />
+    </TouchableOpacity>
+  )
+
   return (
     <Tab.Navigator
       initialRouteName={t('bottomTabs.chat')}
       screenOptions={({ route }) => ({
+        tabBarStyle: {
+          borderTopEndRadius: 20,
+          borderTopStartRadius: 20,
+          borderColor: Colors.WHITE,
+          borderWidth: 10,
+        },
         tabBarLabel: ({ focused, color }) => (
           <Text
             style={[
@@ -35,7 +53,8 @@ const MainNavigator = () => {
         name={t('bottomTabs.insights')}
         component={InsightsContainer}
         options={{
-          headerShown: false,
+          headerLeft: () => <OpenDrawer />,
+          headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
         }}
@@ -44,7 +63,8 @@ const MainNavigator = () => {
         name={t('bottomTabs.chat')}
         component={ChatContainer}
         options={{
-          headerShown: false,
+          headerLeft: () => <OpenDrawer />,
+          headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
         }}
@@ -53,7 +73,8 @@ const MainNavigator = () => {
         name={t('bottomTabs.dashboard')}
         component={DashboardContainer}
         options={{
-          headerShown: false,
+          headerLeft: () => <OpenDrawer />,
+          headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
         }}
@@ -62,4 +83,4 @@ const MainNavigator = () => {
   )
 }
 
-export default MainNavigator
+export default BottomTabNavigator
