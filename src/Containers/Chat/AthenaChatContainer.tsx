@@ -59,7 +59,7 @@ const AthenaChatContainer: ForwardRefRenderFunction<
         dataSet: selectedDatasetId,
         page: {
           from: 0,
-          size: 10,
+          size: 5,
         },
       }
       getChatHistory(reqData)
