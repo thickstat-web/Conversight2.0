@@ -9,11 +9,12 @@ import { useGetFaqMutation } from '@/Services/modules/FAQ'
 import { store } from '@/Store'
 import { FAQ_DATASET } from '@/Constants/api'
 import { selectFAQ, setQuestions } from '@/Store/Faq'
+import SearchContainerFaq from './SearchContainer'
 
 const ReadFAQ = () => {
     const { Fonts, Layout, Colors } = useTheme()
     const [getFaq, { data, isSuccess, error, status }] = useGetFaqMutation()
-    const { token } = store.getState().authReducer?.authData
+    const token = store.getState().authReducer.authData?.token
     const dispatch = useAppDispatch()
     const currentQuestions = useAppSelector(selectFAQ) as any[];
 
@@ -39,9 +40,7 @@ const ReadFAQ = () => {
                         (2)
                     </Text>
                 </View>
-                {/* {[1, 2].map((x, i) => (
-                    <RecentlyViewed key={i} />
-                ))} */}
+            
                 <View style={Layout.row}>
                     <Text style={{ ...Fonts.textSmall, fontSize: 14 }}>
                         Summary
@@ -54,6 +53,7 @@ const ReadFAQ = () => {
                     <Summary title={q} key={i} content={''} />
                 ))}
             </View>
+            <SearchContainerFaq/>
         </ScrollView>
     )
 }

@@ -6,14 +6,23 @@ import { Dimensions, KeyboardAvoidingView, ScrollView, TextInput, Platform } fro
 import { useForm, Controller, FieldValues } from 'react-hook-form'
 import { ReqDemoForm } from '@/Types/Forms'
 import { Button } from '@/Components'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
+import { DEMO_REQUESTED } from '@/Constants/screens'
 
-const RequestDemoContainer = () => {
+interface Props {
+    navigation: NavigationProp<ParamListBase>
+}
+
+const RequestDemoContainer = ({ navigation }: Props) => {
     const { height: screenHeight } = Dimensions.get("screen")
     const { Layout, Fonts, Common, Colors } = useTheme()
 
     const { control, handleSubmit, formState: { errors }, } = useForm<ReqDemoForm>()
 
-    const onSubmit = (data: FieldValues) => console.log(data);
+    const onSubmit = (data: FieldValues) => {
+        // toDo some API call for requesting a demo
+        navigation.navigate(DEMO_REQUESTED)
+    };
 
     const errorName =
         errors.name
@@ -42,7 +51,7 @@ const RequestDemoContainer = () => {
                     <View style={{ height: screenHeight / 6 }}>
                         <ReqIcon />
                     </View>
-                    <View style={{ height: screenHeight / 4.5}}>
+                    <View style={{ height: screenHeight / 4.5 }}>
                         <Text center marginV-10 style={{ ...Fonts.titleSmall, fontSize: 24 }}>Request a Demo</Text>
                         <Text center marginH-40 style={Fonts.textSmall}>If you would like a demo of ConverSight, please fill in this form and one of our representatives will be in touch with you soon.</Text>
                     </View>

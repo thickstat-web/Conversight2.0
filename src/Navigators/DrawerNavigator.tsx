@@ -19,6 +19,7 @@ import {
   WALK_THROUGH_AUTHORIZED,
   REQUEST_DEMO,
   CHANGE_ORGANIZATION,
+  WT_INSIGHTS,
 } from '@/Constants/screens'
 import BottomTabNavigator from './BottomTabNavigator'
 import { useTheme, useAppDispatch, useAppSelector, useAuth } from '@/Hooks'
@@ -98,7 +99,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
           <View style={{ ...styles.screensLinks, width: windowWidth - 130 }}>
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
             <TouchableOpacity
-              onPress={() => handleRedirect(t('bottomTabs.insights'))}
+              onPress={() => handleRedirect(WT_INSIGHTS)}
               style={styles.screenLink}
             >
               <InsightsIcon />

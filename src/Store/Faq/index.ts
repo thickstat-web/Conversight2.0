@@ -4,10 +4,12 @@ import { RootState } from '..'
 
 interface Faqs {
   questions: string[]
+  modalSearchOpen: boolean
 }
 
 const initialState: Faqs = {
   questions: [],
+  modalSearchOpen: false,
 }
 
 const faqSlice = createSlice({
@@ -15,14 +17,20 @@ const faqSlice = createSlice({
   initialState: initialState,
   reducers: {
     setQuestions: (state, { payload }) => {
-        console.log(payload)
+      console.log(payload)
       state.questions = [...payload]
+    },
+    setModalSearchOpen: (state, { payload }) => {
+      state.modalSearchOpen = payload
     },
   },
 })
 
 export const selectFAQ = (state: RootState) => state.faqReducer.questions
 
-export const { setQuestions } = faqSlice.actions
+export const selectModalSearchOpen = (state: RootState) =>
+  state.faqReducer.modalSearchOpen
+
+export const { setQuestions, setModalSearchOpen } = faqSlice.actions
 
 export default faqSlice.reducer
