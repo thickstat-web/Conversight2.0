@@ -188,6 +188,7 @@ const ApplicationNavigator = () => {
                   headerBackImage: () => <BackArrow />,
                   title: 'Request a Demo',
                   headerShown: true,
+                  headerTitleAlign:"center",
                   animationEnabled: true,
                 }}
               />

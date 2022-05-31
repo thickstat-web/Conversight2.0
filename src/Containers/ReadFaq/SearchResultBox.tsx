@@ -7,7 +7,7 @@ const SearchResultBox = () => {
     return (
         <View style={styles.root}>
            {[0,1].map((x,i)=>(
-               <Summary title='test' content='some content'/>
+               <Summary key={i} title='test' content='some content'/>
            ))}
         </View>
     )
