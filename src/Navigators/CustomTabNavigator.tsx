@@ -1,9 +1,8 @@
-import { useTheme } from '@/Hooks';
+import { useTheme } from '@/Hooks'
 import React from 'react';
-import { StyleSheet, Dimensions } from 'react-native';
-import { View, Text, TouchableOpacity, Image } from 'react-native-ui-lib';
-import test from "@/Assets/gifs/athenaGif.gif"
-
+import { StyleSheet, Dimensions } from 'react-native'
+import { View, Text, TouchableOpacity, Image } from 'react-native-ui-lib'
+import athena from '@/Assets/gifs/athena.gif'
 interface Props {
     state: any,
     descriptors: any,
@@ -53,7 +52,7 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
                 style={[styles.athenaBox, { borderColor: Colors.GREEN_DARK, shadowColor: Colors.GREEN_MAIN }]}
             >
                 <Image
-                    source={test}
+                    source={athena}
                     resizeMode='cover'
                     style={styles.athena} />
 
@@ -110,7 +109,7 @@ const styles = StyleSheet.create({
         marginLeft: -16,
     },
     borderRight: {
-        position:"relative",
+        position: "relative",
         borderTopEndRadius: 308,
         borderBottomStartRadius: 110,
         borderTopStartRadius: 80,

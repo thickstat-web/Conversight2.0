@@ -1,12 +1,13 @@
 import { View, Text } from 'react-native-ui-lib'
 import React from 'react'
 import { useTheme, useAppDispatch } from '@/Hooks'
-import LockIcon from '@/Assets/Images/lock.svg'
+import { lockOk, lockError } from '@/Components/Images'
 import {
   TextInput,
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
+  Image
 } from 'react-native'
 import { validateEmail } from '@/Utils/validations/string'
 import EmailOkIcon from '@/Assets/Images/iconsSVG/emailOk.svg'
@@ -23,7 +24,7 @@ interface Props {
 const RecoverEnterEmail = ({ navigation }: Props) => {
   const { Layout, Fonts, Colors, Common } = useTheme()
   const dispatch = useAppDispatch()
-  const [email, setEmail] = React.useState<string>('athena@conversight.ai')
+  const [email, setEmail] = React.useState<string>('sakthivel.murugasamy@conversight.ai')
   const [emailInvalid, setEmailInvalid] = React.useState<boolean>(false)
   const [emailUnknown, setEmailUnknown] = React.useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = React.useState<boolean>(false)
@@ -69,7 +70,13 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
 
   return (
     <View style={Layout.colCenter}>
-      <LockIcon width={150} height={150} />
+      {emailInvalid || emailUnknown
+        ? <Image source={lockError} style={styles.image} />
+        : <Image source={lockOk} style={styles.image} />
+      }
+
+
+
       <Text
         marginB-20
         style={{ ...Fonts.textRegularBold, color: Colors.GREEN_DARK }}
@@ -124,5 +131,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 10,
   },
+  image: {
+    width: 150,
+    height: 150,
+  }
 })
 export default RecoverEnterEmail

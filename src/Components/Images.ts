@@ -1,4 +1,5 @@
-const lock = require('@/Assets/Images/png/lock.png')
+const lockOk = require('@/Assets/Images/png/lockOk.png')
 const success = require('@/Assets/Images/png/success.png')
+const lockError = require('@/Assets/Images/png/lockError.png')
 
-export { lock, success }
+export { lockOk, lockError, success }

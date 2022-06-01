@@ -11,6 +11,8 @@ import {
   RECOVER_ENTER_EMAIL,
   RECOVER_ENTER_PASSWORD,
   RECOVER_COMPLETED,
+  REQUEST_DEMO,
+  DEMO_REQUESTED,
 } from '@/Constants/screens'
 import {
   LandingContainer,
@@ -18,11 +20,14 @@ import {
   EnterEmailContainer,
   PasswordContainer,
   WalkThroughContainer,
+  RequestDemoContainer,
 } from '@/Containers'
 import RecoverEnterEmail from '@/Containers/RecoverEnterEmail'
 import RecoverEnterPassword from '@/Containers/RecoverEnterPassword'
 import RecoverComplete from '@/Containers/RecoverComplete'
 import DrawerNavigator from './DrawerNavigator'
+import BackArrow from '@/Assets/Images/iconsSVG/back.svg'
+import DemoRequested from '@/Containers/DemoRequested'
 
 const Stack = createStackNavigator()
 
@@ -31,6 +36,7 @@ const LoginNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
+        headerBackImage: () => <BackArrow />,
         headerTitleAlign: 'center',
         headerStyle: { backgroundColor: Colors.GRAY },
         headerTitleStyle: {
@@ -111,6 +117,30 @@ const LoginNavigator = () => {
         options={{
           title: 'Recover Credentials',
           headerTitleAlign: 'center',
+        }}
+      />
+
+      <Stack.Screen
+        name={REQUEST_DEMO}
+        component={RequestDemoContainer}
+        options={{
+          title: 'Request a Demo',
+          headerTitleAlign: 'center',
+          headerTransparent: true,
+          headerShown: true,
+          animationEnabled: true,
+        }}
+      />
+
+      <Stack.Screen
+        name={DEMO_REQUESTED}
+        component={DemoRequested}
+        options={{
+          headerTransparent: true,
+          title: 'Request a Demo',
+          headerShown: true,
+          headerTitleAlign: "center",
+          animationEnabled: true,
         }}
       />
     </Stack.Navigator>

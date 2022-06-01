@@ -2,7 +2,8 @@ import React from 'react'
 import { View, Text } from 'react-native-ui-lib'
 import { useTheme } from '@/Hooks'
 import { ButtonCustom } from '@/Components'
-import SuccessIcon from '@/Assets/Images/success.svg'
+import { Image } from 'react-native'
+import { success } from '@/Components/Images'
 
 const RecoverComplete = () => {
   const { Layout, Fonts, Colors } = useTheme()
@@ -14,7 +15,7 @@ const RecoverComplete = () => {
       marginR-60
       style={{ ...Layout.colCenter, flex: 1 }}
     >
-      <SuccessIcon />
+      <Image source={success} style={{ width: 190, height: 190, top: 40 }} />
       <View flex bottom>
         <Text center style={Fonts.textLarge}>
           We’ve sent you an email

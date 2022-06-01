@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { Brand, ButtonCustom } from '@/Components'
 import { useTheme } from '@/Hooks'
-import { ENTER_EMAIL_SCREEN } from '@/Constants/screens'
+import { ENTER_EMAIL_SCREEN, REQUEST_DEMO } from '@/Constants/screens'
 import { Text, View } from 'react-native-ui-lib'
 
 type LoginProps = {
@@ -47,12 +47,13 @@ const LandingContainer = ({ navigation }: LoginProps) => {
             color={Colors.GREEN_MAIN}
           />
           <ButtonCustom
+            action={() => { navigation.navigate(REQUEST_DEMO) }}
             label="Request a Demo"
             labelColor={Colors.WHITE}
             color={Colors.GREEN_DARK}
           />
           <ButtonCustom
-            action={() => {}}
+            action={() => { }}
             label="I'll Sign up later"
             labelColor={Colors.GREEN_MAIN}
             color="transparent"
