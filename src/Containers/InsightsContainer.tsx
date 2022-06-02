@@ -7,6 +7,7 @@ import { Brand } from '@/Components'
 import { useSignInMutation } from '@/Services/modules/auth'
 import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
+import Tooltip from '@/Components/Tooltip'
 
 const InsightsContainer = () => {
   const { t } = useTranslation()
@@ -33,6 +34,7 @@ const InsightsContainer = () => {
       <View flex-6 centerH margin-20>
         <View flex center>
           <Text text60>Insights - In Progress</Text>
+          <Tooltip currentIndex={1} total={3} title="Ask Athena"/>
         </View>
       </View>
     </View>

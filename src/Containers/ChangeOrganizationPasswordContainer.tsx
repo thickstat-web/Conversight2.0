@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
-import { TouchableOpacity, View, Text, Avatar } from 'react-native-ui-lib'
+import { TouchableOpacity, View, Text, Avatar, Button } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { Brand, Button, ButtonCustom } from '@/Components'
+import { Button as ButtonLoading } from '@/Components'
 import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
 import {
@@ -33,7 +33,7 @@ interface Props {
 
 const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
   const { t } = useTranslation()
-  const { Colors, Common, Fonts } = useTheme()
+  const { Colors, Common, Fonts, Layout } = useTheme()
   // ToDo: Need to remove default password
   const [password, setPassword] = useState<string>("sakthi")
   const [passSecured, setPassSecured] = useState<boolean>(true)
@@ -148,7 +148,7 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
           </View>
         </View>
         <View marginT-16 width={300}>
-          <Button
+          <ButtonLoading
             dark={true}
             block={true}
             label={t('common.buttons.next')}
@@ -157,12 +157,10 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
             loading={isLoading}
           />
         </View>
-        <ButtonCustom
-          action={handleRecover}
-          labelColor={Colors.GREEN_DARK}
-          color="transparent"
-          label="Recover Credentials?"
-        />
+        <View style={[Layout.row, { justifyContent: "space-between", width: 300 }]}>
+          <Button labelStyle={{ fontWeight: '700' }} color={Colors.GREEN_DARK} style={styles.transBtn} onPress={handleRecover} label="Recover Credentials?" />
+          <Button labelStyle={{ fontWeight: '700' }}  color={Colors.GREEN_DARK} style={styles.transBtn} onPress={() => setPassword("")} label="Reset" />
+        </View>
       </View>
     </View>
   )
@@ -178,6 +176,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  transBtn: {
+    paddingHorizontal: 0,
+    backgroundColor: "transparent",
+    minWidth: 20,
+
+  }
 })
 
 export default ChangeOrganizationPasswordContainer

@@ -3,7 +3,7 @@ import { SafeAreaView, StatusBar } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
 import { useAppDispatch, useAuth, useTheme } from '@/Hooks'
-import { ReadFAQ, StartupContainer } from '@/Containers'
+import { ReadFAQ, RecoverComplete, RecoverEnterEmail, RecoverEnterPassword, StartupContainer } from '@/Containers'
 import { navigationRef } from './utils'
 import {
   CHANGE_ORGANIZATION,
@@ -12,6 +12,9 @@ import {
   DRAWER_NAVIGATOR,
   LOGIN_NAVIGATOR,
   READ_FAQ,
+  RECOVER_COMPLETED,
+  RECOVER_ENTER_EMAIL,
+  RECOVER_ENTER_PASSWORD,
   REQUEST_DEMO,
   SETTINGS,
   STARTUP_SCREEN,
@@ -55,8 +58,10 @@ const ApplicationNavigator = () => {
           backgroundColor={Colors.GREEN_MAIN}
         />
         <Stack.Navigator
+
           screenOptions={{
             headerShown: false,
+            headerBackImage: () => <BackArrow />,
           }}
         >
           {!isSignedIn ? (
@@ -129,7 +134,6 @@ const ApplicationNavigator = () => {
                   headerTitleStyle: { fontFamily: 'Montserrat-regular' },
                   title: 'Change Organization',
                   headerTitleAlign: 'center',
-                  headerBackImage: () => <BackArrow />,
                   headerShown: true,
                 }}
               />
@@ -150,7 +154,6 @@ const ApplicationNavigator = () => {
                 name={REQUEST_DEMO}
                 component={RequestDemoContainer}
                 options={{
-                  headerBackImage: () => <BackArrow />,
                   title: 'Request a Demo',
                   headerTitleAlign: 'center',
                   headerTransparent: true,
@@ -173,7 +176,6 @@ const ApplicationNavigator = () => {
                 component={InsightsWT}
                 options={{
                   headerTransparent: true,
-                  headerBackImage: () => <BackArrow />,
                   title: "",
                   headerShown: true,
                   animationEnabled: true,
@@ -185,11 +187,38 @@ const ApplicationNavigator = () => {
                 component={DemoRequested}
                 options={{
                   headerTransparent: true,
-                  headerBackImage: () => <BackArrow />,
                   title: 'Request a Demo',
                   headerShown: true,
-                  headerTitleAlign:"center",
+                  headerTitleAlign: "center",
                   animationEnabled: true,
+                }}
+              />
+
+              <Stack.Screen
+                name={RECOVER_ENTER_EMAIL}
+                component={RecoverEnterEmail}
+                options={{
+                  headerShown: true,
+                  title: 'Recover Credentials',
+                  headerTitleAlign: 'center',
+                }}
+              />
+              <Stack.Screen
+                name={RECOVER_ENTER_PASSWORD}
+                component={RecoverEnterPassword}
+                options={{
+                  headerShown: true,
+                  title: 'Recover Credentials',
+                  headerTitleAlign: 'center',
+                }}
+              />
+              <Stack.Screen
+                name={RECOVER_COMPLETED}
+                component={RecoverComplete}
+                options={{
+                  headerShown: true,
+                  title: 'Recover Credentials',
+                  headerTitleAlign: 'center',
                 }}
               />
 

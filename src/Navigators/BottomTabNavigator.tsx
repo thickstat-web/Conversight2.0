@@ -1,5 +1,5 @@
 import React from 'react'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { createBottomTabNavigator, } from '@react-navigation/bottom-tabs'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/Hooks'
 import {
@@ -7,7 +7,7 @@ import {
   InsightsContainer,
   DashboardContainer,
 } from '@/Containers'
-import { Button, Text, TouchableOpacity, View } from 'react-native-ui-lib'
+import { Button, Image, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import BurgerIcon from '@/Assets/Images/drawer/burger.svg'
 import CustomTabNavigation from './CustomTabNavigator'
 
@@ -33,7 +33,6 @@ const BottomTabNavigator = ({ navigation }: Props) => {
       tabBar={props => <CustomTabNavigation {...props} />}
       initialRouteName={t('bottomTabs.chat')}
       screenOptions={({ route }) => ({
-       
         headerLeft: () => <OpenDrawer />,
         tabBarLabel: ({ focused, color }) => (
           <Text

@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native-ui-lib'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { ButtonCustom } from '@/Components'
 import { useTheme } from '@/Hooks'
 import {

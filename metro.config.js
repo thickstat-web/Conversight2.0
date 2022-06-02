@@ -25,6 +25,8 @@ module.exports = async () => {
       sourceExts: ['jsx', 'js', 'ts', 'tsx', 'svg', 'png', 'gif'],
       assetExts: assetExts.filter(ext => ext !== 'gif'),
       assetExts: assetExts.filter(ext => ext !== 'svg'),
+      assetExts: assetExts.filter(ext => ext !== 'png'),
+
     },
   }
 }

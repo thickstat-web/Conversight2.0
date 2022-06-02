@@ -1,8 +1,10 @@
 import { useTheme } from '@/Hooks'
 import React from 'react';
-import { StyleSheet, Dimensions } from 'react-native'
+import { StyleSheet, Dimensions, ImageBackground } from 'react-native'
 import { View, Text, TouchableOpacity, Image } from 'react-native-ui-lib'
 import athena from '@/Assets/gifs/athena.gif'
+import { botNavBG } from '@/Components/Images';
+
 interface Props {
     state: any,
     descriptors: any,
@@ -30,65 +32,59 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
     const [insightsRoute, chatRoute, dashboardRoute] = state.routes
     const [isFocusedInsights, isFocusedChat, isFocusedDashboard] = [state.index === 0, state.index === 1, state.index === 2]
 
-
     return (
-        <View style={styles.root}>
-            <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityState={isFocusedInsights ? { selected: true } : {}}
-                accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
-                onPress={() => onPress(insightsRoute, isFocusedInsights)}
-                style={[styles.tab, styles.borderRight]}
-            >
-                <Text style={[Fonts.text15Bold, { color: isFocusedInsights ? Colors.GREEN_MAIN : Colors.GREEN_DARK }]}>
-                    {insightsRoute.name}
-                </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                accessibilityState={isFocusedChat ? { selected: true } : {}}
-                accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
-                onPress={() => onPress(chatRoute, isFocusedChat)}
+        <ImageBackground resizeMode="cover" style={{ marginTop: 50 }} source={botNavBG}>
+            <View style={styles.root}>
+                <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityState={isFocusedInsights ? { selected: true } : {}}
+                    accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
+                    onPress={() => onPress(insightsRoute, isFocusedInsights)}
+                    style={styles.tab}
+                >
+                    <Text style={[Fonts.text15Bold, { color: isFocusedInsights ? Colors.GREEN_MAIN : Colors.GREEN_DARK }]}>
+                        {insightsRoute.name}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    accessibilityState={isFocusedChat ? { selected: true } : {}}
+                    accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
+                    onPress={() => onPress(chatRoute, isFocusedChat)}
 
-                style={[styles.athenaBox, { borderColor: Colors.GREEN_DARK, shadowColor: Colors.GREEN_MAIN }]}
-            >
-                <Image
-                    source={athena}
-                    resizeMode='cover'
-                    style={styles.athena} />
+                    style={[styles.athenaBox, { borderColor: Colors.GREEN_DARK, shadowColor: Colors.GREEN_MAIN }]}
+                >
+                    <Image
+                        source={athena}
+                        resizeMode='cover'
+                        style={styles.athena} />
 
-            </TouchableOpacity>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityState={isFocusedDashboard ? { selected: true } : {}}
-                accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
-                onPress={() => onPress(dashboardRoute, isFocusedDashboard)}
-                style={[styles.tab, styles.borderLeft]}
-            >
+                <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityState={isFocusedDashboard ? { selected: true } : {}}
+                    accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
+                    onPress={() => onPress(dashboardRoute, isFocusedDashboard)}
+                    style={styles.tab}
+                >
 
-                <Text style={[Fonts.text15Bold, { color: isFocusedDashboard ? Colors.GREEN_MAIN : Colors.GREEN_DARK }]}>
-                    {dashboardRoute.name}
-                </Text>
+                    <Text style={[Fonts.text15Bold, { color: isFocusedDashboard ? Colors.GREEN_MAIN : Colors.GREEN_DARK }]}>
+                        {dashboardRoute.name}
+                    </Text>
 
-            </TouchableOpacity>
-            <View style={{
-                width: screenWidth,
-                backgroundColor: Colors.GRAY,
-                position: 'absolute',
-                zIndex: 1,
-                height: 15,
-                bottom: 0
-            }} />
-        </View>
+                </TouchableOpacity>
+
+            </View>
+        </ImageBackground>
+
     );
 }
 
 const styles = StyleSheet.create({
     root: {
         flexDirection: 'row',
-        height: 50,
         alignContent: "center",
-
+        height: 100,
     },
     tabAthena: {
         flex: 1,
@@ -96,42 +92,27 @@ const styles = StyleSheet.create({
         alignSelf: "center"
     },
     tab: {
-        borderWidth: 4,
+        marginTop: 35,
         borderColor: "#FFF",
         flex: 8,
         justifyContent: "center",
         alignItems: "center",
     },
-    borderLeft: {
-        borderTopLeftRadius: 300,
-        borderBottomEndRadius: 110,
-        borderTopEndRadius: 80,
-        marginLeft: -16,
-    },
-    borderRight: {
-        position: "relative",
-        borderTopEndRadius: 308,
-        borderBottomStartRadius: 110,
-        borderTopStartRadius: 80,
-        marginRight: -16,
-    },
     athenaBox: {
-        top: -20,
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 80,
+        height: 80,
+        borderRadius: 40,
         overflow: 'hidden',
-        borderWidth: 3,
-        zIndex: 2,
-        elevation: 20,
-
+        borderWidth: 4,
+        elevation: 10,
+        
     },
     athena: {
-        borderRadius: 30,
+        borderRadius: 40,
         alignSelf: 'center',
-        width: 60,
-        height: 60,
-        top: -3,
+        width: 82,
+        height: 82,
+        top: -5,
         zIndex: 2,
     },
 
