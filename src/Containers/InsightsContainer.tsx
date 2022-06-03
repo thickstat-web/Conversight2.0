@@ -34,7 +34,10 @@ const InsightsContainer = () => {
       <View flex-6 centerH margin-20>
         <View flex center>
           <Text text60>Insights - In Progress</Text>
-          <Tooltip currentIndex={1} total={3} title="Ask Athena"/>
+          <Tooltip currentIndex={1} total={3} title="Ask Athena" 
+          text="Many devices with high speed for yesterday?"
+          btnText="OK, got ya'"
+          />
         </View>
       </View>
     </View>

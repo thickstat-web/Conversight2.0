@@ -8,17 +8,20 @@ import ButtonCustom from '../ButtonCustom'
 interface Props {
     total: number | string
     currentIndex: number | string
-    title: string
+    title: string,
+    text: string,
+    btnText:string
 }
 
-const Tooltip = ({ total, currentIndex, title }: Props) => {
+const Tooltip = ({ total, currentIndex, title, text,btnText }: Props) => {
     const { Layout, Colors, Fonts } = useTheme()
     return (
         <View style={[Layout.colCenter, styles.root, { backgroundColor: Colors.GREEN_MAIN }]}>
             <Text style={[Fonts.text15Bold, styles.current]}>{currentIndex + "/" + total}</Text>
             <Text style={Fonts.text18BoldContrast}>{title}</Text>
             <Image style={styles.image} source={athena} />
-            <Button labelStyle={{ fontFamily: "Montserrat-Regular", fontSize: 14 }} label="OK, got ya'" style={styles.btn} />
+            <Text center style={Fonts.text18Contrast} >{text}</Text>
+            <Button labelStyle={{ fontFamily: "Montserrat-Regular", fontSize: 14 }} label={btnText} style={styles.btn} />
         </View>
     )
 }
@@ -38,8 +41,8 @@ const styles = StyleSheet.create({
         color: "#FFF"
     },
     image: {
-        width: 230,
-        height: 130
+        width: 190,
+        height: 100
     },
     btn: {
         backgroundColor: "#009833",
