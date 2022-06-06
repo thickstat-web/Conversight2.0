@@ -6,7 +6,7 @@ import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button, ButtonCustom } from '@/Components'
 import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
-import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
+import { selectPassword, selectSignInEmail, selectSignInOrg, setAuthData, setPassword } from '@/Store/Auth'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
 import {
   RECOVER_ENTER_EMAIL,
@@ -20,11 +20,10 @@ import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 
-const PasswordContainer = ({ navigation }: { navigation: any }) => {
+const OrgPassword = ({ navigation }: { navigation: any }) => {
   const { t } = useTranslation()
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
-  // ToDo: Need to remove default password
-  const [password, setPassword] = useState<string>('sakthi')
+  const { Colors, Common, Fonts } = useTheme()
+  const password = useAppSelector(selectPassword);
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
@@ -36,6 +35,10 @@ const PasswordContainer = ({ navigation }: { navigation: any }) => {
   const togglePasswordEye = () => setPassSecured(show => !show)
 
   const handleRecover = () => navigation.navigate(RECOVER_ENTER_EMAIL)
+
+  useEffect(() => {
+    if (!password || !password.length) dispatch(setPassword('sakthi'))
+  }, [])
 
   const handleSignIn = () => {
     if (signInEmail && password && signInOrg) {
@@ -58,15 +61,14 @@ const PasswordContainer = ({ navigation }: { navigation: any }) => {
         : DRAWER_NAVIGATOR
       navigateAndSimpleReset(navigateTo)
     } else if (isSuccess && !resp?.success) {
+      setError(true)
       console.log(`[PasswordContainer] auth error: ${resp?.error}`)
     }
   }, [isSuccess, resp, dispatch])
 
   return (
     <View flex>
-      <View flex-4 center>
-        <Brand width={'60%'} />
-      </View>
+
       <View flex-6 centerH marginT-20>
         {error && (
           <TouchableOpacity
@@ -82,7 +84,8 @@ const PasswordContainer = ({ navigation }: { navigation: any }) => {
 
         <View style={Common.inputBox}>
           <TextInput
-            onChangeText={x => setPassword(x)}
+            placeholder='Password'
+            onChangeText={x => dispatch(setPassword(x))}
             style={[
               Common.textInput,
               error && {
@@ -105,11 +108,15 @@ const PasswordContainer = ({ navigation }: { navigation: any }) => {
             {error && !passSecured && (
               <PasswordVisibleIconError onPress={togglePasswordEye} />
             )}
-            {passSecured ? (
-              <PasswordVisibleIcon onPress={togglePasswordEye} />
-            ) : (
-              <PasswordSecuredIcon onPress={togglePasswordEye} />
-            )}
+
+            {(!error) &&
+              (passSecured ? (
+                <PasswordVisibleIcon onPress={togglePasswordEye} />
+              ) : (
+                <PasswordSecuredIcon onPress={togglePasswordEye} />
+              ))
+            }
+
           </View>
         </View>
         <View marginT-16 width={300}>
@@ -117,7 +124,7 @@ const PasswordContainer = ({ navigation }: { navigation: any }) => {
             dark={true}
             block={true}
             label={t('common.buttons.next')}
-            disabled={!password.length}
+            disabled={!password.length || !signInOrg?.name}
             onPress={handleSignIn}
             loading={isLoading}
           />
@@ -145,4 +152,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default PasswordContainer
+export default OrgPassword

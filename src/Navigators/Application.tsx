@@ -166,7 +166,7 @@ const ApplicationNavigator = () => {
                 name={WALK_THROUGH_AUTHORIZED}
                 component={WalkThroughAuthorizesContainer}
                 options={{
-                  headerShown: true,
+                  headerShown: false,
                   animationEnabled: true,
                 }}
               />

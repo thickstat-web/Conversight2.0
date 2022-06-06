@@ -5,7 +5,6 @@ import {
   CHOOSE_ORGANIZATION,
   ENTER_EMAIL_SCREEN,
   LANDING_SCREEN,
-  PASSWORD_SCREEN,
   DRAWER_NAVIGATOR,
   WALK_THROUGH,
   RECOVER_ENTER_EMAIL,
@@ -18,7 +17,6 @@ import {
   LandingContainer,
   ChooseOrganizationContainer,
   EnterEmailContainer,
-  PasswordContainer,
   WalkThroughContainer,
   RequestDemoContainer,
 } from '@/Containers'
@@ -63,14 +61,6 @@ const LoginNavigator = () => {
       <Stack.Screen
         name={CHOOSE_ORGANIZATION}
         component={ChooseOrganizationContainer}
-        options={{
-          title: 'Login',
-          headerTitleAlign: 'center',
-        }}
-      />
-      <Stack.Screen
-        name={PASSWORD_SCREEN}
-        component={PasswordContainer}
         options={{
           title: 'Login',
           headerTitleAlign: 'center',

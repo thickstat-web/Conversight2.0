@@ -71,7 +71,7 @@ const WalkThrough = () => {
         >
           {item?.title}
         </Text>
-        <Text center style={{ ...Fonts.textSmall, height: 130 }}>
+        <Text center style={{ ...Fonts.textSmall, height: 145 }}>
           {item?.description}
         </Text>
       </View>

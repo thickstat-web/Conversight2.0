@@ -21,7 +21,6 @@ import {
   Animated,
   Easing,
 } from 'react-native'
-import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button } from '@/Components'
 import { selectAllOrganizations, selectSignInOrg } from '@/Store/Auth'
@@ -31,7 +30,8 @@ import NotSelectedOptionIcon from '@/Assets/Images/iconsSVG/notSelectedOptionArr
 import NewLabel from '@/Assets/Images/iconsSVG/newLabel.svg'
 import { getOrgByOrgId } from '@/Utils/array'
 import { setSelectedOrg } from '@/Store/Auth'
-import { PASSWORD_SCREEN } from '@/Constants/screens'
+import OrgPassword from './OrgPassword'
+import { ScrollView } from 'react-native-gesture-handler'
 
 type Item = {
   orgId: string
@@ -59,15 +59,15 @@ declare type RenderCustomModalProps = {
 const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const MODAL_TITLE = 'Choose Organization'
   const ORG_INIT_STATE = { name: '', orgId: '' }
-  const { t } = useTranslation()
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
-  const { Gutters, Layout, Colors, Fonts } = useTheme()
+  const { Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
   const organizations = useAppSelector(selectAllOrganizations)
   const selectedOrg = useAppSelector(selectSignInOrg)
-
   const [openModal, setOpenModal] = useState(false)
   const openModalAnim = useRef(new Animated.Value(0)).current
+
+  const singleOrg = organizations.length === 1
 
   const toggleModal = useCallback(
     (toValue = 0) => {
@@ -90,7 +90,11 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const hideModal = () => setOpenModal(false)
 
   useEffect(() => {
-    dispatch(setSelectedOrg(ORG_INIT_STATE))
+    if (singleOrg) {
+      dispatch(setSelectedOrg(organizations[0]))
+    } else {
+      dispatch(setSelectedOrg(ORG_INIT_STATE))
+    }
   }, [])
 
   const handleSelectOrg = (org: any) => {
@@ -98,8 +102,6 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     dispatch(setSelectedOrg(current))
     hideModal()
   }
-
-  const handleRedirect = () => navigation.navigate(PASSWORD_SCREEN)
 
   const renderCustomPickerModal = ({ visible }: RenderCustomModalProps) => {
     const animationStyles = {
@@ -117,7 +119,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
 
     return (
       <Modal
-        visible={visible}
+        visible={singleOrg ? false :visible }
         presentationStyle="overFullScreen"
         style={styles.modalView}
         animationType="slide"
@@ -167,7 +169,8 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
       >
         {selectedOrg?.name || MODAL_TITLE}
       </Text>
-      <PickerIcon style={styles.pickerIcon} width={20} />
+      {!singleOrg && <PickerIcon style={styles.pickerIcon} width={20} />}
+
     </View>
   )
 
@@ -219,33 +222,28 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   }
 
   return (
-    <View flex>
-      <View flex-4 center>
-        <Brand width={'60%'} />
-      </View>
-      <View flex-6 centerH marginT-20>
-        <Picker
-          mode={Picker.modes.SINGLE}
-          value={selectedOrg?.orgId}
-          migrateTextField
-          migrate
-          onPress={showModal}
-          onChange={handleSelectOrg}
-          renderPicker={renderCustomPicker}
-          renderCustomModal={renderCustomPickerModal}
-          renderItem={renderCustomPickerItem}
-        />
-        <View marginT-16 width={300}>
-          <Button
-            dark={true}
-            block={true}
-            label={t('common.buttons.next')}
-            disabled={!selectedOrg?.name.length}
-            onPress={handleRedirect}
+    <ScrollView>
+
+      <View marginB-25 >
+        <View center>
+          <Brand height={290} width={'60%'} />
+        </View>
+        <View center  >
+          <Picker
+            mode={Picker.modes.SINGLE}
+            value={selectedOrg?.orgId}
+            migrateTextField
+            migrate
+            onPress={showModal}
+            onChange={handleSelectOrg}
+            renderPicker={renderCustomPicker}
+            renderCustomModal={renderCustomPickerModal}
+            renderItem={renderCustomPickerItem}
           />
+          <OrgPassword navigation={navigation} />
         </View>
       </View>
-    </View>
+    </ScrollView>
   )
 }
 
