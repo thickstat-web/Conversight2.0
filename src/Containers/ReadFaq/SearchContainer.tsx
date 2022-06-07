@@ -32,7 +32,7 @@ function SearchContainerFaq() {
             <View>
                 <SearchBar />
             </View>
-            <View>
+            <View flex>
                 <SearchResultBox />
             </View>
         </Modal>

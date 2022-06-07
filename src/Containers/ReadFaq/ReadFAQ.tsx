@@ -60,7 +60,7 @@ const ReadFAQ = () => {
 
 const styles = StyleSheet.create({
     root: {
-        margin: 20,
+        margin: 15,
         backgroundColor: "#FFF"
     },
     title: {

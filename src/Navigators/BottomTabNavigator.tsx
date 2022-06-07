@@ -33,6 +33,7 @@ const BottomTabNavigator = ({ navigation }: Props) => {
       tabBar={props => <CustomTabNavigation {...props} />}
       initialRouteName={t('bottomTabs.chat')}
       screenOptions={({ route }) => ({
+        headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
         headerLeft: () => <OpenDrawer />,
         tabBarLabel: ({ focused, color }) => (
           <Text

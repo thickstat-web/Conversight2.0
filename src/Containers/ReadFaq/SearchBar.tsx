@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from 'react'
-import { Keyboard, StyleSheet, TextInput } from 'react-native'
+import { StyleSheet, TextInput } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
-import { useTheme } from '@/Hooks'
+import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
+import { selectKeyword, setKeyWord } from '@/Store/Faq'
 
 function SearchBarFaq(): JSX.Element {
     const { Colors, Common, Fonts } = useTheme()
     const searchRef = useRef<TextInput>(null)
-
-    const [keyWord, setKeyWord] = React.useState<string>("")
+    const keyword = useAppSelector(selectKeyword)
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         if (searchRef?.current) {
@@ -23,17 +24,18 @@ function SearchBarFaq(): JSX.Element {
         >
             <View flexG style={styles.searchInputWrapper}>
                 <TextInput
+                    value={keyword}
                     ref={searchRef}
                     placeholder="Search chat..."
                     focusable={true}
                     style={[Common.textInput, styles.searchInput]}
-                    onChangeText={(t) => setKeyWord(t)}
+                    onChangeText={(t) => dispatch(setKeyWord(t))}
                 />
             </View>
 
-            {keyWord?.length > 1 && <Text style={[Fonts.textSmall, { padding: 15 }]}>
+            {keyword?.length > 1 && <Text style={[Fonts.textSmall, { padding: 15 }]}>
                 Results for:{" "}
-                <Text style={{ color: Colors.GREEN_MAIN }}>{keyWord}</Text>
+                <Text style={{ color: Colors.GREEN_MAIN }}>{keyword}</Text>
             </Text>}
         </View>
     )
@@ -44,16 +46,16 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
     },
     searchInputWrapper: {
-     
+
         paddingTop: 5,
         paddingHorizontal: 15,
         backgroundColor: '#fff',
         shadowColor: '#000',
-        shadowOpacity:  0.4,
+        shadowOpacity: 0.4,
         shadowRadius: 3,
         elevation: 5,
-        height:60
-        
+        height: 60
+
     },
     searchInput: {
         top: 4,
@@ -63,8 +65,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#F8F8F8',
         borderWidth: 0,
         fontSize: 14,
-        minHeight:40,
-        maxHeight:40
+        minHeight: 40,
+        maxHeight: 40,
+        paddingStart:10
     },
 
 })

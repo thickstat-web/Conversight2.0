@@ -15,8 +15,14 @@ import {
   selectPreference,
 } from '@/Store/Settings'
 import { GET_SETTING_QUERY } from '@/Constants/api'
+import { NavigationProp, ParamListBase } from '@react-navigation/native'
+import { CHANGE_AVATAR } from '@/Constants/screens'
 
-const SettingsContainer = () => {
+interface Props {
+  navigation: NavigationProp<ParamListBase>
+}
+
+const SettingsContainer = ({ navigation }: Props) => {
   const { width: screenWidth } = Dimensions.get('screen')
   const { Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
@@ -27,10 +33,10 @@ const SettingsContainer = () => {
     useAppSelector(selectProfile)
   const {
     allow_athena,
-    voice_speed,
-    provide_suggestion,
-    save_conversation,
-    sound_cues,
+    // voice_speed,
+    // provide_suggestion,
+    // save_conversation,
+    // sound_cues,
   } = useAppSelector(selectPreference)
 
   const fetchProfileSettings = useCallback(async () => {
@@ -65,8 +71,8 @@ const SettingsContainer = () => {
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
             <Text style={textStyle}>Avatar</Text>
-            <TouchableOpacity>
-              <Text style={textStyle}>Upload New profile Pic</Text>
+            <TouchableOpacity onPress={() => navigation.navigate(CHANGE_AVATAR)}>
+              <Text style={[textStyle, { color: Colors.GREEN_MAIN, fontFamily: "Montserrat-Bold" }]} >Upload New profile Pic</Text>
             </TouchableOpacity>
           </View>
           <View

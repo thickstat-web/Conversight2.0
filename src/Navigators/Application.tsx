@@ -3,9 +3,11 @@ import { SafeAreaView, StatusBar } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
 import { useAppDispatch, useAuth, useTheme } from '@/Hooks'
-import { ReadFAQ, RecoverComplete, RecoverEnterEmail, RecoverEnterPassword, StartupContainer } from '@/Containers'
+import { AvatarChanged, CurrentAvatar, ReadFAQ, RecoverComplete, RecoverEnterEmail, RecoverEnterPassword, StartupContainer } from '@/Containers'
 import { navigationRef } from './utils'
 import {
+  AVATAR_CHANGED,
+  CHANGE_AVATAR,
   CHANGE_ORGANIZATION,
   CHANGE_ORGANIZATION_PASSWORD,
   DEMO_REQUESTED,
@@ -42,6 +44,10 @@ import DemoRequested from '@/Containers/DemoRequested'
 
 const Stack = createStackNavigator()
 
+const mainOptions = {
+
+}
+
 // @refresh reset
 const ApplicationNavigator = () => {
   const { isSignedIn } = useAuth()
@@ -58,9 +64,9 @@ const ApplicationNavigator = () => {
           backgroundColor={Colors.GREEN_MAIN}
         />
         <Stack.Navigator
-
           screenOptions={{
             headerShown: false,
+            headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
             headerBackImage: () => <BackArrow />,
           }}
         >
@@ -92,7 +98,6 @@ const ApplicationNavigator = () => {
                 name={READ_FAQ}
                 component={ReadFAQ}
                 options={{
-                  headerTitleStyle: { fontFamily: 'Montserrat-regular' },
                   headerRight: () => <TouchableOpacity onPress={() => { dispatch(setModalSearchOpen(true)) }}>
                     < SearchIcon />
                   </TouchableOpacity>,
@@ -113,7 +118,6 @@ const ApplicationNavigator = () => {
                 name={SETTINGS}
                 component={SettingsContainer}
                 options={{
-                  headerTitleStyle: { fontFamily: 'Montserrat-regular' },
                   title: 'Profile & Settings',
                   headerTitleAlign: 'center',
                   headerRight: () => <SaveIcon />,
@@ -131,7 +135,6 @@ const ApplicationNavigator = () => {
                 name={CHANGE_ORGANIZATION}
                 component={ChangeOrganizationContainer}
                 options={{
-                  headerTitleStyle: { fontFamily: 'Montserrat-regular' },
                   title: 'Change Organization',
                   headerTitleAlign: 'center',
                   headerShown: true,
@@ -156,7 +159,7 @@ const ApplicationNavigator = () => {
                 options={{
                   title: 'Request a Demo',
                   headerTitleAlign: 'center',
-                  headerTransparent: true,
+                  headerTransparent: false,
                   headerShown: true,
                   animationEnabled: true,
                 }}
@@ -177,6 +180,28 @@ const ApplicationNavigator = () => {
                 options={{
                   headerTransparent: true,
                   title: "",
+                  headerShown: true,
+                  animationEnabled: true,
+                }}
+              />
+
+              <Stack.Screen
+                name={CHANGE_AVATAR}
+                component={CurrentAvatar}
+                options={{        
+                  headerTransparent: true,
+                  title: "Profile Avatar",
+                  headerShown: true,
+                  animationEnabled: true,
+                }}
+              />
+
+              <Stack.Screen
+                name={AVATAR_CHANGED}
+                component={AvatarChanged}
+                options={{
+                  headerTransparent: true,
+                  title: "Profile Avatar",
                   headerShown: true,
                   animationEnabled: true,
                 }}

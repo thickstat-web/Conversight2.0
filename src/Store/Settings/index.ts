@@ -37,7 +37,7 @@ const settingsSlice = createSlice({
 
 export const selectProfile = (state: RootState) => state.settingsReducer
 export const selectPreference = (state: RootState) =>
-  state.settingsReducer.preference
+  state.settingsReducer.preference as any
 
 export const { setProfileSettings } = settingsSlice.actions
 

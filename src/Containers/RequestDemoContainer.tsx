@@ -1,4 +1,4 @@
-import { View, Text } from 'react-native-ui-lib'
+import { View, Text, Hint } from 'react-native-ui-lib'
 import React from 'react'
 import ReqIcon from "@/Assets/Images/iconsSVG/req-demo.svg"
 import { useTheme } from '@/Hooks'
@@ -8,6 +8,8 @@ import { ReqDemoForm } from '@/Types/Forms'
 import { Button } from '@/Components'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import { DEMO_REQUESTED } from '@/Constants/screens'
+import InputError from '@/Components/InputError'
+import { EMAIL_REGEX } from '@/Constants/utils'
 
 interface Props {
     navigation: NavigationProp<ParamListBase>
@@ -19,8 +21,11 @@ const RequestDemoContainer = ({ navigation }: Props) => {
 
     const { control, handleSubmit, formState: { errors }, } = useForm<ReqDemoForm>()
 
+    console.log(errors)
+
     const onSubmit = (data: FieldValues) => {
         // toDo some API call for requesting a demo
+
         navigation.navigate(DEMO_REQUESTED)
     };
 
@@ -56,10 +61,12 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                         <Text center marginH-40 style={Fonts.textSmall}>If you would like a demo of ConverSight, please fill in this form and one of our representatives will be in touch with you soon.</Text>
                     </View>
                     <View flex-4>
+                        
+                        {errors.name?.message && <InputError errorText={errors.name?.message} />}
 
                         <Controller control={control}
                             rules={{
-                                required: true,
+                                required: "Name is required",
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <TextInput
@@ -74,9 +81,11 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                                     placeholder="Your name" />
                             )} name={'name'} />
 
+                        {errors.organization?.message && <InputError errorText={errors.organization?.message} />}
+
                         <Controller control={control}
                             rules={{
-                                required: true,
+                                required: "Organization is required",
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <TextInput
@@ -92,12 +101,19 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                                 />
                             )} name="organization" />
 
+                        {errors.email?.message && <InputError errorText={errors.email?.message} />}
+
                         <Controller control={control}
                             rules={{
-                                required: true,
+                                required: "Email is required",
+                                pattern: {
+                                    value: EMAIL_REGEX,
+                                    message: "Invalid email address"
+                                }
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <TextInput
+                                    keyboardType="email-address"
                                     onBlur={onBlur}
                                     value={value}
                                     onChangeText={onChange}
@@ -110,12 +126,15 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                             )} name={'email'}
                         />
 
+                        {errors.phone?.message && <InputError errorText={errors.phone?.message} />}
+
                         <Controller control={control}
                             rules={{
-                                required: true,
+                                required: "Phone is required",
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <TextInput
+                                    keyboardType='phone-pad'
                                     onBlur={onBlur}
                                     value={value}
                                     onChangeText={onChange}

@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native'
 import React from 'react'
 
-const CurrenAvatar = () => {
+const CurrentAvatar = () => {
   return (
     <View>
       <Text>CurrenAvatar</Text>
@@ -9,4 +9,4 @@ const CurrenAvatar = () => {
   )
 }
 
-export default CurrenAvatar
+export default CurrentAvatar

@@ -37,10 +37,7 @@ const LoginNavigator = () => {
         headerBackImage: () => <BackArrow />,
         headerTitleAlign: 'center',
         headerStyle: { backgroundColor: Colors.GRAY },
-        headerTitleStyle: {
-          ...Fonts.textRegularBold,
-          fontSize: 20,
-        },
+        headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
       }}
     >
       <Stack.Screen
