@@ -4,7 +4,7 @@ import { StyleSheet, Dimensions, ImageBackground } from 'react-native'
 import { View, Text, TouchableOpacity, Image } from 'react-native-ui-lib'
 import athena from '@/Assets/gifs/athena.gif'
 import { botNavBG } from '@/Components/Images';
-
+import Athena from "@/Assets/Images/png/athenaFace.svg"
 interface Props {
     state: any,
     descriptors: any,
@@ -51,12 +51,13 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
                     accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
                     onPress={() => onPress(chatRoute, isFocusedChat)}
 
-                    style={[styles.athenaBox, { borderColor: Colors.GREEN_DARK, shadowColor: Colors.GREEN_MAIN }]}
+                    // style={[styles.athenaBox, { borderColor: Colors.GREEN_DARK, shadowColor: Colors.GREEN_MAIN }]}
                 >
-                    <Image
+                    <Athena style={styles.athena}/>
+                    {/* <Image
                         source={athena}
                         resizeMode='cover'
-                        style={styles.athena} />
+                        style={styles.athena} /> */}
 
                 </TouchableOpacity>
 

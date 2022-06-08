@@ -3,6 +3,7 @@ export default {
   common: {
     buttons: {
       next: 'Next',
+      login: 'Login',
     },
   },
   actions: {

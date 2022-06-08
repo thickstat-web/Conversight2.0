@@ -3,7 +3,6 @@ import React from 'react'
 import { athena } from '../Images'
 import { StyleSheet, Image } from 'react-native'
 import { useTheme } from '@/Hooks'
-import ButtonCustom from '../ButtonCustom'
 
 interface Props {
     total: number | string

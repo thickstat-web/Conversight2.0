@@ -53,6 +53,7 @@ const SettingsContainer = ({ navigation }: Props) => {
   }, [fetchProfileSettings])
 
   const textStyle = { ...Fonts.textSmall, color: Colors.DARK }
+  const boldText = [textStyle, { fontFamily: "Montserrat-SemiBold" }]
 
   return (
     <ScrollView>
@@ -70,7 +71,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Avatar</Text>
+            <Text style={[textStyle, { fontFamily: "Montserrat-SemiBold" }]}>Avatar</Text>
             <TouchableOpacity onPress={() => navigation.navigate(CHANGE_AVATAR)}>
               <Text style={[textStyle, { color: Colors.GREEN_MAIN, fontFamily: "Montserrat-Bold" }]} >Upload New profile Pic</Text>
             </TouchableOpacity>
@@ -80,7 +81,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Name</Text>
+            <Text style={boldText}>Name</Text>
             <Text style={textStyle}>{displayName}</Text>
           </View>
           <View
@@ -88,7 +89,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Email</Text>
+            <Text style={boldText}>Email</Text>
             <Text style={textStyle}>{email}</Text>
           </View>
           <View
@@ -96,7 +97,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Mobile</Text>
+            <Text style={boldText}>Mobile</Text>
             <Text style={textStyle}>{mobileNum}</Text>
           </View>
           <View
@@ -104,7 +105,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Designation</Text>
+            <Text style={boldText}>Designation</Text>
             <Text style={textStyle}>{designation}</Text>
           </View>
         </View>
@@ -122,14 +123,14 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Athena's Voice</Text>
+            <Text style={boldText}>Athena's Voice</Text>
           </View>
           <View
             marginH-25
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Speed</Text>
+            <Text style={boldText}>Speed</Text>
             <View width={screenWidth / 3}>
               <Slider
                 value={4}
@@ -149,7 +150,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Pitch</Text>
+            <Text style={boldText}>Pitch</Text>
             <View width={screenWidth / 3}>
               <Slider
                 value={4}
@@ -169,7 +170,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Read Messages</Text>
+            <Text style={boldText}>Read Messages</Text>
             <Switch
               offColor={Colors.GRAY}
               value={chatPageDisabled}
@@ -181,7 +182,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Proactive Insights</Text>
+            <Text style={boldText}>Proactive Insights</Text>
             <Switch
               offColor={Colors.GRAY}
               value={allow_athena}
@@ -193,7 +194,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Walkthrough in Menu</Text>
+            <Text style={boldText}>Walkthrough in Menu</Text>
             <Switch
               offColor={Colors.GRAY}
               value={true}
@@ -205,7 +206,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={textStyle}>Delay (sec)</Text>
+            <Text style={boldText}>Delay (sec)</Text>
             <View width={screenWidth / 3}>
               <Slider
                 value={4}

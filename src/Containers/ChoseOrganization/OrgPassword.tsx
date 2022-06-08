@@ -123,7 +123,7 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
           <Button
             dark={true}
             block={true}
-            label={t('common.buttons.next')}
+            label={t('common.buttons.login')}
             disabled={!password.length || !signInOrg?.name}
             onPress={handleSignIn}
             loading={isLoading}
