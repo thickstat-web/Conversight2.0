@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
-import { TouchableOpacity, View, Text, Avatar, Button } from 'react-native-ui-lib'
+import {
+  TouchableOpacity,
+  View,
+  Text,
+  Avatar,
+  Button,
+} from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Button as ButtonLoading } from '@/Components'
@@ -26,6 +32,7 @@ import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
+import { DEFAULT_PASSWORD } from '@/Config'
 
 interface Props {
   navigation: any
@@ -35,7 +42,7 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const { Colors, Common, Fonts, Layout } = useTheme()
   // ToDo: Need to remove default password
-  const [password, setPassword] = useState<string>("sakthi")
+  const [password, setPassword] = useState<string>(DEFAULT_PASSWORD)
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
@@ -157,9 +164,23 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
             loading={isLoading}
           />
         </View>
-        <View style={[Layout.row, { justifyContent: "space-between", width: 300 }]}>
-          <Button labelStyle={{ fontWeight: '700' }} color={Colors.GREEN_DARK} style={styles.transBtn} onPress={handleRecover} label="Recover Credentials?" />
-          <Button labelStyle={{ fontWeight: '700' }}  color={Colors.GREEN_DARK} style={styles.transBtn} onPress={() => setPassword("")} label="Reset" />
+        <View
+          style={[Layout.row, { justifyContent: 'space-between', width: 300 }]}
+        >
+          <Button
+            labelStyle={{ fontWeight: '700' }}
+            color={Colors.GREEN_DARK}
+            style={styles.transBtn}
+            onPress={handleRecover}
+            label="Recover Credentials?"
+          />
+          <Button
+            labelStyle={{ fontWeight: '700' }}
+            color={Colors.GREEN_DARK}
+            style={styles.transBtn}
+            onPress={() => setPassword('')}
+            label="Reset"
+          />
         </View>
       </View>
     </View>
@@ -178,10 +199,9 @@ const styles = StyleSheet.create({
   },
   transBtn: {
     paddingHorizontal: 0,
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     minWidth: 20,
-
-  }
+  },
 })
 
 export default ChangeOrganizationPasswordContainer

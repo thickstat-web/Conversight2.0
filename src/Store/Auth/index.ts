@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { DEFAULT_PASSWORD } from '@/Config'
 import { AUTH_REDUCER } from '@/Constants/redux'
 import { AuthData } from '@/Types/SignInResponse'
 import { RootState } from '..'
@@ -22,8 +23,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   email: '',
-  // ToDo: Need to remove default password
-  password: 'sakthi',
+  password: DEFAULT_PASSWORD,
   organizations: [],
   signInOrg: null,
   authData: null,

@@ -14,6 +14,7 @@ import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import { CHOOSE_ORGANIZATION } from '@/Constants/screens'
 import { setAllOrganizations } from '@/Store/Auth/index'
+import { DEFAULT_EMAIL } from '@/Config'
 
 interface Props {
   navigation: any
@@ -23,8 +24,7 @@ const EnterEmailContainer = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const { Common, Gutters, Layout, Fonts } = useTheme()
   const dispatch = useAppDispatch()
-  // ToDo: Need to remove default email
-  const [email, setEmail] = useState('sakthivel.murugasamy@conversight.ai')
+  const [email, setEmail] = useState(DEFAULT_EMAIL)
   const [emailInvalid, setEmailInvalid] = useState<boolean>(false)
   const [emailUnknown, setEmailUnknown] = useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = useState<boolean>(false)

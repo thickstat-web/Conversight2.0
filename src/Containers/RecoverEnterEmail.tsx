@@ -7,7 +7,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
-  Image
+  Image,
 } from 'react-native'
 import { validateEmail } from '@/Utils/validations/string'
 import EmailOkIcon from '@/Assets/Images/iconsSVG/emailOk.svg'
@@ -16,6 +16,7 @@ import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import { useLazyVerifyEmailQuery } from '@/Services/modules/auth'
 import { setSignInEmail } from '@/Store/Auth'
 import { RECOVER_ENTER_PASSWORD } from '@/Constants/screens'
+import { DEFAULT_EMAIL } from '@/Config'
 
 interface Props {
   navigation: any
@@ -24,7 +25,7 @@ interface Props {
 const RecoverEnterEmail = ({ navigation }: Props) => {
   const { Layout, Fonts, Colors, Common } = useTheme()
   const dispatch = useAppDispatch()
-  const [email, setEmail] = React.useState<string>('sakthivel.murugasamy@conversight.ai')
+  const [email, setEmail] = React.useState<string>(DEFAULT_EMAIL)
   const [emailInvalid, setEmailInvalid] = React.useState<boolean>(false)
   const [emailUnknown, setEmailUnknown] = React.useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = React.useState<boolean>(false)
@@ -70,12 +71,11 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
 
   return (
     <View style={Layout.colCenter}>
-      {emailInvalid || emailUnknown
-        ? <Image source={lockError} style={styles.image} />
-        : <Image source={lockOk} style={styles.image} />
-      }
-
-
+      {emailInvalid || emailUnknown ? (
+        <Image source={lockError} style={styles.image} />
+      ) : (
+        <Image source={lockOk} style={styles.image} />
+      )}
 
       <Text
         marginB-20
@@ -134,6 +134,6 @@ const styles = StyleSheet.create({
   image: {
     width: 150,
     height: 150,
-  }
+  },
 })
 export default RecoverEnterEmail

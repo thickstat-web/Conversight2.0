@@ -6,7 +6,13 @@ import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button, ButtonCustom } from '@/Components'
 import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
-import { selectPassword, selectSignInEmail, selectSignInOrg, setAuthData, setPassword } from '@/Store/Auth'
+import {
+  selectPassword,
+  selectSignInEmail,
+  selectSignInOrg,
+  setAuthData,
+  setPassword,
+} from '@/Store/Auth'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
 import {
   RECOVER_ENTER_EMAIL,
@@ -19,11 +25,12 @@ import PasswordSecuredIconError from '@/Assets/Images/iconsSVG/passwordHideError
 import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError.svg'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
+import { DEFAULT_PASSWORD } from '@/Config'
 
 const OrgPassword = ({ navigation }: { navigation: any }) => {
   const { t } = useTranslation()
   const { Colors, Common, Fonts } = useTheme()
-  const password = useAppSelector(selectPassword);
+  const password = useAppSelector(selectPassword)
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
@@ -37,7 +44,9 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
   const handleRecover = () => navigation.navigate(RECOVER_ENTER_EMAIL)
 
   useEffect(() => {
-    if (!password || !password.length) dispatch(setPassword('sakthi'))
+    if (!password || !password.length) {
+      dispatch(setPassword(DEFAULT_PASSWORD))
+    }
   }, [])
 
   const handleSignIn = () => {
@@ -68,7 +77,6 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
 
   return (
     <View flex>
-
       <View flex-6 centerH marginT-20>
         {error && (
           <TouchableOpacity
@@ -84,7 +92,7 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
 
         <View style={Common.inputBox}>
           <TextInput
-            placeholder='Password'
+            placeholder="Password"
             onChangeText={x => dispatch(setPassword(x))}
             style={[
               Common.textInput,
@@ -109,14 +117,12 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
               <PasswordVisibleIconError onPress={togglePasswordEye} />
             )}
 
-            {(!error) &&
+            {!error &&
               (passSecured ? (
                 <PasswordVisibleIcon onPress={togglePasswordEye} />
               ) : (
                 <PasswordSecuredIcon onPress={togglePasswordEye} />
-              ))
-            }
-
+              ))}
           </View>
         </View>
         <View marginT-16 width={300}>
