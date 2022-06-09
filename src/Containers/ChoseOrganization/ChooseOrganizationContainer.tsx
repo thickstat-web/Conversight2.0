@@ -119,7 +119,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
 
     return (
       <Modal
-        visible={singleOrg ? false :visible }
+        visible={singleOrg ? false : visible}
         presentationStyle="overFullScreen"
         style={styles.modalView}
         animationType="slide"
@@ -170,7 +170,6 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
         {selectedOrg?.name || MODAL_TITLE}
       </Text>
       {!singleOrg && <PickerIcon style={styles.pickerIcon} width={20} />}
-
     </View>
   )
 
@@ -223,12 +222,11 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
 
   return (
     <ScrollView>
-
-      <View marginB-25 >
+      <View marginB-25>
         <View center>
           <Brand height={290} width={'60%'} />
         </View>
-        <View center  >
+        <View center>
           <Picker
             mode={Picker.modes.SINGLE}
             value={selectedOrg?.orgId}

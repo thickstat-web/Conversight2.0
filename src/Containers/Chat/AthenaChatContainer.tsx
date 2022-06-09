@@ -30,16 +30,131 @@ import { useGetChatHistoryMutation } from '@/Services/modules/bot'
 import { ChatHistoryRequestData } from '@/Types/ChatHistory'
 import { ChatMessage } from '@/Types/ChatMessage'
 
-interface MessageType {
-  user?: boolean
-  message: string
-  style?: ViewStyle
-}
-
 declare type AthenaChatContainerProps = {}
 
 export declare type RefProps = {
   open: () => void
+}
+
+interface SearchOptions {
+  search: boolean
+  onCancel: () => void
+}
+
+interface TitlebarOptions {
+  onCancel: () => void
+  onDone: () => void
+}
+
+interface MessageType {
+  message: string
+  user?: boolean
+  style?: ViewStyle
+}
+
+interface ChatboxOptions {
+  onDatasetChange: (datasetId: string) => void
+}
+
+const Message = ({ user = false, message, style = {} }: MessageType) => {
+  const { Colors, Fonts } = useTheme()
+  return (
+    <View flex row style={[user && styles.alignRight]}>
+      <View style={[{ backgroundColor: Colors.WHITE }, style]}>
+        <Text style={[Fonts.textRegular, styles.message]}>{message}</Text>
+      </View>
+    </View>
+  )
+}
+
+const UserMessage = ({ message }: { message: string }) => (
+  <Message message={message} style={styles.userMessageWrapper} user={true} />
+)
+
+const AthenaMessage = ({ message }: { message: string }) => (
+  <View style={[styles.athenaMessageContainer]}>
+    <View style={styles.athenaIcon}>
+      <Image source={AthenaIcon} forwardedRef={undefined} modifiers={{}} />
+    </View>
+    <Message message={message} style={styles.athenaMessageWrapper} />
+  </View>
+)
+
+const ChatSearch = ({ search, onCancel }: SearchOptions) => (
+  <View style={styles.searchContainer}>
+    {search && <SearchContainer visible={search} onCancel={onCancel} />}
+  </View>
+)
+
+const TitleBar = ({ onCancel, onDone }: TitlebarOptions) => {
+  const { Colors, Fonts } = useTheme()
+  return (
+    <Modal.TopBar
+      title="Ask Athena"
+      onCancel={onCancel}
+      onDone={onDone}
+      cancelIcon={BackIconWhite}
+      doneIcon={SearchIcon}
+      doneButtonProps={{
+        label: '',
+      }}
+      titleStyle={[Fonts.text20Bold, { color: Colors.WHITE }]}
+      containerStyle={[{ backgroundColor: Colors.GREEN_MAIN }]}
+      includeStatusBar={false}
+    />
+  )
+}
+
+const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => (
+  <View flex>
+    <ScrollView>
+      {messages.map((message, index) => {
+        return message.isAthena ? (
+          <AthenaMessage key={`${index}`} message={message.message} />
+        ) : (
+          <UserMessage key={`${index}`} message={message.message} />
+        )
+      })}
+    </ScrollView>
+  </View>
+)
+
+const ChatBox = ({ onDatasetChange }: ChatboxOptions) => {
+  const { Colors } = useTheme()
+  const [query, setQuery] = useState('')
+  return (
+    <View
+      style={[
+        styles.chatboxWrapper,
+        {
+          backgroundColor: Colors.WHITE,
+        },
+      ]}
+    >
+      <DatasetChooser onSelect={onDatasetChange} />
+      <TextInput
+        placeholder={'Ask Athena...'}
+        onChangeText={setQuery}
+        // value={query}
+        defaultValue={query}
+        style={styles.textInput}
+      />
+      <IconButton
+        icon={<FaqIcon />}
+        style={[styles.faqButton, { backgroundColor: Colors.GRAY }]}
+      />
+      <IconButton icon={<SendIcon />} />
+    </View>
+  )
+}
+
+const Loading = () => {
+  const { Colors } = useTheme()
+  return (
+    <View flex center>
+      <ActivityIndicator size={'large'} color={Colors.GREEN_MAIN} />
+    </View>
+  )
 }
 
 const AthenaChatContainer: ForwardRefRenderFunction<
@@ -49,11 +164,10 @@ const AthenaChatContainer: ForwardRefRenderFunction<
   const { t } = useTranslation()
   const [visible, setVisible] = useState(false)
   const [search, setSearch] = useState(false)
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+  const { Layout, Colors, Common, Fonts } = useTheme()
 
   const selectedDatasetId = useAppSelector(selectDatasetId)
-  const [getChatHistory, { data, isLoading, isSuccess }] =
-    useGetChatHistoryMutation()
+  const [getChatHistory, { data, isLoading }] = useGetChatHistoryMutation()
 
   useEffect(() => {
     // console.log('[AthenaChatContainer] messages:', data?.data)
@@ -89,109 +203,19 @@ const AthenaChatContainer: ForwardRefRenderFunction<
     setSearch(false)
   }
 
-  const Message = ({ user, message, style }: MessageType) => (
-    <View flex row style={[user && styles.alignRight]}>
-      <View style={[{ backgroundColor: Colors.WHITE }, style]}>
-        <Text style={[Fonts.textRegular, styles.message]}>{message}</Text>
-      </View>
-    </View>
-  )
-
-  const UserMessage = ({ message }: { message: string }) => (
-    <Message message={message} style={styles.userMessageWrapper} user={true} />
-  )
-
-  const AthenaMessage = ({ message }: { message: string }) => (
-    <View style={[styles.athenaMessageContainer]}>
-      <View style={styles.athenaIcon}>
-        <Image source={AthenaIcon} forwardedRef={undefined} modifiers={{}} />
-      </View>
-      <Message message={message} style={styles.athenaMessageWrapper} />
-    </View>
-  )
-
-  const ChatSearch = () => (
-    <View style={styles.searchContainer}>
-      {search && <SearchContainer visible={search} onCancel={closeSearch} />}
-    </View>
-  )
-
-  const TitleBar = () => (
-    <Modal.TopBar
-      title="Ask Athena"
-      onCancel={close}
-      onDone={openSearch}
-      cancelIcon={BackIconWhite}
-      doneIcon={SearchIcon}
-      doneButtonProps={{
-        label: '',
-      }}
-      titleStyle={[Fonts.text20Bold, { color: Colors.WHITE }]}
-      containerStyle={[{ backgroundColor: Colors.GREEN_MAIN }]}
-    />
-  )
-
-  const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => (
-    <View flex>
-      <ScrollView>
-        {messages.map((message, index) => {
-          return message.isAthena ? (
-            <AthenaMessage key={`${index}`} message={message.message} />
-          ) : (
-            <UserMessage key={`${index}`} message={message.message} />
-          )
-        })}
-      </ScrollView>
-    </View>
-  )
-
-  const ChatBox = () => {
-    const [query, setQuery] = useState('')
-    return (
-      <View
-        style={[
-          styles.chatboxWrapper,
-          {
-            backgroundColor: Colors.WHITE,
-          },
-        ]}
-      >
-        <DatasetChooser onSelect={handleDatasetSelection} />
-        <TextInput
-          placeholder={'Ask Athena...'}
-          onChangeText={setQuery}
-          // value={query}
-          defaultValue={query}
-          style={styles.textInput}
-        />
-        <IconButton
-          icon={<FaqIcon />}
-          style={{ backgroundColor: Colors.GRAY }}
-        />
-        <IconButton icon={<SendIcon />} />
-      </View>
-    )
-  }
-
-  const Loading = () => (
-    <View flex center>
-      <ActivityIndicator size={'large'} color={Colors.GREEN_MAIN} />
-    </View>
-  )
-
   return (
-    <SafeAreaView style={Layout.fill}>
-      <Modal
-        visible={visible}
-        animationType={'fade'}
-        // onBackgroundPress={() => console.log('Background pressed')}
-        presentationStyle={'fullScreen'}
-        transparent={false}
-      >
+    <Modal
+      visible={visible}
+      animationType={'fade'}
+      // onBackgroundPress={() => console.log('Background pressed')}
+      presentationStyle={'fullScreen'}
+      // transparent={false}
+    >
+      <SafeAreaView style={Layout.fill}>
         <View>
-          <TitleBar />
+          <TitleBar onCancel={close} onDone={openSearch} />
           {/* Search container / overlay */}
-          <ChatSearch />
+          <ChatSearch search={search} onCancel={closeSearch} />
         </View>
 
         <View flex style={{ backgroundColor: Colors.GRAY }}>
@@ -200,10 +224,10 @@ const AthenaChatContainer: ForwardRefRenderFunction<
           ) : (
             <ChatMessageContainer messages={data?.data ?? []} />
           )}
-          <ChatBox />
+          <ChatBox onDatasetChange={handleDatasetSelection} />
         </View>
-      </Modal>
-    </SafeAreaView>
+      </SafeAreaView>
+    </Modal>
   )
 }
 
@@ -249,13 +273,16 @@ const styles = StyleSheet.create({
     // alignItems: 'center',
     marginHorizontal: 16,
     marginVertical: 8,
-    height: 60,
+    height: 54,
     borderRadius: 32,
   },
   textInput: {
     flex: 1,
     fontFamily: 'Montserrat-Regular',
     fontSize: 18,
+  },
+  faqButton: {
+    marginRight: 0,
   },
 })
 

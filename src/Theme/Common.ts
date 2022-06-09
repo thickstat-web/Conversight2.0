@@ -36,9 +36,12 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         // minHeight: 50,
         textAlign: 'center',
         borderRadius: 8,
-        paddingRight: 15,
-        paddingEnd: 35,
-        paddingStart: 35
+        paddingRight: 36,
+        paddingLeft: 8,
+        paddingVertical: 10,
+        // paddingRight: 15,
+        // paddingEnd: 35,
+        // paddingStart: 35,
       },
       inputIcon: {
         position: 'absolute',

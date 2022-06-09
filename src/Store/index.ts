@@ -53,9 +53,11 @@ const store = configureStore({
   reducer: persistedReducer,
   middleware: getDefaultMiddleware => {
     const middlewares = getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-      },
+      serializableCheck: __DEV__
+        ? false
+        : {
+          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        },
     }).concat([csApi.middleware as Middleware, botApi.middleware as Middleware])
 
     if (__DEV__ && !process.env.JEST_WORKER_ID) {
