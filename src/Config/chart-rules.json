@@ -1,0 +1,916 @@
+{
+  "name": "Chart_Rules",
+  "attributes": [
+    {
+      "name": "dimCount",
+      "type": "number"
+    },
+    {
+      "name": "metCount",
+      "type": "number"
+    },
+    {
+      "name": "dateCount",
+      "type": "number"
+    },
+    {
+      "name": "dim",
+      "type": "array"
+    },
+    {
+      "name": "met",
+      "type": "array"
+    },
+    {
+      "name": "date",
+      "type": "array"
+    },
+    {
+      "name": "dataCount",
+      "type": "number"
+    },
+    {
+      "name": "columnsCount",
+      "type": "number"
+    },
+    {
+      "name": "category",
+      "type": "string"
+    },
+    {
+      "name": "value",
+      "type": "string"
+    }
+  ],
+  "decisions": [
+    {
+      "conditions": {
+        "all": [
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 0
+                  },
+                  {
+                    "fact": "dataCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 0
+                  },
+                  {
+                    "fact": "dataCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fact": "dataCount",
+            "operator": "greaterThan",
+            "value": 1
+          },
+          {
+            "fact": "dataCount",
+            "operator": "lessThanInclusive",
+            "value": 150
+          }
+        ]
+      },
+      "event": {
+        "type": "PieChart",
+        "params": {
+          "colorField": "${facts.dim[0] || facts.date[0]}",
+          "angleField": "${facts.met[0]}"
+        }
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 0
+                  },
+                  {
+                    "fact": "dataCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 0
+                  },
+                  {
+                    "fact": "dataCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fact": "dataCount",
+            "operator": "greaterThan",
+            "value": 1
+          },
+          {
+            "fact": "dataCount",
+            "operator": "lessThanInclusive",
+            "value": 150
+          }
+        ]
+      },
+      "event": {
+        "type": "DonutChart",
+        "params": {
+          "colorField": "${facts.dim[0] || facts.date[0]}",
+          "angleField": "${facts.met[0]}"
+        }
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "fact": "dataCount",
+            "operator": "greaterThan",
+            "value": 1
+          },
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 2
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fact": "dataCount",
+            "operator": "lessThanInclusive",
+            "value": 1000
+          }
+        ]
+      },
+      "event": {
+        "type": "LineChart",
+        "params": {
+          "xField": "${facts.date.length >= 1 ? facts.date[0] : facts.dim.length >= 1 ? facts.dim[0] : ''}",
+          "yField": "${facts.value ? facts.value : facts.met[0]}",
+          "seriesField": "${facts.category ? facts.category : facts.date.length > 1 ? facts.date[1] : facts.dim.length > 1 ? facts.dim[1] : facts.date.length ? facts.dim[0] : ''}"
+        }
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 2
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fact": "dataCount",
+            "operator": "greaterThan",
+            "value": 1
+          },
+          {
+            "fact": "dataCount",
+            "operator": "lessThanInclusive",
+            "value": 1000
+          }
+        ]
+      },
+      "event": {
+        "type": "AreaChart",
+        "params": {
+          "xField": "${facts.date.length >= 1 ?  facts.date[0] :  facts.dim.length >= 1 ? facts.dim[0] : ''}",
+          "yField": "${facts.value ? facts.value : facts.met[0]}",
+          "seriesField": "${facts.category ? facts.category : facts.date.length > 1 ? facts.date[1] : facts.dim.length > 1 ? facts.dim[1] : facts.date.length ? facts.dim[0] : ''}"
+        }
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fact": "dataCount",
+            "operator": "greaterThan",
+            "value": 1
+          },
+          {
+            "fact": "dataCount",
+            "operator": "lessThanInclusive",
+            "value": 1000
+          }
+        ]
+      },
+      "event": {
+        "type": "ColumnChart",
+        "params": {
+          "xField": "${facts.date.length >= 1 ? facts.date[0] : facts.dim.length >= 1 ? facts.dim[0] : ''}",
+          "yField": "${facts.met[0]}",
+          "seriesField": "${facts.date.length > 1 ? facts.date[1] : facts.dim.length > 1 ? facts.dim[1] : facts.date.length ? facts.dim[0] : ''}",
+          "isStack": "${facts.dim[1] || facts.date[1] ? facts.dataCount > 50 ? true : false : false}",
+          "isGroup": "${facts.dim[1] || facts.date[1] ? facts.dataCount < 50 ? true : false : false}"
+        }
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fact": "dataCount",
+            "operator": "greaterThan",
+            "value": 1
+          },
+          {
+            "fact": "dataCount",
+            "operator": "lessThanInclusive",
+            "value": 1000
+          }
+        ]
+      },
+      "event": {
+        "type": "BarChart",
+        "params": {
+          "xField": "${facts.date.length >= 1 ? facts.date[0] : facts.dim.length >= 1 ? facts.dim[0] : ''}",
+          "yField": "${facts.met[0]}",
+          "seriesField": "${facts.date.length > 1 ? facts.date[1] : facts.dim.length > 1 ? facts.dim[1] : facts.date.length ? facts.dim[0] : ''}",
+          "isStack": "${facts.dim[1] || facts.date[1] ? facts.dataCount > 50 ? true : false : false}",
+          "isGroup": "${facts.dim[1] || facts.date[1] ? facts.dataCount < 50 ? true : false : false}"
+        }
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "any": [
+              {
+                "fact": "dimCount",
+                "operator": "greaterThanInclusive",
+                "value": 1
+              },
+              {
+                "fact": "metCount",
+                "operator": "greaterThanInclusive",
+                "value": 1
+              },
+              {
+                "fact": "dateCount",
+                "operator": "greaterThanInclusive",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "fact": "dataCount",
+            "operator": "notEqual",
+            "value": 0
+          },
+          {
+            "all": [
+              {
+                "fact": "columnsCount",
+                "operator": "greaterThanInclusive",
+                "value": 1
+              },
+              {
+                "fact": "dataCount",
+                "operator": "greaterThanInclusive",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "event": {
+        "type": "Table",
+        "params": {}
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "fact": "columnsCount",
+            "operator": "equal",
+            "value": 1
+          },
+          {
+            "fact": "dataCount",
+            "operator": "equal",
+            "value": 1
+          }
+        ]
+      },
+      "event": {
+        "type": "Text",
+        "params": {}
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "fact": "dataCount",
+            "operator": "greaterThan",
+            "value": 1
+          },
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 0
+                  },
+                  {
+                    "fact": "dataCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 0
+                  },
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dataCount",
+                    "operator": "greaterThan",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "fact": "dataCount",
+            "operator": "lessThanInclusive",
+            "value": 1000
+          }
+        ]
+      },
+      "event": {
+        "type": "FunnelChart",
+        "params": {
+          "xField": "${facts.date[0] || facts.dim[0]}",
+          "yField": "${facts.met[0]}"
+        }
+      }
+    },
+    {
+      "conditions": {
+        "all": [
+          {
+            "fact": "dataCount",
+            "operator": "greaterThan",
+            "value": 1
+          },
+          {
+            "fact": "dataCount",
+            "operator": "lessThanInclusive",
+            "value": 1000
+          },
+          {
+            "any": [
+              {
+                "all": [
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 0
+                  }
+                ]
+              },
+              {
+                "all": [
+                  {
+                    "fact": "metCount",
+                    "operator": "equal",
+                    "value": 2
+                  },
+                  {
+                    "fact": "dateCount",
+                    "operator": "equal",
+                    "value": 1
+                  },
+                  {
+                    "fact": "dimCount",
+                    "operator": "equal",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "event": {
+        "type": "DualAxes",
+        "params": {
+          "xField": "${facts.date[0] || facts.dim[0]}",
+          "yField": "${facts.met}"
+        }
+      }
+    }
+  ]
+}

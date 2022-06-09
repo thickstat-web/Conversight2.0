@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import { Animated, Dimensions, StyleSheet } from 'react-native'
+import { Animated, Dimensions, SafeAreaView, StyleSheet } from 'react-native'
 // import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/Hooks'
 import SearchBar from './Searchbar'
@@ -39,26 +39,28 @@ function SearchContainer({
   }, [fadeIn, fadeOut, visible])
 
   return (
-    <Animated.View
-      style={[
-        styles.searchContainer,
-        {
-          backgroundColor: Colors.GRAY,
-          opacity: fadeAnim,
-          transform: [
-            {
-              translateY: fadeAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [screenHeight + 10, 0],
-              }),
-            },
-          ],
-        },
-      ]}
-    >
-      <SearchBar onCancel={onCancel} />
-      <SearchResult visible={true} />
-    </Animated.View>
+    <SafeAreaView style={Layout.fill}>
+      <Animated.View
+        style={[
+          styles.searchContainer,
+          {
+            backgroundColor: Colors.GRAY,
+            opacity: fadeAnim,
+            transform: [
+              {
+                translateY: fadeAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [screenHeight + 10, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <SearchBar onCancel={onCancel} />
+        <SearchResult visible={true} />
+      </Animated.View>
+    </SafeAreaView>
   )
 }
 

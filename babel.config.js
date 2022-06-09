@@ -1,5 +1,5 @@
 const presets = ['module:metro-react-native-babel-preset']
-const plugins = ['react-native-reanimated/plugin']
+const plugins = []
 
 plugins.push([
   'module-resolver',
@@ -10,11 +10,13 @@ plugins.push([
       '@': './src',
     },
   },
-
 ])
+
+// Reanimated plugin has to be listed last.
+// Ref: https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation/
+plugins.push('react-native-reanimated/plugin')
 
 module.exports = {
   presets,
-  plugins
+  plugins,
 }
-

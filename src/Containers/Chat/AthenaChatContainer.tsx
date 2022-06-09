@@ -7,6 +7,7 @@ import React, {
 } from 'react'
 import {
   ActivityIndicator,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -27,6 +28,7 @@ import SearchContainer from './SearchContainer'
 import { selectDatasetId } from '@/Store/Auth'
 import { useGetChatHistoryMutation } from '@/Services/modules/bot'
 import { ChatHistoryRequestData } from '@/Types/ChatHistory'
+import { ChatMessage } from '@/Types/ChatMessage'
 
 interface MessageType {
   user?: boolean
@@ -50,8 +52,12 @@ const AthenaChatContainer: ForwardRefRenderFunction<
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
 
   const selectedDatasetId = useAppSelector(selectDatasetId)
-  const [getChatHistory, { data: messages, isLoading, isSuccess }] =
+  const [getChatHistory, { data, isLoading, isSuccess }] =
     useGetChatHistoryMutation()
+
+  useEffect(() => {
+    // console.log('[AthenaChatContainer] messages:', data?.data)
+  }, [data])
 
   useEffect(() => {
     if (selectedDatasetId) {
@@ -125,11 +131,16 @@ const AthenaChatContainer: ForwardRefRenderFunction<
     />
   )
 
-  const ChatMessageContainer = () => (
+  const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => (
     <View flex>
       <ScrollView>
-        <UserMessage message="Hello Athena! How are you?" />
-        <AthenaMessage message="Hello User! I am doing good. How things are going?" />
+        {messages.map((message, index) => {
+          return message.isAthena ? (
+            <AthenaMessage key={`${index}`} message={message.message} />
+          ) : (
+            <UserMessage key={`${index}`} message={message.message} />
+          )
+        })}
       </ScrollView>
     </View>
   )
@@ -169,24 +180,30 @@ const AthenaChatContainer: ForwardRefRenderFunction<
   )
 
   return (
-    <View flex>
+    <SafeAreaView style={Layout.fill}>
       <Modal
         visible={visible}
         animationType={'fade'}
         // onBackgroundPress={() => console.log('Background pressed')}
+        presentationStyle={'fullScreen'}
         transparent={false}
       >
-        <TitleBar />
-
-        {/* Search container / overlay */}
-        <ChatSearch />
+        <View>
+          <TitleBar />
+          {/* Search container / overlay */}
+          <ChatSearch />
+        </View>
 
         <View flex style={{ backgroundColor: Colors.GRAY }}>
-          {isLoading ? <Loading /> : <ChatMessageContainer />}
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <ChatMessageContainer messages={data?.data ?? []} />
+          )}
           <ChatBox />
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   )
 }
 

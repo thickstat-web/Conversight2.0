@@ -52,6 +52,8 @@ const LoginNavigator = () => {
         options={{
           title: 'Login',
           headerTitleAlign: 'center',
+          headerBackTitleVisible: false,
+          headerTintColor: Colors.DARK,
         }}
       />
       <Stack.Screen
@@ -60,6 +62,7 @@ const LoginNavigator = () => {
         options={{
           title: 'Login',
           headerTitleAlign: 'center',
+          headerBackTitleVisible: false,
         }}
       />
       <Stack.Screen
@@ -68,6 +71,7 @@ const LoginNavigator = () => {
         options={{
           title: 'Login',
           headerTitleAlign: 'center',
+          headerBackTitleVisible: false,
         }}
       />
       <Stack.Screen

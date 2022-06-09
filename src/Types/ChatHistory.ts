@@ -798,7 +798,7 @@ export interface DrillDown {
   followup: any
 }
 
-export interface ChatMessage {
+export interface Message {
   status: string
   data: string
   chart: boolean
@@ -836,7 +836,7 @@ export interface ChatMessage {
 }
 
 export interface ChatHistoryResponse {
-  data: ChatMessage[]
+  data: Message[]
   status: boolean
   mesg: string
 }

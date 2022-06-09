@@ -68,7 +68,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
   const DrawerView = (props: Props) => {
     return (
       <DrawerContentScrollView>
-        <View height={windowHeight - 70} style={Layout.center}>
+        <View style={Layout.center}>
           <View style={styles.topBar}>
             <TouchableOpacity>
               <MoreIcon />
@@ -95,7 +95,13 @@ export default function DrawerNavigator({ navigation }: Props2) {
             </TouchableOpacity>
           </View>
 
-          <View style={{ ...styles.screensLinks, width: windowWidth - 130 }}>
+          <View
+            marginT-16
+            style={{
+              ...styles.screensLinks,
+              width: windowWidth - 130,
+            }}
+          >
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
             <TouchableOpacity
               onPress={() => handleRedirect(t('bottomTabs.insights'))}
@@ -141,7 +147,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
             </TouchableOpacity>
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
           </View>
-          <View marginT-16 width={300}>
+          <View marginT-24 width={300}>
             <Button
               dark={true}
               block={true}
@@ -182,7 +188,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   avatar: {
-    flex: 5,
+    flex: 3,
   },
   changeOrg: {
     display: 'flex',
@@ -190,7 +196,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   screensLinks: {
-    flex: 10,
+    flex: 8,
   },
   screenLink: {
     justifyContent: 'flex-start',
