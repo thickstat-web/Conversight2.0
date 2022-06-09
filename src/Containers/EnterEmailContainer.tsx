@@ -43,6 +43,9 @@ const EnterEmailContainer = ({ navigation }: Props) => {
   const handleVerifyEmail = async () => {
     const { success, data: orgData } = await verifyEmail(email).unwrap()
     if (success) {
+      ///
+      // const test = orgData?.slice(0, 1)
+      ///
       setEmailUnknown(false)
       setErrorHintOpen(false)
       setEmailInvalid(false)

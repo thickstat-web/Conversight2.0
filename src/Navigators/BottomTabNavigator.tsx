@@ -1,5 +1,5 @@
 import React from 'react'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
+import { createBottomTabNavigator, } from '@react-navigation/bottom-tabs'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/Hooks'
 import {
@@ -7,8 +7,9 @@ import {
   InsightsContainer,
   DashboardContainer,
 } from '@/Containers'
-import { Button, Text, TouchableOpacity, View } from 'react-native-ui-lib'
+import { Button, Image, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import BurgerIcon from '@/Assets/Images/drawer/burger.svg'
+import CustomTabNavigation from './CustomTabNavigator'
 
 const Tab = createBottomTabNavigator()
 
@@ -29,14 +30,11 @@ const BottomTabNavigator = ({ navigation }: Props) => {
 
   return (
     <Tab.Navigator
+      tabBar={props => <CustomTabNavigation {...props} />}
       initialRouteName={t('bottomTabs.chat')}
       screenOptions={({ route }) => ({
-        tabBarStyle: {
-          borderTopEndRadius: 20,
-          borderTopStartRadius: 20,
-          borderColor: Colors.WHITE,
-          borderWidth: 10,
-        },
+        headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
+        headerLeft: () => <OpenDrawer />,
         tabBarLabel: ({ focused, color }) => (
           <Text
             style={[
@@ -53,7 +51,6 @@ const BottomTabNavigator = ({ navigation }: Props) => {
         name={t('bottomTabs.insights')}
         component={InsightsContainer}
         options={{
-          headerLeft: () => <OpenDrawer />,
           headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
@@ -63,7 +60,6 @@ const BottomTabNavigator = ({ navigation }: Props) => {
         name={t('bottomTabs.chat')}
         component={ChatContainer}
         options={{
-          headerLeft: () => <OpenDrawer />,
           headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
@@ -73,7 +69,6 @@ const BottomTabNavigator = ({ navigation }: Props) => {
         name={t('bottomTabs.dashboard')}
         component={DashboardContainer}
         options={{
-          headerLeft: () => <OpenDrawer />,
           headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',

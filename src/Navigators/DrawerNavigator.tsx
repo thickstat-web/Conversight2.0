@@ -19,11 +19,12 @@ import {
   WALK_THROUGH_AUTHORIZED,
   REQUEST_DEMO,
   CHANGE_ORGANIZATION,
+  WT_INSIGHTS,
 } from '@/Constants/screens'
 import BottomTabNavigator from './BottomTabNavigator'
 import { useTheme, useAppDispatch, useAppSelector, useAuth } from '@/Hooks'
 import { useLazyLogoutQuery } from '@/Services/modules/auth'
-import { cleanupAuthData, selectSignInOrg } from '@/Store/Auth'
+import { cleanupAuthData, selectAllOrganizations, selectSignInOrg } from '@/Store/Auth'
 import { Button } from '@/Components'
 
 import MoreIcon from '@/Assets/Images/iconsSVG/more.svg'
@@ -55,6 +56,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
   const { authData } = useAuth()
   const selectedOrg = useAppSelector(selectSignInOrg)
   const { height: windowHeight, width: windowWidth } = Dimensions.get('window')
+  const singleOrg = useAppSelector(selectAllOrganizations).length === 1
 
   const handleRedirect = (screen: string) => {
     navigation.navigate(screen)
@@ -87,11 +89,13 @@ export default function DrawerNavigator({ navigation }: Props2) {
               {authData?.displayName}
             </Text>
             <TouchableOpacity
-              onPress={() => handleRedirect(CHANGE_ORGANIZATION)}
+
+              onPress={singleOrg ? () => { } : () => handleRedirect(CHANGE_ORGANIZATION)}
               style={styles.changeOrg}
             >
               <Text color={Colors.GREEN_MAIN}>{selectedOrg?.name}</Text>
-              <DownArrow style={{ marginLeft: 5 }} />
+              {!singleOrg && <DownArrow style={{ marginLeft: 5 }} />}
+
             </TouchableOpacity>
           </View>
 
@@ -104,7 +108,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
           >
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
             <TouchableOpacity
-              onPress={() => handleRedirect(t('bottomTabs.insights'))}
+              onPress={() => handleRedirect(WT_INSIGHTS)}
               style={styles.screenLink}
             >
               <InsightsIcon />
@@ -112,7 +116,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
             </TouchableOpacity>
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
             <TouchableOpacity
-              // onPress={() => handleRedirect("todo")}
+              onPress={() => handleRedirect(t('bottomTabs.dashboard'))}
               style={styles.screenLink}
             >
               <DashboardIcon />

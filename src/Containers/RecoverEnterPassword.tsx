@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { View, Text } from 'react-native-ui-lib'
 import LockIcon from '@/Assets/Images/lock.svg'
 import { useTheme } from '@/Hooks'
-import { TextInput } from 'react-native'
+import { Image, TextInput } from 'react-native'
 import PasswordSecuredIcon from '@/Assets/Images/iconsSVG/passwordHide.svg'
 import PasswordVisibleIcon from '@/Assets/Images/iconsSVG/passwordShow.svg'
 import PasswordSecuredIconError from '@/Assets/Images/iconsSVG/passwordHideError.svg'
@@ -11,6 +11,7 @@ import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 import { store } from '@/Store'
 import { RECOVER_COMPLETED } from '@/Constants/screens'
+import { lockError, lockOk } from '@/Components/Images'
 interface Props {
   navigation: any
 }
@@ -43,7 +44,12 @@ const RecoverEnterPassword = ({ navigation }: Props) => {
   }
   return (
     <View style={Layout.colCenter}>
-      <LockIcon width={150} height={150} />
+
+      {error
+        ? <Image source={lockError} style={{ width: 150, height: 150 }} />
+        : <Image source={lockOk} style={{ width: 150, height: 150 }} />
+      }
+
       <Text
         marginB-20
         style={{ ...Fonts.textRegularBold, color: Colors.GREEN_DARK }}

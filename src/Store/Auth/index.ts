@@ -10,6 +10,7 @@ type Org = {
 
 interface AuthState {
   email: string
+  password: string
   organizations: any[]
   signInOrg: Org | null
   authData: AuthData | null
@@ -21,6 +22,8 @@ interface AuthState {
 
 const initialState: AuthState = {
   email: '',
+  // ToDo: Need to remove default password
+  password: 'sakthi',
   organizations: [],
   signInOrg: null,
   authData: null,
@@ -56,6 +59,9 @@ const authSlice = createSlice({
     setTempOrg: (state, { payload }) => {
       state.tempOrg = { ...payload }
     },
+    setPassword: (state, { payload }) => {
+      state.password = payload
+    },
   },
 })
 
@@ -70,10 +76,13 @@ export const selectSelectedOrg = (state: RootState) =>
   state.authReducer.selectedOrg
 
 export const selectAuthData = (state: RootState) => state.authReducer.authData
+
 export const selectDatasetId = (state: RootState) =>
   state.authReducer.selectedDatasetId
 
 export const selectTempOrg = (state: RootState) => state.authReducer.tempOrg
+
+export const selectPassword = (state: RootState) => state.authReducer.password
 
 export const {
   setSignInEmail,
@@ -83,6 +92,7 @@ export const {
   setSelectedDatasetId,
   cleanupAuthData,
   setTempOrg,
+  setPassword,
 } = authSlice.actions
 
 export default authSlice.reducer

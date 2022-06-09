@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native-ui-lib'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { ButtonCustom } from '@/Components'
 import { useTheme } from '@/Hooks'
 import {
@@ -71,7 +71,7 @@ const WalkThrough = () => {
         >
           {item?.title}
         </Text>
-        <Text center style={{ ...Fonts.textSmall, height: 130 }}>
+        <Text center style={{ ...Fonts.textSmall, height: 145 }}>
           {item?.description}
         </Text>
       </View>

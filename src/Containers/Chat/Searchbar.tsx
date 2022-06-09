@@ -3,7 +3,7 @@ import { Keyboard, StyleSheet, TextInput } from 'react-native'
 import { View } from 'react-native-ui-lib'
 // import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/Hooks'
-import BackIcon from '@/Assets/Images/iconsSVG/back.svg'
+import BackIconWhite from '@/Assets/Images/iconsSVG/back-white.svg'
 import SearchIcon from '@/Assets/Images/iconsSVG/search.svg'
 import IconButton from '@/Components/IconButton'
 
@@ -36,7 +36,7 @@ function SearchBar({ onCancel }: SearchBarProps): JSX.Element {
       ]}
     >
       <IconButton
-        icon={<BackIcon />}
+        icon={<BackIconWhite />}
         style={styles.cancelIcon}
         onPress={cancelSearch}
       />

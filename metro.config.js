@@ -6,7 +6,7 @@
  */
 const { getDefaultConfig } = require('metro-config')
 
-module.exports = (async () => {
+module.exports = async () => {
   const {
     resolver: { sourceExts, assetExts },
   } = await getDefaultConfig()
@@ -22,8 +22,10 @@ module.exports = (async () => {
       }),
     },
     resolver: {
-      sourceExts: ['jsx', 'js', 'ts', 'tsx', 'svg'],
+      sourceExts: ['jsx', 'js', 'ts', 'tsx', 'svg', 'png', 'gif'],
+      // assetExts: assetExts.filter(ext => ext !== 'gif'),
       assetExts: assetExts.filter(ext => ext !== 'svg'),
+      // assetExts: assetExts.filter(ext => ext !== 'png'),
     },
   }
-})()
+}

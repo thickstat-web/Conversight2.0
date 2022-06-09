@@ -5,24 +5,27 @@ import {
   CHOOSE_ORGANIZATION,
   ENTER_EMAIL_SCREEN,
   LANDING_SCREEN,
-  PASSWORD_SCREEN,
   DRAWER_NAVIGATOR,
   WALK_THROUGH,
   RECOVER_ENTER_EMAIL,
   RECOVER_ENTER_PASSWORD,
   RECOVER_COMPLETED,
+  REQUEST_DEMO,
+  DEMO_REQUESTED,
 } from '@/Constants/screens'
 import {
   LandingContainer,
   ChooseOrganizationContainer,
   EnterEmailContainer,
-  PasswordContainer,
   WalkThroughContainer,
+  RequestDemoContainer,
 } from '@/Containers'
 import RecoverEnterEmail from '@/Containers/RecoverEnterEmail'
 import RecoverEnterPassword from '@/Containers/RecoverEnterPassword'
 import RecoverComplete from '@/Containers/RecoverComplete'
 import DrawerNavigator from './DrawerNavigator'
+import BackArrow from '@/Assets/Images/iconsSVG/back.svg'
+import DemoRequested from '@/Containers/DemoRequested'
 
 const Stack = createStackNavigator()
 
@@ -31,12 +34,10 @@ const LoginNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
+        headerBackImage: () => <BackArrow />,
         headerTitleAlign: 'center',
         headerStyle: { backgroundColor: Colors.GRAY },
-        headerTitleStyle: {
-          ...Fonts.textRegularBold,
-          fontSize: 20,
-        },
+        headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
       }}
     >
       <Stack.Screen
@@ -59,15 +60,6 @@ const LoginNavigator = () => {
       <Stack.Screen
         name={CHOOSE_ORGANIZATION}
         component={ChooseOrganizationContainer}
-        options={{
-          title: 'Login',
-          headerTitleAlign: 'center',
-          headerBackTitleVisible: false,
-        }}
-      />
-      <Stack.Screen
-        name={PASSWORD_SCREEN}
-        component={PasswordContainer}
         options={{
           title: 'Login',
           headerTitleAlign: 'center',
@@ -115,6 +107,30 @@ const LoginNavigator = () => {
         options={{
           title: 'Recover Credentials',
           headerTitleAlign: 'center',
+        }}
+      />
+
+      <Stack.Screen
+        name={REQUEST_DEMO}
+        component={RequestDemoContainer}
+        options={{
+          title: 'Request a Demo',
+          headerTitleAlign: 'center',
+          headerTransparent: true,
+          headerShown: true,
+          animationEnabled: true,
+        }}
+      />
+
+      <Stack.Screen
+        name={DEMO_REQUESTED}
+        component={DemoRequested}
+        options={{
+          headerTransparent: true,
+          title: 'Request a Demo',
+          headerShown: true,
+          headerTitleAlign: "center",
+          animationEnabled: true,
         }}
       />
     </Stack.Navigator>
