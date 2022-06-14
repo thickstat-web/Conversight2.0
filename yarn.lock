@@ -1628,7 +1628,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^18.0.10":
+"@types/react@*", "@types/react@^18.0.8":
   "integrity" "sha512-dIugadZuIPrRzvIEevIu7A1smqOAjkSMv8qOfwPt9Ve6i6JT/FQcCHyk2qIAxwsQNKZt5/oGR0T4z9h2dXRAkg=="
   "resolved" "https://registry.npmjs.org/@types/react/-/react-18.0.10.tgz"
   "version" "18.0.10"

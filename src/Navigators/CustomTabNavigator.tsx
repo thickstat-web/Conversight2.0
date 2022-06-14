@@ -5,6 +5,8 @@ import { View, Text, TouchableOpacity, Image } from 'react-native-ui-lib'
 import athena from '@/Assets/gifs/athena.gif'
 import { botNavBG } from '@/Components/Images';
 import Athena from "@/Assets/Images/png/athenaFace.svg"
+import {athenaFaceXML} from "@/Assets/Images/xml-svg/athenaFace"
+import { SvgCss} from 'react-native-svg';
 interface Props {
     state: any,
     descriptors: any,
@@ -53,7 +55,8 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
 
                     // style={[styles.athenaBox, { borderColor: Colors.GREEN_DARK, shadowColor: Colors.GREEN_MAIN }]}
                 >
-                    <Athena style={styles.athena}/>
+                    {/* <Athena style={styles.athena}/> */}
+                    <SvgCss width="100" height="100" xml={athenaFaceXML} />
                     {/* <Image
                         source={athena}
                         resizeMode='cover'

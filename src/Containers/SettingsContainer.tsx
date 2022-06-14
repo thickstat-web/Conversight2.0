@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { FC, PropsWithChildren, useCallback, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Dimensions } from 'react-native'
 import {
   View,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Switch,
   Slider,
+  Hint,
 } from 'react-native-ui-lib'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { useGetSettingsMutation } from '@/Services/modules/settings'
@@ -22,10 +23,23 @@ interface Props {
   navigation: NavigationProp<ParamListBase>
 }
 
+interface HintProps {
+  props: React.ReactNode
+}
+
+const Hint1: FC<PropsWithChildren<HintProps>> = ({
+  children, props
+}) => <Hint {...props} >{children}</Hint>
+
 const SettingsContainer = ({ navigation }: Props) => {
   const { width: screenWidth } = Dimensions.get('screen')
   const { Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
+  const [emailOpen, setEmailOpen] = useState<boolean>(false)
+  const [speed, setSpeed] = useState<number>(2)
+  const [pitch, setPitch] = useState<number>(2)
+  const [delay, setDelay] = useState<number>(2)
+
   const [getSettings, { data: profile, isLoading, isSuccess }] =
     useGetSettingsMutation()
 
@@ -52,7 +66,7 @@ const SettingsContainer = ({ navigation }: Props) => {
     fetchProfileSettings()
   }, [fetchProfileSettings])
 
-  const textStyle = { ...Fonts.textSmall, color: Colors.DARK }
+  const textStyle = { ...Fonts.textSmall, color: Colors.DARK, fontFamily: "Montserrat-Medium" }
   const boldText = [textStyle, { fontFamily: "Montserrat-SemiBold" }]
 
   return (
@@ -73,7 +87,7 @@ const SettingsContainer = ({ navigation }: Props) => {
           >
             <Text style={[textStyle, { fontFamily: "Montserrat-SemiBold" }]}>Avatar</Text>
             <TouchableOpacity onPress={() => navigation.navigate(CHANGE_AVATAR)}>
-              <Text style={[textStyle, { color: Colors.GREEN_MAIN, fontFamily: "Montserrat-Bold" }]} >Upload New profile Pic</Text>
+              <Text style={[textStyle, { color: Colors.GREEN_MAIN, }]} >Change</Text>
             </TouchableOpacity>
           </View>
           <View
@@ -84,14 +98,31 @@ const SettingsContainer = ({ navigation }: Props) => {
             <Text style={boldText}>Name</Text>
             <Text style={textStyle}>{displayName}</Text>
           </View>
-          <View
-            marginH-25
-            paddingV-14
-            style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
+          <Hint1
+            color={Colors.WHITE}
+            enableShadow
+            edgeMargins={1}
+            messageStyle={textStyle}
+            containerWidth={screenWidth}
+            message={email}
+            borderRadius={8}
+            visible={emailOpen}
+            customContent={<View style={{ paddingVertical: 6 }}>
+              <Text selectable={true} style={[textStyle,]}>{email}</Text>
+            </View>}
+            onBackgroundPress={() => setEmailOpen(false)}
+          // onPress={}
           >
-            <Text style={boldText}>Email</Text>
-            <Text style={textStyle}>{email}</Text>
-          </View>
+            <TouchableOpacity
+              marginH-25
+              onPress={() => setEmailOpen(true)}
+              paddingV-14
+              style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
+            >
+              <Text style={boldText}>Email</Text>
+              <Text numberOfLines={1} style={[textStyle, { width: screenWidth * 0.7 }]}>{email}</Text>
+            </TouchableOpacity>
+          </Hint1>
           <View
             marginH-25
             paddingV-14
@@ -130,12 +161,16 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={boldText}>Speed</Text>
+            <View style={styles.sliderVal}>
+              <Text style={boldText}>Speed</Text>
+              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY }]}>{speed}</Text>
+            </View>
             <View width={screenWidth / 3}>
               <Slider
-                value={4}
+                onValueChange={(v) => setSpeed(v)}
                 maximumValue={10}
                 minimumValue={0}
+                step={1}
                 maximumTrackTintColor={Colors.GRAY}
                 minimumTrackTintColor={Colors.GREEN_MAIN}
                 thumbTintColor={Colors.GREEN_MAIN}
@@ -150,10 +185,13 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={boldText}>Pitch</Text>
+            <View style={styles.sliderVal}>
+              <Text style={boldText}>Pitch</Text>
+              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY }]}>{pitch}</Text>
+            </View>
             <View width={screenWidth / 3}>
               <Slider
-                value={4}
+                onValueChange={(v) => setPitch(v)}
                 maximumValue={10}
                 minimumValue={0}
                 maximumTrackTintColor={Colors.GRAY}
@@ -162,6 +200,8 @@ const SettingsContainer = ({ navigation }: Props) => {
                 thumbStyle={{ borderWidth: 0 }}
                 activeThumbStyle={{ borderWidth: 0 }}
                 disableActiveStyling
+                disableRTL
+                step={1}
               />
             </View>
           </View>
@@ -206,10 +246,14 @@ const SettingsContainer = ({ navigation }: Props) => {
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={boldText}>Delay (sec)</Text>
+            <View style={styles.sliderVal}>
+              <Text style={boldText}>Delay (sec)</Text>
+              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY }]}>{delay}</Text>
+            </View>
             <View width={screenWidth / 3}>
               <Slider
-                value={4}
+                onValueChange={(v) => setDelay(v)}
+                step={1}
                 maximumValue={10}
                 minimumValue={0}
                 maximumTrackTintColor={Colors.GRAY}
@@ -238,6 +282,18 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderRightWidth: 0,
   },
+  sliderVal: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  sliderValue: {
+    marginLeft: 5,
+    paddingHorizontal: 12,
+    fontFamily: "Montserrat-Bold",
+    paddingVertical: 3,
+    borderRadius: 34
+  }
 })
 
 export default SettingsContainer
