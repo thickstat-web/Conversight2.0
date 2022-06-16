@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   Switch,
-  Slider,
   Hint,
 } from 'react-native-ui-lib'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
@@ -18,6 +17,9 @@ import {
 import { GET_SETTING_QUERY } from '@/Constants/api'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import { CHANGE_AVATAR } from '@/Constants/screens'
+import DownArrow from "@/Assets/Images/drawer/down-arrow.svg"
+import { Slider } from '@miblanchard/react-native-slider';
+
 
 interface Props {
   navigation: NavigationProp<ParamListBase>
@@ -27,13 +29,10 @@ interface HintProps {
   props: React.ReactNode
 }
 
-const Hint1: FC<PropsWithChildren<HintProps>> = ({
-  children, props
-}) => <Hint {...props} >{children}</Hint>
 
 const SettingsContainer = ({ navigation }: Props) => {
   const { width: screenWidth } = Dimensions.get('screen')
-  const { Colors, Fonts } = useTheme()
+  const { Colors, Fonts, Layout } = useTheme()
   const dispatch = useAppDispatch()
   const [emailOpen, setEmailOpen] = useState<boolean>(false)
   const [speed, setSpeed] = useState<number>(2)
@@ -98,7 +97,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             <Text style={boldText}>Name</Text>
             <Text style={textStyle}>{displayName}</Text>
           </View>
-          <Hint1
+          <Hint
             color={Colors.WHITE}
             enableShadow
             edgeMargins={1}
@@ -122,7 +121,7 @@ const SettingsContainer = ({ navigation }: Props) => {
               <Text style={boldText}>Email</Text>
               <Text numberOfLines={1} style={[textStyle, { width: screenWidth * 0.7 }]}>{email}</Text>
             </TouchableOpacity>
-          </Hint1>
+          </Hint>
           <View
             marginH-25
             paddingV-14
@@ -155,6 +154,12 @@ const SettingsContainer = ({ navigation }: Props) => {
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
             <Text style={boldText}>Athena's Voice</Text>
+            <TouchableOpacity>
+              <View style={Layout.rowCenter}>
+                <Text style={[Fonts.textSmall, { color: Colors.GREEN_MAIN }]} >Shazza</Text>
+                <DownArrow style={{ marginHorizontal: 10 }} />
+              </View>
+            </TouchableOpacity>
           </View>
           <View
             marginH-25
@@ -163,20 +168,21 @@ const SettingsContainer = ({ navigation }: Props) => {
           >
             <View style={styles.sliderVal}>
               <Text style={boldText}>Speed</Text>
-              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY }]}>{speed}</Text>
+              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY, color: Colors.GREEN_DARK }]}>{speed}</Text>
             </View>
             <View width={screenWidth / 3}>
               <Slider
-                onValueChange={(v) => setSpeed(v)}
+                containerStyle={{ height: 25 }}
+                value={speed}
+                onValueChange={(v) => setSpeed(+v)}
                 maximumValue={10}
                 minimumValue={0}
                 step={1}
                 maximumTrackTintColor={Colors.GRAY}
-                minimumTrackTintColor={Colors.GREEN_MAIN}
+                minimumTrackTintColor={Colors.GRAY}
                 thumbTintColor={Colors.GREEN_MAIN}
-                thumbStyle={{ borderWidth: 0 }}
-                activeThumbStyle={{ borderWidth: 0 }}
-                disableActiveStyling
+                trackStyle={{ height: 6 }}
+                thumbStyle={{ width: 22, height: 22, borderRadius: 11 }}
               />
             </View>
           </View>
@@ -187,21 +193,21 @@ const SettingsContainer = ({ navigation }: Props) => {
           >
             <View style={styles.sliderVal}>
               <Text style={boldText}>Pitch</Text>
-              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY }]}>{pitch}</Text>
+              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY, color: Colors.GREEN_DARK }]}>{pitch}</Text>
             </View>
             <View width={screenWidth / 3}>
               <Slider
-                onValueChange={(v) => setPitch(v)}
+                containerStyle={{ height: 25 }}
+                value={pitch}
+                onValueChange={(v) => setPitch(+v)}
                 maximumValue={10}
                 minimumValue={0}
                 maximumTrackTintColor={Colors.GRAY}
-                minimumTrackTintColor={Colors.GREEN_MAIN}
+                minimumTrackTintColor={Colors.GRAY}
                 thumbTintColor={Colors.GREEN_MAIN}
-                thumbStyle={{ borderWidth: 0 }}
-                activeThumbStyle={{ borderWidth: 0 }}
-                disableActiveStyling
-                disableRTL
                 step={1}
+                trackStyle={{ height: 6 }}
+                thumbStyle={{ width: 22, height: 22, borderRadius: 11 }}
               />
             </View>
           </View>
@@ -248,20 +254,21 @@ const SettingsContainer = ({ navigation }: Props) => {
           >
             <View style={styles.sliderVal}>
               <Text style={boldText}>Delay (sec)</Text>
-              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY }]}>{delay}</Text>
+              <Text style={[styles.sliderValue, { backgroundColor: Colors.GRAY, color: Colors.GREEN_DARK }]}>{delay}</Text>
             </View>
             <View width={screenWidth / 3}>
               <Slider
-                onValueChange={(v) => setDelay(v)}
+                containerStyle={{ height: 25 }}
+                value={delay}
+                onValueChange={(v) => setDelay(+v)}
                 step={1}
                 maximumValue={10}
                 minimumValue={0}
                 maximumTrackTintColor={Colors.GRAY}
-                minimumTrackTintColor={Colors.GREEN_MAIN}
+                minimumTrackTintColor={Colors.GRAY}
                 thumbTintColor={Colors.GREEN_MAIN}
-                thumbStyle={{ borderWidth: 0 }}
-                activeThumbStyle={{ borderWidth: 0 }}
-                disableActiveStyling
+                trackStyle={{ height: 6 }}
+                thumbStyle={{ width: 22, height: 22, borderRadius: 11 }}
               />
             </View>
           </View>

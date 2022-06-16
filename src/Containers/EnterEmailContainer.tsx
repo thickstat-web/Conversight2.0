@@ -62,12 +62,12 @@ const EnterEmailContainer = ({ navigation }: Props) => {
   }
 
   const errorStyle =
-    emailInvalid || emailUnknown
+    (emailInvalid || emailUnknown) && email.length
       ? { borderColor: Colors.DARK_BLUE, color: Colors.DARK_BLUE }
       : {}
 
   const emailValidStyle =
-    !emailInvalid || !emailUnknown
+    (!emailInvalid || !emailUnknown) && email.length
       ? { borderColor: Colors.GREEN_MAIN, color: Colors.GREEN_MAIN }
       : {}
 
@@ -96,16 +96,19 @@ const EnterEmailContainer = ({ navigation }: Props) => {
             <TextInput
               onChangeText={e => setAndCheckEmail(e)}
               value={email}
+              placeholder="Type your email"
+              placeholderTextColor={Colors.GREEN_DARK}
+
               style={{
                 ...Common.textInput,
                 ...emailValidStyle,
                 ...errorStyle,
               }}
             />
-            {emailInvalid || emailUnknown ? (
-              <InputErrorIcon style={Common.inputIcon} />
+            {(emailInvalid || emailUnknown) && email.length ? (
+              email.length > 0 && <InputErrorIcon style={Common.inputIcon} />
             ) : (
-              <EmailOkIcon style={Common.inputIcon} />
+              email.length > 0 && <EmailOkIcon style={Common.inputIcon} />
             )}
           </View>
           <View marginT-16 width={300}>

@@ -17,6 +17,7 @@
     "type-check": "tsc"
   },
   "dependencies": {
+    "@miblanchard/react-native-slider": "^2.1.0",
     "@react-native-async-storage/async-storage": "^1.15.14",
     "@react-native-community/netinfo": "^8.3.0",
     "@react-native-masked-view/masked-view": "^0.2.6",

@@ -1,4 +1,4 @@
-import React, { ReactElement, useRef, useEffect, useState } from 'react'
+import React, { ReactElement, useRef, useEffect, useState,useCallback } from 'react'
 import { View, Text, Picker, Modal, Avatar } from 'react-native-ui-lib'
 import {
     FlatList,
@@ -9,7 +9,6 @@ import {
 } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { Brand, Button } from '@/Components'
 import { selectAllOrganizations, selectAuthData, selectSelectedOrg, selectTempOrg, setTempOrg } from '@/Store/Auth'
 import PickerIcon from '@/Assets/Images/iconsSVG/pickerIcon.svg'
 import SelectedOptionIcon from '@/Assets/Images/iconsSVG/selectedOptionArrow.svg'
@@ -18,6 +17,7 @@ import NewLabel from '@/Assets/Images/iconsSVG/newLabel.svg'
 import { getOrgByOrgId } from '@/Utils/array'
 import { CHANGE_ORGANIZATION_PASSWORD } from '@/Constants/screens'
 import DownArrow from "@/Assets/Images/drawer/down-arrow.svg";
+import EnterPassword from './EnterPassword'
 
 type Item = {
     orgId: string
@@ -42,46 +42,38 @@ const ChangeOrganizationContainer = ({ navigation }: Props) => {
     const selectedOrg = useAppSelector(selectSelectedOrg)
     const authData = useAppSelector(selectAuthData)
     const tempOrg = useAppSelector(selectTempOrg);
-
     const animatedValue = useRef(new Animated.Value(0)).current
-    const [animationIn, setAnimationIn] = useState<boolean>(false)
+    const [openModal, setOpenModal] = useState(false)
 
     useEffect(() => {
         dispatch(setTempOrg(selectedOrg))
     }, [])
 
-    const handleSelectOrg = (org: any) => {
+    const toggleModal = useCallback(
+        (toValue = 0) => {
+          Animated.timing(animatedValue, {
+            toValue,
+            duration: 600,
+            useNativeDriver: true,
+            easing: Easing.elastic(1.2),
+          }).start()
+        },
+        [animatedValue],
+      )
+    
+      useEffect(() => {
+        toggleModal(openModal ? 0 : 1)
+      }, [openModal, toggleModal])
+    
+      const showModal = () => setOpenModal(true)
+    
+      const hideModal = () => setOpenModal(false)
+
+const handleSelectOrg = (org: any) => {
         const current = getOrgByOrgId(organizations, org)
         dispatch(setTempOrg(current))
-        setAnimationIn(false)
+        hideModal()
     }
-
-    const hideModal = () => {
-        Animated.timing(animatedValue, {
-            toValue: 0,
-            duration: 600,
-            useNativeDriver: true,
-            easing: Easing.elastic(1.2),
-        }).start()
-    }
-
-    const showModal = () => {
-        Animated.timing(animatedValue, {
-            toValue: 1,
-            duration: 600,
-            useNativeDriver: true,
-            easing: Easing.elastic(1.2),
-        }).start()
-    }
-
-    useEffect(() => {
-        if (animationIn) {
-            hideModal()
-        } else {
-            showModal()
-        }
-    }, [animationIn])
-
     const handleRedirect = () => {
         navigation.navigate(CHANGE_ORGANIZATION_PASSWORD)
     }
@@ -90,7 +82,7 @@ const ChangeOrganizationContainer = ({ navigation }: Props) => {
         <View flex>
             <View flex-4 center>
                 <Avatar size={100} />
-                <Text marginT-20 style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}>{authData.displayName}</Text>
+                <Text marginT-20 style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}>{authData?.displayName}</Text>
                 <View style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                     <Text color={Colors.GREEN_MAIN} >{tempOrg.name}</Text>
                     <DownArrow style={{ marginLeft: 5 }} />
@@ -102,7 +94,7 @@ const ChangeOrganizationContainer = ({ navigation }: Props) => {
                     value={tempOrg?.orgId}
                     migrateTextField
                     migrate
-                    onPress={() => setAnimationIn(true)}
+                    onPress={showModal}
                     renderItem={(value, itemProps, label) => {
                         const { isSelected } = itemProps
                         const currentOrg = getOrgByOrgId(organizations, value)
@@ -158,6 +150,8 @@ const ChangeOrganizationContainer = ({ navigation }: Props) => {
                                 style={styles.modalView}
                                 animationType="slide"
                                 transparent
+                                onBackgroundPress={() => { hideModal(); toggleModal(false) }}
+
                             >
                                 <Animated.View
                                     style={[
@@ -223,15 +217,8 @@ const ChangeOrganizationContainer = ({ navigation }: Props) => {
                         </View>
                     )}
                 />
-                <View marginT-16 width={300}>
-                    <Button
-                        dark={true}
-                        block={true}
-                        label={t('common.buttons.next')}
-                        disabled={tempOrg.orgId === selectedOrg.orgId}
-                        onPress={handleRedirect}
-                    />
-                </View>
+                <EnterPassword navigation={navigation} />
+
             </View>
         </View>
     )

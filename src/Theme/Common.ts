@@ -25,7 +25,7 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         backgroundColor: Colors.transparent,
       },
       textInput: {
-        fontFamily: 'Montserrat-Regular',
+        fontFamily:"Montserrat-SemiBold",
         fontSize: 18,
         minWidth: 300,
         maxWidth: 300,
@@ -38,7 +38,7 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         borderRadius: 8,
         paddingRight: 15,
         paddingEnd:35,
-        paddingStart:35
+        paddingStart:35,
       },
       inputIcon: {
         position: 'absolute',

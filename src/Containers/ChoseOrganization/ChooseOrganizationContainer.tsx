@@ -103,7 +103,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     hideModal()
   }
 
-  const renderCustomPickerModal = ({ visible }: RenderCustomModalProps) => {
+  const renderCustomPickerModal = ({ visible, toggleModal }: RenderCustomModalProps) => {
     const animationStyles = {
       height: (screenHeight * 58) / 100,
       width: screenWidth,
@@ -119,11 +119,12 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
 
     return (
       <Modal
-        visible={singleOrg ? false :visible }
+        visible={singleOrg ? false : visible}
         presentationStyle="overFullScreen"
         style={styles.modalView}
         animationType="slide"
         transparent
+        onBackgroundPress={() => { hideModal(); toggleModal(false) }}
       >
         <Animated.View style={[styles.modalView, animationStyles]}>
           <Text
@@ -156,7 +157,9 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     <View
       style={[
         styles.pickerBox,
-        !!selectedOrg?.name && { borderColor: Colors.GREEN_MAIN },
+        !!selectedOrg?.name
+          ? { borderColor: Colors.GREEN_MAIN }
+          : { borderColor: Colors.GREEN_DARK }
       ]}
     >
       <Text

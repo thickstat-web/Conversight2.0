@@ -120,12 +120,15 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
         <View style={Common.inputBox}>
           <TextInput
             onChangeText={x => setPassword(x)}
+            placeholder="Password"
+            placeholderTextColor={Colors.GREEN_DARK}
             style={[
               Common.textInput,
               error && {
                 borderColor: Colors.DARK_BLUE,
                 color: Colors.DARK_BLUE,
-              },
+              }
+
             ]}
             value={password}
             secureTextEntry={passSecured}
@@ -137,10 +140,10 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
               />
             )}
             {error && passSecured && (
-              <PasswordSecuredIconError onPress={togglePasswordEye} />
+              <PasswordVisibleIconError onPress={togglePasswordEye} />
             )}
             {error && !passSecured && (
-              <PasswordVisibleIconError onPress={togglePasswordEye} />
+              <PasswordSecuredIconError onPress={togglePasswordEye} />
             )}
             {passSecured
               ? !error && <PasswordVisibleIcon onPress={togglePasswordEye} />
@@ -159,7 +162,7 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
         </View>
         <View style={[Layout.row, { justifyContent: "space-between", width: 300 }]}>
           <Button labelStyle={{ fontWeight: '700' }} color={Colors.GREEN_DARK} style={styles.transBtn} onPress={handleRecover} label="Recover Credentials?" />
-          <Button labelStyle={{ fontWeight: '700' }}  color={Colors.GREEN_DARK} style={styles.transBtn} onPress={() => setPassword("")} label="Reset" />
+          <Button labelStyle={{ fontWeight: '700' }} color={Colors.GREEN_DARK} style={styles.transBtn} onPress={() => setPassword("")} label="Reset" />
         </View>
       </View>
     </View>
@@ -170,6 +173,7 @@ const styles = StyleSheet.create({
   hint: {
     fontFamily: 'Montserrat-Regular',
     padding: 13,
+    marginBottom: 6,
     width: 300,
     borderRadius: 8,
     flexDirection: 'row',
@@ -180,7 +184,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     backgroundColor: "transparent",
     minWidth: 20,
-
   }
 })
 

@@ -12,6 +12,7 @@ import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 import { store } from '@/Store'
 import { RECOVER_COMPLETED } from '@/Constants/screens'
 import { lockError, lockOk } from '@/Components/Images'
+import { ScrollView } from 'react-native-gesture-handler'
 interface Props {
   navigation: any
 }
@@ -43,81 +44,91 @@ const RecoverEnterPassword = ({ navigation }: Props) => {
     }
   }
   return (
-    <View style={Layout.colCenter}>
+    <ScrollView>
+      <View style={Layout.colCenter}>
+        <View style={[Layout.colVCenter, { marginTop: 90, marginBottom: 45 }]}>
+          {error
+            ? <Image source={lockError} style={{ width: 150, height: 150 }} />
+            : <Image source={lockOk} style={{ width: 150, height: 150 }} />
+          }
+        </View>
+        <View flex-1 >
 
-      {error
-        ? <Image source={lockError} style={{ width: 150, height: 150 }} />
-        : <Image source={lockOk} style={{ width: 150, height: 150 }} />
-      }
 
-      <Text
-        marginB-20
-        style={{ ...Fonts.textRegularBold, color: Colors.GREEN_DARK }}
-      >
-        Enter your new password
-      </Text>
-      <View margin-5 centerV>
-        <TextInput
-          onSubmitEditing={handleSubmit}
-          onChangeText={x => setPassword(x)}
-          placeholder="Type new password"
-          style={[
-            Common.textInput,
-            error && {
-              borderColor: Colors.DARK_BLUE,
-              color: Colors.DARK_BLUE,
-            },
-          ]}
-          value={password}
-          secureTextEntry={passSecured}
-        />
-        <View style={Common.inputIcon}>
-          {error && (
-            <InputErrorIcon style={[Common.inputIcon, { right: 25, top: 2 }]} />
-          )}
-          {error && !passSecured && (
-            <PasswordSecuredIconError onPress={togglePasswordEye} />
-          )}
-          {error && passSecured && (
-            <PasswordVisibleIconError onPress={togglePasswordEye} />
-          )}
-          {passSecured
-            ? !error && <PasswordVisibleIcon onPress={togglePasswordEye} />
-            : !error && <PasswordSecuredIcon onPress={togglePasswordEye} />}
+        </View>
+        <Text
+          marginB-20
+          style={{ ...Fonts.textRegularBold, color: Colors.GREEN_DARK }}
+        >
+          Enter your new password
+        </Text>
+        <View margin-5 centerV>
+          <TextInput
+            onSubmitEditing={handleSubmit}
+            onChangeText={x => setPassword(x)}
+            placeholder="Type new password"
+            placeholderTextColor={Colors.GREEN_DARK}
+            style={[
+              Common.textInput,
+              error && {
+                borderColor: Colors.DARK_BLUE,
+                color: Colors.DARK_BLUE,
+              },
+            ]}
+            value={password}
+            secureTextEntry={passSecured}
+          />
+          <View style={Common.inputIcon}>
+            {error && (
+              <InputErrorIcon style={[Common.inputIcon, { right: 25, top: 2 }]} />
+            )}
+            {error && !passSecured && (
+              <PasswordSecuredIconError onPress={togglePasswordEye} />
+            )}
+            {error && passSecured && (
+              <PasswordVisibleIconError onPress={togglePasswordEye} />
+            )}
+            {passSecured
+              ? !error && <PasswordVisibleIcon onPress={togglePasswordEye} />
+              : !error && <PasswordSecuredIcon onPress={togglePasswordEye} />}
+          </View>
+        </View>
+        <View margin-5 centerV>
+          <TextInput
+            onSubmitEditing={handleSubmit}
+            onBlur={validate}
+            placeholder="Repeat password"
+            placeholderTextColor={Colors.GREEN_DARK}
+
+            onChangeText={x => setRePassword(x)}
+            style={[
+              Common.textInput,
+              error && {
+                borderColor: Colors.DARK_BLUE,
+                color: Colors.DARK_BLUE,
+              },
+            ]}
+            value={rePassword}
+            secureTextEntry={passSecured}
+          />
+          <View style={Common.inputIcon}>
+            {error && (
+              <InputErrorIcon style={[Common.inputIcon, { right: 25, top: 2 }]} />
+            )}
+            {error && !passSecured && (
+              <PasswordSecuredIconError onPress={togglePasswordEye} />
+            )}
+            {error && passSecured && (
+              <PasswordVisibleIconError onPress={togglePasswordEye} />
+            )}
+            {passSecured
+              ? !error && <PasswordVisibleIcon onPress={togglePasswordEye} />
+              : !error && <PasswordSecuredIcon onPress={togglePasswordEye} />}
+          </View>
         </View>
       </View>
-      <View margin-5 centerV>
-        <TextInput
-          onSubmitEditing={handleSubmit}
-          onBlur={validate}
-          placeholder="Repeat password"
-          onChangeText={x => setRePassword(x)}
-          style={[
-            Common.textInput,
-            error && {
-              borderColor: Colors.DARK_BLUE,
-              color: Colors.DARK_BLUE,
-            },
-          ]}
-          value={rePassword}
-          secureTextEntry={passSecured}
-        />
-        <View style={Common.inputIcon}>
-          {error && (
-            <InputErrorIcon style={[Common.inputIcon, { right: 25, top: 2 }]} />
-          )}
-          {error && !passSecured && (
-            <PasswordSecuredIconError onPress={togglePasswordEye} />
-          )}
-          {error && passSecured && (
-            <PasswordVisibleIconError onPress={togglePasswordEye} />
-          )}
-          {passSecured
-            ? !error && <PasswordVisibleIcon onPress={togglePasswordEye} />
-            : !error && <PasswordSecuredIcon onPress={togglePasswordEye} />}
-        </View>
-      </View>
-    </View>
+    </ScrollView>
+
   )
 }
 
