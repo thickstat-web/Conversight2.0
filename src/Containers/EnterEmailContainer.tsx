@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { TextInput, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import { Brand, Button } from '@/Components'
+import { Brand, Button, LayoutNoInternet } from '@/Components'
 import { useTheme, useAppDispatch } from '@/Hooks'
 import { setSignInEmail } from '@/Store/Auth'
 import { useLazyVerifyEmailQuery } from '@/Services/modules/auth'
@@ -24,7 +24,8 @@ const EnterEmailContainer = ({ navigation }: Props) => {
   const { Common, Gutters, Layout, Fonts } = useTheme()
   const dispatch = useAppDispatch()
   // ToDo: Need to remove default email
-  const [email, setEmail] = useState('sakthivel.murugasamy@conversight.ai')
+  const [email, setEmail] = useState("sakthivel.murugasamy@conversight.ai")
+  // 'sakthivel.murugasamy@conversight.ai'
   const [emailInvalid, setEmailInvalid] = useState<boolean>(false)
   const [emailUnknown, setEmailUnknown] = useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = useState<boolean>(false)
@@ -72,58 +73,62 @@ const EnterEmailContainer = ({ navigation }: Props) => {
       : {}
 
   return (
-    <View flex>
-      <View flex-4 center>
-        <Brand width={'60%'} />
-      </View>
-      <View flex-6 centerH>
-        <View>
-          {errorHintOpen && data?.error && (
-            <TouchableOpacity
-              style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
-              onPress={() => setErrorHintOpen(false)}
-            >
-              <Text
-                style={[Fonts.textRegular, { lineHeight: 20 }]}
-                color={Colors.WHITE}
+    <LayoutNoInternet>
+      <View flex>
+        <View flex-4 center>
+          <Brand width={'60%'} />
+        </View>
+        <View flex-6 centerH>
+          <View>
+            {errorHintOpen && data?.error && (
+              <TouchableOpacity
+                style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
+                onPress={() => setErrorHintOpen(false)}
               >
-                {data?.error}
-              </Text>
-              <CloseIcon style={{ marginLeft: 10 }} />
-            </TouchableOpacity>
-          )}
-          <View row centerV width={300}>
-            <TextInput
-              onChangeText={e => setAndCheckEmail(e)}
-              value={email}
-              placeholder="Type your email"
-              placeholderTextColor={Colors.GREEN_DARK}
-
-              style={{
-                ...Common.textInput,
-                ...emailValidStyle,
-                ...errorStyle,
-              }}
-            />
-            {(emailInvalid || emailUnknown) && email.length ? (
-              email.length > 0 && <InputErrorIcon style={Common.inputIcon} />
-            ) : (
-              email.length > 0 && <EmailOkIcon style={Common.inputIcon} />
+                <Text
+                  style={[Fonts.text15, {}]}
+                  color={Colors.WHITE}
+                >
+                  Email doesn't exist in the database.
+                  {/* {data?.error} */}
+                </Text>
+                <CloseIcon style={{ marginLeft: 10 }} />
+              </TouchableOpacity>
             )}
-          </View>
-          <View marginT-16 width={300}>
-            <Button
-              block={true}
-              dark={true}
-              disabled={emailInvalid || emailUnknown}
-              loading={isLoading || isFetching}
-              label={t('enterEmail.buttons.next')}
-              onPress={handleVerifyEmail}
-            />
+            <View row centerV width={300}>
+              <TextInput
+                onChangeText={e => setAndCheckEmail(e)}
+                value={email}
+                placeholder="Type your email"
+                placeholderTextColor={Colors.GREEN_DARK}
+
+                style={{
+                  ...Common.textInput,
+                  ...emailValidStyle,
+                  ...errorStyle,
+                }}
+              />
+              {(emailInvalid || emailUnknown) && email.length ? (
+                email.length > 0 && <InputErrorIcon style={Common.inputIcon} />
+              ) : (
+                email.length > 0 && <EmailOkIcon style={Common.inputIcon} />
+              )}
+            </View>
+            <View marginT-16 width={300}>
+              <Button
+                block={true}
+                dark={true}
+                disabled={emailInvalid || emailUnknown}
+                loading={isLoading || isFetching}
+                label={t('enterEmail.buttons.next')}
+                onPress={handleVerifyEmail}
+              />
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </LayoutNoInternet>
+
   )
 }
 
@@ -131,6 +136,7 @@ const styles = StyleSheet.create({
   hint: {
     fontFamily: 'Montserrat-Regular',
     padding: 13,
+    marginBottom: 6,
     width: 300,
     borderRadius: 8,
     flexDirection: 'row',

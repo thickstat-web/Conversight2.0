@@ -23,7 +23,7 @@ interface AuthState {
 const initialState: AuthState = {
   email: '',
   // ToDo: Need to remove default password
-  password: 'sakthi',
+  password: '',
   organizations: [],
   signInOrg: null,
   authData: null,

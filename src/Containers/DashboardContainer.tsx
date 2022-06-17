@@ -3,7 +3,7 @@ import { StyleSheet, TextInput } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { Brand, Button, ButtonCustom } from '@/Components'
+import { Brand, Button, ButtonCustom, LayoutNoInternet } from '@/Components'
 import { useSignInMutation } from '@/Services/modules/auth'
 import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
@@ -29,16 +29,19 @@ const DashboardContainer = () => {
   }, [isSuccess, data, dispatch])
 
   return (
-    <View flex>
-      <View flex-4 center>
-        <Brand width={'60%'} />
-      </View>
-      <View flex-6 centerH margin-20>
-        <View flex center>
-          <Text text60>Dashboard - In Progress</Text>
+    <LayoutNoInternet>
+      <View flex>
+        <View flex-4 center>
+          <Brand width={'60%'} />
+        </View>
+        <View flex-6 centerH margin-20>
+          <View flex center>
+            <Text text60>Dashboard - In Progress</Text>
+          </View>
         </View>
       </View>
-    </View>
+    </LayoutNoInternet>
+
   )
 }
 

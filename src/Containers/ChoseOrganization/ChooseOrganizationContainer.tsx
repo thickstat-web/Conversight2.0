@@ -23,7 +23,7 @@ import {
 } from 'react-native'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand, Button } from '@/Components'
-import { selectAllOrganizations, selectSignInOrg } from '@/Store/Auth'
+import { selectAllOrganizations, selectSignInOrg, setPassword } from '@/Store/Auth'
 import PickerIcon from '@/Assets/Images/iconsSVG/pickerIcon.svg'
 import SelectedOptionIcon from '@/Assets/Images/iconsSVG/selectedOptionArrow.svg'
 import NotSelectedOptionIcon from '@/Assets/Images/iconsSVG/notSelectedOptionArrow.svg'
@@ -100,6 +100,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const handleSelectOrg = (org: any) => {
     const current = getOrgByOrgId(organizations, org)
     dispatch(setSelectedOrg(current))
+    dispatch(setPassword(""))
     hideModal()
   }
 
@@ -225,7 +226,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   }
 
   return (
-    <ScrollView>
+    <ScrollView keyboardShouldPersistTaps={'always'}>
 
       <View marginB-25 >
         <View center>

@@ -58,7 +58,7 @@ const ApplicationNavigator = () => {
   return (
     <SafeAreaView style={[Layout.fill, { backgroundColor: colors.card }]}>
       <NavigationContainer theme={NavigationTheme} ref={navigationRef}>
-        <StatusBar
+        <StatusBar 
           // barStyle={darkMode ? 'light-content' : 'dark-content'}
           barStyle={'light-content'}
           backgroundColor={Colors.GREEN_MAIN}

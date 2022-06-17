@@ -61,7 +61,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                         <Text center marginH-40 style={Fonts.textSmall}>If you would like a demo of ConverSight, please fill in this form and one of our representatives will be in touch with you soon.</Text>
                     </View>
                     <View flex-4>
-                        
+
                         {errors.name?.message && <InputError errorText={errors.name?.message} />}
 
                         <Controller control={control}
@@ -70,6 +70,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <TextInput
+                                    placeholderTextColor={Colors.GREEN_DARK}
                                     onBlur={onBlur}
                                     value={value}
                                     onChangeText={onChange}
@@ -89,6 +90,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <TextInput
+                                    placeholderTextColor={Colors.GREEN_DARK}
                                     onBlur={onBlur}
                                     value={value}
                                     onChangeText={onChange}
@@ -114,6 +116,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <TextInput
                                     keyboardType="email-address"
+                                    placeholderTextColor={Colors.GREEN_DARK}
                                     onBlur={onBlur}
                                     value={value}
                                     onChangeText={onChange}
@@ -134,6 +137,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
                             }}
                             render={({ field: { onChange, onBlur, value } }) => (
                                 <TextInput
+                                    placeholderTextColor={Colors.GREEN_DARK}
                                     keyboardType='phone-pad'
                                     onBlur={onBlur}
                                     value={value}

@@ -106,7 +106,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
               style={styles.screenLink}
             >
               <InsightsIcon />
-              <Text marginL-25>Insights</Text>
+              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Insights</Text>
             </TouchableOpacity>
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
             <TouchableOpacity
@@ -114,7 +114,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
               style={styles.screenLink}
             >
               <DashboardIcon />
-              <Text marginL-25>Dashboard</Text>
+              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Dashboard</Text>
             </TouchableOpacity>
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
@@ -123,7 +123,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
               style={styles.screenLink}
             >
               <WalkThroughIcon />
-              <Text marginL-25>Walkthrough</Text>
+              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Walkthrough</Text>
             </TouchableOpacity>
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
@@ -132,7 +132,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
               style={styles.screenLink}
             >
               <RequestDemoIcon />
-              <Text marginL-25>Request a Demo</Text>
+              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Request a Demo</Text>
             </TouchableOpacity>
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
@@ -141,7 +141,7 @@ export default function DrawerNavigator({ navigation }: Props2) {
               style={styles.screenLink}
             >
               <FaqIcon />
-              <Text marginL-25>Read FAQ</Text>
+              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Read FAQ</Text>
             </TouchableOpacity>
             <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
           </View>
@@ -201,4 +201,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  linkText: {
+    fontFamily: "Montserrat-SemiBold"
+  }
 })

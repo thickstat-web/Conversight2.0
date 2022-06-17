@@ -36,9 +36,9 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
 
   const handleRecover = () => navigation.navigate(RECOVER_ENTER_EMAIL)
 
-  useEffect(() => {
-    if (!password || !password.length) dispatch(setPassword('sakthi'))
-  }, [])
+  // useEffect(() => {
+  //   if (!password || !password.length) dispatch(setPassword('sakthi'))
+  // }, [])
 
   const handleSignIn = () => {
     if (signInEmail && password && signInOrg) {
@@ -59,6 +59,7 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
       const navigateTo = resp.data.isFirstTimeLogin
         ? WALK_THROUGH
         : DRAWER_NAVIGATOR
+      dispatch(setPassword(''))
       navigateAndSimpleReset(navigateTo)
     } else if (isSuccess && !resp?.success) {
       setError(true)
@@ -105,10 +106,10 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
               />
             )}
             {error && passSecured && (
-              <PasswordSecuredIconError onPress={togglePasswordEye} />
+              <PasswordVisibleIconError onPress={togglePasswordEye} />
             )}
             {error && !passSecured && (
-              <PasswordVisibleIconError onPress={togglePasswordEye} />
+              < PasswordSecuredIconError onPress={togglePasswordEye} />
             )}
 
             {(!error) &&

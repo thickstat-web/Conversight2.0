@@ -35,7 +35,7 @@ const EnterPassword = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const { Colors, Common, Fonts, Layout } = useTheme()
   // ToDo: Need to remove default password
-  const [password, setPassword] = useState<string>("sakthi")
+  const [password, setPassword] = useState<string>("") /*'sakthi'*/
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
