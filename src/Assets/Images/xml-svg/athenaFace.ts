@@ -1,4 +1,4 @@
-<svg width="108" height="108" viewBox="0 0 108 108" fill="none" xmlns="http://www.w3.org/2000/svg">
+export const athenaFaceXML = `<svg width="108" height="108" viewBox="0 0 108 108" fill="none" xmlns="http://www.w3.org/2000/svg">
 <ellipse cx="54" cy="97" rx="23" ry="3" fill="#DCE5E3" fill-opacity="0.72"/>
 <g filter="url(#filter0_dd_68_154)">
 <circle r="40" transform="matrix(-1 0 0 1 54 47)" fill="white"/>
@@ -39,4 +39,4 @@
 <stop offset="0.613411" stop-color="white" stop-opacity="0"/>
 </linearGradient>
 </defs>
-</svg>
+</svg>`

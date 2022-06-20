@@ -8,6 +8,8 @@ import Athena from '@/Assets/Images/png/athenaFace.svg'
 import AthenaChatContainer, {
   RefProps,
 } from '@/Containers/Chat/AthenaChatContainer'
+import { athenaFaceXML } from '@/Assets/Images/xml-svg/athenaFace'
+import { SvgCss } from 'react-native-svg'
 interface Props {
   state: any
   descriptors: any
@@ -82,7 +84,51 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
           // style={[styles.athenaBox, { borderColor: Colors.GREEN_DARK, shadowColor: Colors.GREEN_MAIN }]}
           onPress={openChat}
         >
-          <Athena style={styles.athena} />
+          {/* <Athena style={styles.athena} /> */}
+          {/* <Image
+    const { Colors, Fonts } = useTheme()
+    const { width: screenWidth, height: screenHeight } = Dimensions.get("screen")
+
+    const onPress = (route: any, isFocused: any) => {
+        const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+        });
+
+        if (!isFocused && !event.defaultPrevented) {
+            // The `merge: true` option makes sure that the params inside the tab screen are preserved
+            navigation.navigate({ name: route.name, merge: true });
+        }
+    };
+
+    const insightsOptions = descriptors[state.routes[0].key];
+    const [insightsRoute, chatRoute, dashboardRoute] = state.routes
+    const [isFocusedInsights, isFocusedChat, isFocusedDashboard] = [state.index === 0, state.index === 1, state.index === 2]
+
+    return (
+        <ImageBackground resizeMode="cover" style={{ marginTop: 50 }} source={botNavBG}>
+            <View style={styles.root}>
+                <TouchableOpacity
+                    accessibilityRole="button"
+                    accessibilityState={isFocusedInsights ? { selected: true } : {}}
+                    accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
+                    onPress={() => onPress(insightsRoute, isFocusedInsights)}
+                    style={styles.tab}
+                >
+                    <Text style={[Fonts.text15Bold, { color: isFocusedInsights ? Colors.GREEN_MAIN : Colors.GREEN_DARK }]}>
+                        {insightsRoute.name}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    accessibilityState={isFocusedChat ? { selected: true } : {}}
+                    accessibilityLabel={insightsOptions.tabBarAccessibilityLabel}
+                    onPress={() => onPress(chatRoute, isFocusedChat)}
+
+                    // style={[styles.athenaBox, { borderColor: Colors.GREEN_DARK, shadowColor: Colors.GREEN_MAIN }]}
+                >
+                    {/* <Athena style={styles.athena}/> */}
+          <SvgCss width="100" height="100" xml={athenaFaceXML} />
           {/* <Image
                         source={athena}
                         resizeMode='cover'

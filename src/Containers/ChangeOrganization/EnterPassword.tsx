@@ -1,12 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
-import {
-  TouchableOpacity,
-  View,
-  Text,
-  Avatar,
-  Button,
-} from 'react-native-ui-lib'
+import { TouchableOpacity, View, Text, Avatar, Button } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Button as ButtonLoading } from '@/Components'
@@ -32,17 +26,16 @@ import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
-import { DEFAULT_PASSWORD } from '@/Config'
 
 interface Props {
   navigation: any
 }
 
-const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
+const EnterPassword = ({ navigation }: Props) => {
   const { t } = useTranslation()
   const { Colors, Common, Fonts, Layout } = useTheme()
   // ToDo: Need to remove default password
-  const [password, setPassword] = useState<string>(DEFAULT_PASSWORD)
+  const [password, setPassword] = useState<string>("") /*'sakthi'*/
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
@@ -78,39 +71,21 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
       }
 
       console.log(
-        `[ChangeOrganizationPasswordContainer] auth data: ${JSON.stringify(
+        `[EnterPassword] auth data: ${JSON.stringify(
           data.data,
         )}`,
       )
     } else if (isSuccess && !data?.success) {
       setError(true)
       console.log(
-        `[ChangeOrganizationPasswordContainer] auth error: ${data?.error}`,
+        `[EnterPassword] auth error: ${data?.error}`,
       )
     }
   }, [isSuccess, data, dispatch, navigation])
 
   return (
     <View flex>
-      <View flex-4 center>
-        <Avatar size={100} />
-        <Text
-          marginT-20
-          style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}
-        >
-          {authData?.displayName}
-        </Text>
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}
-        >
-          <Text color={Colors.GREEN_MAIN}>Login to {orgToBeChanged.name}</Text>
-          <DownArrow style={{ marginLeft: 5 }} />
-        </View>
-      </View>
+  
       <View flex-6 centerH marginT-20>
         {error && (
           <TouchableOpacity
@@ -127,12 +102,15 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
         <View style={Common.inputBox}>
           <TextInput
             onChangeText={x => setPassword(x)}
+            placeholder="Password"
+            placeholderTextColor={Colors.GREEN_DARK}
             style={[
               Common.textInput,
               error && {
                 borderColor: Colors.DARK_BLUE,
                 color: Colors.DARK_BLUE,
-              },
+              }
+
             ]}
             value={password}
             secureTextEntry={passSecured}
@@ -144,10 +122,10 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
               />
             )}
             {error && passSecured && (
-              <PasswordSecuredIconError onPress={togglePasswordEye} />
+              <PasswordVisibleIconError onPress={togglePasswordEye} />
             )}
             {error && !passSecured && (
-              <PasswordVisibleIconError onPress={togglePasswordEye} />
+              <PasswordSecuredIconError onPress={togglePasswordEye} />
             )}
             {passSecured
               ? !error && <PasswordVisibleIcon onPress={togglePasswordEye} />
@@ -156,31 +134,18 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
         </View>
         <View marginT-16 width={300}>
           <ButtonLoading
+          
             dark={true}
             block={true}
             label={t('common.buttons.next')}
-            disabled={!password.length}
+            disabled={!password.length || authData?.orgId === orgToBeChanged.orgId}
             onPress={handleSignIn}
             loading={isLoading}
           />
         </View>
-        <View
-          style={[Layout.row, { justifyContent: 'space-between', width: 300 }]}
-        >
-          <Button
-            labelStyle={{ fontWeight: '700' }}
-            color={Colors.GREEN_DARK}
-            style={styles.transBtn}
-            onPress={handleRecover}
-            label="Recover Credentials?"
-          />
-          <Button
-            labelStyle={{ fontWeight: '700' }}
-            color={Colors.GREEN_DARK}
-            style={styles.transBtn}
-            onPress={() => setPassword('')}
-            label="Reset"
-          />
+        <View style={[Layout.row, { justifyContent: "space-between", width: 300 }]}>
+          <Button labelStyle={{ fontWeight: '700' }} color={Colors.GREEN_DARK} style={styles.transBtn} onPress={handleRecover} label="Recover Credentials?" />
+          <Button labelStyle={{ fontWeight: '700' }} color={Colors.GREEN_DARK} style={styles.transBtn} onPress={() => setPassword("")} label="Reset" />
         </View>
       </View>
     </View>
@@ -191,6 +156,7 @@ const styles = StyleSheet.create({
   hint: {
     fontFamily: 'Montserrat-Regular',
     padding: 13,
+    marginBottom: 6,
     width: 300,
     borderRadius: 8,
     flexDirection: 'row',
@@ -199,9 +165,9 @@ const styles = StyleSheet.create({
   },
   transBtn: {
     paddingHorizontal: 0,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     minWidth: 20,
-  },
+  }
 })
 
-export default ChangeOrganizationPasswordContainer
+export default EnterPassword

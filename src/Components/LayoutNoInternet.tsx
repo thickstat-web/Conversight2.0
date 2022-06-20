@@ -3,7 +3,7 @@ import { Text, View } from 'react-native-ui-lib'
 import React from 'react'
 import NetInfo from '@react-native-community/netinfo'
 import { useTheme } from '@/Hooks'
-
+import NoInternetIcon from "@/Assets/Images/no-internet.svg"
 interface Props {
   children: any
 }
@@ -26,8 +26,9 @@ const LayoutNoInternet = ({ children }: Props) => {
     <>
       {!connected && (
         <View style={{ ...styles.root, backgroundColor: Colors.DARK_BLUE }}>
-          <Text center style={{ ...styles.text, color: Colors.WHITE }}>
-            No internet Connection
+          <NoInternetIcon />
+          <Text style={{ ...styles.text, color: Colors.WHITE }}>
+            No internet Connection Available
           </Text>
         </View>
       )}
@@ -38,12 +39,21 @@ const LayoutNoInternet = ({ children }: Props) => {
 }
 const styles = StyleSheet.create({
   root: {
+    top:0,
     position: 'absolute',
     width: '100%',
     alignSelf: 'center',
+    display:"flex",
+    flexDirection:"row",
+    justifyContent:"center",
+    alignItems:"center",
+    padding:4
   },
   text: {
+    fontFamily:"Montserrat-Regular",
+    fontSize:15,
     lineHeight: 20,
+    paddingLeft:10
   },
 })
 

@@ -25,7 +25,7 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         backgroundColor: Colors.transparent,
       },
       textInput: {
-        fontFamily: 'Montserrat-Regular',
+        fontFamily: "Montserrat-SemiBold",
         fontSize: 18,
         minWidth: 300,
         maxWidth: 300,

@@ -18,9 +18,9 @@ import {
 export const Colors: ThemeColors = {
   // Example colors:
   GREEN_LIGHTER: '#27DC61',
-  GREEN_LIGHT: '#00581E',
+  GREEN_LIGHT: '#00DA49',
   GREEN_MAIN: '#00AA39',
-  GREEN_DARK: '#004438',
+  GREEN_DARK: '#014E40',
   LIGHT_BLUE: '#00C1FA',
   DARK_BLUE: '#0097C4',
   ORANGE_LIGHT: '#FFCD4B',
@@ -29,7 +29,7 @@ export const Colors: ThemeColors = {
   WHITE: '#FFFFFF',
   RED: '#F06F5F',
   GRAY: '#F2F2F3',
-  DARK: '#201D1D',
+  DARK: '#004438',
   NOTIFICATION_BGR: '#E0F0E5',
 }
 
@@ -53,6 +53,7 @@ const tiny = 5 // 10
 const small = tiny * 2 // 10
 const regular = tiny * 3 // 15
 const large = regular * 2 // 30
+
 export const MetricsSizes: ThemeMetricsSizes = {
   tiny,
   small,

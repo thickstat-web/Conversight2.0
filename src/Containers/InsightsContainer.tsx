@@ -3,7 +3,7 @@ import { StyleSheet, TextInput } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { Brand } from '@/Components'
+import { Brand, LayoutNoInternet } from '@/Components'
 import { useSignInMutation } from '@/Services/modules/auth'
 import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
@@ -27,20 +27,23 @@ const InsightsContainer = () => {
   }, [isSuccess, data, dispatch])
 
   return (
-    <View flex>
-      <View flex-4 center>
-        <Brand width={'60%'} />
-      </View>
-      <View flex-6 centerH margin-20>
-        <View flex center>
-          <Text text60>Insights - In Progress</Text>
-          <Tooltip currentIndex={1} total={3} title="Ask Athena" 
-          text="Many devices with high speed for yesterday?"
-          btnText="OK, got ya'"
-          />
+    <LayoutNoInternet>
+      <View flex>
+        <View flex-4 center>
+          <Brand width={'60%'} />
+        </View>
+        <View flex-6 centerH margin-20>
+          <View flex center>
+            <Text text60>Insights - In Progress</Text>
+            <Tooltip currentIndex={1} total={3} title="Ask Athena"
+              text="Many devices with high speed for yesterday?"
+              btnText="OK, got ya'"
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </LayoutNoInternet>
+
   )
 }
 

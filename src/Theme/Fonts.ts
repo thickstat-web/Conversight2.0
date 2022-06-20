@@ -12,25 +12,25 @@ import { ThemeVariables, ThemeFonts } from '@/Theme/theme.type'
 export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
   return StyleSheet.create({
     textSmall: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.small,
       color: Colors.GREEN_DARK,
       lineHeight: 20,
     },
     textSmallContrast: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.small,
       color: Colors.WHITE,
       lineHeight: 20,
     },
     textRegular: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.regular,
       color: Colors.GREEN_DARK,
       lineHeight: 20,
     },
     textNormalContrast: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.regular,
       color: Colors.WHITE,
       lineHeight: 20,
@@ -52,13 +52,13 @@ export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
       color: Colors.WHITE,
     },
     text18Contrast: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.regular,
       lineHeight: 20,
       color: Colors.WHITE,
     },
     text15Bold: {
-      fontFamily: 'Montserrat-SemiBold',
+      fontFamily: 'Montserrat-Bold',
       fontSize: 15,
       lineHeight: 20,
     },
@@ -69,42 +69,42 @@ export default function ({ FontSize, Colors }: ThemeVariables): ThemeFonts {
       lineHeight: 20,
     },
     textLarge: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.large,
       color: Colors.GREEN_DARK,
     },
     titleSmall: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.small * 2,
       fontWeight: 'bold',
       color: Colors.GREEN_DARK,
     },
     titleRegular: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.regular * 2,
       fontWeight: 'bold',
       color: Colors.GREEN_DARK,
     },
     titleLarge: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       fontSize: FontSize.large * 2,
       fontWeight: 'bold',
       color: Colors.GREEN_DARK,
     },
     textCenter: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       textAlign: 'center',
     },
     textJustify: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       textAlign: 'justify',
     },
     textLeft: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       textAlign: 'left',
     },
     textRight: {
-      fontFamily: 'Montserrat-Regular',
+      fontFamily: 'Montserrat-Medium',
       textAlign: 'right',
     },
     textPrimary: {

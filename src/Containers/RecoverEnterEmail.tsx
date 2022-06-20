@@ -9,14 +9,15 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 import { validateEmail } from '@/Utils/validations/string'
 import EmailOkIcon from '@/Assets/Images/iconsSVG/emailOk.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import { useLazyVerifyEmailQuery } from '@/Services/modules/auth'
 import { setSignInEmail } from '@/Store/Auth'
-import { RECOVER_ENTER_PASSWORD } from '@/Constants/screens'
 import { DEFAULT_EMAIL } from '@/Config'
+import { ENTER_EMAIL_SCREEN, RECOVER_ENTER_PASSWORD } from '@/Constants/screens'
 
 interface Props {
   navigation: any
@@ -60,63 +61,90 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
   }
 
   const errorStyle =
-    emailInvalid || emailUnknown
+    (emailInvalid || emailUnknown) && email.length
       ? { borderColor: Colors.DARK_BLUE, color: Colors.DARK_BLUE }
       : {}
 
   const emailValidStyle =
-    !emailInvalid || !emailUnknown
+    (!emailInvalid || !emailUnknown) && email.length
       ? { borderColor: Colors.GREEN_MAIN, color: Colors.GREEN_MAIN }
       : {}
 
   return (
-    <View style={Layout.colCenter}>
-      {emailInvalid || emailUnknown ? (
-        <Image source={lockError} style={styles.image} />
-      ) : (
-        <Image source={lockOk} style={styles.image} />
-      )}
-
-      <Text
-        marginB-20
-        style={{ ...Fonts.textRegularBold, color: Colors.GREEN_DARK }}
-      >
-        What's your Email?
-      </Text>
-      {errorHintOpen && data?.error && (
-        <TouchableOpacity
-          style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
-          onPress={() => setErrorHintOpen(false)}
-        >
+    <ScrollView>
+      <View flex-1 style={[Layout.colCenter]}>
+        <View style={[Layout.colVCenter, { marginTop: 90, marginBottom: 45 }]}>
+          {(emailInvalid || emailUnknown) && email.length ? (
+            <Image source={lockError} style={styles.image} />
+          ) : (
+            <Image source={lockOk} style={styles.image} />
+          )}
+        </View>
+        <View flex-1>
           <Text
-            style={[Fonts.textRegular, { lineHeight: 20, color: Colors.WHITE }]}
+            center
+            marginB-20
+            style={{ ...Fonts.textRegularBold, color: Colors.GREEN_DARK }}
           >
-            {data?.error}
+            What's your Email?
           </Text>
-          <CloseIcon style={{ marginLeft: 10 }} />
-        </TouchableOpacity>
-      )}
-      <View row centerV>
-        <TextInput
-          onChangeText={e => setAndCheckEmail(e)}
-          value={email}
-          onSubmitEditing={() => handleVerifyEmail()}
-          style={{
-            ...Common.textInput,
-            ...emailValidStyle,
-            ...errorStyle,
-          }}
-        />
-        {emailInvalid || emailUnknown ? (
-          <InputErrorIcon style={Common.inputIcon} />
-        ) : (
-          <EmailOkIcon style={Common.inputIcon} />
-        )}
+
+          {errorHintOpen && data?.error && (
+            <TouchableOpacity
+              style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
+              onPress={() => setErrorHintOpen(false)}
+            >
+              <Text
+                style={[
+                  Fonts.textRegular,
+                  { lineHeight: 20, color: Colors.WHITE },
+                ]}
+              >
+                {data?.error}
+              </Text>
+              <CloseIcon style={{ marginLeft: 10 }} />
+            </TouchableOpacity>
+          )}
+          <View row centerV>
+            <TextInput
+              onChangeText={e => setAndCheckEmail(e)}
+              value={email}
+              onSubmitEditing={() => handleVerifyEmail()}
+              style={{
+                ...Common.textInput,
+                ...emailValidStyle,
+                ...errorStyle,
+              }}
+            />
+            {emailInvalid || emailUnknown
+              ? email.length > 0 && <InputErrorIcon style={Common.inputIcon} />
+              : email.length > 0 && <EmailOkIcon style={Common.inputIcon} />}
+          </View>
+          {(isLoading || isFetching) && (
+            <ActivityIndicator color={Colors.GREEN_MAIN} />
+          )}
+        </View>
+        <View style={Layout.row}>
+          <Text
+            marginT-15
+            style={[Fonts.text15Bold, { color: Colors.GREEN_DARK }]}
+          >
+            Remember you password?
+          </Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate(ENTER_EMAIL_SCREEN)}
+          >
+            <Text
+              marginL-4
+              marginT-15
+              style={[Fonts.text15Bold, { color: Colors.GREEN_MAIN }]}
+            >
+              Login
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      {(isLoading || isFetching) && (
-        <ActivityIndicator color={Colors.GREEN_MAIN} />
-      )}
-    </View>
+    </ScrollView>
   )
 }
 

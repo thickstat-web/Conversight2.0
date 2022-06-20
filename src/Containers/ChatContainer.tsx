@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
-import { StyleSheet,  } from 'react-native'
+import { StyleSheet, } from 'react-native'
 import { View, Text } from 'react-native-ui-lib'
-import { Brand, Button, } from '@/Components'
+import { Brand, Button, LayoutNoInternet, } from '@/Components'
 import AthenaChatContainer from './Chat/AthenaChatContainer'
 
 const ChatContainer = () => {
@@ -14,20 +14,23 @@ const ChatContainer = () => {
   }
 
   return (
-    <View flex>
-      <View flex-4 center>
-        <Brand width={'60%'} />
-      </View>
-      <View flex-6 centerH margin-20>
-        <View flex center>
-          <Text text60>Chat - In Progress</Text>
+    <LayoutNoInternet>
+      <View flex>
+        <View flex-4 center>
+          <Brand width={'60%'} />
         </View>
-        <View flex center>
-          <Button label="Chat" onPress={openChat} />
+        <View flex-6 centerH margin-20>
+          <View flex center>
+            <Text text60>Chat - In Progress</Text>
+          </View>
+          <View flex center>
+            <Button label="Chat" onPress={openChat} />
+          </View>
         </View>
+        <AthenaChatContainer ref={chatRef} />
       </View>
-      <AthenaChatContainer ref={chatRef} />
-    </View>
+    </LayoutNoInternet>
+
   )
 }
 

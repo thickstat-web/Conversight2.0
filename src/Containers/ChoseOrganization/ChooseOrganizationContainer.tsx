@@ -21,9 +21,14 @@ import {
   Animated,
   Easing,
 } from 'react-native'
+import { ScrollView } from 'react-native-gesture-handler'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { Brand, Button } from '@/Components'
-import { selectAllOrganizations, selectSignInOrg } from '@/Store/Auth'
+import { Brand } from '@/Components'
+import {
+  selectAllOrganizations,
+  selectSignInOrg,
+  setPassword,
+} from '@/Store/Auth'
 import PickerIcon from '@/Assets/Images/iconsSVG/pickerIcon.svg'
 import SelectedOptionIcon from '@/Assets/Images/iconsSVG/selectedOptionArrow.svg'
 import NotSelectedOptionIcon from '@/Assets/Images/iconsSVG/notSelectedOptionArrow.svg'
@@ -31,7 +36,6 @@ import NewLabel from '@/Assets/Images/iconsSVG/newLabel.svg'
 import { getOrgByOrgId } from '@/Utils/array'
 import { setSelectedOrg } from '@/Store/Auth'
 import OrgPassword from './OrgPassword'
-import { ScrollView } from 'react-native-gesture-handler'
 
 type Item = {
   orgId: string
@@ -100,10 +104,14 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const handleSelectOrg = (org: any) => {
     const current = getOrgByOrgId(organizations, org)
     dispatch(setSelectedOrg(current))
+    dispatch(setPassword(''))
     hideModal()
   }
 
-  const renderCustomPickerModal = ({ visible }: RenderCustomModalProps) => {
+  const renderCustomPickerModal = ({
+    visible,
+    toggleModal,
+  }: RenderCustomModalProps) => {
     const animationStyles = {
       height: (screenHeight * 58) / 100,
       width: screenWidth,
@@ -124,6 +132,10 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
         style={styles.modalView}
         animationType="slide"
         transparent
+        onBackgroundPress={() => {
+          hideModal()
+          toggleModal(false)
+        }}
       >
         <Animated.View style={[styles.modalView, animationStyles]}>
           <Text
@@ -156,7 +168,9 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     <View
       style={[
         styles.pickerBox,
-        !!selectedOrg?.name && { borderColor: Colors.GREEN_MAIN },
+        !!selectedOrg?.name
+          ? { borderColor: Colors.GREEN_MAIN }
+          : { borderColor: Colors.GREEN_DARK },
       ]}
     >
       <Text
@@ -221,7 +235,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   }
 
   return (
-    <ScrollView>
+    <ScrollView keyboardShouldPersistTaps={'always'}>
       <View marginB-25>
         <View center>
           <Brand height={290} width={'60%'} />

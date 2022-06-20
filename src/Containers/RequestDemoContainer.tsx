@@ -86,6 +86,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
+                  placeholderTextColor={Colors.GREEN_DARK}
                   onBlur={onBlur}
                   value={value}
                   onChangeText={onChange}
@@ -111,6 +112,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
+                  placeholderTextColor={Colors.GREEN_DARK}
                   onBlur={onBlur}
                   value={value}
                   onChangeText={onChange}
@@ -141,6 +143,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   keyboardType="email-address"
+                  placeholderTextColor={Colors.GREEN_DARK}
                   onBlur={onBlur}
                   value={value}
                   onChangeText={onChange}
@@ -166,6 +169,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
               }}
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
+                  placeholderTextColor={Colors.GREEN_DARK}
                   keyboardType="phone-pad"
                   onBlur={onBlur}
                   value={value}

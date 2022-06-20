@@ -3,7 +3,15 @@ import { SafeAreaView, StatusBar } from 'react-native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
 import { useAppDispatch, useAuth, useTheme } from '@/Hooks'
-import { AvatarChanged, CurrentAvatar, ReadFAQ, RecoverComplete, RecoverEnterEmail, RecoverEnterPassword, StartupContainer } from '@/Containers'
+import {
+  AvatarChanged,
+  CurrentAvatar,
+  ReadFAQ,
+  RecoverComplete,
+  RecoverEnterEmail,
+  RecoverEnterPassword,
+  StartupContainer,
+} from '@/Containers'
 import { navigationRef } from './utils'
 import {
   AVATAR_CHANGED,
@@ -41,12 +49,9 @@ import { setModalSearchOpen } from '@/Store/Faq'
 import InsightsWT from '@/Containers/WalkThrough/InsightsWT'
 import DemoRequested from '@/Containers/DemoRequested'
 
-
 const Stack = createStackNavigator()
 
-const mainOptions = {
-
-}
+const mainOptions = {}
 
 // @refresh reset
 const ApplicationNavigator = () => {
@@ -78,21 +83,21 @@ const ApplicationNavigator = () => {
         ]}
       >
         <NavigationContainer theme={NavigationTheme} ref={navigationRef}>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
-            headerBackImage: () => <BackArrow />,
-          }}
-        >
-          {!isSignedIn ? (
-            <Stack.Screen
-              name={LOGIN_NAVIGATOR}
-              component={LoginNavigator}
-              options={{
-                animationEnabled: false,
-              }}
-            />
+          <Stack.Navigator
+            screenOptions={{
+              headerShown: false,
+              headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
+              headerBackImage: () => <BackArrow />,
+            }}
+          >
+            {!isSignedIn ? (
+              <Stack.Screen
+                name={LOGIN_NAVIGATOR}
+                component={LoginNavigator}
+                options={{
+                  animationEnabled: false,
+                }}
+              />
             ) : (
               <>
                 <Stack.Screen
@@ -109,53 +114,59 @@ const ApplicationNavigator = () => {
                   }}
                 />
 
-              <Stack.Screen
-                name={READ_FAQ}
-                component={ReadFAQ}
-                options={{
-                  headerRight: () => <TouchableOpacity onPress={() => { dispatch(setModalSearchOpen(true)) }}>
-                    < SearchIcon />
-                  </TouchableOpacity>,
-                  headerRightContainerStyle: { paddingRight: 15 },
-                  title: 'Need Help?',
-                  headerTitleAlign: 'center',
-                  headerBackImage: () => <BackArrowWhite />,
-                  headerTintColor: Colors.WHITE,
-                  headerStyle: {
-                    backgroundColor: Colors.GREEN_MAIN,
-                  },
-                  headerShown: true,
-                  headerBackTitleVisible: false,
-                  animationEnabled: true,
-                }}
-              />
+                <Stack.Screen
+                  name={READ_FAQ}
+                  component={ReadFAQ}
+                  options={{
+                    headerRight: () => (
+                      <TouchableOpacity
+                        onPress={() => {
+                          dispatch(setModalSearchOpen(true))
+                        }}
+                      >
+                        <SearchIcon />
+                      </TouchableOpacity>
+                    ),
+                    headerRightContainerStyle: { paddingRight: 15 },
+                    title: 'Need Help?',
+                    headerTitleAlign: 'center',
+                    headerBackImage: () => <BackArrowWhite />,
+                    headerTintColor: Colors.WHITE,
+                    headerStyle: {
+                      backgroundColor: Colors.GREEN_MAIN,
+                    },
+                    headerShown: true,
+                    headerBackTitleVisible: false,
+                    animationEnabled: true,
+                  }}
+                />
 
-              <Stack.Screen
-                name={SETTINGS}
-                component={SettingsContainer}
-                options={{
-                  title: 'Profile & Settings',
-                  headerTitleAlign: 'center',
-                  headerRight: () => <SaveIcon />,
-                  headerRightContainerStyle: { paddingRight: 15 },
-                  headerTintColor: Colors.WHITE,
-                  headerBackImage: () => <BackArrowWhite />,
-                  headerStyle: {
-                    backgroundColor: Colors.GREEN_MAIN,
-                  },
-                  headerShown: true,
-                }}
-              />
+                <Stack.Screen
+                  name={SETTINGS}
+                  component={SettingsContainer}
+                  options={{
+                    title: 'Profile & Settings',
+                    headerTitleAlign: 'center',
+                    headerRight: () => <SaveIcon />,
+                    headerRightContainerStyle: { paddingRight: 15 },
+                    headerTintColor: Colors.WHITE,
+                    headerBackImage: () => <BackArrowWhite />,
+                    headerStyle: {
+                      backgroundColor: Colors.GREEN_MAIN,
+                    },
+                    headerShown: true,
+                  }}
+                />
 
-              <Stack.Screen
-                name={CHANGE_ORGANIZATION}
-                component={ChangeOrganizationContainer}
-                options={{
-                  title: 'Change Organization',
-                  headerTitleAlign: 'center',
-                  headerShown: true,
-                }}
-              />
+                <Stack.Screen
+                  name={CHANGE_ORGANIZATION}
+                  component={ChangeOrganizationContainer}
+                  options={{
+                    title: 'Change Organization',
+                    headerTitleAlign: 'center',
+                    headerShown: true,
+                  }}
+                />
 
                 <Stack.Screen
                   name={CHANGE_ORGANIZATION_PASSWORD}
@@ -169,106 +180,105 @@ const ApplicationNavigator = () => {
                   }}
                 />
 
-              <Stack.Screen
-                name={REQUEST_DEMO}
-                component={RequestDemoContainer}
-                options={{
-                  title: 'Request a Demo',
-                  headerTitleAlign: 'center',
-                  headerTransparent: false,
-                  headerShown: true,
-                  headerBackTitleVisible: false,
-                  animationEnabled: true,
-                }}
-              />
+                <Stack.Screen
+                  name={REQUEST_DEMO}
+                  component={RequestDemoContainer}
+                  options={{
+                    title: 'Request a Demo',
+                    headerTitleAlign: 'center',
+                    headerTransparent: false,
+                    headerShown: true,
+                    headerBackTitleVisible: false,
+                    animationEnabled: true,
+                  }}
+                />
 
-              <Stack.Screen
-                name={WALK_THROUGH_AUTHORIZED}
-                component={WalkThroughAuthorizesContainer}
-                options={{
-                  headerShown: false,
-                  animationEnabled: true,
-                }}
-              />
+                <Stack.Screen
+                  name={WALK_THROUGH_AUTHORIZED}
+                  component={WalkThroughAuthorizesContainer}
+                  options={{
+                    headerShown: false,
+                    animationEnabled: true,
+                  }}
+                />
 
-              <Stack.Screen
-                name={WT_INSIGHTS}
-                component={InsightsWT}
-                options={{
-                  headerTransparent: true,
-                  title: "",
-                  headerShown: true,
-                  animationEnabled: true,
-                }}
-              />
+                <Stack.Screen
+                  name={WT_INSIGHTS}
+                  component={InsightsWT}
+                  options={{
+                    headerTransparent: true,
+                    title: '',
+                    headerShown: true,
+                    animationEnabled: true,
+                  }}
+                />
 
-              <Stack.Screen
-                name={CHANGE_AVATAR}
-                component={CurrentAvatar}
-                options={{        
-                  headerTransparent: true,
-                  title: "Profile Avatar",
-                  headerShown: true,
-                  animationEnabled: true,
-                }}
-              />
+                <Stack.Screen
+                  name={CHANGE_AVATAR}
+                  component={CurrentAvatar}
+                  options={{
+                    headerTransparent: true,
+                    title: 'Profile Avatar',
+                    headerShown: true,
+                    animationEnabled: true,
+                  }}
+                />
 
-              <Stack.Screen
-                name={AVATAR_CHANGED}
-                component={AvatarChanged}
-                options={{
-                  headerTransparent: true,
-                  title: "Profile Avatar",
-                  headerShown: true,
-                  animationEnabled: true,
-                }}
-              />
+                <Stack.Screen
+                  name={AVATAR_CHANGED}
+                  component={AvatarChanged}
+                  options={{
+                    headerTransparent: true,
+                    title: 'Profile Avatar',
+                    headerShown: true,
+                    animationEnabled: true,
+                  }}
+                />
 
-              <Stack.Screen
-                name={DEMO_REQUESTED}
-                component={DemoRequested}
-                options={{
-                  headerTransparent: true,
-                  title: 'Request a Demo',
-                  headerShown: true,
-                  headerTitleAlign: "center",
-                  animationEnabled: true,
-                }}
-              />
+                <Stack.Screen
+                  name={DEMO_REQUESTED}
+                  component={DemoRequested}
+                  options={{
+                    headerTransparent: true,
+                    title: 'Request a Demo',
+                    headerShown: true,
+                    headerTitleAlign: 'center',
+                    animationEnabled: true,
+                  }}
+                />
 
-              <Stack.Screen
-                name={RECOVER_ENTER_EMAIL}
-                component={RecoverEnterEmail}
-                options={{
-                  headerShown: true,
-                  title: 'Recover Credentials',
-                  headerTitleAlign: 'center',
-                }}
-              />
-              <Stack.Screen
-                name={RECOVER_ENTER_PASSWORD}
-                component={RecoverEnterPassword}
-                options={{
-                  headerShown: true,
-                  title: 'Recover Credentials',
-                  headerTitleAlign: 'center',
-                }}
-              />
-              <Stack.Screen
-                name={RECOVER_COMPLETED}
-                component={RecoverComplete}
-                options={{
-                  headerShown: true,
-                  title: 'Recover Credentials',
-                  headerTitleAlign: 'center',
-                }}
-              />
-
-            </>
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaView>
+                <Stack.Screen
+                  name={RECOVER_ENTER_EMAIL}
+                  component={RecoverEnterEmail}
+                  options={{
+                    headerShown: true,
+                    title: 'Recover Credentials',
+                    headerTitleAlign: 'center',
+                  }}
+                />
+                <Stack.Screen
+                  name={RECOVER_ENTER_PASSWORD}
+                  component={RecoverEnterPassword}
+                  options={{
+                    headerShown: true,
+                    title: 'Recover Credentials',
+                    headerTitleAlign: 'center',
+                  }}
+                />
+                <Stack.Screen
+                  name={RECOVER_COMPLETED}
+                  component={RecoverComplete}
+                  options={{
+                    headerShown: true,
+                    title: 'Recover Credentials',
+                    headerTitleAlign: 'center',
+                  }}
+                />
+              </>
+            )}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaView>
     </>
   )
 }
