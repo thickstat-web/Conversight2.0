@@ -13,6 +13,7 @@ import { logRequestResponse } from './logging'
 
 const csApiBaseQuery = fetchBaseQuery({ baseUrl: Config.CS_API_URL })
 const botAPIBaseQuery = fetchBaseQuery({ baseUrl: Config.BOT_API_URL })
+const ingressAPIBaseQuery = fetchBaseQuery({ baseUrl: Config.INGRESS_API_URL })
 
 const buildBaseQueryWithInterceptor = (
   baseQuery: BaseQueryFn<
@@ -65,5 +66,12 @@ export const csApi = createApi({
 export const botApi = createApi({
   reducerPath: 'botApi',
   baseQuery: buildBaseQueryWithInterceptor(botAPIBaseQuery),
+  endpoints: () => ({}),
+})
+
+// Ingress API Service
+export const ingressApi = createApi({
+  reducerPath: 'ingressApi',
+  baseQuery: buildBaseQueryWithInterceptor(ingressAPIBaseQuery),
   endpoints: () => ({}),
 })

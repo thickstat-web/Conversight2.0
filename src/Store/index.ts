@@ -13,15 +13,17 @@ import {
 import { configureStore, ThunkAction } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 
-import { csApi, botApi } from '@/Services/api'
+import { csApi, botApi, ingressApi } from '@/Services/api'
 import * as modules from '@/Services/modules'
 import theme from './Theme'
 import authReducer from './Auth'
+import appReducer from './App'
 import settingsReducer from './Settings'
 import faqReducer from './Faq'
 import {
   AUTH_REDUCER,
   THEME_REDUCER,
+  APP_REDUCER,
   SETTING_REDUCER,
   FAQ_REDUCER,
 } from '@/Constants/redux'
@@ -29,6 +31,7 @@ import {
 const reducers = combineReducers({
   theme,
   authReducer,
+  appReducer,
   settingsReducer,
   faqReducer,
   ...Object.values(modules).reduce(
@@ -44,7 +47,7 @@ const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
   whitelist: [THEME_REDUCER, AUTH_REDUCER],
-  blackList: [SETTING_REDUCER, FAQ_REDUCER],
+  blackList: [APP_REDUCER, SETTING_REDUCER, FAQ_REDUCER],
 }
 
 const persistedReducer = persistReducer(persistConfig, reducers)
@@ -58,7 +61,11 @@ const store = configureStore({
         : {
           ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
         },
-    }).concat([csApi.middleware as Middleware, botApi.middleware as Middleware])
+    }).concat([
+      csApi.middleware as Middleware,
+      botApi.middleware as Middleware,
+      ingressApi.middleware as Middleware,
+    ])
 
     if (__DEV__ && !process.env.JEST_WORKER_ID) {
       const createDebugger = require('redux-flipper').default

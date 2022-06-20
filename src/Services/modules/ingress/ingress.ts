@@ -1,0 +1,61 @@
+import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
+import { ResponseType } from '@/Types/Common'
+import {
+  SendChatMessage,
+  SendChatMessageResponse,
+} from '@/Types/SendChatMessage'
+import { RawChatMessage } from '@/Types/ChatMessage'
+
+export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
+  return build.mutation<ResponseType<RawChatMessage>, Partial<SendChatMessage>>(
+    {
+      query: body => ({
+        url: '/converse/v2',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (response: SendChatMessageResponse) => {
+        const {
+          status: respStatus,
+          response: { data },
+        } = response
+
+        if (respStatus === 'failed') {
+          return {
+            success: false,
+            data: null,
+          }
+        }
+
+        const {
+          columns,
+          column_metadata,
+          colType,
+          createdAt,
+          val,
+          id,
+          processedUtterance,
+          text,
+          utterance,
+          status,
+        } = data
+        let transformedData = {
+          columns,
+          columnMetadata: column_metadata,
+          colType,
+          createdAt,
+          base64Data: val,
+          id,
+          displayUtterance: utterance,
+          text,
+          utterance: processedUtterance,
+          status,
+        }
+        return {
+          success: ['ok'].includes(respStatus), // , 'clarification'
+          data: transformedData,
+        }
+      },
+    },
+  )
+}

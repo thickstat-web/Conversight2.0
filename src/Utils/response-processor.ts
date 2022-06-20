@@ -1,20 +1,32 @@
 import { atob } from 'react-native-quick-base64'
 import { cleanseColumn } from '@/Utils/common'
 
-type MetaData = {
+type KeyValue = {
   [key: string]: any
+}
+
+interface MetaData extends KeyValue { }
+
+interface ProcessedResponse {
+  columns: string[]
+  columnMetadata: MetaData
+  values: KeyValue[]
 }
 
 export const processResponse = (
   columns: string[],
   column_metadata: MetaData,
   base64Value: string,
-) => {
+): ProcessedResponse => {
+  // Decode base64 to array of values
   const decoded = atob(base64Value)
   const valueArr = JSON.parse(decoded)
-  const cleansedColumns = columns.map(cleanseColumn)
-  const col_meta: MetaData = {}
 
+  // Cleanse column names
+  const cleansedColumns = columns.map(cleanseColumn)
+
+  // Cleanse and find numberic columns from metadata
+  const col_meta: MetaData = {}
   for (const column of Object.keys(column_metadata)) {
     const { category, data_type, additional_data } = column_metadata[column]
     const isNumericFormat =
@@ -28,15 +40,17 @@ export const processResponse = (
     col_meta[cleansedColumn] = { ...column_metadata[column], isNumericFormat }
   }
 
+  // Extract array of name, value pairs
   const values = []
-  const init: MetaData = {}
+  const colsCount = cleansedColumns.length
   for (const row of valueArr) {
-    const record = cleansedColumns.reduce((acc, column, index) => {
+    const record: KeyValue = {}
+    for (let index = 0; index < colsCount; index++) {
+      const column = cleansedColumns[index]
       const { isNumericFormat } = col_meta[column]
-      acc[column] = isNumericFormat ? Number(row[index]) : row[index]
-      return acc
-    }, init)
+      record[column] = isNumericFormat ? Number(row[index]) : row[index]
+    }
     values.push(record)
   }
-  return { columns: cleansedColumns, column_metadata: col_meta, values }
+  return { columns: cleansedColumns, columnMetadata: col_meta, values }
 }

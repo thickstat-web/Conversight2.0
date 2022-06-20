@@ -1,10 +1,14 @@
 import 'react-native-gesture-handler'
 import React from 'react'
+import { LogBox } from 'react-native'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/lib/integration/react'
 import { store, persistor } from '@/Store'
 import ApplicationNavigator from '@/Navigators/Application'
 import './Translations'
+
+// To avoid showing cyclic import warning in victory native charts modules
+LogBox.ignoreLogs(['Require cycle: node_modules/victory'])
 
 const App = () => (
   <Provider store={store}>
