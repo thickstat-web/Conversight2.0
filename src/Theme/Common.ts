@@ -25,7 +25,8 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         backgroundColor: Colors.transparent,
       },
       textInput: {
-        fontFamily: "Montserrat-SemiBold",
+        flex: 1,
+        fontFamily: 'Montserrat-SemiBold',
         fontSize: 18,
         minWidth: 300,
         maxWidth: 300,
@@ -34,7 +35,7 @@ export default function ({ Colors, ...args }: ThemeCommonParams) {
         backgroundColor: Colors.WHITE,
         color: Colors.GREEN_DARK,
         // minHeight: 50,
-        textAlign: 'center',
+        textAlign: 'left',
         borderRadius: 8,
         paddingRight: 36,
         paddingLeft: 8,
