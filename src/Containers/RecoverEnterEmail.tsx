@@ -25,7 +25,8 @@ interface Props {
 const RecoverEnterEmail = ({ navigation }: Props) => {
   const { Layout, Fonts, Colors, Common } = useTheme()
   const dispatch = useAppDispatch()
-  const [email, setEmail] = React.useState<string>('sakthivel.murugasamy@conversight.ai')
+  const [email, setEmail] = React.useState<string>('')
+  // sakthivel.murugasamy@conversight.ai
   const [emailInvalid, setEmailInvalid] = React.useState<boolean>(false)
   const [emailUnknown, setEmailUnknown] = React.useState<boolean>(false)
   const [errorHintOpen, setErrorHintOpen] = React.useState<boolean>(false)
