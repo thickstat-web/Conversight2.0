@@ -12,7 +12,7 @@ import {
   RecoverEnterPassword,
   StartupContainer,
 } from '@/Containers'
-import { default as ChatFAQ } from '@/Containers/Chat/FAQ'
+// import { default as ChatFAQ } from '@/Containers/Chat/FAQ'
 import { default as AthenaChatContainer } from '@/Containers/Chat/AthenaChatContainer'
 import { navigationRef } from './utils'
 import {
@@ -148,25 +148,6 @@ const ApplicationNavigator = () => {
                   }}
                 />
                 <Stack.Screen
-                  name={CHAT_FAQ}
-                  component={ChatFAQ}
-                  options={{
-                    // headerRight: SearchButton,
-                    headerRightContainerStyle: { paddingRight: 15 },
-                    title: 'Athena Recommendations',
-                    headerTitleAlign: 'center',
-                    // headerBackImage: renderBackArrowWhite,
-                    headerTintColor: Colors.WHITE,
-                    headerStyle: {
-                      backgroundColor: Colors.GREEN_MAIN,
-                    },
-                    headerShown: true,
-                    headerBackTitleVisible: false,
-                    animationEnabled: true,
-                  }}
-                />
-
-                <Stack.Screen
                   name={READ_FAQ}
                   component={ReadFAQ}
                   options={{
@@ -257,17 +238,17 @@ const ApplicationNavigator = () => {
                   }}
                 />
 
-              <Stack.Screen
-                name={CHANGE_AVATAR}
-                component={CurrentAvatar}
-                options={{        
-                  headerTitleAlign:"center",
-                  headerTransparent: true,
-                  title: "Profile Avatar",
-                  headerShown: true,
-                  animationEnabled: true,
-                }}
-              />
+                <Stack.Screen
+                  name={CHANGE_AVATAR}
+                  component={CurrentAvatar}
+                  options={{
+                    headerTitleAlign: 'center',
+                    headerTransparent: true,
+                    title: 'Profile Avatar',
+                    headerShown: true,
+                    animationEnabled: true,
+                  }}
+                />
 
                 <Stack.Screen
                   name={AVATAR_CHANGED}

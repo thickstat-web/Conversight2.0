@@ -38,7 +38,12 @@ declare type PickerProps = {
   isSelected: boolean
 }
 
-const Header = ({ title, onClose }: { title: string; onClose: () => void }) => {
+interface HeaderProps {
+  title: string
+  onClose: () => void
+}
+
+const Header = ({ title, onClose }: HeaderProps) => {
   const { Colors, Fonts } = useTheme()
   return (
     <View row centerV paddingV-6 style={{ backgroundColor: Colors.GREEN_MAIN }}>
@@ -81,7 +86,11 @@ const DatasetChooser = ({ onSelect }: Props) => {
     toggleModal,
   }: RenderCustomModalProps) => {
     return (
-      <Modal visible={visible} animationType="slide">
+      <Modal
+        visible={visible}
+        animationType="slide"
+        onRequestClose={() => toggleModal(false)}
+      >
         <View flex style={{ backgroundColor: Colors.WHITE }}>
           <Header title={MODAL_TITLE} onClose={() => toggleModal(false)} />
           <ScrollView style={[Layout.fill]}>
