@@ -22,10 +22,8 @@ module.exports = async () => {
       }),
     },
     resolver: {
-      sourceExts: ['jsx', 'js', 'ts', 'tsx', 'svg', 'png', 'gif'],
-      // assetExts: assetExts.filter(ext => ext !== 'gif'),
+      sourceExts: ['jsx', 'js', 'ts', 'tsx', 'svg', 'png', 'gif', 'jpg'],
       assetExts: assetExts.filter(ext => ext !== 'svg'),
-      // assetExts: assetExts.filter(ext => ext !== 'png'),
     },
   }
 }

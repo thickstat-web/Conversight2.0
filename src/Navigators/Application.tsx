@@ -189,6 +189,7 @@ const ApplicationNavigator = () => {
                 name={CHANGE_AVATAR}
                 component={CurrentAvatar}
                 options={{        
+                  headerTitleAlign:"center",
                   headerTransparent: true,
                   title: "Profile Avatar",
                   headerShown: true,

@@ -24,7 +24,7 @@ const EnterEmailContainer = ({ navigation }: Props) => {
   const { Common, Gutters, Layout, Fonts } = useTheme()
   const dispatch = useAppDispatch()
   // ToDo: Need to remove default email
-  const [email, setEmail] = useState("sakthivel.murugasamy@conversight.ai")
+  const [email, setEmail] = useState("")
   // 'sakthivel.murugasamy@conversight.ai'
   const [emailInvalid, setEmailInvalid] = useState<boolean>(false)
   const [emailUnknown, setEmailUnknown] = useState<boolean>(false)
