@@ -62,3 +62,7 @@ buck-out/
 template/plugins/typescript/template/tsconfig.json
 
 test-data/
+src/Navigators/Tab*.tsx
+src/Utils/chat-history-data.json
+android/app/src/main/assets/index.android.bundle
+package-lock.json

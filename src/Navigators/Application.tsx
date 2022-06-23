@@ -257,16 +257,17 @@ const ApplicationNavigator = () => {
                   }}
                 />
 
-                <Stack.Screen
-                  name={CHANGE_AVATAR}
-                  component={CurrentAvatar}
-                  options={{
-                    headerTransparent: true,
-                    title: 'Profile Avatar',
-                    headerShown: true,
-                    animationEnabled: true,
-                  }}
-                />
+              <Stack.Screen
+                name={CHANGE_AVATAR}
+                component={CurrentAvatar}
+                options={{        
+                  headerTitleAlign:"center",
+                  headerTransparent: true,
+                  title: "Profile Avatar",
+                  headerShown: true,
+                  animationEnabled: true,
+                }}
+              />
 
                 <Stack.Screen
                   name={AVATAR_CHANGED}
