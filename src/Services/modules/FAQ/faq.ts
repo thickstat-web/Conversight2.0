@@ -1,29 +1,25 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
-import { ResponseTypeFAQ } from '@/Types/Common'
-import { FaqRequestData } from '@/Types/FaqRequest'
-import { FaqResponseData } from '@/Types/FaqResponse'
+import { ResponseType } from '@/Types/Common'
+import { FaqRequestData, FaqResponseData } from '@/Types/Faq'
 
 export const getFaq = (build: EndpointBuilder<any, any, any>) => {
-  return build.mutation<ResponseTypeFAQ, Partial<FaqRequestData>>({
+  return build.mutation<ResponseType<string[]>, Partial<FaqRequestData>>({
     query: body => ({
-      url: `/faq?token=${body.token}`,
+      url: '/faq',
       method: 'POST',
       body,
     }),
     transformResponse: (response: FaqResponseData) => {
       const { data, status } = response
-      let FaqResponseData = { status: 'fail' } as FaqResponseData
       if (status === 'ok') {
-        FaqResponseData = { status: 'ok', data }
-      }else{
-        FaqResponseData = {
-            status: 'fail',
-            data: {},
-            error: 'Unable to fetch FAQ, try again later',
+        return { success: true, data }
+      } else {
+        return {
+          success: false,
+          data: [],
+          error: 'Unable to fetch FAQ, try again later',
         }
       }
-
-      return FaqResponseData
     },
   })
 }

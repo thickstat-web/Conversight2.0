@@ -22,6 +22,14 @@ interface ChartProps {
   values: Array<Record<string, number>>
 }
 
+interface PieChartProps extends ChartProps {
+  innerRadious: number
+}
+
+interface BarChartProps extends ChartProps {
+  horizontal: boolean
+}
+
 interface ChartContainerProps {
   columns: string[]
   columnMetadata: ColumnMetadata
@@ -29,7 +37,12 @@ interface ChartContainerProps {
   values: Array<Record<string, any>>
 }
 
-const PieChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
+const PieChart = ({
+  xAxisLabel,
+  yAxisLabel,
+  innerRadious = 0,
+  values,
+}: PieChartProps) => {
   const { width: screenWidth } = Dimensions.get('window')
   return (
     <VictoryPie
@@ -38,10 +51,22 @@ const PieChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
       x={xAxisLabel}
       y={yAxisLabel}
       data={values}
+      cornerRadius={2}
+      innerRadius={innerRadious}
       theme={VictoryTheme.material}
-      cornerRadius={4}
       labelComponent={<VictoryLabel angle={45} textAnchor={'end'} dx={15} />}
       style={{ parent: { alignItems: 'center', paddingLeft: 20 } }}
+    />
+  )
+}
+
+const DonutChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
+  return (
+    <PieChart
+      xAxisLabel={xAxisLabel}
+      yAxisLabel={yAxisLabel}
+      values={values}
+      innerRadious={64}
     />
   )
 }
@@ -179,14 +204,12 @@ const LineChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
   )
 }
 
-const BarChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
-  // console.log(
-  //   `[BarChart] xAxisLabel: ${xAxisLabel}, yAxisLabel: ${yAxisLabel}, values: ${JSON.stringify(
-  //     values,
-  //     null,
-  //     2,
-  //   )}`,
-  // )
+const BarChart = ({
+  xAxisLabel,
+  yAxisLabel,
+  horizontal = true,
+  values,
+}: BarChartProps) => {
   const { width: screenWidth } = Dimensions.get('window')
   return (
     <VictoryChart
@@ -240,6 +263,7 @@ const BarChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
         x={xAxisLabel}
         y={yAxisLabel}
         data={values}
+        horizontal={horizontal}
         labels={({ datum }) => numeral(datum[yAxisLabel]).format('0,0.00')}
         alignment="middle"
         labelComponent={
@@ -258,6 +282,17 @@ const BarChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
   )
 }
 
+const ColumnChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
+  return (
+    <BarChart
+      xAxisLabel={xAxisLabel}
+      yAxisLabel={yAxisLabel}
+      values={values}
+      horizontal={false}
+    />
+  )
+}
+
 export default function ChartContainer({
   columns,
   columnMetadata,
@@ -269,48 +304,75 @@ export default function ChartContainer({
   }
 
   let chart = null
-
-  // if (getChartFormat('PieChart')) {
-  //   let chartFormat = getChartFormat('PieChart')
-  //   chart = (
-  //     <PieChart
-  //       xAxisLabel={chartFormat?.xAxisField}
-  //       yAxisLabel={chartFormat?.yAxisField}
-  //       values={values}
-  //     />
-  //   )
-  // } else
   const chartFormat = getChartFormat()
-  console.log(`[ChartContainer] type: ${chartFormat?.type}`)
-  if (chartFormat?.type === 'AreaChart') {
+  // console.log(`[ChartContainer] type: ${chartFormat?.type}`)
+  if (
+    chartFormat?.type === 'AreaChart' &&
+    typeof chartFormat?.yField === 'string'
+  ) {
     chart = (
       <AreaChart
-        xAxisLabel={chartFormat?.xAxisField}
-        yAxisLabel={chartFormat?.yAxisField}
+        xAxisLabel={chartFormat?.xField}
+        yAxisLabel={chartFormat?.yField}
         values={values}
       />
     )
-  } else if (chartFormat?.type === 'LineChart') {
+  } else if (
+    chartFormat?.type === 'LineChart' &&
+    typeof chartFormat?.yField === 'string'
+  ) {
     chart = (
       <LineChart
-        xAxisLabel={chartFormat?.xAxisField}
-        yAxisLabel={chartFormat?.yAxisField}
+        xAxisLabel={chartFormat?.xField}
+        yAxisLabel={chartFormat?.yField}
         values={values}
       />
     )
-  } else if (chartFormat?.type === 'BarChart') {
+  } else if (
+    chartFormat?.type === 'BarChart' &&
+    typeof chartFormat?.yField === 'string'
+  ) {
     chart = (
       <BarChart
-        xAxisLabel={chartFormat?.xAxisField}
-        yAxisLabel={chartFormat?.yAxisField}
+        xAxisLabel={chartFormat?.xField}
+        yAxisLabel={chartFormat?.yField}
+        horizontal={true}
         values={values}
       />
     )
-  } else if (chartFormat?.type === 'PieChart') {
+  } else if (
+    chartFormat?.type === 'ColumnChart' &&
+    typeof chartFormat?.yField === 'string'
+  ) {
+    chart = (
+      <ColumnChart
+        xAxisLabel={chartFormat?.xField}
+        yAxisLabel={chartFormat?.yField}
+        values={values}
+      />
+    )
+  } else if (
+    chartFormat?.type === 'PieChart' &&
+    chartFormat?.angleField &&
+    chartFormat?.colorField
+  ) {
     chart = (
       <PieChart
-        xAxisLabel={chartFormat?.xAxisField}
-        yAxisLabel={chartFormat?.yAxisField}
+        xAxisLabel={chartFormat?.angleField}
+        yAxisLabel={chartFormat?.colorField}
+        innerRadious={0}
+        values={values}
+      />
+    )
+  } else if (
+    chartFormat?.type === 'DonutChart' &&
+    chartFormat?.angleField &&
+    chartFormat?.colorField
+  ) {
+    chart = (
+      <DonutChart
+        xAxisLabel={chartFormat?.angleField}
+        yAxisLabel={chartFormat?.colorField}
         values={values}
       />
     )

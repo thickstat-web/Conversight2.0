@@ -12,12 +12,16 @@ import {
   RecoverEnterPassword,
   StartupContainer,
 } from '@/Containers'
+import { default as ChatFAQ } from '@/Containers/Chat/FAQ'
+import { default as AthenaChatContainer } from '@/Containers/Chat/AthenaChatContainer'
 import { navigationRef } from './utils'
 import {
   AVATAR_CHANGED,
   CHANGE_AVATAR,
   CHANGE_ORGANIZATION,
   CHANGE_ORGANIZATION_PASSWORD,
+  CHAT_FAQ,
+  ATHENA_CHAT_SCREEN,
   DEMO_REQUESTED,
   DRAWER_NAVIGATOR,
   LOGIN_NAVIGATOR,
@@ -51,14 +55,26 @@ import DemoRequested from '@/Containers/DemoRequested'
 
 const Stack = createStackNavigator()
 
-const mainOptions = {}
+const renderBackArrowWhite = () => <BackArrowWhite />
+const renderBackArrow = () => <BackArrow />
+const renderSaveIcon = () => <SaveIcon />
+const SearchButton = () => {
+  const dispatch = useAppDispatch()
+  return (
+    <TouchableOpacity
+      onPress={() => {
+        dispatch(setModalSearchOpen(true))
+      }}
+    >
+      <SearchIcon />
+    </TouchableOpacity>
+  )
+}
 
 // @refresh reset
 const ApplicationNavigator = () => {
   const { isSignedIn } = useAuth()
   const { Colors, Layout, darkMode, NavigationTheme } = useTheme()
-  const { colors } = NavigationTheme
-  const dispatch = useAppDispatch()
 
   return (
     <>
@@ -87,7 +103,7 @@ const ApplicationNavigator = () => {
             screenOptions={{
               headerShown: false,
               headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
-              headerBackImage: () => <BackArrow />,
+              headerBackImage: renderBackArrow,
             }}
           >
             {!isSignedIn ? (
@@ -113,24 +129,52 @@ const ApplicationNavigator = () => {
                     headerTitleAlign: 'center',
                   }}
                 />
+                <Stack.Screen
+                  name={ATHENA_CHAT_SCREEN}
+                  component={AthenaChatContainer}
+                  options={{
+                    // headerRight: SearchButton,
+                    headerRightContainerStyle: { paddingRight: 15 },
+                    title: 'Ask Athena',
+                    headerTitleAlign: 'center',
+                    // headerBackImage: renderBackArrowWhite,
+                    headerTintColor: Colors.WHITE,
+                    headerStyle: {
+                      backgroundColor: Colors.GREEN_MAIN,
+                    },
+                    headerShown: true,
+                    headerBackTitleVisible: false,
+                    animationEnabled: true,
+                  }}
+                />
+                <Stack.Screen
+                  name={CHAT_FAQ}
+                  component={ChatFAQ}
+                  options={{
+                    // headerRight: SearchButton,
+                    headerRightContainerStyle: { paddingRight: 15 },
+                    title: 'Athena Recommendations',
+                    headerTitleAlign: 'center',
+                    // headerBackImage: renderBackArrowWhite,
+                    headerTintColor: Colors.WHITE,
+                    headerStyle: {
+                      backgroundColor: Colors.GREEN_MAIN,
+                    },
+                    headerShown: true,
+                    headerBackTitleVisible: false,
+                    animationEnabled: true,
+                  }}
+                />
 
                 <Stack.Screen
                   name={READ_FAQ}
                   component={ReadFAQ}
                   options={{
-                    headerRight: () => (
-                      <TouchableOpacity
-                        onPress={() => {
-                          dispatch(setModalSearchOpen(true))
-                        }}
-                      >
-                        <SearchIcon />
-                      </TouchableOpacity>
-                    ),
+                    headerRight: SearchButton,
                     headerRightContainerStyle: { paddingRight: 15 },
                     title: 'Need Help?',
                     headerTitleAlign: 'center',
-                    headerBackImage: () => <BackArrowWhite />,
+                    headerBackImage: renderBackArrowWhite,
                     headerTintColor: Colors.WHITE,
                     headerStyle: {
                       backgroundColor: Colors.GREEN_MAIN,
@@ -147,10 +191,10 @@ const ApplicationNavigator = () => {
                   options={{
                     title: 'Profile & Settings',
                     headerTitleAlign: 'center',
-                    headerRight: () => <SaveIcon />,
+                    headerRight: renderSaveIcon,
                     headerRightContainerStyle: { paddingRight: 15 },
                     headerTintColor: Colors.WHITE,
-                    headerBackImage: () => <BackArrowWhite />,
+                    headerBackImage: renderBackArrowWhite,
                     headerStyle: {
                       backgroundColor: Colors.GREEN_MAIN,
                     },
@@ -175,7 +219,7 @@ const ApplicationNavigator = () => {
                     headerTitleStyle: { fontFamily: 'Montserrat-regular' },
                     title: 'Login',
                     headerTitleAlign: 'center',
-                    headerBackImage: () => <BackArrow />,
+                    headerBackImage: renderBackArrow,
                     headerShown: true,
                   }}
                 />

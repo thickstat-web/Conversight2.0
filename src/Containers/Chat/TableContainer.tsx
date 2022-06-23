@@ -78,7 +78,8 @@ export default function TableContainer({
   columnMetadata,
   values,
 }: TableProps) {
-  const widthArr = new Array(columns.length).fill(120)
+  const columnWidth = columns.length <= 2 ? 180 : 120
+  const widthArr = new Array(columns.length).fill(columnWidth)
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
   const [rows, setRows] = useState(values.slice(0, 10))
@@ -162,12 +163,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerText: {
-    fontFamily: 'Montserrat-Regular',
+    // fontFamily: 'Montserrat-Regular',
     textAlign: 'center',
     color: '#201D1D',
   },
   cell: {
     marginHorizontal: 6,
+    color: '#014E40',
   },
   number: { textAlign: 'right' },
   tableBorder: {

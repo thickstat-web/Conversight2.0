@@ -23,7 +23,7 @@ interface TextFormat {
 const FailureMessageContainer = ({ message }: { message: string }) => {
   const { Fonts } = useTheme()
   return (
-    <Text margin-4 style={Fonts.textSmall}>
+    <Text margin-4 style={[Fonts.textSmall, styles.message]}>
       {message}
     </Text>
   )
@@ -33,7 +33,7 @@ const TextContainer = ({ columns, columnMetadata, value }: TextFormat) => {
   const { Fonts } = useTheme()
   const formattedValue = formatValue(columns, columnMetadata)(value, 0)
   return (
-    <Text margin-4 style={Fonts.textSmall}>
+    <Text margin-4 style={[Fonts.textSmall, styles.message]}>
       {formattedValue}
     </Text>
   )
@@ -149,11 +149,11 @@ const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => (
       renderItem={({ item: message, index }) => {
         return message.isAthena ? (
           <AthenaMessageContainer
-            key={`${index}`}
+            key={`${message.id}`}
             message={message as AthenaMessage}
           />
         ) : (
-          <UserMessageContainer key={`${index}`} message={message} />
+          <UserMessageContainer key={`${message.id}`} message={message} />
         )
       }}
     />
@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   message: {
+    fontSize: 14,
     lineHeight: 24,
   },
 })

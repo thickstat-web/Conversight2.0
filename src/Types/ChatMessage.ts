@@ -18,8 +18,10 @@ export interface RawChatMessage {
 /* Visual format */
 export interface VisualFormat {
   type: string
-  xAxisField: string
-  yAxisField: string | string[]
+  xField: string
+  yField: string | string[]
+  colorField?: string
+  angleField?: string
   isStack?: boolean
   isGroup?: boolean
 }
@@ -55,3 +57,13 @@ export interface UserMessage extends BaseMessage { }
 
 /* Processed Chat Message format */
 export type ChatMessage = UserMessage | AthenaMessage | AthenaFailureMessage
+
+export type ChartType =
+  | 'AreaChart'
+  | 'BarChart'
+  | 'ColumnChart'
+  | 'DonutChart'
+  | 'DualAxes'
+  | 'FunnelChart'
+  | 'LineChart'
+  | 'PieChart'

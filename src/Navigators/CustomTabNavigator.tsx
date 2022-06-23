@@ -10,6 +10,8 @@ import AthenaChatContainer, {
 } from '@/Containers/Chat/AthenaChatContainer'
 import { athenaFaceXML } from '@/Assets/Images/xml-svg/athenaFace'
 import { SvgCss } from 'react-native-svg'
+import { ATHENA_CHAT_SCREEN } from '@/Constants/screens'
+
 interface Props {
   state: any
   descriptors: any
@@ -18,7 +20,7 @@ interface Props {
 
 const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
   const { Colors, Fonts } = useTheme()
-  const chatRef = useRef<RefProps>()
+  // const chatRef = useRef<RefProps>()
 
   const onPress = (route: any, isFocused: any) => {
     const event = navigation.emit({
@@ -42,9 +44,10 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
   ]
 
   const openChat = () => {
-    if (chatRef && chatRef.current) {
-      chatRef.current.open()
-    }
+    navigation.navigate({ name: ATHENA_CHAT_SCREEN, merge: true })
+    // if (chatRef && chatRef.current) {
+    //   chatRef.current.open()
+    // }
   }
 
   return (
@@ -156,7 +159,7 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
           </Text>
         </TouchableOpacity>
       </View>
-      <AthenaChatContainer ref={chatRef} />
+      {/* <AthenaChatContainer ref={chatRef} /> */}
     </ImageBackground>
   )
 }

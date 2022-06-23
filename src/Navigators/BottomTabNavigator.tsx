@@ -7,7 +7,7 @@ import {
   InsightsContainer,
   DashboardContainer,
 } from '@/Containers'
-import { Text, TouchableOpacity, View } from 'react-native-ui-lib'
+import { Text, TouchableOpacity } from 'react-native-ui-lib'
 import BurgerIcon from '@/Assets/Images/drawer/burger.svg'
 import CustomTabNavigation from './CustomTabNavigator'
 
@@ -31,7 +31,7 @@ const BottomTabNavigator = ({ navigation }: Props) => {
   return (
     <Tab.Navigator
       tabBar={props => <CustomTabNavigation {...props} />}
-      initialRouteName={t('bottomTabs.chat')}
+      initialRouteName={t('bottomTabs.insights')}
       screenOptions={({ route }) => ({
         headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
         headerLeft: () => <OpenDrawer />,

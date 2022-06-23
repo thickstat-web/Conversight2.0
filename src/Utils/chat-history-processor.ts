@@ -1,9 +1,9 @@
-import { AthenaFailureMessage } from './../Types/ChatMessage';
+import { AthenaFailureMessage } from './../Types/ChatMessage'
 import { Engine } from 'json-rules-engine'
 import { processResponse } from '@/Utils/response-processor'
 import chartRules from '@/Config/chart-rules.json'
 import { cleanseColumn } from '@/Utils/common'
-import { ColumnMetadata } from '@/Types/ChatHistory'
+import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import {
   AthenaMessage,
   ChatMessage,
@@ -26,18 +26,8 @@ interface Fact {
   value: string
 }
 
-declare type ChartType =
-  | 'AreaChart'
-  | 'BarChart'
-  | 'ColumnChart'
-  | 'DonutChart'
-  | 'DualAxes'
-  | 'FunnelChart'
-  | 'LineChart'
-  | 'PieChart'
-
 const makeFacts = (
-  colType: { [key: string]: string[] },
+  colType: ColType,
   columns: string[],
   values: { [key: string]: any }[],
 ): Fact => {
@@ -103,148 +93,6 @@ const makeAthenaMessage = (
   }
 }
 
-const getAxis = (chartType: ChartType, facts: Fact) => {
-  let result = null
-  switch (chartType) {
-    case 'AreaChart':
-      result = {
-        xField:
-          facts.date.length >= 1
-            ? facts.date[0]
-            : facts.dim.length >= 1
-              ? facts.dim[0]
-              : '',
-        yField: facts.value ? facts.value : facts.met[0],
-        seriesField: facts.category
-          ? facts.category
-          : facts.date.length > 1
-            ? facts.date[1]
-            : facts.dim.length > 1
-              ? facts.dim[1]
-              : facts.date.length
-                ? facts.dim[0]
-                : '',
-      }
-      break
-
-    case 'BarChart':
-      result = {
-        xField:
-          facts.date.length >= 1
-            ? facts.date[0]
-            : facts.dim.length >= 1
-              ? facts.dim[0]
-              : '',
-        yField: facts.met[0],
-        seriesField:
-          facts.date.length > 1
-            ? facts.date[1]
-            : facts.dim.length > 1
-              ? facts.dim[1]
-              : facts.date.length
-                ? facts.dim[0]
-                : '',
-        isStack:
-          facts.dim[1] || facts.date[1]
-            ? facts.dataCount > 50
-              ? true
-              : false
-            : false,
-        isGroup:
-          facts.dim[1] || facts.date[1]
-            ? facts.dataCount < 50
-              ? true
-              : false
-            : false,
-      }
-      break
-    case 'ColumnChart':
-      result = {
-        xField:
-          facts.date.length >= 1
-            ? facts.date[0]
-            : facts.dim.length >= 1
-              ? facts.dim[0]
-              : '',
-        yField: facts.met[0],
-        seriesField:
-          facts.date.length > 1
-            ? facts.date[1]
-            : facts.dim.length > 1
-              ? facts.dim[1]
-              : facts.date.length
-                ? facts.dim[0]
-                : '',
-        isStack:
-          facts.dim[1] || facts.date[1]
-            ? facts.dataCount > 50
-              ? true
-              : false
-            : false,
-        isGroup:
-          facts.dim[1] || facts.date[1]
-            ? facts.dataCount < 50
-              ? true
-              : false
-            : false,
-      }
-      break
-    case 'DonutChart':
-      result = {
-        colorField: facts.dim[0] || facts.date[0],
-        angleField: facts.met[0],
-      }
-      break
-    case 'DualAxes':
-      result = {
-        xField: facts.date[0] || facts.dim[0],
-        yField: facts.met,
-      }
-      break
-    case 'FunnelChart':
-      result = {
-        xField: facts.date[0] || facts.dim[0],
-        yField: facts.met[0],
-      }
-      break
-    case 'LineChart':
-      result = {
-        xField:
-          facts.date.length >= 1
-            ? facts.date[0]
-            : facts.dim.length >= 1
-              ? facts.dim[0]
-              : '',
-        yField: facts.value ? facts.value : facts.met[0],
-        seriesField: facts.category
-          ? facts.category
-          : facts.date.length > 1
-            ? facts.date[1]
-            : facts.dim.length > 1
-              ? facts.dim[1]
-              : facts.date.length
-                ? facts.dim[0]
-                : '',
-      }
-      break
-    case 'PieChart':
-      result = {
-        xField: facts.dim[0] || facts.date[0],
-        yField: facts.met[0],
-      }
-      break
-    default:
-      result = {
-        xField: '',
-        yField: '',
-        isStack: false,
-        isGroup: false,
-      }
-      break
-  }
-  return result
-}
-
 const engine = new Engine()
 chartRules.decisions.forEach((decision: Decision) => {
   const { conditions, event } = decision
@@ -263,33 +111,25 @@ export const processChatMessage = async (item: RawChatMessage) => {
   // Find visualization formats
   const colType = item?.colType
   const facts = makeFacts(colType, columns, values)
-  // console.log(
-  //   `[Chart Rule Processor]facts: ${JSON.stringify(facts, null, 2)}`,
-  // )
+  // console.log(`[Chart Rule Processor]facts: ${JSON.stringify(facts, null, 2)}`)
   const { events } = await engine.run(facts)
   const visualFormats: VisualFormat[] = events.map(event => {
-    const { type } = event
-    const {
-      xField = '',
-      yField = '',
-      isStack = false,
-      isGroup = false,
-    } = getAxis(type as ChartType, facts)
+    const { type, params } = event
+    const decisions: Partial<VisualFormat> = {}
+    for (const key in params) {
+      // eslint-disable-next-line no-new-func
+      const columnName = new Function('facts', `return \`${params[key]}\`;`)(facts)
+      decisions[key] = cleanseColumn(columnName)
+    }
     return {
       type,
-      xAxisField: cleanseColumn(xField),
-      yAxisField:
-        typeof yField === 'string'
-          ? cleanseColumn(yField)
-          : yField.map(field => cleanseColumn(field)),
-      isStack,
-      isGroup,
+      ...decisions,
     }
   })
-  console.log(
-    '[HistoryData] Visual Formats:',
-    JSON.stringify(visualFormats, null, 2),
-  )
+  // console.log(
+  //   '[HistoryData] Visual Formats:',
+  //   JSON.stringify(visualFormats, null, 2),
+  // )
 
   if (visualFormats.find(item => item.type === 'Text')) {
     console.log(
@@ -325,7 +165,7 @@ export const processChatHistory = async (rawChatMessages: RawChatMessage[]) => {
       messages = messages.concat(userMessage, athenaMessage)
     } catch (error) {
       console.error(
-        `[TransformHelper] ProcesChatistory - Error while processing ${index}: `,
+        `[TransformHelper] ProcesChatistory - Error while processing message#${index}: `,
         error,
       )
     }

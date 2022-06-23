@@ -1,3 +1,18 @@
+export interface Navigation { }
+
+export interface Params { }
+
+export interface Route {
+  key: string
+  name: string
+  params: Params
+}
+
+export interface NavigationProps {
+  navigation: Navigation
+  route: Route
+}
+
 export interface ResponseType<T> {
   success: boolean
   error?: string | null
@@ -12,16 +27,4 @@ export interface Error {
 export interface LogoutResponse {
   status?: number
   message: string
-}
-
-export interface ResponseTypeSettings {
-  status?: string
-  data?: any
-  error?: string
-}
-
-export interface ResponseTypeFAQ {
-  status?: string
-  data?: any
-  error?: string
 }

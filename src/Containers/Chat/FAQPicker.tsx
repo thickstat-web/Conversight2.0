@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useState, useEffect } from 'react'
 import {
   View,
   Text,
@@ -8,18 +8,16 @@ import {
   PickerItemProps,
 } from 'react-native-ui-lib'
 import { StyleSheet, ScrollView } from 'react-native'
-import { formatDistance } from 'date-fns'
-
+import _ from 'lodash'
 // import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { setSelectedDatasetId, selectDatasetId } from '@/Store/Auth'
-import RadioIcon from '@/Assets/Images/iconsSVG/radio.svg'
-import RadioSelectedIcon from '@/Assets/Images/iconsSVG/radio-selected.svg'
+import { useGetFaqMutation } from '@/Services/modules/FAQ'
+import { selectDatasetId } from '@/Store/Auth'
+import { selectFAQ, setQuestions } from '@/Store/Faq'
 import DatasetIcon from '@/Assets/Images/iconsSVG/dataset.svg'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import IconButton from '@/Components/IconButton'
-import { useGetDatasetsQuery } from '@/Services/modules/chat'
-import { Dataset } from '@/Types/Dataset'
+import { FaqRequestData } from '@/Types/Faq'
 
 declare type RenderCustomModalProps = {
   visible: boolean
@@ -59,20 +57,33 @@ const Header = ({ title, onClose }: { title: string; onClose: () => void }) => {
   )
 }
 
-const DatasetChooser = ({ onSelect }: Props) => {
-  const MODAL_TITLE = 'Choose Dataset'
+const FAQPicker = ({ onSelect }: Props) => {
+  const MODAL_TITLE = 'Athena Recommendations'
   // const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const { Colors, Fonts, Layout } = useTheme()
-  const { data } = useGetDatasetsQuery()
-  const datasets = data?.data || []
+  const [getFaq, { data, isLoading, isSuccess, error }] = useGetFaqMutation()
   const selectedDatasetId = useAppSelector(selectDatasetId)
+  const questions = useAppSelector(selectFAQ)
 
-  const handleSelectedDataset = (value: PickerValue) => {
-    const datasetId = value?.toString()
-    if (datasetId) {
-      dispatch(setSelectedDatasetId(datasetId))
-      onSelect(datasetId)
+  useEffect(() => {
+    if (selectedDatasetId) {
+      const fetchFaq = async () => {
+        const reqData: FaqRequestData = {
+          dataset: [selectedDatasetId],
+          isQuestionsOnly: true,
+        }
+        const resp = await getFaq(reqData).unwrap()
+        dispatch(setQuestions(resp.data))
+      }
+      fetchFaq()
+    }
+  }, [dispatch, getFaq, selectedDatasetId])
+
+  const handleSelectedFaq = (value: PickerValue) => {
+    const faq = value?.toString()
+    if (faq) {
+      onSelect(faq)
     }
   }
 
@@ -85,12 +96,8 @@ const DatasetChooser = ({ onSelect }: Props) => {
         <View flex style={{ backgroundColor: Colors.WHITE }}>
           <Header title={MODAL_TITLE} onClose={() => toggleModal(false)} />
           <ScrollView style={[Layout.fill]}>
-            {datasets.map((dataset: Dataset, index) => (
-              <Picker.Item
-                key={`${dataset.dataSetID}-${index}`}
-                value={dataset.dataSetID}
-                label={dataset.datasetName}
-              />
+            {questions.map((item: string, index) => (
+              <Picker.Item key={`${index}`} value={item} label={item} />
             ))}
           </ScrollView>
         </View>
@@ -103,21 +110,13 @@ const DatasetChooser = ({ onSelect }: Props) => {
     { isSelected }: PickerItemProps & PickerProps,
     label: string,
   ) => {
-    const dataset = datasets.find(ds => ds.dataSetID === value)
-    const timeAgo = formatDistance(
-      new Date(dataset?.updatedTime ?? new Date()),
-      new Date(),
-      {
-        addSuffix: true,
-      },
-    )
     const backgroundColor = isSelected ? Colors.NOTIFICATION_BGR : Colors.GRAY
     return (
       <View key={label} row style={[styles.item, { backgroundColor }]}>
         <View flex>
           <Text
             style={[
-              Fonts.textRegularBold,
+              Fonts.textSmall,
               styles.optionLabel,
               {
                 color: Colors.GREEN_DARK,
@@ -126,40 +125,37 @@ const DatasetChooser = ({ onSelect }: Props) => {
           >
             {label}
           </Text>
-          <Text marginT-8>Last Update: {timeAgo}</Text>
         </View>
-        {isSelected ? <RadioSelectedIcon /> : <RadioIcon />}
       </View>
     )
   }
 
-  const renderCustomPicker = () => (
-    <IconButton
-      icon={<DatasetIcon />}
-      style={{ backgroundColor: Colors.GRAY }}
-    />
-  )
+  const renderCustomPicker = () => {
+    return (
+      <IconButton
+        icon={<DatasetIcon />}
+        loading={isLoading}
+        style={{ backgroundColor: Colors.GRAY }}
+      />
+    )
+  }
 
   return (
     <Picker
-      value={selectedDatasetId || ''}
+      value={`${''}`}
       mode={Picker.modes.SINGLE}
       migrateTextField
       migrate
-      onChange={handleSelectedDataset}
+      enableModalBlur={false}
+      onChange={handleSelectedFaq}
       renderPicker={renderCustomPicker}
-      renderCustomModal={renderCustomPickerModal}
       renderItem={renderCustomPickerItem}
+      renderCustomModal={renderCustomPickerModal}
     />
   )
 }
 
 const styles = StyleSheet.create({
-  orgOption: {
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   closeIcon: {
     left: 16,
     height: 32,
@@ -172,10 +168,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   item: {
-    marginVertical: 12,
+    marginVertical: 2,
     marginHorizontal: 16,
-    paddingVertical: 24,
-    paddingHorizontal: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderRadius: 8,
   },
   optionLabel: {
@@ -186,4 +182,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default DatasetChooser
+export default FAQPicker

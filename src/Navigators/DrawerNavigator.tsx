@@ -8,6 +8,7 @@ import {
   DrawerContentScrollView,
 } from '@react-navigation/drawer'
 import {
+  DrawerContentComponentProps,
   DrawerDescriptorMap,
   DrawerNavigationHelpers,
 } from '@react-navigation/drawer/lib/typescript/src/types'
@@ -24,7 +25,11 @@ import {
 import BottomTabNavigator from './BottomTabNavigator'
 import { useTheme, useAppDispatch, useAppSelector, useAuth } from '@/Hooks'
 import { useLazyLogoutQuery } from '@/Services/modules/auth'
-import { cleanupAuthData, selectAllOrganizations, selectSignInOrg } from '@/Store/Auth'
+import {
+  cleanupAuthData,
+  selectAllOrganizations,
+  selectSignInOrg,
+} from '@/Store/Auth'
 import { Button } from '@/Components'
 
 import MoreIcon from '@/Assets/Images/iconsSVG/more.svg'
@@ -42,134 +47,163 @@ interface Props {
   descriptors: DrawerDescriptorMap
 }
 
-interface Props2 {
-  navigation: any
+interface DrawerViewProps {
+  handleRedirect: (screen: string) => void
 }
 
 const Drawer = createDrawerNavigator()
 
-export default function DrawerNavigator({ navigation }: Props2) {
+const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
   const { Fonts, Colors, Layout } = useTheme()
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const [logout, { isLoading }] = useLazyLogoutQuery()
   const { authData } = useAuth()
   const selectedOrg = useAppSelector(selectSignInOrg)
-  const { height: windowHeight, width: windowWidth } = Dimensions.get('window')
+  const { width: windowWidth } = Dimensions.get('window')
   const singleOrg = useAppSelector(selectAllOrganizations).length === 1
-
-  const handleRedirect = (screen: string) => {
-    navigation.navigate(screen)
-  }
 
   const handleSignout = async () => {
     await logout()
     dispatch(cleanupAuthData())
   }
 
-  const DrawerView = (props: Props) => {
-    return (
-      <DrawerContentScrollView>
-        <View style={Layout.center}>
-          <View style={styles.topBar}>
-            <TouchableOpacity>
-              <MoreIcon />
-            </TouchableOpacity>
-            <Text style={{ ...Fonts.textRegular, fontSize: 16 }}>Welcome</Text>
-            <TouchableOpacity onPress={() => handleRedirect(SETTINGS)}>
-              <SettingsIcon />
-            </TouchableOpacity>
-          </View>
-          <View center style={styles.avatar}>
-            <Avatar size={100} />
-            <Text
-              marginT-20
-              style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}
-            >
-              {authData?.displayName}
-            </Text>
-            <TouchableOpacity
-
-              onPress={singleOrg ? () => { } : () => handleRedirect(CHANGE_ORGANIZATION)}
-              style={styles.changeOrg}
-            >
-              <Text color={Colors.GREEN_MAIN}>{selectedOrg?.name}</Text>
-              {!singleOrg && <DownArrow style={{ marginLeft: 5 }} />}
-
-            </TouchableOpacity>
-          </View>
-
-          <View
-            marginT-16
-            style={{
-              ...styles.screensLinks,
-              width: windowWidth - 130,
-            }}
-          >
-            <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
-            <TouchableOpacity
-              onPress={() => handleRedirect(WT_INSIGHTS)}
-              style={styles.screenLink}
-            >
-              <InsightsIcon />
-              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Insights</Text>
-            </TouchableOpacity>
-            <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
-            <TouchableOpacity
-              onPress={() => handleRedirect(t('bottomTabs.dashboard'))}
-              style={styles.screenLink}
-            >
-              <DashboardIcon />
-              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Dashboard</Text>
-            </TouchableOpacity>
-            <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
-
-            <TouchableOpacity
-              onPress={() => handleRedirect(WALK_THROUGH_AUTHORIZED)}
-              style={styles.screenLink}
-            >
-              <WalkThroughIcon />
-              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Walkthrough</Text>
-            </TouchableOpacity>
-            <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
-
-            <TouchableOpacity
-              onPress={() => handleRedirect(REQUEST_DEMO)}
-              style={styles.screenLink}
-            >
-              <RequestDemoIcon />
-              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Request a Demo</Text>
-            </TouchableOpacity>
-            <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
-
-            <TouchableOpacity
-              onPress={() => handleRedirect(READ_FAQ)}
-              style={styles.screenLink}
-            >
-              <FaqIcon />
-              <Text style={[styles.linkText, { color: Colors.GREEN_DARK }]} marginL-25>Read FAQ</Text>
-            </TouchableOpacity>
-            <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
-          </View>
-          <View marginT-24 width={300}>
-            <Button
-              dark={true}
-              block={true}
-              label={'Sign Out'}
-              loading={isLoading}
-              disabled={isLoading}
-              onPress={handleSignout}
-            />
-          </View>
+  return (
+    <DrawerContentScrollView>
+      <View style={Layout.center}>
+        <View style={styles.topBar}>
+          <TouchableOpacity>
+            <MoreIcon />
+          </TouchableOpacity>
+          <Text style={[Fonts.textRegular, styles.welcome]}>Welcome</Text>
+          <TouchableOpacity onPress={() => handleRedirect(SETTINGS)}>
+            <SettingsIcon />
+          </TouchableOpacity>
         </View>
-      </DrawerContentScrollView>
-    )
+        <View center style={styles.avatar}>
+          <Avatar size={100} />
+          <Text
+            marginT-20
+            style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}
+          >
+            {authData?.displayName}
+          </Text>
+          <TouchableOpacity
+            onPress={
+              singleOrg ? undefined : () => handleRedirect(CHANGE_ORGANIZATION)
+            }
+            style={styles.changeOrg}
+          >
+            <Text color={Colors.GREEN_MAIN}>{selectedOrg?.name}</Text>
+            {!singleOrg && <DownArrow style={styles.downArrow} />}
+          </TouchableOpacity>
+        </View>
+
+        <View
+          marginT-16
+          style={{
+            ...styles.screensLinks,
+            width: windowWidth - 130,
+          }}
+        >
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+          <TouchableOpacity
+            onPress={() => handleRedirect(WT_INSIGHTS)}
+            style={styles.screenLink}
+          >
+            <InsightsIcon />
+            <Text
+              style={[styles.linkText, { color: Colors.GREEN_DARK }]}
+              marginL-25
+            >
+              Insights
+            </Text>
+          </TouchableOpacity>
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+          <TouchableOpacity
+            onPress={() => handleRedirect(t('bottomTabs.dashboard'))}
+            style={styles.screenLink}
+          >
+            <DashboardIcon />
+            <Text
+              style={[styles.linkText, { color: Colors.GREEN_DARK }]}
+              marginL-25
+            >
+              Dashboard
+            </Text>
+          </TouchableOpacity>
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+
+          <TouchableOpacity
+            onPress={() => handleRedirect(WALK_THROUGH_AUTHORIZED)}
+            style={styles.screenLink}
+          >
+            <WalkThroughIcon />
+            <Text
+              style={[styles.linkText, { color: Colors.GREEN_DARK }]}
+              marginL-25
+            >
+              Walkthrough
+            </Text>
+          </TouchableOpacity>
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+
+          <TouchableOpacity
+            onPress={() => handleRedirect(REQUEST_DEMO)}
+            style={styles.screenLink}
+          >
+            <RequestDemoIcon />
+            <Text
+              style={[styles.linkText, { color: Colors.GREEN_DARK }]}
+              marginL-25
+            >
+              Request a Demo
+            </Text>
+          </TouchableOpacity>
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+
+          <TouchableOpacity
+            onPress={() => handleRedirect(READ_FAQ)}
+            style={styles.screenLink}
+          >
+            <FaqIcon />
+            <Text
+              style={[styles.linkText, { color: Colors.GREEN_DARK }]}
+              marginL-25
+            >
+              Read FAQ
+            </Text>
+          </TouchableOpacity>
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+        </View>
+        <View marginT-24 width={300}>
+          <Button
+            dark={true}
+            block={true}
+            label={'Sign Out'}
+            loading={isLoading}
+            disabled={isLoading}
+            onPress={handleSignout}
+          />
+        </View>
+      </View>
+    </DrawerContentScrollView>
+  )
+}
+
+export default function DrawerNavigator({ navigation }: Props) {
+  const handleRedirect = (screen: string) => {
+    navigation.navigate(screen)
   }
+
+  const renderDrawerView = (props: DrawerContentComponentProps) => (
+    <DrawerView {...props} handleRedirect={handleRedirect} />
+  )
 
   return (
     <Drawer.Navigator
       screenOptions={{ drawerStyle: { width: '90%' } }}
-      drawerContent={props => <DrawerView {...props} />}
+      drawerContent={renderDrawerView}
       initialRouteName={BOTTOM_TAB_NAVIGATOR}
     >
       <Drawer.Screen
@@ -191,6 +225,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  welcome: { fontSize: 16 },
   avatar: {
     flex: 3,
   },
@@ -199,6 +234,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  downArrow: { marginLeft: 5 },
   screensLinks: {
     flex: 8,
   },
@@ -208,6 +244,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    fontFamily: "Montserrat-SemiBold"
-  }
+    fontFamily: 'Montserrat-SemiBold',
+  },
 })

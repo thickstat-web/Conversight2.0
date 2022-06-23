@@ -6,16 +6,19 @@ import React, {
   ForwardRefRenderFunction,
 } from 'react'
 import { SafeAreaView, StyleSheet, TextInput } from 'react-native'
-import { Modal, View } from 'react-native-ui-lib'
+import { Modal, Picker, PickerValue, Text, View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
+import IconButton from '@/Components/IconButton'
 import BackIconWhite from '@/Assets/Images/iconsSVG/back-white.svg'
 import SearchIcon from '@/Assets/Images/iconsSVG/search.svg'
+import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import SendIcon from '@/Assets/Images/iconsSVG/send.svg'
 import FaqIcon from '@/Assets/Images/iconsSVG/faq.svg'
-import IconButton from '@/Components/IconButton'
+import RadioIcon from '@/Assets/Images/iconsSVG/radio.svg'
+import RadioSelectedIcon from '@/Assets/Images/iconsSVG/radio-selected.svg'
 import DatasetChooser from './DatasetChooser'
-import SearchContainer from './SearchContainer'
+// import SearchContainer from './SearchContainer'
 import { selectDatasetId } from '@/Store/Auth'
 import {
   selectChatMessages,
@@ -33,90 +36,101 @@ import { LoadingSpinner } from '@/Components'
 import { SendChatMessage } from '@/Types/SendChatMessage'
 import { UserMessage } from '@/Types/ChatMessage'
 import { makeFailureAthenaMessage } from '@/Utils/chat-history-processor'
-
-declare type AthenaChatContainerProps = {}
+import { CHAT_FAQ } from '@/Constants/screens'
+import { Navigation, NavigationProps } from '@/Types/Common'
+import FAQPicker from './FAQPicker'
 
 export declare type RefProps = {
   open: () => void
 }
 
-interface SearchOptions {
-  search: boolean
-  onCancel: () => void
-}
+// interface SearchOptions {
+//   search: boolean
+//   onCancel: () => void
+// }
 
-interface TitlebarOptions {
-  onCancel: () => void
-  onDone: () => void
-}
+// interface TitlebarOptions {
+//   onCancel: () => void
+//   onDone: () => void
+// }
 
 interface ChatboxOptions {
+  navigation: Navigation
   onDatasetChange: (datasetId: string) => void
 }
 
-const ChatSearch = ({ search, onCancel }: SearchOptions) => (
-  <View style={styles.searchContainer}>
-    {search && <SearchContainer visible={search} onCancel={onCancel} />}
-  </View>
-)
+// const ChatSearch = ({ search, onCancel }: SearchOptions) => (
+//   <View style={styles.searchContainer}>
+//     {search && <SearchContainer visible={search} onCancel={onCancel} />}
+//   </View>
+// )
 
-const TitleBar = ({ onCancel, onDone }: TitlebarOptions) => {
+// const TitleBar = ({ onCancel, onDone }: TitlebarOptions) => {
+//   const { Colors, Fonts } = useTheme()
+//   return (
+//     <Modal.TopBar
+//       title="Ask Athena"
+//       onCancel={onCancel}
+//       onDone={onDone}
+//       cancelIcon={BackIconWhite}
+//       doneIcon={SearchIcon}
+//       doneButtonProps={{
+//         label: '',
+//       }}
+//       titleStyle={[Fonts.text20Bold, { color: Colors.WHITE }]}
+//       containerStyle={[{ backgroundColor: Colors.GREEN_MAIN }]}
+//       includeStatusBar={false}
+//     />
+//   )
+// }
+
+const ChatBox = ({ navigation, onDatasetChange }: ChatboxOptions) => {
   const { Colors, Fonts } = useTheme()
-  return (
-    <Modal.TopBar
-      title="Ask Athena"
-      onCancel={onCancel}
-      onDone={onDone}
-      cancelIcon={BackIconWhite}
-      doneIcon={SearchIcon}
-      doneButtonProps={{
-        label: '',
-      }}
-      titleStyle={[Fonts.text20Bold, { color: Colors.WHITE }]}
-      containerStyle={[{ backgroundColor: Colors.GREEN_MAIN }]}
-      includeStatusBar={false}
-    />
-  )
-}
-
-const ChatBox = ({ onDatasetChange }: ChatboxOptions) => {
-  const { Colors } = useTheme()
   const dispatch = useAppDispatch()
   const [query, setQuery] = useState('')
   const selectedDatasetId = useAppSelector(selectDatasetId)
   const processingChatMessage = useAppSelector(selectProcessingChatMessage)
   const [sendChatMessage, { isLoading }] = useSendChatMessageMutation()
 
+  const makeSendRequestData = (
+    datasetId: string,
+    text: string,
+  ): SendChatMessage => {
+    return {
+      session: {
+        message: {
+          text,
+          dataSet: datasetId,
+          objectID: [],
+          filter: [],
+          qtype: 'addfilter',
+        },
+        options: {
+          transform: true,
+          channel: 'chat',
+          source: 'web',
+          timezone: '-330',
+        },
+      },
+    }
+  }
+
+  const makeUserMessage = (utterance: string): UserMessage => ({
+    id: `${Date.now()}`,
+    message: utterance,
+    isAthena: false,
+  })
+
   const sendMessage = () => {
     const utterance = query.trim()
     setQuery('')
     // Add user message to the chat message list
-    const userMessage: UserMessage = {
-      id: `${Date.now()}`,
-      message: utterance,
-      isAthena: false,
-    }
+    const userMessage = makeUserMessage(utterance)
     dispatch(addChatMessage(userMessage))
 
     const sendAndTransformResponse = async () => {
       if (selectedDatasetId && utterance.length) {
-        const reqData: SendChatMessage = {
-          session: {
-            message: {
-              text: utterance,
-              dataSet: selectedDatasetId,
-              objectID: [],
-              filter: [],
-              qtype: 'addfilter',
-            },
-            options: {
-              transform: true,
-              channel: 'chat',
-              source: 'web',
-              timezone: '-330',
-            },
-          },
-        }
+        const reqData = makeSendRequestData(selectedDatasetId, utterance)
         const resp = await sendChatMessage(reqData).unwrap()
         if (resp.success && resp.data) {
           dispatch(processAndSetChatMessage(resp.data))
@@ -129,6 +143,14 @@ const ChatBox = ({ onDatasetChange }: ChatboxOptions) => {
 
     sendAndTransformResponse()
   }
+
+  // const handleSelectedFaq = (utterance: string) => {
+  //   console.log(`[AthenaChatContainer] utterance: ${utterance}`)
+  // }
+
+  // const openFaq = () => {
+  //   navigation.navigate(CHAT_FAQ)
+  // }
 
   return (
     <View
@@ -147,10 +169,18 @@ const ChatBox = ({ onDatasetChange }: ChatboxOptions) => {
         defaultValue={query}
         style={styles.textInput}
       />
-      <IconButton
+      <FAQPicker
+        onSelect={faq =>
+          console.log(
+            `[AthenaChatContainer] selected faq: ${JSON.stringify(faq)}`,
+          )
+        }
+      />
+      {/* <IconButton
         icon={<FaqIcon />}
         style={[styles.faqButton, { backgroundColor: Colors.GRAY }]}
-      />
+        onPress={openFaq}
+      /> */}
       <IconButton
         icon={<SendIcon />}
         loading={isLoading || processingChatMessage}
@@ -160,10 +190,8 @@ const ChatBox = ({ onDatasetChange }: ChatboxOptions) => {
   )
 }
 
-const AthenaChatContainer: ForwardRefRenderFunction<
-  RefProps,
-  AthenaChatContainerProps
-> = (props, ref) => {
+const AthenaChatContainer = props => {
+  const { navigation, route } = props
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const [visible, setVisible] = useState(false)
@@ -174,6 +202,12 @@ const AthenaChatContainer: ForwardRefRenderFunction<
   const chatMessagesProcessing = useAppSelector(selectProcessingChatMessages)
   const chatMessages = useAppSelector(selectChatMessages)
   const [getChatHistory, { isLoading }] = useGetChatHistoryMutation()
+
+  useEffect(() => {
+    console.log(
+      `[AthenaChatContainer] prosp: ${JSON.stringify(props, null, 2)}`,
+    )
+  })
 
   useEffect(() => {
     if (selectedDatasetId) {
@@ -196,7 +230,7 @@ const AthenaChatContainer: ForwardRefRenderFunction<
   const open = () => setVisible(true)
   const close = () => setVisible(false)
 
-  useImperativeHandle(ref, () => ({ open }))
+  // useImperativeHandle(ref, () => ({ open }))
 
   const handleDatasetSelection = (datasetId: string) => {
     console.log(`[ChatContainer] dataset: ${datasetId}`)
@@ -211,32 +245,33 @@ const AthenaChatContainer: ForwardRefRenderFunction<
   }
 
   return (
-    <Modal
-      visible={visible}
-      animationType={'fade'}
-      // onBackgroundPress={() => console.log('Background pressed')}
-      presentationStyle={'fullScreen'}
-      // transparent={true}
-    >
-      <SafeAreaView
-        style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}
-      >
-        <View>
-          <TitleBar onCancel={close} onDone={openSearch} />
-          {/* Search container / overlay */}
-          <ChatSearch search={search} onCancel={closeSearch} />
-        </View>
+    // <Modal
+    //   visible={true}
+    //   animationType={'fade'}
+    //   // onBackgroundPress={() => console.log('Background pressed')}
+    //   presentationStyle={'fullScreen'}
+    //   // transparent={true}
+    // >
+    <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
+      {/* <View>
+        <TitleBar onCancel={close} onDone={openSearch} /> */}
+      {/* Search container / overlay */}
+      {/* <ChatSearch search={search} onCancel={closeSearch} />
+      </View> */}
 
-        <View flex style={{ backgroundColor: Colors.GRAY }}>
-          {chatMessagesProcessing || isLoading ? (
-            <LoadingSpinner />
-          ) : (
-            <ChatMessageContainer messages={chatMessages} />
-          )}
-          <ChatBox onDatasetChange={handleDatasetSelection} />
-        </View>
-      </SafeAreaView>
-    </Modal>
+      <View flex style={{ backgroundColor: Colors.GRAY }}>
+        {chatMessagesProcessing || isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <ChatMessageContainer messages={chatMessages} />
+        )}
+        <ChatBox
+          navigation={navigation}
+          onDatasetChange={handleDatasetSelection}
+        />
+      </View>
+    </SafeAreaView>
+    // </Modal>
   )
 }
 
@@ -262,6 +297,17 @@ const styles = StyleSheet.create({
   faqButton: {
     marginRight: 0,
   },
+  item: {
+    marginVertical: 4,
+    marginHorizontal: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  optionLabel: {
+    marginRight: 12,
+  },
 })
 
-export default forwardRef(AthenaChatContainer)
+// export default forwardRef(AthenaChatContainer)
+export default AthenaChatContainer
