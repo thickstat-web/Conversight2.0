@@ -121,9 +121,7 @@ const ChatBox = ({ navigation, onDatasetChange }: ChatboxOptions) => {
     isAthena: false,
   })
 
-  const sendMessage = () => {
-    const utterance = query.trim()
-    setQuery('')
+  const sendMessage = (utterance: string) => {
     // Add user message to the chat message list
     const userMessage = makeUserMessage(utterance)
     dispatch(addChatMessage(userMessage))
@@ -144,13 +142,15 @@ const ChatBox = ({ navigation, onDatasetChange }: ChatboxOptions) => {
     sendAndTransformResponse()
   }
 
-  // const handleSelectedFaq = (utterance: string) => {
-  //   console.log(`[AthenaChatContainer] utterance: ${utterance}`)
-  // }
+  const handleSendMessage = () => {
+    sendMessage(query.trim())
+    setQuery('')
+  }
 
-  // const openFaq = () => {
-  //   navigation.navigate(CHAT_FAQ)
-  // }
+  const handleSelectedFaq = (faq: string) => {
+    console.log(`[AthenaChatContainer] selected faq: ${faq}`)
+    sendMessage(faq)
+  }
 
   return (
     <View
@@ -169,13 +169,7 @@ const ChatBox = ({ navigation, onDatasetChange }: ChatboxOptions) => {
         defaultValue={query}
         style={styles.textInput}
       />
-      <FAQPicker
-        onSelect={faq =>
-          console.log(
-            `[AthenaChatContainer] selected faq: ${JSON.stringify(faq)}`,
-          )
-        }
-      />
+      <FAQPicker onSelect={handleSelectedFaq} />
       {/* <IconButton
         icon={<FaqIcon />}
         style={[styles.faqButton, { backgroundColor: Colors.GRAY }]}
@@ -184,7 +178,7 @@ const ChatBox = ({ navigation, onDatasetChange }: ChatboxOptions) => {
       <IconButton
         icon={<SendIcon />}
         loading={isLoading || processingChatMessage}
-        onPress={sendMessage}
+        onPress={handleSendMessage}
       />
     </View>
   )
@@ -294,19 +288,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Regular',
     fontSize: 18,
   },
-  faqButton: {
-    marginRight: 0,
-  },
-  item: {
-    marginVertical: 4,
-    marginHorizontal: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  optionLabel: {
-    marginRight: 12,
-  },
+  // faqButton: {
+  //   marginRight: 0,
+  // },
+  // item: {
+  //   marginVertical: 4,
+  //   marginHorizontal: 16,
+  //   paddingVertical: 16,
+  //   paddingHorizontal: 24,
+  //   borderRadius: 8,
+  // },
+  // optionLabel: {
+  //   marginRight: 12,
+  // },
 })
 
 // export default forwardRef(AthenaChatContainer)

@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, useEffect } from 'react'
+import React, { ReactNode } from 'react'
 import {
   View,
   Text,
@@ -7,17 +7,13 @@ import {
   Modal,
   PickerItemProps,
 } from 'react-native-ui-lib'
-import { StyleSheet, ScrollView } from 'react-native'
-import _ from 'lodash'
+import { StyleSheet, ScrollView, FlatList, Pressable } from 'react-native'
 // import { useTranslation } from 'react-i18next'
-import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { useGetFaqMutation } from '@/Services/modules/FAQ'
-import { selectDatasetId } from '@/Store/Auth'
-import { selectFAQ, setQuestions } from '@/Store/Faq'
-import DatasetIcon from '@/Assets/Images/iconsSVG/dataset.svg'
+import { useTheme, useFaq } from '@/Hooks'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
+import FaqIcon from '@/Assets/Images/iconsSVG/faq.svg'
 import IconButton from '@/Components/IconButton'
-import { FaqRequestData } from '@/Types/Faq'
+import { Colors } from '@/Theme/Variables'
 
 declare type RenderCustomModalProps = {
   visible: boolean
@@ -64,26 +60,19 @@ const Header = ({ title, onClose }: HeaderProps) => {
 
 const FAQPicker = ({ onSelect }: Props) => {
   const MODAL_TITLE = 'Athena Recommendations'
+  const VIEW_ALL = 'View All'
   // const { t } = useTranslation()
-  const dispatch = useAppDispatch()
   const { Colors, Fonts, Layout } = useTheme()
-  const [getFaq, { data, isLoading, isSuccess, error }] = useGetFaqMutation()
-  const selectedDatasetId = useAppSelector(selectDatasetId)
-  const questions = useAppSelector(selectFAQ)
-
-  useEffect(() => {
-    if (selectedDatasetId) {
-      const fetchFaq = async () => {
-        const reqData: FaqRequestData = {
-          dataset: [selectedDatasetId],
-          isQuestionsOnly: true,
-        }
-        const resp = await getFaq(reqData).unwrap()
-        dispatch(setQuestions(resp.data))
-      }
-      fetchFaq()
-    }
-  }, [dispatch, getFaq, selectedDatasetId])
+  const {
+    tagQuestionsMap,
+    tags,
+    questions,
+    isLoading,
+    filterTags,
+    setFilterTags,
+  } = useFaq()
+  const tagList = [VIEW_ALL, ...tags]
+  // console.log(`[FaqPicker] tags: ${tags}`)
 
   const handleSelectedFaq = (value: PickerValue) => {
     const faq = value?.toString()
@@ -92,19 +81,80 @@ const FAQPicker = ({ onSelect }: Props) => {
     }
   }
 
+  const handleFilterTag = (item: string) => {
+    if (item === VIEW_ALL) {
+      setFilterTags([])
+    } else {
+      setFilterTags(prev => [...prev, item])
+    }
+  }
+
+  const renderTag = ({ item }: { item: string }) => {
+    if (!tagQuestionsMap) {
+      return null
+    }
+
+    const handleTagSelect = () => {
+      handleFilterTag(item)
+    }
+
+    const renderCount = () => {
+      if (!tagQuestionsMap[item]) {
+        return ''
+      }
+
+      const count = tagQuestionsMap[item].length
+      return <Text style={styles.tagText}> ({count})</Text>
+    }
+
+    const selected =
+      (filterTags.length === 0 && item === VIEW_ALL) ||
+      filterTags.includes(item)
+
+    return (
+      <Pressable
+        onPress={handleTagSelect}
+        style={[styles.tag, selected && styles.selectedTagWrapper]}
+      >
+        <Text style={[Fonts.textSmall, selected && { color: Colors.WHITE }]}>
+          {item}
+          {renderCount()}
+        </Text>
+      </Pressable>
+    )
+  }
+
   const renderCustomPickerModal = ({
     visible,
     toggleModal,
   }: RenderCustomModalProps) => {
+    const closeModal = () => toggleModal(false)
     return (
       <Modal
         visible={visible}
         animationType="slide"
-        onRequestClose={() => toggleModal(false)}
+        onRequestClose={closeModal}
       >
-        <View flex style={{ backgroundColor: Colors.WHITE }}>
-          <Header title={MODAL_TITLE} onClose={() => toggleModal(false)} />
-          <ScrollView style={[Layout.fill]}>
+        <View flex style={{ backgroundColor: Colors.GRAY_LIGHT }}>
+          <Header title={MODAL_TITLE} onClose={closeModal} />
+          <View
+            paddingV-8
+            paddingH-16
+            style={{ backgroundColor: Colors.WHITE }}
+          >
+            <FlatList
+              data={tagList}
+              // contentContainerStyle={{ backgroundColor: 'orange' }}
+              showsHorizontalScrollIndicator={false}
+              horizontal
+              keyExtractor={(_, index) => `${index}`}
+              renderItem={renderTag}
+            />
+          </View>
+          <ScrollView
+            style={[Layout.fill]}
+            contentContainerStyle={{ paddingTop: 16 }}
+          >
             {questions.map((item: string, index) => (
               <Picker.Item key={`${index}`} value={item} label={item} />
             ))}
@@ -142,9 +192,10 @@ const FAQPicker = ({ onSelect }: Props) => {
   const renderCustomPicker = () => {
     return (
       <IconButton
-        icon={<DatasetIcon />}
+        icon={<FaqIcon />}
         loading={isLoading}
-        style={{ backgroundColor: Colors.GRAY }}
+        loaderColor={Colors.GREEN_MAIN}
+        style={[styles.faqButton, { backgroundColor: Colors.GRAY }]}
       />
     )
   }
@@ -170,6 +221,9 @@ const styles = StyleSheet.create({
     height: 32,
     width: 32,
   },
+  faqButton: {
+    marginRight: 0,
+  },
   itemSeparator: {
     height: 1,
     marginVertical: 10,
@@ -186,8 +240,18 @@ const styles = StyleSheet.create({
   optionLabel: {
     marginRight: 12,
   },
-  selectedOption: {
-    marginRight: 12,
+  tag: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    marginHorizontal: 4,
+  },
+  tagText: { color: Colors.GRAY_DARK, paddingLeft: 8 },
+  selectedTagWrapper: {
+    backgroundColor: Colors.GREEN_DARK,
+    borderRadius: 8,
+  },
+  selectedTagText: {
+    color: Colors.WHITE,
   },
 })
 

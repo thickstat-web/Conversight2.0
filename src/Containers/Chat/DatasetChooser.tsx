@@ -69,7 +69,7 @@ const DatasetChooser = ({ onSelect }: Props) => {
   // const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const { Colors, Fonts, Layout } = useTheme()
-  const { data } = useGetDatasetsQuery()
+  const { data, isLoading } = useGetDatasetsQuery()
   const datasets = data?.data || []
   const selectedDatasetId = useAppSelector(selectDatasetId)
 
@@ -145,6 +145,8 @@ const DatasetChooser = ({ onSelect }: Props) => {
   const renderCustomPicker = () => (
     <IconButton
       icon={<DatasetIcon />}
+      loading={isLoading}
+      loaderColor={Colors.GREEN_MAIN}
       style={{ backgroundColor: Colors.GRAY }}
     />
   )
