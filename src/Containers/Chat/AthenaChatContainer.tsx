@@ -84,7 +84,7 @@ interface ChatboxOptions {
 //   )
 // }
 
-const ChatBox = ({ navigation, onDatasetChange }: ChatboxOptions) => {
+const ChatBox = ({ onDatasetChange }: ChatboxOptions) => {
   const { Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
   const [query, setQuery] = useState('')
@@ -221,8 +221,8 @@ const AthenaChatContainer = props => {
     }
   }, [dispatch, getChatHistory, selectedDatasetId])
 
-  const open = () => setVisible(true)
-  const close = () => setVisible(false)
+  // const open = () => setVisible(true)
+  // const close = () => setVisible(false)
 
   // useImperativeHandle(ref, () => ({ open }))
 
@@ -230,13 +230,13 @@ const AthenaChatContainer = props => {
     console.log(`[ChatContainer] dataset: ${datasetId}`)
   }
 
-  const openSearch = () => {
-    setSearch(true)
-  }
+  // const openSearch = () => {
+  //   setSearch(true)
+  // }
 
-  const closeSearch = () => {
-    setSearch(false)
-  }
+  // const closeSearch = () => {
+  //   setSearch(false)
+  // }
 
   return (
     // <Modal
