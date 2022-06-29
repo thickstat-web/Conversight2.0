@@ -13,6 +13,7 @@
     "android:release": "react-native run-android --variant=release",
     "android:build:test": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/ && cd android && ./gradlew assembleDebug && cd ..",
     "android:build:release": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/build/intermediates/res/merged/release/ && rm -rf android/app/src/main/res/drawable-* && rm -rf android/app/src/main/res/raw/* && cd android && ./gradlew assembleRelease && cd ..",
+    "android:build:clean": "rm -rf android/app/src/main/res/drawable-* && rm -rf android/app/src/main/res/raw && rm -rf android/app/build/generated/res/react/release/drawable-* && rm -rf android/app/build/generated/res/react/release/raw",
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
