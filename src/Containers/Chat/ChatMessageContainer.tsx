@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { FlatList, StyleSheet } from 'react-native'
 import { Modal, View, Text } from 'react-native-ui-lib'
 import { useTheme } from '@/Hooks'
@@ -131,9 +131,11 @@ const AthenaMessageContainer = ({ message }: { message: AthenaMessage }) => {
   )
 }
 
-const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => (
-  <View flex>
-    {/* {messages.map((message, index) => {
+const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => {
+  let messageListRef = useRef()
+  return (
+    <View flex>
+      {/* {messages.map((message, index) => {
       return message.isAthena ? (
         <AthenaMessageContainer
           key={`${index}`}
@@ -143,22 +145,30 @@ const ChatMessageContainer = ({ messages }: { messages: ChatMessage[] }) => (
         <UserMessageContainer key={`${index}`} message={message} />
       )
     })} */}
-    <FlatList
-      data={messages}
-      keyExtractor={(item, _) => item.id}
-      renderItem={({ item: message, index }) => {
-        return message.isAthena ? (
-          <AthenaMessageContainer
-            key={`${message.id}`}
-            message={message as AthenaMessage}
-          />
-        ) : (
-          <UserMessageContainer key={`${message.id}`} message={message} />
-        )
-      }}
-    />
-  </View>
-)
+      <FlatList
+        data={messages}
+        ref={ref => (messageListRef = ref)}
+        onLayout={() => {
+          messageListRef.scrollToEnd({ animated: false })
+        }}
+        onContentSizeChange={() => {
+          messageListRef.scrollToEnd({ animated: true })
+        }}
+        keyExtractor={(item, _) => item.id}
+        renderItem={({ item: message, index }) => {
+          return message.isAthena ? (
+            <AthenaMessageContainer
+              key={`${message.id}`}
+              message={message as AthenaMessage}
+            />
+          ) : (
+            <UserMessageContainer key={`${message.id}`} message={message} />
+          )
+        }}
+      />
+    </View>
+  )
+}
 
 export default ChatMessageContainer
 
