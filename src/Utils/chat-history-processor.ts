@@ -41,7 +41,7 @@ const makeFacts = (
     columnsCount: columns.length ?? 0,
     dataCount: values.length,
     category: '',
-    value: 0,
+    value: '',
   }
 }
 
@@ -100,30 +100,35 @@ chartRules.decisions.forEach((decision: Decision) => {
 })
 
 export const processChatMessage = async (item: RawChatMessage) => {
-  console.log('[chat-history-processor] processChatMessage...')
+  // console.log('[chat-history-processor] processChatMessage...')
   // Process and transform base64 string to array of records
   const { columns, columnMetadata, values } = processResponse(
     item.columns,
     item.columnMetadata,
     item.base64Data,
+    item.text,
   )
+  // console.log(`[Chart Rule Processor] Response processed columns: ${JSON.stringify(columns, null, 2)}`)
 
   // Find visualization formats
   const colType = item?.colType
   const facts = makeFacts(colType, columns, values)
-  // console.log(`[Chart Rule Processor]facts: ${JSON.stringify(facts, null, 2)}`)
+  // console.log(`[Chart Rule Processor] facts: ${JSON.stringify(facts, null, 2)}`)
   const { events } = await engine.run(facts)
+  // console.log('[Chart Rule Processor] rule run compelte...')
   const visualFormats: VisualFormat[] = events.map(event => {
     const { type, params } = event
-    const decisions: Partial<VisualFormat> = {}
+    let decisions: Record<string, any> = {}
     for (const key in params) {
       // eslint-disable-next-line no-new-func
-      const columnName = new Function('facts', `return \`${params[key]}\`;`)(facts)
+      const columnName = new Function('facts', `return \`${params[key]}\`;`)(
+        facts,
+      )
       decisions[key] = cleanseColumn(columnName)
     }
     return {
+      ...(decisions as VisualFormat),
       type,
-      ...decisions,
     }
   })
   // console.log(
@@ -131,14 +136,14 @@ export const processChatMessage = async (item: RawChatMessage) => {
   //   JSON.stringify(visualFormats, null, 2),
   // )
 
-  if (visualFormats.find(item => item.type === 'Text')) {
-    console.log(
-      '[chat-history-processor] values: ',
-      JSON.stringify(values, 2, null),
-    )
-  } else {
-    console.log('[chat-history-processor] values length: ', values.length)
-  }
+  // if (visualFormats.find(item => item.type === 'Text')) {
+  //   console.log(
+  //     '[chat-history-processor] values: ',
+  //     JSON.stringify(values, 2, null),
+  //   )
+  // } else {
+  //   console.log('[chat-history-processor] values length: ', values.length)
+  // }
 
   // Extract separate message for user and athena and add to the message array
   const userMessage: UserMessage = makeUserMessage(item)
@@ -165,7 +170,7 @@ export const processChatHistory = async (rawChatMessages: RawChatMessage[]) => {
       messages = messages.concat(userMessage, athenaMessage)
     } catch (error) {
       console.error(
-        `[TransformHelper] ProcesChatistory - Error while processing message#${index}: `,
+        `[chat-history-processor] ProcesChatistory - Error while processing message#${index}: `,
         error,
       )
     }

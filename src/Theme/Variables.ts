@@ -17,6 +17,7 @@ import {
  */
 export const Colors: ThemeColors = {
   // Example colors:
+  GREEN_LIGHTEST: '#EAFAEA',
   GREEN_LIGHTER: '#27DC61',
   GREEN_LIGHT: '#00DA49',
   GREEN_MAIN: '#00AA39',

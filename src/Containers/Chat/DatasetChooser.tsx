@@ -197,4 +197,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default DatasetChooser
+export default React.memo(DatasetChooser)

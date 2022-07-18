@@ -19,14 +19,9 @@ export const formatValue =
   (value: any, index: number) => {
     let content = value
     const column = columns[index]
-    const {
-      isNumericFormat,
-      type,
-      unit = '',
-      additional_data,
-    } = columnMetadata[column]
-    const precision = additional_data?.precision ?? 0
-    if (isNumericFormat) {
+    if (columnMetadata[column] && columnMetadata[column].isNumericFormat) {
+      const { type, unit = '', additional_data } = columnMetadata[column]
+      const precision = additional_data?.precision ?? 0
       let valueFormat = '0,0'
       const precisionFormat =
         precision > 0 ? '.'.padEnd(precision + 1, '0') : ''
@@ -70,7 +65,7 @@ const getStyledRowData = (
 interface TableProps {
   columns: string[]
   columnMetadata: ColumnMetadata
-  values: Array<Record<string, any>[]>
+  values: Array<Record<string, any>>
 }
 
 export default function TableContainer({
@@ -82,7 +77,7 @@ export default function TableContainer({
   const widthArr = new Array(columns.length).fill(columnWidth)
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
-  const [rows, setRows] = useState(values.slice(0, 10))
+  const [rows, setRows] = useState(values.slice(0, 5))
 
   // if (values.length > 10) {
   //   console.log(`col metadata: ${JSON.stringify(columnMetadata, null, 2)}`)

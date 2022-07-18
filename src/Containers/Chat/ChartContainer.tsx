@@ -13,10 +13,13 @@ import {
   VictoryContainer,
 } from 'victory-native'
 import numeral from 'numeral'
+import { useTheme } from '@/Hooks'
+import { Colors } from '@/Theme/Variables'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import { VisualFormat } from '@/Types/ChatMessage'
 
 interface ChartProps {
+  title: string
   xAxisLabel: string
   yAxisLabel: string
   values: Array<Record<string, number>>
@@ -31,6 +34,7 @@ interface BarChartProps extends ChartProps {
 }
 
 interface ChartContainerProps {
+  title: string
   columns: string[]
   columnMetadata: ColumnMetadata
   visualFormats: VisualFormat[]
@@ -43,20 +47,43 @@ const PieChart = ({
   innerRadious = 0,
   values,
 }: PieChartProps) => {
+  const { Colors, Fonts } = useTheme()
   const { width: screenWidth } = Dimensions.get('window')
   return (
-    <VictoryPie
-      width={screenWidth - 24 * 4}
-      height={350}
-      x={xAxisLabel}
-      y={yAxisLabel}
-      data={values}
-      cornerRadius={2}
-      innerRadius={innerRadious}
-      theme={VictoryTheme.material}
-      labelComponent={<VictoryLabel angle={45} textAnchor={'end'} dx={15} />}
-      style={{ parent: { alignItems: 'center', paddingLeft: 20 } }}
-    />
+    <View>
+      {/* <View padding-6 marginB-8>
+        <Text
+          numberOfLines={1}
+          style={[
+            {
+              color: Colors.GREEN_MAIN,
+              textAlign: 'center',
+              fontWeight: 'bold',
+            },
+          ]}
+        >
+          {title}
+        </Text>
+      </View> */}
+      <VictoryPie
+        width={screenWidth - 24 * 4}
+        height={300}
+        x={xAxisLabel}
+        y={yAxisLabel}
+        data={values}
+        cornerRadius={2}
+        innerRadius={innerRadious}
+        theme={VictoryTheme.material}
+        // labelComponent={<VictoryLabel angle={45} textAnchor={'end'} dx={15} />}
+        labels={({ datum }) => {
+          return `${datum.yName}`
+          // return numeral(datum[xAxisLabel]).format('0a')
+          // return `${datum.yName} (${numeral(datum[xAxisLabel]).format('0a')})`
+        }}
+        labelPosition={'centroid'}
+        labelPlacement={'parallel'}
+      />
+    </View>
   )
 }
 
@@ -104,7 +131,7 @@ const AreaChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
       }}
     >
       <VictoryAxis
-        label="Top 10 Vendors by Spend"
+        // label="Top 10 Vendors by Spend"
         axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
         tickLabelComponent={
           <VictoryLabel dx={2} dy={-8} angle={-60} textAnchor={'end'} />
@@ -174,18 +201,9 @@ const LineChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
       }}
     >
       <VictoryAxis
-        label="Top 10 Vendors by Spend"
-        axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
-        tickLabelComponent={
-          <VictoryLabel dx={2} dy={-8} angle={-60} textAnchor={'end'} />
-        }
+        // label="Top 10 Vendors by Spend"
         style={{
-          axisLabel: {
-            fontSize: 16,
-            fontWeight: 'bold',
-            padding: 8,
-            fill: '#00AA39',
-          },
+          axisLabel: { fill: '#00AA39' },
           ticks: { size: 4 },
           tickLabels: { angle: -60, alignItems: 'baseline' },
         }}
@@ -242,7 +260,7 @@ const BarChart = ({
       }}
     >
       <VictoryAxis
-        label="Top 10 Vendors by Spend"
+        // label="Top 10 Vendors by Spend"
         axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
         tickLabelComponent={
           <VictoryLabel dx={2} dy={-8} angle={-60} textAnchor={'end'} />
@@ -293,25 +311,26 @@ const ColumnChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
   )
 }
 
-export default function ChartContainer({
-  columns,
-  columnMetadata,
+const ChartContainer = ({
+  // columns,
+  // columnMetadata,
   visualFormats,
   values,
-}: ChartContainerProps) {
+  title,
+}: ChartContainerProps) => {
   const getChartFormat = () => {
     return visualFormats.find(item => item.type.indexOf('Chart') !== -1)
   }
 
   let chart = null
   const chartFormat = getChartFormat()
-  // console.log(`[ChartContainer] type: ${chartFormat?.type}`)
   if (
     chartFormat?.type === 'AreaChart' &&
     typeof chartFormat?.yField === 'string'
   ) {
     chart = (
       <AreaChart
+        title={title}
         xAxisLabel={chartFormat?.xField}
         yAxisLabel={chartFormat?.yField}
         values={values}
@@ -323,6 +342,7 @@ export default function ChartContainer({
   ) {
     chart = (
       <LineChart
+        title={title}
         xAxisLabel={chartFormat?.xField}
         yAxisLabel={chartFormat?.yField}
         values={values}
@@ -334,6 +354,7 @@ export default function ChartContainer({
   ) {
     chart = (
       <BarChart
+        title={title}
         xAxisLabel={chartFormat?.xField}
         yAxisLabel={chartFormat?.yField}
         horizontal={true}
@@ -346,6 +367,7 @@ export default function ChartContainer({
   ) {
     chart = (
       <ColumnChart
+        title={title}
         xAxisLabel={chartFormat?.xField}
         yAxisLabel={chartFormat?.yField}
         values={values}
@@ -358,6 +380,7 @@ export default function ChartContainer({
   ) {
     chart = (
       <PieChart
+        title={title}
         xAxisLabel={chartFormat?.angleField}
         yAxisLabel={chartFormat?.colorField}
         innerRadious={0}
@@ -371,6 +394,7 @@ export default function ChartContainer({
   ) {
     chart = (
       <DonutChart
+        title={title}
         xAxisLabel={chartFormat?.angleField}
         yAxisLabel={chartFormat?.colorField}
         values={values}
@@ -390,6 +414,8 @@ export default function ChartContainer({
     </View>
   )
 }
+
+export default React.memo(ChartContainer)
 
 const styles = StyleSheet.create({
   container: {

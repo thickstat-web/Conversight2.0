@@ -53,7 +53,7 @@ const addProcessChatMessage = (builder: ActionReducerMapBuilder<AppState>) => {
     .addCase(processAndSetChatMessage.fulfilled, (state, action) => {
       state.processingChatMessage = false
       const { athenaMessage } = action.payload
-      state.chatMessages = [...state.chatMessages, athenaMessage]
+      state.chatMessages.push(athenaMessage)
     })
 }
 

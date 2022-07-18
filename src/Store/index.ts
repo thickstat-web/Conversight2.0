@@ -78,7 +78,7 @@ const store = configureStore({
 
 const persistor = persistStore(store)
 
-setupListeners(store.dispatch)
+// setupListeners(store.dispatch)
 
 export { store, persistor }
 

@@ -23,7 +23,6 @@ export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
         if (respStatus === 'failed') {
           return {
             success: false,
-            data: null,
           }
         }
 

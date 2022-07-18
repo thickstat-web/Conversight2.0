@@ -17,7 +17,9 @@ export const processResponse = (
   columns: string[],
   column_metadata: MetaData,
   base64Value: string,
+  text: string,
 ): ProcessedResponse => {
+  // console.log('[response-processor] Process response...')
   // Decode base64 to array of values
   const decoded = atob(base64Value)
   const valueArr = JSON.parse(decoded)
@@ -42,15 +44,28 @@ export const processResponse = (
 
   // Extract array of name, value pairs
   const values = []
-  const colsCount = cleansedColumns.length
-  for (const row of valueArr) {
-    const record: KeyValue = {}
-    for (let index = 0; index < colsCount; index++) {
-      const column = cleansedColumns[index]
-      const { isNumericFormat } = col_meta[column]
-      record[column] = isNumericFormat ? Number(row[index]) : row[index]
+  if (valueArr.length === 0) {
+    values.push({ result: text })
+  } else {
+    const colsCount = cleansedColumns.length
+    for (const row of valueArr) {
+      const record: KeyValue = {}
+      for (let index = 0; index < colsCount; index++) {
+        const column = cleansedColumns[index]
+        // if (colsCount === 1 && valueArr.length === 1) {
+        //   console.log(
+        //     `[Chart Rule Processor] colsCount: ${cleansedColumns} valueArr.length: ${valueArr.length
+        //     }, col_meta: ${JSON.stringify(col_meta, null, 2)}`,
+        //   )
+        // }
+        const { isNumericFormat } = col_meta[column] || {
+          isNumericFormat: false,
+        }
+        record[column] = isNumericFormat ? Number(row[index]) : row[index]
+      }
+      values.push(record)
     }
-    values.push(record)
   }
+  // console.log(`[Chart Rule Processor] Extract array of name, value pairs...`)
   return { columns: cleansedColumns, columnMetadata: col_meta, values }
 }

@@ -20,7 +20,7 @@ const StartupContainer = () => {
     const delayStart = new Promise(resolve =>
       setTimeout(() => {
         resolve(true)
-      }, 2000),
+      }, 500),
     )
 
     // Load all the initial datasets
