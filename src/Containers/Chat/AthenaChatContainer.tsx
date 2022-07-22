@@ -1,10 +1,4 @@
-import React, {
-  createRef,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-} from 'react'
+import React, { useEffect, useRef } from 'react'
 import { SafeAreaView, StyleSheet } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
@@ -31,7 +25,7 @@ const AthenaChatContainer = () => {
         dataSet: selectedDatasetId,
         page: {
           from: 0,
-          size: 10,
+          size: 5,
         },
       }
       const fetchChatHistory = async () => {

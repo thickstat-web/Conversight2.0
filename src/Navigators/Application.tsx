@@ -6,6 +6,7 @@ import { useAppDispatch, useAuth, useTheme } from '@/Hooks'
 import {
   AvatarChanged,
   CurrentAvatar,
+  DataExplorerContainer,
   ReadFAQ,
   RecoverComplete,
   RecoverEnterEmail,
@@ -34,6 +35,7 @@ import {
   STARTUP_SCREEN,
   WALK_THROUGH_AUTHORIZED,
   WT_INSIGHTS,
+  DATA_EXPLORER,
 } from '@/Constants/screens'
 import LoginNavigator from '@/Navigators/LoginNavigator'
 import DrawerNavigator from '@/Navigators/DrawerNavigator'
@@ -138,6 +140,22 @@ const ApplicationNavigator = () => {
                     title: 'Ask Athena',
                     headerTitleAlign: 'center',
                     // headerBackImage: renderBackArrowWhite,
+                    headerTintColor: Colors.WHITE,
+                    headerStyle: {
+                      backgroundColor: Colors.GREEN_MAIN,
+                    },
+                    headerShown: true,
+                    headerBackTitleVisible: false,
+                    animationEnabled: true,
+                  }}
+                />
+                <Stack.Screen
+                  name={DATA_EXPLORER}
+                  component={DataExplorerContainer}
+                  options={{
+                    headerRightContainerStyle: { paddingRight: 15 },
+                    title: 'Explorer',
+                    headerTitleAlign: 'center',
                     headerTintColor: Colors.WHITE,
                     headerStyle: {
                       backgroundColor: Colors.GREEN_MAIN,

@@ -12,6 +12,7 @@ import {
 type RootStackParamList = {
   Startup: undefined
   Home: undefined
+  DataExplorerScreen: undefined
 }
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>()

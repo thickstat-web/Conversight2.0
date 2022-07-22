@@ -10,6 +10,7 @@ interface Props {
   disabled?: boolean
   onPress?: (...args: any) => any
   style?: any
+  labelStyle?: any
 }
 
 const Button = ({
@@ -20,6 +21,7 @@ const Button = ({
   label,
   onPress,
   style,
+  labelStyle,
 }: Props) => {
   const { Colors, Common, Fonts, Gutters, Layout } = useTheme()
   const disabledStyle = { opacity: 0.6 }
@@ -46,7 +48,7 @@ const Button = ({
             style={[Gutters.smallRMargin]}
           />
         )}
-        <Text style={[Fonts.text18BoldContrast]}>{label}</Text>
+        <Text style={[Fonts.text18BoldContrast, labelStyle]}>{label}</Text>
       </Pressable>
     </View>
   )
@@ -60,6 +62,7 @@ Button.defaultProps = {
   loading: false,
   onPress: () => {},
   style: {},
+  labelStyle: {},
 }
 
 export default Button

@@ -21,6 +21,7 @@ import DatasetChooser from './DatasetChooser'
 import FAQPicker from './FAQPicker'
 import IconButton from '@/Components/IconButton'
 import SendIcon from '@/Assets/Images/iconsSVG/send.svg'
+import { NO_DATA_AVAILABLE } from '@/Config'
 
 export declare type RefProps = {
   setUtterance: (text: string) => void
@@ -89,7 +90,11 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
         if (resp.success && resp.data) {
           dispatch(processAndSetChatMessage(resp.data))
         } else {
-          const message = makeFailureAthenaMessage('No matching result found.')
+          let failureMessage =
+            resp.data?.status === 'failed' && resp.data?.text
+              ? resp.data?.text
+              : NO_DATA_AVAILABLE
+          const message = makeFailureAthenaMessage(failureMessage)
           dispatch(addChatMessage(message))
         }
       }

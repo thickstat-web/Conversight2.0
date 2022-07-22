@@ -42,7 +42,7 @@ const InsightsContainer = () => {
                 total={3}
                 title="Ask Athena"
                 text="Many devices with high speed for yesterday?"
-                btnText="OK, got ya'"
+                btnText="OK, got ya"
                 onPress={() => setShowTooltip(false)}
               />
             )}

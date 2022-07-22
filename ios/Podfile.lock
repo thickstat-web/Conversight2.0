@@ -292,7 +292,7 @@ PODS:
     - glog
   - react-native-flipper (0.143.0):
     - React-Core
-  - react-native-netinfo (8.3.1):
+  - react-native-netinfo (9.3.0):
     - React-Core
   - react-native-quick-base64 (2.0.3):
     - React-Core
@@ -416,7 +416,7 @@ PODS:
   - RNScreens (3.15.0):
     - React-Core
     - React-RCTImage
-  - RNSVG (12.3.0):
+  - RNSVG (12.4.0):
     - React-Core
   - TOCropViewController (2.6.1)
   - Yoga (1.14.0)
@@ -638,7 +638,7 @@ SPEC CHECKSUMS:
   React-jsinspector: f4775ea9118cbe1f72b834f0f842baa7a99508d8
   React-logger: a1f028f6d8639a3f364ef80419e5e862e1115250
   react-native-flipper: df8e2a7e5dcc857033d925ad8c7e8c52760b8e06
-  react-native-netinfo: 1a6035d3b9780221d407c277ebfb5722ace00658
+  react-native-netinfo: 129bd99f607a2dc5bb096168f3e5c150fd1f1c95
   react-native-quick-base64: 8d7a267399ebe8e9b49c68642ff461ff579e93bf
   react-native-safe-area-context: 6c12e3859b6f27b25de4fee8201cfb858432d8de
   React-perflogger: 0afaf2f01a47fd0fc368a93bfbb5bd3b26db6e7f
@@ -661,7 +661,7 @@ SPEC CHECKSUMS:
   RNImageCropPicker: ffbba608264885c241cbf3a8f78eb7aeeb978241
   RNReanimated: b5b17149593e7c05e4ec5c0efea1f21e05829510
   RNScreens: 4a1af06327774490d97342c00aee0c2bafb497b7
-  RNSVG: 302bfc9905bd8122f08966dc2ce2d07b7b52b9f8
+  RNSVG: 3dd44d99d1c18e1342aee4bfa53ab3f6a8c4865f
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   Yoga: d6b6a80659aa3e91aaba01d0012e7edcbedcbecd
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a

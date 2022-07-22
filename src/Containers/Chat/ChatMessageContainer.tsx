@@ -1,26 +1,24 @@
-import React, { useCallback, useEffect, useRef } from 'react'
-import { FlatList, StyleSheet } from 'react-native'
-import { View, Text, TouchableOpacity } from 'react-native-ui-lib'
+import React, { useRef, useState } from 'react'
+import { FlatList, Pressable, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, Colors } from 'react-native-ui-lib'
 import { Image } from 'react-native-ui-lib/src/components/image'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
 import { selectChatMessages, selectProcessingChatMessages } from '@/Store/App'
 import {
   AthenaMessage,
+  ChartType,
   ChatMessage,
   UserMessage,
   VisualFormat,
 } from '@/Types/ChatMessage'
 import { LoadingSpinner } from '@/Components'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import TableContainer, { formatValue } from './TableContainer'
+import TableContainer from './TableContainer'
 import AthenaIcon from '@/Assets/Images/iconsSVG/athena.svg'
 import ChartContainer from './ChartContainer'
-
-interface TextFormat {
-  columns: string[]
-  columnMetadata: ColumnMetadata
-  value: string
-}
+import { NO_DATA_AVAILABLE } from '@/Config'
+import { navigate } from '@/Navigators/utils'
+import { DATA_EXPLORER } from '@/Constants/screens'
 
 const FailureMessageContainer = ({ message }: { message: string }) => {
   const { Fonts } = useTheme()
@@ -31,14 +29,53 @@ const FailureMessageContainer = ({ message }: { message: string }) => {
   )
 }
 
-const TextContainer = ({ columns, columnMetadata, value }: TextFormat) => {
+const TextContainer = ({ value }: { value: string }) => {
   const { Fonts } = useTheme()
-  const formattedValue = formatValue(columns, columnMetadata)(value, 0)
   return (
-    <Text margin-4 style={[Fonts.textSmall, styles.message]}>
-      {formattedValue}
+    <Text
+      margin-4
+      style={[Fonts.textSmall, styles.message]}
+      selectable={true}
+      selectionColor={Colors.GREEN_LIGHTEST}
+    >
+      {value}
     </Text>
   )
+}
+
+const getPreferredChart = (
+  visualFormats: VisualFormat[],
+  utterance: string,
+  values: Record<string, any>[],
+  visualFormatIncludes: (chart: string) => boolean,
+) => {
+  let preferredChart: ChartType | null =
+    (visualFormats.find(item => item.type.indexOf('Chart') !== -1)
+      ?.type as ChartType) ?? null
+  const query = utterance?.toLowerCase()
+  if (
+    values.length <= 10 &&
+    (query.includes('top') || query.includes('bottom')) &&
+    visualFormatIncludes('PieChart')
+  ) {
+    preferredChart = 'PieChart'
+  } else if (
+    values.length > 10 &&
+    values.length < 100 &&
+    visualFormatIncludes('ColumnChart')
+  ) {
+    preferredChart = 'ColumnChart'
+  } else if (
+    (values.length > 1 || query.includes('compare')) &&
+    visualFormatIncludes('LineChart')
+  ) {
+    preferredChart = 'LineChart'
+  } else if (query.includes('compare') && visualFormatIncludes('AreaChart')) {
+    preferredChart = 'AreaChart'
+    // } else if (visualFormatIncludes('DualAxes')) {
+    //   preferredChart = 'DualAxes'
+  }
+  return preferredChart
 }
 
 const resolveVisualization = (
@@ -46,57 +83,48 @@ const resolveVisualization = (
   visualFormats: VisualFormat[],
   columns: string[],
   columnMetadata: ColumnMetadata,
+  value: string,
   values: Record<string, any>[],
+  utterance: string,
   message: string,
 ) => {
-  // console.log(
-  //   `[ChartMessageContainer] visual formats: ${JSON.stringify(
-  //     visualFormats,
-  //     null,
-  //     2,
-  //   )}`,
-  // )
+  const visualFormatIncludes = (chart: string) => {
+    return !!visualFormats.find(item => item.type.indexOf(chart) !== -1)
+  }
+
   let content = null
   if (visualFormats.find(item => item.type === 'Error')) {
-    if (values.length === 1) {
-      const [[, value]] = Object.entries(values[0])
-      content = <FailureMessageContainer message={`${value}`} />
-    }
+    content = <FailureMessageContainer message={NO_DATA_AVAILABLE} />
   } else if (
     visualFormats.length === 0 ||
-    visualFormats.find(item => item.type === 'Text')
+    visualFormats.find(item => item.type === 'Text' || values.length === 0)
   ) {
-    if (values.length === 1) {
-      const [[, value]] = Object.entries(values[0])
-      content = (
-        <TextContainer
-          columns={columns}
-          columnMetadata={columnMetadata}
-          value={`${value}`}
-        />
-      )
-    } else {
-      console.warn(
-        `[VisualFormat] text & more values: ${JSON.stringify(values, null, 2)}`,
-      )
-    }
-  } else if (visualFormats.find(item => item.type.indexOf('Chart') !== -1)) {
+    content = <TextContainer value={value} />
+  } else if (visualFormatIncludes('Chart') && values.length < 100) {
+    let preferredChart: ChartType | null = getPreferredChart(
+      visualFormats,
+      utterance,
+      values,
+      visualFormatIncludes,
+    )
+
     content = (
       <ChartContainer
         key={id}
+        preferredChart={preferredChart}
         columns={columns}
         columnMetadata={columnMetadata}
         visualFormats={visualFormats}
-        values={values.slice(0, 50)}
+        values={values}
         title={message}
       />
     )
-  } else if (visualFormats.find(item => item.type === 'Table')) {
+  } else if (visualFormatIncludes('Table')) {
     content = (
       <TableContainer
         columns={columns}
         columnMetadata={columnMetadata}
-        values={values.slice(0, 220)}
+        values={values.slice(0, 5)}
       />
     )
   } else {
@@ -150,11 +178,14 @@ const AthenaMessageContainer = React.memo(
       id,
       columns,
       columnMetadata,
-      data,
+      value,
+      values,
       message: title,
+      utterance,
       visualFormats,
     } = message
-    const { Colors, Fonts } = useTheme()
+    const { Colors } = useTheme()
+    const [move, setMove] = useState(false)
     return (
       <View style={styles.athenaMessageContainer}>
         <View style={styles.athenaIcon}>
@@ -163,17 +194,37 @@ const AthenaMessageContainer = React.memo(
         <View flex left>
           <View
             style={[
-              { backgroundColor: Colors.WHITE },
               styles.athenaMessageWrapper,
+              { backgroundColor: Colors.WHITE },
             ]}
           >
-            <View marginV-12>
+            <View
+              marginV-8
+              onTouchStart={() => setMove(false)}
+              onTouchMove={() => setMove(true)}
+              onTouchEnd={() => {
+                if (!move) {
+                  navigate(DATA_EXPLORER, { id })
+
+                  // console.log(
+                  //   `visualFormats: ${JSON.stringify(visualFormats, null, 2)}
+                  // \ncolumns: ${JSON.stringify(columns, null, 2)}
+                  // \ncolumnMetadata: ${JSON.stringify(columnMetadata, null, 2)}
+                  // \nvalue: ${value}
+                  // \nvalues: ${JSON.stringify(values, null, 2)}
+                  // `,
+                  // )
+                }
+              }}
+            >
               {resolveVisualization(
                 id,
                 visualFormats,
                 columns,
                 columnMetadata,
-                data,
+                value,
+                values,
+                utterance,
                 title,
               )}
             </View>
@@ -213,10 +264,6 @@ const ChatMessageContainer = ({
   let messageListRef = useRef()
   const chatMessagesProcessing = useAppSelector(selectProcessingChatMessages)
   const messages = useAppSelector(selectChatMessages)
-
-  // useEffect(() => {
-  //   console.log('[ChatMessageContainer] rendering...')
-  // })
 
   const setMessageListRef = ref => (messageListRef = ref)
   const keyExtractor = (item: ChatMessage) => item.id
@@ -273,7 +320,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.65 }],
   },
   athenaMessageWrapper: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     borderRadius: 16,
     borderBottomLeftRadius: 0,
   },

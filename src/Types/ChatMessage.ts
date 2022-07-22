@@ -15,9 +15,21 @@ export interface RawChatMessage {
   status: string
 }
 
+export type ChartType =
+  | 'AreaChart'
+  | 'BarChart'
+  | 'ColumnChart'
+  | 'DonutChart'
+  // | 'DualAxes'
+  // | 'FunnelChart'
+  | 'LineChart'
+  | 'PieChart'
+
+export type VisualFormatType = 'Text' | 'Table' | ChartType | 'Error'
+
 /* Visual format */
 export interface VisualFormat {
-  type: string
+  type: VisualFormatType
   xField: string
   yField: string | string[]
   colorField?: string
@@ -31,11 +43,12 @@ export interface AthenaMessage {
   columnMetadata: ColumnMetadata
   columns: string[]
   createdAt: number
-  data: Array<Record<string, any>>
   id: string
   isAthena: boolean
   message: string
   utterance: string
+  value: string
+  values: Array<Record<string, any>>
   visualFormats: VisualFormat[]
 }
 
@@ -57,13 +70,3 @@ export interface UserMessage extends BaseMessage { }
 
 /* Processed Chat Message format */
 export type ChatMessage = UserMessage | AthenaMessage | AthenaFailureMessage
-
-export type ChartType =
-  | 'AreaChart'
-  | 'BarChart'
-  | 'ColumnChart'
-  | 'DonutChart'
-  | 'DualAxes'
-  | 'FunnelChart'
-  | 'LineChart'
-  | 'PieChart'

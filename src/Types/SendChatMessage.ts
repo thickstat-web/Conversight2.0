@@ -130,7 +130,7 @@ export interface AdditionalData {
 }
 
 export interface ColType {
-  date: any[]
+  date: string[]
   dim: string[]
   metrics: string[]
 }

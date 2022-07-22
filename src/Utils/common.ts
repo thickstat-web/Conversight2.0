@@ -1,3 +1,6 @@
+import numeral from 'numeral'
+import { ColumnMetadata } from '@/Types/ChatHistory'
+
 export const cleanseColumn = (str: string) => {
   if (str) {
     str = str.replace(/[. \- %()#&>]/g, '_')
@@ -53,4 +56,26 @@ export const properCase = (text: string, onlyFirstChar = false) => {
   } finally {
     return result
   }
+}
+
+export const formatValue = (value: any, metadata: ColumnMetadata) => {
+  const { type, unit = '', additional_data } = metadata
+  const precision = additional_data?.precision ?? 0
+  let valueFormat = '0,0'
+  const precisionFormat = precision > 0 ? '.'.padEnd(precision + 1, '0') : ''
+
+  if (type === 'currency') {
+    const currency = unit ? unit : ''
+    valueFormat =
+      currency === '$'
+        ? `${currency}0,0${precisionFormat}`
+        : `0,0${precisionFormat}${currency}`
+  } else {
+    valueFormat =
+      unit && `${unit}`.length
+        ? `0,0${precisionFormat}${unit}`
+        : `0,0${precisionFormat}`
+  }
+
+  return numeral(value).format(valueFormat)
 }

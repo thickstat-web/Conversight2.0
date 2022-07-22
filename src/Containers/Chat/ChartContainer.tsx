@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dimensions, StyleSheet } from 'react-native'
+import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
 import {
   VictoryArea,
@@ -16,7 +16,7 @@ import numeral from 'numeral'
 import { useTheme } from '@/Hooks'
 import { Colors } from '@/Theme/Variables'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { VisualFormat } from '@/Types/ChatMessage'
+import { ChartType, VisualFormat } from '@/Types/ChatMessage'
 
 interface ChartProps {
   title: string
@@ -34,12 +34,32 @@ interface BarChartProps extends ChartProps {
 }
 
 interface ChartContainerProps {
+  preferredChart: ChartType | null
   title: string
   columns: string[]
   columnMetadata: ColumnMetadata
   visualFormats: VisualFormat[]
   values: Array<Record<string, any>>
 }
+
+const colorScale = [
+  '#D9F0EB',
+  '#66E992',
+  '#27DC61',
+  '#78D196',
+  '#00AA39',
+  '#069577',
+  '#E5ECEB',
+  '#A1E7D9',
+  '#6BCEBA',
+  '#A5D6CC',
+  '#95B3BD',
+  '#CCDAD7',
+  '#B3C7C3',
+  '#99B4AF',
+  '#80A19C',
+  '#014E40',
+]
 
 const PieChart = ({
   xAxisLabel,
@@ -48,7 +68,7 @@ const PieChart = ({
   values,
 }: PieChartProps) => {
   const { Colors, Fonts } = useTheme()
-  const { width: screenWidth } = Dimensions.get('window')
+  const { width: screenWidth } = useWindowDimensions()
   return (
     <View>
       {/* <View padding-6 marginB-8>
@@ -71,6 +91,7 @@ const PieChart = ({
         x={xAxisLabel}
         y={yAxisLabel}
         data={values}
+        colorScale={colorScale}
         cornerRadius={2}
         innerRadius={innerRadious}
         theme={VictoryTheme.material}
@@ -99,7 +120,7 @@ const DonutChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
 }
 
 const AreaChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
-  const { width: screenWidth } = Dimensions.get('window')
+  const { width: screenWidth } = useWindowDimensions()
   return (
     <VictoryChart
       // animate={{ duration: 100, easing: 'linear' }}
@@ -148,7 +169,7 @@ const AreaChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
         }}
       />
       <VictoryAxis dependentAxis tickFormat={x => numeral(x).format('$0a')} />
-      {/* <VictoryArea
+      <VictoryArea
         x={xAxisLabel}
         y={yAxisLabel}
         data={values}
@@ -156,66 +177,60 @@ const AreaChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
           data: { fill: '#27DC61', stroke: '#00AA39', strokeWidth: 1 },
           parent: { border: '1px solid #ccc' },
         }}
-      /> */}
+      />
     </VictoryChart>
   )
 }
 
 const LineChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
-  // console.log(
-  //   `[Line] xAxisLabel: ${xAxisLabel}, yAxisLabel: ${yAxisLabel}, values: ${JSON.stringify(
-  //     values,
-  //     null,
-  //     2,
-  //   )}`,
-  // )
-  const { width: screenWidth } = Dimensions.get('window')
+  const { width: screenWidth } = useWindowDimensions()
   return (
     <VictoryChart
       // animate={{ duration: 100, easing: 'linear' }}
-      style={{ parent: { borderWidth: 1 } }}
+      // style={{ parent: { borderWidth: 1 } }}
       containerComponent={
         <VictoryContainer
-          height={350}
-          events={
-            {
-              // onPressIn: evt => console.log('Tapped...'),
-            }
-          }
+          height={300}
+          events={{
+            onPressIn: () => {
+              // console.log(`[LineChart] touched here...`)
+            },
+          }}
         />
       }
       height={300}
       width={screenWidth - 24 * 2}
       theme={VictoryTheme.material}
       domainPadding={10}
-      style={{
-        parent: {
-          // alignItems: 'center',
-          border: '1px solid #00ff00',
-          // backgroundColor: 'orange',
-          // paddingBottom: 80,
-        },
-        // background: {
-        //   fill: 'pink',
-        // },
-      }}
+      // style={{
+      //   parent: {
+      //     // alignItems: 'center',
+      //     border: '1px solid #00ff00',
+      //     // backgroundColor: 'orange',
+      //     // paddingBottom: 80,
+      //   },
+      //   // background: {
+      //   //   fill: 'pink',
+      //   // },
+      // }}
     >
       <VictoryAxis
-        // label="Top 10 Vendors by Spend"
+        // label="Line Chart"
         style={{
           axisLabel: { fill: '#00AA39' },
           ticks: { size: 4 },
           tickLabels: { angle: -60, alignItems: 'baseline' },
         }}
+        tickFormat={x => `${x}`}
       />
       <VictoryAxis dependentAxis tickFormat={x => numeral(x).format('$0a')} />
-      <VictoryLine
+      <VictoryArea
         x={xAxisLabel}
         y={yAxisLabel}
         data={values}
         style={{
-          data: { stroke: '#00AA39', strokeWidth: 1 },
-          parent: { border: '1px solid #ccc' },
+          data: { stroke: '#00AA39', strokeWidth: 1, fill: 'transparent' },
+          // parent: { border: '1px solid #ccc' },
         }}
       />
     </VictoryChart>
@@ -228,25 +243,16 @@ const BarChart = ({
   horizontal = true,
   values,
 }: BarChartProps) => {
-  const { width: screenWidth } = Dimensions.get('window')
+  const { width: screenWidth } = useWindowDimensions()
   return (
     <VictoryChart
-      animate={{ duration: 100, easing: 'linear' }}
+      // animate={{ duration: 100, easing: 'linear' }}
       style={{ parent: { borderWidth: 1 } }}
-      containerComponent={
-        <VictoryContainer
-          height={400}
-          events={
-            {
-              // onPressIn: evt => console.log('Tapped...'),
-            }
-          }
-        />
-      }
+      containerComponent={<VictoryContainer height={325} />}
       height={300}
       width={screenWidth - 24 * 2}
       theme={VictoryTheme.material}
-      domainPadding={10}
+      domainPadding={20}
       style={{
         parent: {
           // alignItems: 'center',
@@ -260,7 +266,6 @@ const BarChart = ({
       }}
     >
       <VictoryAxis
-        // label="Top 10 Vendors by Spend"
         axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
         tickLabelComponent={
           <VictoryLabel dx={2} dy={-8} angle={-60} textAnchor={'end'} />
@@ -276,13 +281,15 @@ const BarChart = ({
           tickLabels: { angle: -60, alignItems: 'baseline' },
         }}
       />
-      <VictoryAxis dependentAxis tickFormat={x => numeral(x).format('$0a')} />
+      {/* tickFormat={x => numeral(x).format('$0a')} */}
+      {/* <VictoryAxis dependentAxis tickFormat={x => numeral(x).format('0a')} /> */}
+      <VictoryAxis dependentAxis tickFormat={x => x} />
       <VictoryBar
         x={xAxisLabel}
         y={yAxisLabel}
-        data={values}
+        data={values.slice(0, 10)}
         horizontal={horizontal}
-        labels={({ datum }) => numeral(datum[yAxisLabel]).format('0,0.00')}
+        labels={({ datum }) => numeral(datum[yAxisLabel]).format('0,0a')}
         alignment="middle"
         labelComponent={
           <VictoryLabel dx={10} dy={5} angle={-60} textAnchor={'start'} />
@@ -311,25 +318,42 @@ const ColumnChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
   )
 }
 
+const chartMap = {
+  AreaChart,
+  LineChart,
+  BarChart,
+  ColumnChart,
+  PieChart,
+  DonutChart,
+}
+
 const ChartContainer = ({
+  preferredChart = null,
   // columns,
   // columnMetadata,
   visualFormats,
   values,
   title,
 }: ChartContainerProps) => {
-  const getChartFormat = () => {
-    return visualFormats.find(item => item.type.indexOf('Chart') !== -1)
+  const getChartFormat = (chartType: ChartType | null) => {
+    return visualFormats.find(item =>
+      chartType ? item.type === chartType : item.type.indexOf('Chart') !== -1,
+    )
   }
 
   let chart = null
-  const chartFormat = getChartFormat()
-  if (
-    chartFormat?.type === 'AreaChart' &&
+  const chartFormat = getChartFormat(preferredChart)
+  if (!chartFormat) {
+    chart = <Text>No matching chart found</Text>
+  } else if (
+    ['AreaChart', 'LineChart', 'BarChart', 'ColumnChart'].includes(
+      chartFormat?.type,
+    ) &&
     typeof chartFormat?.yField === 'string'
   ) {
+    const Chart = chartMap[chartFormat?.type]
     chart = (
-      <AreaChart
+      <Chart
         title={title}
         xAxisLabel={chartFormat?.xField}
         yAxisLabel={chartFormat?.yField}
@@ -337,74 +361,18 @@ const ChartContainer = ({
       />
     )
   } else if (
-    chartFormat?.type === 'LineChart' &&
-    typeof chartFormat?.yField === 'string'
-  ) {
-    chart = (
-      <LineChart
-        title={title}
-        xAxisLabel={chartFormat?.xField}
-        yAxisLabel={chartFormat?.yField}
-        values={values}
-      />
-    )
-  } else if (
-    chartFormat?.type === 'BarChart' &&
-    typeof chartFormat?.yField === 'string'
-  ) {
-    chart = (
-      <BarChart
-        title={title}
-        xAxisLabel={chartFormat?.xField}
-        yAxisLabel={chartFormat?.yField}
-        horizontal={true}
-        values={values}
-      />
-    )
-  } else if (
-    chartFormat?.type === 'ColumnChart' &&
-    typeof chartFormat?.yField === 'string'
-  ) {
-    chart = (
-      <ColumnChart
-        title={title}
-        xAxisLabel={chartFormat?.xField}
-        yAxisLabel={chartFormat?.yField}
-        values={values}
-      />
-    )
-  } else if (
-    chartFormat?.type === 'PieChart' &&
+    ['PieChart', 'DonutChart'].includes(chartFormat?.type) &&
     chartFormat?.angleField &&
     chartFormat?.colorField
   ) {
+    const Chart = chartMap[chartFormat?.type]
     chart = (
-      <PieChart
-        title={title}
-        xAxisLabel={chartFormat?.angleField}
-        yAxisLabel={chartFormat?.colorField}
-        innerRadious={0}
-        values={values}
-      />
-    )
-  } else if (
-    chartFormat?.type === 'DonutChart' &&
-    chartFormat?.angleField &&
-    chartFormat?.colorField
-  ) {
-    chart = (
-      <DonutChart
+      <Chart
         title={title}
         xAxisLabel={chartFormat?.angleField}
         yAxisLabel={chartFormat?.colorField}
         values={values}
       />
-    )
-  } else {
-    chart = (
-      <View>
-        <Text>No matching chart found</Text>
-      </View>
     )
   }
 

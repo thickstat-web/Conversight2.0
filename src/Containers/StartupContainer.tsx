@@ -2,9 +2,9 @@ import React, { useCallback, useEffect } from 'react'
 import { ActivityIndicator, View, Text } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { DRAWER_NAVIGATOR } from '@/Constants/screens'
-import { useTheme, useAppDispatch } from '@/Hooks'
+import { useAppSelector, useAppDispatch, useTheme } from '@/Hooks'
 import { Brand } from '@/Components'
-import { setSelectedDatasetId } from '@/Store/Auth'
+import { selectDatasetId, setSelectedDatasetId } from '@/Store/Auth'
 import { setDefaultTheme } from '@/Store/Theme'
 import { useLazyGetDatasetsQuery } from '@/Services/modules/chat'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
@@ -13,6 +13,7 @@ const StartupContainer = () => {
   const { Layout, Gutters, Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
   const [getDatasets] = useLazyGetDatasetsQuery()
+  const selectedDatasetId = useAppSelector(selectDatasetId)
 
   const { t } = useTranslation()
 
@@ -20,7 +21,7 @@ const StartupContainer = () => {
     const delayStart = new Promise(resolve =>
       setTimeout(() => {
         resolve(true)
-      }, 500),
+      }, 100),
     )
 
     // Load all the initial datasets
@@ -28,13 +29,13 @@ const StartupContainer = () => {
 
     // Set first dataset as default for chat
     const datasets = datasetsRes.data?.data
-    if (datasets && datasets?.length) {
+    if (!selectedDatasetId && datasets && datasets?.length) {
       dispatch(setSelectedDatasetId(datasets[0].dataSetID))
     }
 
     setDefaultTheme({ theme: 'default', darkMode: null })
     navigateAndSimpleReset(DRAWER_NAVIGATOR)
-  }, [dispatch, getDatasets])
+  }, [dispatch, selectedDatasetId, getDatasets])
 
   useEffect(() => {
     init()

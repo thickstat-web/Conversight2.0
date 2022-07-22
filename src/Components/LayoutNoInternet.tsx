@@ -1,30 +1,33 @@
+import React, { useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
-import React from 'react'
-import NetInfo from '@react-native-community/netinfo'
+import NetInfo, {
+  NetInfoState,
+  useNetInfo,
+} from '@react-native-community/netinfo'
 import { useTheme } from '@/Hooks'
-import NoInternetIcon from "@/Assets/Images/no-internet.svg"
+import NoInternetIcon from '@/Assets/Images/no-internet.svg'
 interface Props {
   children: any
 }
 
 const LayoutNoInternet = ({ children }: Props) => {
-  const [connected, setConnected] = React.useState(true)
+  // const [connected, setConnected] = React.useState(true)
   const { Colors } = useTheme()
+  const { isConnected } = useNetInfo()
 
-  const cb = (x: any) => {
-    if (x !== connected) {
-      setConnected(x)
-    }
-  }
-  const unsubscribe = NetInfo.addEventListener((state: any) => {
-    // console.log('Is connected?', state.isConnected);
-    cb(state.isConnected)
-  })
+  // useEffect(() => {
+  //   const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+  //     console.log(`[NoInternerConnection] isConnected: ${state.isConnected}`)
+  //     setConnected(state.isConnected)
+  //   })
+
+  //   return () => unsubscribe()
+  // }, [])
 
   return (
     <>
-      {!connected && (
+      {!isConnected && (
         <View style={{ ...styles.root, backgroundColor: Colors.DARK_BLUE }}>
           <NoInternetIcon />
           <Text style={{ ...styles.text, color: Colors.WHITE }}>
@@ -39,21 +42,21 @@ const LayoutNoInternet = ({ children }: Props) => {
 }
 const styles = StyleSheet.create({
   root: {
-    top:0,
+    top: 0,
     position: 'absolute',
     width: '100%',
     alignSelf: 'center',
-    display:"flex",
-    flexDirection:"row",
-    justifyContent:"center",
-    alignItems:"center",
-    padding:4
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 4,
   },
   text: {
-    fontFamily:"Montserrat-Regular",
-    fontSize:15,
+    fontFamily: 'Montserrat-Regular',
+    fontSize: 15,
     lineHeight: 20,
-    paddingLeft:10
+    paddingLeft: 10,
   },
 })
 

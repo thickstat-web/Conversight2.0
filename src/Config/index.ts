@@ -7,3 +7,5 @@ export const Config = {
 // Replace following credentials below for testing
 export const DEFAULT_EMAIL = '' // sakthivel.murugasamy@conversight.ai
 export const DEFAULT_PASSWORD = '' // sakthi
+
+export const NO_DATA_AVAILABLE = 'No data available'

@@ -2,12 +2,12 @@ import { useTheme } from '@/Hooks'
 import React, { useRef } from 'react'
 import { StyleSheet, Dimensions, ImageBackground } from 'react-native'
 import { View, Text, TouchableOpacity, Image } from 'react-native-ui-lib'
-import athena from '@/Assets/gifs/athena.gif'
+// import athena from '@/Assets/gifs/athena.gif'
 import { botNavBG } from '@/Components/Images'
-import Athena from '@/Assets/Images/png/athenaFace.svg'
-import AthenaChatContainer, {
-  RefProps,
-} from '@/Containers/Chat/AthenaChatContainer'
+// import Athena from '@/Assets/Images/png/athenaFace.svg'
+// import AthenaChatContainer, {
+//   RefProps,
+// } from '@/Containers/Chat/AthenaChatContainer'
 import { athenaFaceXML } from '@/Assets/Images/xml-svg/athenaFace'
 import { SvgCss } from 'react-native-svg'
 import { ATHENA_CHAT_SCREEN } from '@/Constants/screens'

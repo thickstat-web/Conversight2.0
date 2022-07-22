@@ -33,13 +33,21 @@ export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
           createdAt,
           val,
           id,
+          isColumnReorder,
           processedUtterance,
           text,
           utterance,
           status,
         } = data
+        const cols = isColumnReorder
+          ? ([] as string[]).concat(
+            colType?.date ?? [],
+            colType?.metrics ?? [],
+            colType?.dim ?? [],
+          )
+          : columns
         let transformedData = {
-          columns,
+          columns: cols,
           columnMetadata: column_metadata,
           colType,
           createdAt,

@@ -7,59 +7,32 @@ import {
   TouchableOpacity,
 } from 'react-native'
 import { Table, Row } from 'react-native-table-component'
-import numeral from 'numeral'
 import _ from 'lodash'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { properCase } from '@/Utils/common'
-
-export const formatValue =
-  (columns: string[], columnMetadata: ColumnMetadata) =>
-  (value: any, index: number) => {
-    let content = value
-    const column = columns[index]
-    if (columnMetadata[column] && columnMetadata[column].isNumericFormat) {
-      const { type, unit = '', additional_data } = columnMetadata[column]
-      const precision = additional_data?.precision ?? 0
-      let valueFormat = '0,0'
-      const precisionFormat =
-        precision > 0 ? '.'.padEnd(precision + 1, '0') : ''
-
-      if (type === 'currency') {
-        const currency = unit ? unit : ''
-        valueFormat =
-          currency === '$'
-            ? `${currency}0,0${precisionFormat}`
-            : `0,0${precisionFormat}${currency}`
-      } else {
-        valueFormat =
-          unit && `${unit}`.length
-            ? `0,0${precisionFormat}${unit}`
-            : `0,0${precisionFormat}`
-      }
-
-      content = (
-        <Text numberOfLines={1} style={[styles.cell, styles.number]}>
-          {numeral(value).format(valueFormat)}
-        </Text>
-      )
-    } else {
-      content = (
-        <Text numberOfLines={1} style={styles.cell}>
-          {value}
-        </Text>
-      )
-    }
-    return content
-  }
+import { properCase, formatValue } from '@/Utils/common'
 
 const getStyledRowData = (
   columns: string[],
   columnMetadata: ColumnMetadata,
   row: Record<string, any>,
 ) => {
-  return Object.values(row).map(formatValue(columns, columnMetadata))
+  return Object.values(row).map((value: any, index: number) => {
+    const column = columns[index]
+    let isNumeric = false
+    let metadata = columnMetadata[column]
+    if (columnMetadata[column]) {
+      metadata = columnMetadata[column]
+      isNumeric = metadata.isNumericFormat
+    }
+    const displayValue = isNumeric ? formatValue(value, metadata) : value
+    return (
+      <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
+        {displayValue}
+      </Text>
+    )
+  })
 }
 
 interface TableProps {
@@ -77,7 +50,7 @@ export default function TableContainer({
   const widthArr = new Array(columns.length).fill(columnWidth)
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
-  const [rows, setRows] = useState(values.slice(0, 5))
+  const [rows, setRows] = useState(values)
 
   // if (values.length > 10) {
   //   console.log(`col metadata: ${JSON.stringify(columnMetadata, null, 2)}`)
@@ -143,6 +116,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#EAFAEA',
   },
   header: {
     height: 42,
