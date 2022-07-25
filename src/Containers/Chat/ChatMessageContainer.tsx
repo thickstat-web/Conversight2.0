@@ -127,14 +127,6 @@ const resolveVisualization = (
         values={values.slice(0, 5)}
       />
     )
-  } else {
-    console.log(
-      `[VisualFormat] visual formats not matched: ${JSON.stringify(
-        visualFormats,
-        null,
-        2,
-      )}`,
-    )
   }
   return content
 }
@@ -205,7 +197,6 @@ const AthenaMessageContainer = React.memo(
               onTouchEnd={() => {
                 if (!move) {
                   navigate(DATA_EXPLORER, { id })
-
                   // console.log(
                   //   `visualFormats: ${JSON.stringify(visualFormats, null, 2)}
                   // \ncolumns: ${JSON.stringify(columns, null, 2)}
@@ -285,6 +276,7 @@ const ChatMessageContainer = ({
           onContentSizeChange={scrollToEnd()}
           keyExtractor={keyExtractor}
           renderItem={renderItem(onTapMessage)}
+          showsVerticalScrollIndicator={false}
         />
       )}
     </View>

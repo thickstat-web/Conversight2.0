@@ -86,8 +86,8 @@ const PieChart = ({
         </Text>
       </View> */}
       <VictoryPie
-        width={screenWidth - 24 * 4}
-        height={300}
+        width={screenWidth - 24 * 2}
+        // height={350}
         x={xAxisLabel}
         y={yAxisLabel}
         data={values}
@@ -124,7 +124,7 @@ const AreaChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
   return (
     <VictoryChart
       // animate={{ duration: 100, easing: 'linear' }}
-      style={{ parent: { borderWidth: 1 } }}
+      // style={{ parent: { borderWidth: 1 } }}
       containerComponent={
         <VictoryContainer
           height={400}
@@ -135,13 +135,12 @@ const AreaChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
           }
         />
       }
-      height={300}
-      width={screenWidth - 24 * 2}
+      // height={300}
+      // width={screenWidth - 24 * 2}
       theme={VictoryTheme.material}
       domainPadding={10}
       style={{
         parent: {
-          // alignItems: 'center',
           border: '1px solid #00ff00',
           // backgroundColor: 'orange',
           // paddingBottom: 80,
@@ -190,7 +189,7 @@ const LineChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
       // style={{ parent: { borderWidth: 1 } }}
       containerComponent={
         <VictoryContainer
-          height={300}
+          // height={350}
           events={{
             onPressIn: () => {
               // console.log(`[LineChart] touched here...`)
@@ -198,8 +197,8 @@ const LineChart = ({ xAxisLabel, yAxisLabel, values }: ChartProps) => {
           }}
         />
       }
-      height={300}
-      width={screenWidth - 24 * 2}
+      // height={300}
+      // width={screenWidth - 24 * 2}
       theme={VictoryTheme.material}
       domainPadding={10}
       // style={{
@@ -248,9 +247,9 @@ const BarChart = ({
     <VictoryChart
       // animate={{ duration: 100, easing: 'linear' }}
       style={{ parent: { borderWidth: 1 } }}
-      containerComponent={<VictoryContainer height={325} />}
-      height={300}
-      width={screenWidth - 24 * 2}
+      // containerComponent={<VictoryContainer height={325} />}
+      // height={300}
+      // width={screenWidth - 24 * 2}
       theme={VictoryTheme.material}
       domainPadding={20}
       style={{
@@ -267,9 +266,9 @@ const BarChart = ({
     >
       <VictoryAxis
         axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
-        tickLabelComponent={
-          <VictoryLabel dx={2} dy={-8} angle={-60} textAnchor={'end'} />
-        }
+        // tickLabelComponent={
+        //   <VictoryLabel dx={2} dy={-8} angle={-60} textAnchor={'end'} />
+        // }
         style={{
           axisLabel: {
             fontSize: 16,
@@ -357,7 +356,7 @@ const ChartContainer = ({
         title={title}
         xAxisLabel={chartFormat?.xField}
         yAxisLabel={chartFormat?.yField}
-        values={values}
+        values={values.slice(0, 20)}
       />
     )
   } else if (

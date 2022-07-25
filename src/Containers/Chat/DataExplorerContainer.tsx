@@ -248,6 +248,7 @@ const styles = StyleSheet.create({
   moreOptionsButton: { fontSize: 30 },
   contentContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: Colors.WHITE,
   },
   dotsContainer: {
