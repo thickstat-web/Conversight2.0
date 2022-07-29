@@ -125,6 +125,14 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
       ],
     }
 
+    const renderItem = (org: Org): ReactElement => (
+      <Picker.Item
+        key={org.item.orgId}
+        value={org.item.orgId}
+        label={org.item.name}
+        disabled={false}
+      />
+    )
     return (
       <Modal
         visible={singleOrg ? false : visible}
@@ -148,17 +156,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
             {MODAL_TITLE}
           </Text>
 
-          <FlatList
-            data={organizations}
-            renderItem={(org: Org): ReactElement => (
-              <Picker.Item
-                key={org.item.orgId}
-                value={org.item.orgId}
-                label={org.item.name}
-                disabled={false}
-              />
-            )}
-          />
+          <FlatList data={organizations} renderItem={renderItem} />
         </Animated.View>
       </Modal>
     )

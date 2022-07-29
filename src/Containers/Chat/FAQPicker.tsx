@@ -169,7 +169,7 @@ const FAQPicker = ({ onSelect }: Props) => {
     { isSelected }: PickerItemProps & PickerProps,
     label: string,
   ) => {
-    const backgroundColor = isSelected ? Colors.NOTIFICATION_BGR : Colors.GRAY
+    const backgroundColor = isSelected ? Colors.NOTIFICATION_GREEN : Colors.GRAY
     return (
       <View key={label} row style={[styles.item, { backgroundColor }]}>
         <View flex>

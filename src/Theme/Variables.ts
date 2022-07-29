@@ -16,8 +16,9 @@ import {
  * Colors
  */
 export const Colors: ThemeColors = {
-  // Example colors:
+  NOTIFICATION_GREEN: '#E0F0E5',
   GREEN_LIGHTEST: '#EAFAEA',
+  GREEN_LIGHTEST2: '#64846E',
   GREEN_LIGHTER: '#27DC61',
   GREEN_LIGHT: '#00DA49',
   GREEN_MAIN: '#00AA39',
@@ -33,7 +34,6 @@ export const Colors: ThemeColors = {
   GRAY_LIGHT: '#E6E8ED',
   GRAY_DARK: '#9A9A9A',
   DARK: '#004438',
-  NOTIFICATION_BGR: '#E0F0E5',
 }
 
 export const NavigationColors: Partial<ThemeNavigationColors> = {

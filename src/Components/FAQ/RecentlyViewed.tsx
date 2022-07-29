@@ -10,13 +10,18 @@ const RecentlyViewed = () => {
     <View
       br30
       marginV-5
-      style={{ ...styles.root, backgroundColor: Colors.NOTIFICATION_BGR }}
+      style={{ ...styles.root, backgroundColor: Colors.NOTIFICATION_GREEN }}
     >
-      <Text style={{ ...styles.title,...Fonts.textRegularBold, color: Colors.GREEN_DARK }}>
+      <Text
+        style={{
+          ...styles.title,
+          ...Fonts.textRegularBold,
+          color: Colors.GREEN_DARK,
+        }}
+      >
         Title
       </Text>
       <Text style={{ ...Fonts.textSmall, fontSize: 14 }}>
-
         Content Content Content Content Content Content Content Content Content
         Content Content Content Content Content Content Content Content Content
         Content Content Content Content Content Content

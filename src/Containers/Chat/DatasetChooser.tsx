@@ -120,7 +120,7 @@ const DatasetChooser = ({ onSelect }: Props) => {
         addSuffix: true,
       },
     )
-    const backgroundColor = isSelected ? Colors.NOTIFICATION_BGR : Colors.GRAY
+    const backgroundColor = isSelected ? Colors.NOTIFICATION_GREEN : Colors.GRAY
     return (
       <View key={label} row style={[styles.item, { backgroundColor }]}>
         <View flex>

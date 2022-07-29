@@ -12,7 +12,7 @@ export default {
   bottomTabs: {
     insights: 'Insights',
     chat: 'Chat',
-    dashboard: 'Dashboard',
+    dashboard: 'Dashboards',
   },
   enterEmail: {
     buttons: {

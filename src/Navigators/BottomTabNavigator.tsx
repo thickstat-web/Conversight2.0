@@ -69,6 +69,7 @@ const BottomTabNavigator = ({ navigation }: Props) => {
         name={t('bottomTabs.dashboard')}
         component={DashboardContainer}
         options={{
+          title: 'My Dashboards',
           headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
