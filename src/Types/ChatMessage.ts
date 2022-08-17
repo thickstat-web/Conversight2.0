@@ -1,18 +1,17 @@
 import { ColType } from './ChatHistory'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 
-/* Raw Chat Message format */
-export interface RawChatMessage {
+/* Raw Convese Message format */
+export interface RawConverseData {
+  id: string
+  colType: ColType
   columnMetadata: ColumnMetadata
   columns: string[]
-  colType: ColType
-  createdAt: number
   base64Data: string
-  id: string
-  displayUtterance: string
   text: string
   utterance: string
   status: string
+  createdAt: number
 }
 
 export type ChartType =
@@ -25,11 +24,11 @@ export type ChartType =
   | 'LineChart'
   | 'PieChart'
 
-export type VisualFormatType = 'Text' | 'Table' | ChartType | 'Error'
+export type VisualType = 'Text' | 'Table' | ChartType
 
 /* Visual format */
 export interface VisualFormat {
-  type: VisualFormatType
+  type: string | VisualType
   xField: string
   yField: string | string[]
   colorField?: string
@@ -38,13 +37,18 @@ export interface VisualFormat {
   isGroup?: boolean
 }
 
-/* Athena Message format */
-export interface AthenaMessage {
+export enum MessageType {
+  USER,
+  ATHENA,
+  ATHENA_ERROR,
+}
+
+/* Converse Data format */
+export interface ConverseData {
   columnMetadata: ColumnMetadata
   columns: string[]
   createdAt: number
   id: string
-  isAthena: boolean
   message: string
   utterance: string
   value: string
@@ -52,21 +56,32 @@ export interface AthenaMessage {
   visualFormats: VisualFormat[]
 }
 
-/* Base Message format */
-export interface BaseMessage {
-  id: string
-  message: string
-  isAthena: boolean
-}
+// /* Athena Failure Message format */
+// export interface AthenaFailureMessage extends BaseMessage {
+//   isFailed: boolean
+// }
 
-/* Athena Failure Message format */
-export interface AthenaFailureMessage extends BaseMessage {
-  data: Array<Record<string, string>>
-  visualFormats: VisualFormat[]
-}
+// /* User Message format */
+// export interface UserMessage extends BaseMessage { }
 
-/* User Message format */
-export interface UserMessage extends BaseMessage { }
+// /* Athena Message format */
+// export interface AthenaMessage {
+//   converseId: string
+//   data: ConverseData
+// }
 
 /* Processed Chat Message format */
-export type ChatMessage = UserMessage | AthenaMessage | AthenaFailureMessage
+// export type ChatMessage = UserMessage | AthenaMessage | AthenaFailureMessage
+
+/* Base Message format */
+// export interface BaseMessage {
+//   id: string
+//   type: MessageType
+// }
+
+/* Chat Message format */
+export interface ChatMessage {
+  id: string
+  type: MessageType
+  message: string | ConverseData
+}

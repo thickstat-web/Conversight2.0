@@ -1,5 +1,26 @@
 import { ColType, ColumnMetadata } from './ChatHistory'
 
+export type FilterCategory =
+  | 'dateFilter'
+  | 'dimensions'
+  | 'calculated dimension'
+
+export interface FilterValue {
+  id: string | number
+  name: string | number
+}
+
+export interface Filter {
+  category: string | FilterCategory
+  column: string
+  resolvedColumn: string
+  dateFrom?: string
+  dateTo?: string
+  datasetId: string
+  value: string | FilterValue[]
+  isDefault: boolean
+}
+
 export interface Pinboard {
   id: string
   name: string
@@ -7,6 +28,7 @@ export interface Pinboard {
   ownedByName?: string
   shared: boolean
   tags: string[]
+  appliedFilters: Filter[]
   createdAt: Date
   updatedAt: Date
 }
@@ -22,7 +44,7 @@ export interface PinnedItem {
 
 export interface PinnedItemRequest {
   pinboardId: string
-  dataID: string[]
+  dataId: string | string[]
 }
 
 export interface RawPinnedItemData {
@@ -32,9 +54,21 @@ export interface RawPinnedItemData {
   colType: ColType
   createdAt: number
   base64Data: string
-  base64QuestionText: string
-  pinboardItemId: string
-  displayUtterance: string
+  utterance: string
+  text: string
+  status: string
+}
+
+export interface RawConverseData {
+  id: string
+  columnMetadata: ColumnMetadata
+  columns: string[]
+  colType: ColType
+  createdAt: number
+  base64Data: string
+  status: string
+  text: string
+  utterance: string
 }
 
 export interface PinnedItemData {

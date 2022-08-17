@@ -5,7 +5,10 @@ export const Config = {
 }
 
 // Replace following credentials below for testing
-export const DEFAULT_EMAIL = '' // sakthivel.murugasamy@conversight.ai
-export const DEFAULT_PASSWORD = '' // sakthi
+export const DEFAULT_EMAIL = '' // pradeep.ramakrishnan@conversight.ai / sakthivel.murugasamy@conversight.ai
+export const DEFAULT_PASSWORD = '' // Test123 / sakthi
 
 export const NO_DATA_AVAILABLE = 'No data available'
+export const MY_DASHBOARD = 'my dashboard'
+export const SHARED = 'shared'
+export const VIEW_ALL = 'view all'

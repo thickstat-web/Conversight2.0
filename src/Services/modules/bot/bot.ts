@@ -1,17 +1,26 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
+import { atob } from 'react-native-quick-base64'
+import { MY_DASHBOARD, SHARED } from '@/Config'
 import { ResponseType } from '@/Types/Common'
 import {
   ChatHistoryRequestData,
   ChatHistoryResponse,
 } from '@/Types/ChatHistory'
-import { RawChatMessage } from '@/Types/ChatMessage'
+import { RawConverseData } from '@/Types/ChatMessage'
 import {
   RawPinnedItemData,
   PinnedItemRequest,
   Pinboard,
   PinnedItem,
+  FilterValue,
+  FilterCategory,
+  Filter,
 } from '@/Types/Pinboard'
-import { ListPinboardsResponse } from '@/Types/PinboardsResponse'
+import {
+  Created,
+  Shared,
+  ListPinboardsResponse,
+} from '@/Types/PinboardsResponse'
 import {
   ListPinnedItemsResponse,
   PinBoardComponent,
@@ -20,7 +29,7 @@ import { PinnedItemDataResponse } from '@/Types/PinnedItemDataResponse'
 
 export const getChatHistory = (build: EndpointBuilder<any, any, any>) => {
   return build.mutation<
-    ResponseType<RawChatMessage[]>,
+    ResponseType<RawConverseData[]>,
     Partial<ChatHistoryRequestData>
   >({
     query: body => ({
@@ -51,19 +60,60 @@ export const getChatHistory = (build: EndpointBuilder<any, any, any>) => {
             createdAt,
             base64Data: val,
             id: ID,
-            displayUtterance,
             text,
-            utterance,
+            utterance: displayUtterance.length ? displayUtterance : utterance,
             status,
           }
         })
         .sort(
-          (a: RawChatMessage, b: RawChatMessage) => a.createdAt - b.createdAt,
+          (a: RawConverseData, b: RawConverseData) => a.createdAt - b.createdAt,
         )
       return { success: respStatus, data: sortedMessages }
     },
   })
 }
+
+function buildAppliedFilters(item: Created | Shared): Filter[] {
+  return item.retainFilters.map(filter => {
+    const {
+      category,
+      id,
+      processedID,
+      dateValueFrom,
+      dateValueTo,
+      data_set,
+      value,
+      isDefault,
+    } = filter
+    return {
+      category,
+      column: id,
+      resolvedColumn: processedID,
+      dateFrom: dateValueFrom,
+      dateTo: dateValueTo,
+      datasetId: data_set,
+      value: Array.isArray(value)
+        ? (value as FilterValue[])
+        : (value as string),
+      isDefault,
+    }
+  })
+}
+
+const buildPinboard = (item: Created | Shared, shared: boolean): Pinboard => ({
+  id: item.pinBoardID,
+  name: item.pinName,
+  ownedById: item.ownerID,
+  shared,
+  tags: (Array.isArray(item.tags) ? item.tags : []).concat(
+    shared ? SHARED : MY_DASHBOARD,
+  ),
+  appliedFilters: Array.isArray(item.retainFilters)
+    ? buildAppliedFilters(item)
+    : [],
+  createdAt: item.createdAt,
+  updatedAt: item.updatedAt,
+})
 
 export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
   return build.query<ResponseType<Pinboard[]>, void>({
@@ -77,32 +127,18 @@ export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
         },
       } = response
 
+      // Build user's own pinboard list
       let ownedPinboards: Pinboard[] = []
       if (Array.isArray(created)) {
-        ownedPinboards = created.map(item => ({
-          id: item.pinBoardID,
-          name: item.pinName,
-          ownedById: item.ownerID,
-          shared: false,
-          tags: (Array.isArray(item.tags) ? item.tags : []).concat(
-            'My Dashboard',
-          ),
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
-        }))
+        ownedPinboards = created.map(item => buildPinboard(item, false))
       }
 
+      // Build shared pinboard list
       let sharedPinboards: Pinboard[] = []
       if (Array.isArray(shared)) {
         sharedPinboards = shared.map(item => ({
-          id: item.pinBoardID,
-          name: item.pinName,
-          ownedById: item.ownerID,
+          ...buildPinboard(item, true),
           ownedByName: item.ownerName,
-          shared: true,
-          tags: (Array.isArray(item.tags) ? item.tags : []).concat('Shared'),
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt,
         }))
       }
 
@@ -115,6 +151,15 @@ export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
   })
 }
 
+const getTitle = (item: PinBoardComponent) => {
+  const { title = '', displayUtterance = '', utterance = '' } = item
+  return title.length
+    ? title
+    : displayUtterance.length
+      ? displayUtterance
+      : utterance
+}
+
 export const fetchPinnedItems = (build: EndpointBuilder<any, any, any>) => {
   return build.query<ResponseType<PinnedItem[]>, string>({
     query: (pinboardId: string) =>
@@ -125,15 +170,6 @@ export const fetchPinnedItems = (build: EndpointBuilder<any, any, any>) => {
         message,
         data: { pinBoardComponents },
       } = response
-
-      const getTitle = (item: PinBoardComponent) => {
-        const { title = '', displayUtterance = '', utterance = '' } = item
-        return title.length
-          ? title
-          : displayUtterance.length
-            ? displayUtterance
-            : utterance
-      }
 
       let pinnedItems: PinnedItem[] = []
       if (Array.isArray(pinBoardComponents)) {
@@ -157,11 +193,12 @@ export const fetchPinnedItems = (build: EndpointBuilder<any, any, any>) => {
 
 export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
   return build.mutation<
-    ResponseType<RawPinnedItemData[]>,
+    ResponseType<RawConverseData[]>,
     Partial<PinnedItemRequest>
   >({
     query: data => {
-      const { pinboardId, dataID } = data
+      const { pinboardId, dataId } = data
+      const dataID = Array.isArray(dataId) ? dataId : [dataId]
       return {
         url: `/PinBoardComponentData?pinBoardID=${pinboardId}`,
         method: 'POST',
@@ -175,9 +212,9 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
         data: { pinBoardComponentData },
       } = response
 
-      let pinnedItemData: RawPinnedItemData[] = []
+      let rawPinnedItemData: RawConverseData[] = []
       if (Array.isArray(pinBoardComponentData)) {
-        pinnedItemData = pinBoardComponentData.map(item => {
+        rawPinnedItemData = pinBoardComponentData.map(item => {
           const { data } = item
           return {
             id: data.ID,
@@ -186,16 +223,17 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
             colType: JSON.parse(data.colTypeString),
             createdAt: data.createdAt,
             base64Data: data.val,
-            base64QuestionText: data.questiontext,
+            text: atob(data.questiontext),
             pinboardItemId: data.id,
-            displayUtterance: data.displayUtterance,
+            utterance: data.displayUtterance,
+            status: data.status,
           }
         })
       }
 
       return {
         success: code === '200' && message === 'success',
-        data: pinnedItemData,
+        data: rawPinnedItemData,
       }
     },
   })

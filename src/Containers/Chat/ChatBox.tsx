@@ -5,23 +5,27 @@ import React, {
   ForwardRefRenderFunction,
 } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
-import { View, Text, TouchableOpacity } from 'react-native-ui-lib'
+import { View } from 'react-native-ui-lib'
 import { useSendChatMessageMutation } from '@/Services/modules/ingress'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
 import {
-  processAndSetChatMessage,
+  processAndAddChatMessage,
   addChatMessage,
   selectProcessingChatMessage,
 } from '@/Store/App'
 import { selectDatasetId } from '@/Store/Auth'
 import { SendChatMessage } from '@/Types/SendChatMessage'
-import { UserMessage } from '@/Types/ChatMessage'
-import { makeFailureAthenaMessage } from '@/Utils/chat-history-processor'
+import {
+  makeAthenaFailureMessage,
+  makeUserMessage,
+} from '@/Utils/chat-history-processor'
 import DatasetChooser from './DatasetChooser'
 import FAQPicker from './FAQPicker'
 import IconButton from '@/Components/IconButton'
 import SendIcon from '@/Assets/Images/iconsSVG/send.svg'
 import { NO_DATA_AVAILABLE } from '@/Config'
+import { RawConverseData } from '@/Types/ChatMessage'
+import { ResponseType } from '@/Types/Common'
 
 export declare type RefProps = {
   setUtterance: (text: string) => void
@@ -64,43 +68,38 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
         options: {
           transform: true,
           channel: 'chat',
-          source: 'web',
+          source: 'mobile',
           timezone: '-330',
         },
       },
     }
   }
 
-  const makeUserMessage = (utterance: string): UserMessage => ({
-    id: `${Date.now()}`,
-    message: utterance,
-    isAthena: false,
-  })
+  const buildFailureMessage = (resp: ResponseType<RawConverseData>) => {
+    return resp.data?.status === 'failed' && resp.data?.text
+      ? resp.data?.text
+      : NO_DATA_AVAILABLE
+  }
+
+  const sendAndTransformResponse = async (utterance: string) => {
+    if (selectedDatasetId && utterance.length) {
+      const reqData = makeSendRequestData(selectedDatasetId, utterance)
+      const resp = await sendChatMessage(reqData).unwrap()
+      if (resp.success && resp.data) {
+        dispatch(processAndAddChatMessage(resp.data))
+      } else {
+        const failureMessage = buildFailureMessage(resp)
+        const message = makeAthenaFailureMessage(failureMessage)
+        dispatch(addChatMessage(message))
+      }
+    }
+  }
 
   const sendMessage = (utterance: string) => {
     // Add user message to the chat message list
     const userMessage = makeUserMessage(utterance)
     dispatch(addChatMessage(userMessage))
-    // console.log(`[ChatBox] sendMessage text: ${utterance}`)
-
-    const sendAndTransformResponse = async () => {
-      if (selectedDatasetId && utterance.length) {
-        const reqData = makeSendRequestData(selectedDatasetId, utterance)
-        const resp = await sendChatMessage(reqData).unwrap()
-        if (resp.success && resp.data) {
-          dispatch(processAndSetChatMessage(resp.data))
-        } else {
-          let failureMessage =
-            resp.data?.status === 'failed' && resp.data?.text
-              ? resp.data?.text
-              : NO_DATA_AVAILABLE
-          const message = makeFailureAthenaMessage(failureMessage)
-          dispatch(addChatMessage(message))
-        }
-      }
-    }
-
-    sendAndTransformResponse()
+    sendAndTransformResponse(utterance)
   }
 
   const handleSendMessage = () => {

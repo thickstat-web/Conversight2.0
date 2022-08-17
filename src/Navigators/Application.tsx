@@ -36,6 +36,7 @@ import {
   WALK_THROUGH_AUTHORIZED,
   WT_INSIGHTS,
   DATA_EXPLORER,
+  DASHBOARD_SCREEN,
 } from '@/Constants/screens'
 import LoginNavigator from '@/Navigators/LoginNavigator'
 import DrawerNavigator from '@/Navigators/DrawerNavigator'
@@ -54,6 +55,7 @@ import { TouchableOpacity } from 'react-native-ui-lib'
 import { setModalSearchOpen } from '@/Store/Faq'
 import InsightsWT from '@/Containers/WalkThrough/InsightsWT'
 import DemoRequested from '@/Containers/DemoRequested'
+import DashboardContainer from '@/Containers/DashboardContainer'
 
 const Stack = createStackNavigator()
 
@@ -155,6 +157,22 @@ const ApplicationNavigator = () => {
                   options={{
                     headerRightContainerStyle: { paddingRight: 15 },
                     title: 'Explorer',
+                    headerTitleAlign: 'center',
+                    headerTintColor: Colors.WHITE,
+                    headerStyle: {
+                      backgroundColor: Colors.GREEN_MAIN,
+                    },
+                    headerShown: true,
+                    headerBackTitleVisible: false,
+                    animationEnabled: true,
+                  }}
+                />
+                <Stack.Screen
+                  name={DASHBOARD_SCREEN}
+                  component={DashboardContainer}
+                  options={{
+                    headerRightContainerStyle: { paddingRight: 15 },
+                    title: 'Dashboard',
                     headerTitleAlign: 'center',
                     headerTintColor: Colors.WHITE,
                     headerStyle: {

@@ -4,65 +4,66 @@ import {
   SendChatMessage,
   SendChatMessageResponse,
 } from '@/Types/SendChatMessage'
-import { RawChatMessage } from '@/Types/ChatMessage'
+import { RawConverseData } from '@/Types/ChatMessage'
 
 export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
-  return build.mutation<ResponseType<RawChatMessage>, Partial<SendChatMessage>>(
-    {
-      query: body => ({
-        url: '/converse/v2',
-        method: 'POST',
-        body,
-      }),
-      transformResponse: (response: SendChatMessageResponse) => {
-        const {
-          status: respStatus,
-          response: { data },
-        } = response
+  return build.mutation<
+    ResponseType<RawConverseData>,
+    Partial<SendChatMessage>
+  >({
+    query: body => ({
+      url: '/converse/v2',
+      method: 'POST',
+      body,
+    }),
+    transformResponse: (response: SendChatMessageResponse) => {
+      const {
+        status: respStatus,
+        response: { data },
+      } = response
 
-        if (respStatus === 'failed') {
-          return {
-            success: false,
-          }
-        }
-
-        const {
-          columns,
-          column_metadata,
-          colType,
-          createdAt,
-          val,
-          id,
-          isColumnReorder,
-          processedUtterance,
-          text,
-          utterance,
-          status,
-        } = data
-        const cols = isColumnReorder
-          ? ([] as string[]).concat(
-            colType?.date ?? [],
-            colType?.metrics ?? [],
-            colType?.dim ?? [],
-          )
-          : columns
-        let transformedData = {
-          columns: cols,
-          columnMetadata: column_metadata,
-          colType,
-          createdAt,
-          base64Data: val,
-          id,
-          displayUtterance: utterance,
-          text,
-          utterance: processedUtterance,
-          status,
-        }
+      if (respStatus === 'failed') {
         return {
-          success: ['ok'].includes(respStatus), // , 'clarification'
-          data: transformedData,
+          success: false,
         }
-      },
+      }
+
+      const {
+        columns,
+        column_metadata,
+        colType,
+        createdAt,
+        val,
+        id,
+        isColumnReorder,
+        processedUtterance,
+        text,
+        utterance,
+        status,
+      } = data
+      const cols = isColumnReorder
+        ? ([] as string[]).concat(
+          colType?.date ?? [],
+          colType?.metrics ?? [],
+          colType?.dim ?? [],
+        )
+        : columns
+      let transformedData = {
+        columns: cols,
+        columnMetadata: column_metadata,
+        colType,
+        createdAt,
+        base64Data: val,
+        id,
+        displayUtterance: utterance,
+        text,
+        utterance: processedUtterance,
+        status,
+      }
+      return {
+        success: ['ok'].includes(respStatus), // , 'clarification'
+        data: transformedData,
+      }
     },
-  )
+  })
 }

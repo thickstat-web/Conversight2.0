@@ -1,18 +1,17 @@
 import { Engine } from 'json-rules-engine'
 import { atob } from 'react-native-quick-base64'
 import chartRules from '@/Config/chart-rules.json'
-import { AthenaFailureMessage } from './../Types/ChatMessage'
-import { cleanseColumn, formatValue } from '@/Utils/common'
 import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import {
-  AthenaMessage,
   ChatMessage,
-  RawChatMessage,
-  UserMessage,
+  ConverseData,
+  MessageType,
+  RawConverseData,
   VisualFormat,
 } from '@/Types/ChatMessage'
 import { Decision } from '@/Types/ChartRules'
 import { NO_DATA_AVAILABLE } from '@/Config'
+import { cleanseColumn, formatValue } from '@/Utils/common'
 
 interface Fact {
   dimCount: number
@@ -46,47 +45,29 @@ const makeFacts = (
   }
 }
 
-const makeUserMessage = (item: RawChatMessage) => {
-  const { displayUtterance, utterance, id } = item
-  return {
-    id: `u-${id}`,
-    message: displayUtterance.length ? displayUtterance : utterance,
-    isAthena: false,
-  }
-}
-
-export const makeFailureAthenaMessage = (
-  message: string,
-): AthenaFailureMessage => {
-  return {
-    id: `a-${Date.now()}`,
-    isAthena: true,
-    message,
-    visualFormats: [{ type: 'Error' } as VisualFormat],
-    data: [{ message }],
-  }
-}
-
-const makeAthenaMessage = (
+const makeConverseData = (
   columns: string[],
   columnMetadata: ColumnMetadata,
   values: string | any,
-  item: RawChatMessage,
+  item: RawConverseData,
   visualFormats: VisualFormat[],
-) => {
-  const { createdAt, id, displayUtterance, text, utterance } = item
+): ConverseData => {
+  const { createdAt, id, text = '', utterance } = item
 
-  let message = displayUtterance.length ? displayUtterance : utterance
+  let message = utterance
   let displayValue = ''
   if (!Array.isArray(values) || values.length === 0) {
-    displayValue = text === '0' ? NO_DATA_AVAILABLE : text
+    displayValue = text === '0' || text.length === 0 ? NO_DATA_AVAILABLE : text
   } else if (values.length === 1) {
-    const [[columnName, value]] = Object.entries(values[0])
-    displayValue = formatValue(value, columnMetadata[columnName])
-    if (
-      columnMetadata[columnName] !== undefined &&
-      columnMetadata[columnName].category === 'date'
-    ) {
+    const [[columnName, value = '']] = Object.entries(values[0])
+    const metadata = columnMetadata[columnName]
+    displayValue = `${value}`
+    if (metadata) {
+      displayValue = formatValue(value, metadata)
+    } else {
+      console.log(`[Processor] metadata not available for column: ${columnName}`)
+    }
+    if (!!metadata && metadata.category === 'date') {
       const datetimeArr = `${value}`.split(' ')
       displayValue = datetimeArr[0]
     }
@@ -96,8 +77,7 @@ const makeAthenaMessage = (
     columnMetadata,
     columns,
     createdAt,
-    id: `a-${id}`,
-    isAthena: true,
+    id,
     message,
     utterance,
     value: displayValue,
@@ -106,11 +86,33 @@ const makeAthenaMessage = (
   }
 }
 
+export const makeUserMessage = (message: string): ChatMessage => ({
+  // id: uuidv4(),
+  id: `u-${Date.now()}`,
+  type: MessageType.USER,
+  message,
+})
+
+export const makeAthenaFailureMessage = (message: string): ChatMessage => {
+  return {
+    // id: uuidv4(),
+    id: `a-${Date.now()}`,
+    type: MessageType.ATHENA_ERROR,
+    message,
+  }
+}
+
+export const makeAthenaMessage = (message: ConverseData): ChatMessage => ({
+  id: message.id,
+  type: MessageType.ATHENA,
+  message,
+})
+
 type KeyValue = {
   [key: string]: any
 }
 
-interface MetaData extends KeyValue { }
+type MetaData = KeyValue
 
 interface ProcessedResponse {
   columns: string[]
@@ -118,7 +120,7 @@ interface ProcessedResponse {
   values: KeyValue[]
 }
 
-const processResponse = (
+const normalizeConverseData = (
   columns: string[],
   column_metadata: MetaData,
   base64Value: string,
@@ -178,22 +180,18 @@ chartRules.decisions.forEach((decision: Decision) => {
   engine.addRule({ conditions, event })
 })
 
-export const processChatMessage = async (item: RawChatMessage) => {
-  // console.log('[chat-history-processor] processChatMessage...')
+export const processConverseData = async (item: RawConverseData) => {
   // Process and transform base64 string to array of records
-  const { columns, columnMetadata, values } = processResponse(
+  const { columns, columnMetadata, values } = normalizeConverseData(
     item.columns,
     item.columnMetadata,
     item.base64Data,
   )
-  // console.log(`[Chart Rule Processor] Response processed columns: ${JSON.stringify(columns, null, 2)}`)
 
   // Find visualization formats
   const colType = item?.colType
   const facts = makeFacts(colType, columns, values)
-  // console.log(`[Chart Rule Processor] facts: ${JSON.stringify(facts, null, 2)}`)
   const { events } = await engine.run(facts)
-  // console.log('[Chart Rule Processor] rule run compelte...')
   const visualFormats: VisualFormat[] = events.map(event => {
     const { type, params } = event
     let decisions: Record<string, any> = {}
@@ -209,43 +207,34 @@ export const processChatMessage = async (item: RawChatMessage) => {
       type,
     }
   })
-  // console.log(
-  //   '[HistoryData] Visual Formats:',
-  //   JSON.stringify(visualFormats, null, 2),
-  // )
-
-  // if (visualFormats.find(item => item.type === 'Text')) {
-  //   console.log(
-  //     '[chat-history-processor] values: ',
-  //     JSON.stringify(values, 2, null),
-  //   )
-  // } else {
-  //   console.log('[chat-history-processor] values length: ', values.length)
-  // }
 
   // Extract separate message for user and athena and add to the message array
-  const userMessage: UserMessage = makeUserMessage(item)
-  const athenaMessage: AthenaMessage = makeAthenaMessage(
+  const message = item.utterance
+  const userMessage: ChatMessage = makeUserMessage(message)
+
+  const converseData = makeConverseData(
     columns,
     columnMetadata,
     values,
     item,
     visualFormats,
-  )
-  return { userMessage, athenaMessage }
+  ) as ConverseData
+  const athenaMessage: ChatMessage = makeAthenaMessage(converseData)
+
+  return { userMessage, athenaMessage, converseData }
 }
 
-export const processChatHistory = async (rawChatMessages: RawChatMessage[]) => {
-  if (rawChatMessages.length === 0) {
+export const processChatHistory = async (rawMessages: RawConverseData[]) => {
+  if (rawMessages.length === 0) {
     return []
   }
 
   let index = 0
   let messages: ChatMessage[] = []
-  for (const item of rawChatMessages) {
+  for (const item of rawMessages) {
     try {
-      const { userMessage, athenaMessage } = await processChatMessage(item)
-      messages = messages.concat(userMessage, athenaMessage)
+      const { userMessage, athenaMessage } = await processConverseData(item)
+      messages = [...messages, userMessage, athenaMessage]
     } catch (error) {
       console.error(
         `[chat-history-processor] ProcessChatHistory - Error while processing message#${index}: `,

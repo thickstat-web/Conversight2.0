@@ -7,27 +7,50 @@ import {
 import { APP_REDUCER } from '@/Constants/redux'
 import {
   processChatHistory,
-  processChatMessage,
+  processConverseData,
 } from '@/Utils/chat-history-processor'
 import { RootState } from '..'
-import { ChatMessage } from '@/Types/ChatMessage'
+import { ChatMessage, ConverseData, MessageType } from '@/Types/ChatMessage'
+
+export interface PinboardItem {
+  id: string
+  loading: boolean
+  isTextCard: boolean
+}
 
 interface AppState {
   processingChatMessages: boolean
   processingChatMessage: boolean
+  converseMap: Record<string, ConverseData[]>
   chatMessages: ChatMessage[]
+  chatHistoryLoaded: boolean
+  // pinboardItems: PinboardItem[]
 }
 
 const initialState: AppState = {
   processingChatMessages: false,
   processingChatMessage: false,
+  converseMap: {},
   chatMessages: [],
+  chatHistoryLoaded: false,
+  // pinboardItems: [],
 }
 
 export const processAndSetChatHistory = createAsyncThunk(
-  'app/processChatHistory',
+  'app/processAndSetChatHistory',
   processChatHistory,
 )
+
+// const buildConverseMap = (
+//   chatMessages: ChatMessage[],
+// ): Record<string, ConverseData[]> => {
+//   return chatMessages
+//     .filter(item => item.type === MessageType.ATHENA)
+//     .reduce((acc, item) => {
+//       acc[item.id] = [item.message as ConverseData]
+//       return acc
+//     }, {} as Record<string, ConverseData[]>)
+// }
 
 const addProcessChatHistory = (builder: ActionReducerMapBuilder<AppState>) => {
   builder
@@ -36,21 +59,23 @@ const addProcessChatHistory = (builder: ActionReducerMapBuilder<AppState>) => {
     })
     .addCase(processAndSetChatHistory.fulfilled, (state, action) => {
       state.processingChatMessages = false
+      // state.converseMap = buildConverseMap(action.payload)
       state.chatMessages = action.payload
+      state.chatHistoryLoaded = true
     })
 }
 
-export const processAndSetChatMessage = createAsyncThunk(
-  'app/processChatMessage',
-  processChatMessage,
+export const processAndAddChatMessage = createAsyncThunk(
+  'app/processAndAddChatMessage',
+  processConverseData,
 )
 
 const addProcessChatMessage = (builder: ActionReducerMapBuilder<AppState>) => {
   builder
-    .addCase(processAndSetChatMessage.pending, state => {
+    .addCase(processAndAddChatMessage.pending, state => {
       state.processingChatMessage = true
     })
-    .addCase(processAndSetChatMessage.fulfilled, (state, action) => {
+    .addCase(processAndAddChatMessage.fulfilled, (state, action) => {
       state.processingChatMessage = false
       const { athenaMessage } = action.payload
       state.chatMessages.push(athenaMessage)
@@ -67,6 +92,31 @@ const appSlice = createSlice({
     addChatMessage: (state, { payload }: PayloadAction<ChatMessage>) => {
       // Add user sending message to the list
       state.chatMessages.push(payload)
+
+      const { id, type, message } = payload
+      if (type === MessageType.ATHENA) {
+        state.converseMap[id] = [message as ConverseData]
+      }
+    },
+    // setPinboardItemLoading: (state, { payload }: PayloadAction<string>) => {
+    //   const item: PinboardItem = {
+    //     id: payload,
+    //     loading: true,
+    //     isTextCard: false,
+    //   }
+    //   state.pinboardItems.push(item)
+    // },
+    addConverseData: (state, { payload }: PayloadAction<ConverseData>) => {
+      const { id } = payload
+      state.converseMap[id] = [payload]
+
+      // const index = state.pinboardItems.findIndex(item => item.id === id)
+      // const item = state.pinboardItems[index]
+      // state.pinboardItems[index] = {
+      //   ...item,
+      //   loading: false,
+      //   isTextCard: !!payload.visualFormats.find(_ => _.type === 'Text'),
+      // }
     },
   },
   extraReducers: builder => {
@@ -76,13 +126,24 @@ const appSlice = createSlice({
   },
 })
 
+export const selectChatHistoryLoaded = (state: RootState) =>
+  state.appReducer.chatHistoryLoaded
 export const selectChatMessages = (state: RootState) =>
   state.appReducer.chatMessages
 export const selectProcessingChatMessages = (state: RootState) =>
   state.appReducer.processingChatMessages
 export const selectProcessingChatMessage = (state: RootState) =>
   state.appReducer.processingChatMessage
+export const selectConverseData = (state: RootState) =>
+  state.appReducer.converseMap
+// export const selectPinboardItems = (state: RootState) =>
+//   state.appReducer.pinboardItems
 
-export const { setChatMessages, addChatMessage } = appSlice.actions
+export const {
+  setChatMessages,
+  addChatMessage,
+  addConverseData,
+  // setPinboardItemLoading,
+} = appSlice.actions
 
 export default appSlice.reducer

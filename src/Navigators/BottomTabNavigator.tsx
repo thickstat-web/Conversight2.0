@@ -5,7 +5,7 @@ import { useTheme } from '@/Hooks'
 import {
   ChatContainer,
   InsightsContainer,
-  DashboardContainer,
+  MyDashboardsContainer,
 } from '@/Containers'
 import { Text, TouchableOpacity } from 'react-native-ui-lib'
 import BurgerIcon from '@/Assets/Images/drawer/burger.svg'
@@ -67,7 +67,7 @@ const BottomTabNavigator = ({ navigation }: Props) => {
       /> */}
       <Tab.Screen
         name={t('bottomTabs.dashboard')}
-        component={DashboardContainer}
+        component={MyDashboardsContainer}
         options={{
           title: 'My Dashboards',
           headerTitleAlign: 'center',
