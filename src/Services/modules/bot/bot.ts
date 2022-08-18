@@ -205,7 +205,11 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
         body: { dataID },
       }
     },
-    transformResponse: (response: PinnedItemDataResponse) => {
+    transformResponse: (
+      response: PinnedItemDataResponse,
+      meta: any,
+      arg: Partial<PinnedItemRequest>,
+    ) => {
       const {
         code,
         message,
@@ -214,20 +218,36 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
 
       let rawPinnedItemData: RawConverseData[] = []
       if (Array.isArray(pinBoardComponentData)) {
-        rawPinnedItemData = pinBoardComponentData.map(item => {
+        pinBoardComponentData.forEach(item => {
           const { data } = item
-          return {
-            id: data.ID,
-            columnMetadata: JSON.parse(data.colMetadata),
-            columns: data.columns,
-            colType: JSON.parse(data.colTypeString),
-            createdAt: data.createdAt,
-            base64Data: data.val,
-            text: atob(data.questiontext),
-            pinboardItemId: data.id,
-            utterance: data.displayUtterance,
+          let rawData = {
+            id: Array.isArray(arg.dataId) ? arg.dataId[0] : `${arg.dataId}`,
+            columnMetadata: {},
+            columns: [] as string[],
+            colType: { dim: [], date: [], metrics: [] },
+            createdAt: 0,
+            base64Data: '',
+            text: `${data.text}`,
+            pinboardItemId: '',
+            utterance: data.utterance,
             status: data.status,
           }
+
+          if (data.status !== 'failed') {
+            rawData = {
+              id: data.ID,
+              columnMetadata: JSON.parse(data.colMetadata),
+              columns: data.columns,
+              colType: JSON.parse(data.colTypeString),
+              createdAt: data.createdAt,
+              base64Data: data.val,
+              text: atob(data.questiontext),
+              pinboardItemId: data.id,
+              utterance: data.displayUtterance,
+              status: data.status,
+            }
+          }
+          rawPinnedItemData.push(rawData)
         })
       }
 

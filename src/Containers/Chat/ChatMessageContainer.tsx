@@ -10,7 +10,7 @@ import AthenaIcon from '@/Assets/Images/iconsSVG/athena.svg'
 import { NO_DATA_AVAILABLE } from '@/Config'
 import { navigate } from '@/Navigators/utils'
 import { DATA_EXPLORER } from '@/Constants/screens'
-import { resolveVisualization } from '@/Components/Visualization'
+import { ChatVisualizer } from '@/Components/Visualization'
 
 interface UserMessageContainerProps {
   message: string
@@ -88,7 +88,7 @@ const AthenaMessageContainer = React.memo(
                 }
               }}
             >
-              {resolveVisualization(message)}
+              <ChatVisualizer data={message} />
             </View>
           </View>
         </View>

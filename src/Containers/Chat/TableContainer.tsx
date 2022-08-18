@@ -26,7 +26,11 @@ const getStyledRowData = (
       metadata = columnMetadata[column]
       isNumeric = metadata.isNumericFormat
     }
-    const displayValue = isNumeric ? formatValue(value, metadata) : value
+    let displayValue = value
+    if (isNumeric) {
+      const { prefix, value: text, suffix } = formatValue(value, metadata)
+      displayValue = `${prefix}${text}${suffix}`
+    }
     return (
       <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
         {displayValue}
@@ -41,11 +45,7 @@ interface TableProps {
   values: Array<Record<string, any>>
 }
 
-export default function TableContainer({
-  columns,
-  columnMetadata,
-  values,
-}: TableProps) {
+function TableContainer({ columns, columnMetadata, values }: TableProps) {
   const columnWidth = columns.length <= 2 ? 180 : 120
   const widthArr = new Array(columns.length).fill(columnWidth)
   const [direction, setDirection] = useState<string | null>(null)
@@ -87,7 +87,7 @@ export default function TableContainer({
   return (
     <View style={styles.container}>
       <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-        <View>
+        <View style={styles.tableWrapper}>
           <Table borderStyle={styles.tableBorder}>
             <Row
               data={headerList}
@@ -112,10 +112,18 @@ export default function TableContainer({
   )
 }
 
+export default React.memo(TableContainer)
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
     backgroundColor: '#fff',
+    // backgroundColor: 'red',
+    borderRadius: 8,
+    // borderWidth: 2,
+    // borderColor: '#EAFAEA',
+  },
+  tableWrapper: {
     borderRadius: 8,
     borderWidth: 2,
     borderColor: '#EAFAEA',
@@ -144,8 +152,8 @@ const styles = StyleSheet.create({
   },
   number: { textAlign: 'right' },
   tableBorder: {
-    borderWidth: 1,
-    borderColor: '#FFFFFF' /* '#C1C0B9' */,
+    // borderWidth: 1,
+    // borderColor: '#FFFFFF' /* '#C1C0B9' */,
   },
   row: {
     height: 40,

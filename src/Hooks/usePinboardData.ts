@@ -45,26 +45,26 @@ export default function (pinboardId: string) {
       })
       setPinboardComponents(components)
 
-      const fetchData = async (batchSize: number = 1, index: number = 0) => {
-        while (batchSize >= 0 && index < ids.length) {
+      let index: number = -1
+      const fetchData = async (batchSize: number = 1) => {
+        while (batchSize > 0 && index < ids.length) {
+          batchSize--
+          index++
           const pinboardItemId = ids[index]
-          if (pinboardItemId === undefined) {
-            return
-          }
-
           console.log(
             `Processing index: ${index}, batch: ${batchSize}, pinboardItemId:${pinboardItemId} ...`,
           )
-
-          const resp = await getPinnedItemData(pinboardItemId)
-          batchSize--
-          index++
-          if (batchSize === 0 && index < ids.length) {
-            fetchData(2, index)
-          }
-          if (resp.data?.length) {
-            const rawPinnedItemData = resp.data[0]
-            processConverseData(rawPinnedItemData).then(storeProcessedData)
+          // const resp = await getPinnedItemData(pinboardItemId)
+          if (pinboardItemId) {
+            getPinnedItemData(pinboardItemId).then(resp => {
+              if (batchSize === 0 && index < ids.length) {
+                fetchData(2)
+              }
+              if (resp.data?.length) {
+                const rawPinnedItemData = resp.data[0]
+                processConverseData(rawPinnedItemData).then(storeProcessedData)
+              }
+            })
           }
         }
       }
@@ -77,15 +77,18 @@ export default function (pinboardId: string) {
         converseData: ConverseData
       }) => {
         dispatch(addConverseData(converseData))
+        console.log(
+          `[usePinboardData] storeProcessedData id: ${converseData.id}`,
+        )
         setPinboardComponents(prev => {
           const tempPinnedComponents = [...prev]
           const idx = prev.findIndex(item => item.id === converseData.id)
           tempPinnedComponents[idx] = {
             ...prev[idx],
             loading: false,
-            isTextCard: !!converseData.visualFormats.find(
-              _ => _.type === 'Text',
-            ),
+            isTextCard:
+              !converseData.visualFormats ||
+              !!converseData.visualFormats.find(_ => _.type === 'Text'),
           }
           return tempPinnedComponents
         })

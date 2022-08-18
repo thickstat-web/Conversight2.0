@@ -248,7 +248,7 @@ const BarChart = ({
       // animate={{ duration: 100, easing: 'linear' }}
       style={{ parent: { borderWidth: 1 } }}
       // containerComponent={<VictoryContainer height={325} />}
-      // height={300}
+      height={300}
       // width={screenWidth - 24 * 2}
       theme={VictoryTheme.material}
       domainPadding={20}

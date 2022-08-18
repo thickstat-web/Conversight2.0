@@ -68,7 +68,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
         options: {
           transform: true,
           channel: 'chat',
-          source: 'mobile',
+          source: 'web',
           timezone: '-330',
         },
       },

@@ -7,6 +7,7 @@ import {
   ConverseData,
   MessageType,
   RawConverseData,
+  TextData,
   VisualFormat,
 } from '@/Types/ChatMessage'
 import { Decision } from '@/Types/ChartRules'
@@ -54,22 +55,17 @@ const makeConverseData = (
 ): ConverseData => {
   const { createdAt, id, text = '', utterance } = item
 
-  let message = utterance
-  let displayValue = ''
+  let formattedValue: TextData = formatValue('', null)
   if (!Array.isArray(values) || values.length === 0) {
-    displayValue = text === '0' || text.length === 0 ? NO_DATA_AVAILABLE : text
+    const value = text === '0' || text.length === 0 ? NO_DATA_AVAILABLE : text
+    formattedValue = formatValue(value, null)
   } else if (values.length === 1) {
     const [[columnName, value = '']] = Object.entries(values[0])
     const metadata = columnMetadata[columnName]
-    displayValue = `${value}`
     if (metadata) {
-      displayValue = formatValue(value, metadata)
+      formattedValue = formatValue(value, metadata)
     } else {
-      console.log(`[Processor] metadata not available for column: ${columnName}`)
-    }
-    if (!!metadata && metadata.category === 'date') {
-      const datetimeArr = `${value}`.split(' ')
-      displayValue = datetimeArr[0]
+      console.log(`Metadata not available for column: ${columnName}`)
     }
   }
 
@@ -78,9 +74,9 @@ const makeConverseData = (
     columns,
     createdAt,
     id,
-    message,
+    message: utterance,
     utterance,
-    value: displayValue,
+    textData: formattedValue,
     values,
     visualFormats,
   }
@@ -181,6 +177,19 @@ chartRules.decisions.forEach((decision: Decision) => {
 })
 
 export const processConverseData = async (item: RawConverseData) => {
+  if (item.status === 'failed') {
+    const { text, utterance } = item
+    const userMessage: ChatMessage = makeUserMessage(utterance)
+    const athenaMessage: ChatMessage = makeAthenaFailureMessage(text)
+    const converseData = {
+      id: item.id,
+      textData: formatValue(text, null),
+      message: utterance,
+      visualFormats: [] as VisualFormat[],
+    } as ConverseData
+    return { userMessage, athenaMessage, converseData }
+  }
+
   // Process and transform base64 string to array of records
   const { columns, columnMetadata, values } = normalizeConverseData(
     item.columns,

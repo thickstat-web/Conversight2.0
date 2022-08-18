@@ -31,6 +31,7 @@ export const Colors: ThemeColors = {
   WHITE: '#FFFFFF',
   RED: '#F06F5F',
   GRAY: '#F2F2F3',
+  WHITE_SMOKE: '#F8F8F8',
   GRAY_LIGHT: '#E6E8ED',
   GRAY_DARK: '#9A9A9A',
   DARK: '#004438',

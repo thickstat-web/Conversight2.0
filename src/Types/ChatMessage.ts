@@ -43,6 +43,12 @@ export enum MessageType {
   ATHENA_ERROR,
 }
 
+export interface TextData {
+  prefix: string
+  value: string
+  suffix: string
+}
+
 /* Converse Data format */
 export interface ConverseData {
   columnMetadata: ColumnMetadata
@@ -51,7 +57,7 @@ export interface ConverseData {
   id: string
   message: string
   utterance: string
-  value: string
+  textData: TextData
   values: Array<Record<string, any>>
   visualFormats: VisualFormat[]
 }

@@ -11,6 +11,7 @@ export interface Data2 {
   chart: boolean
   show: string
   val: string
+  text?: string
   questiontext: string
   utterance: string
   createdAt: number

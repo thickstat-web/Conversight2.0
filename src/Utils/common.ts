@@ -1,5 +1,6 @@
 import numeral from 'numeral'
 import { ColumnMetadata } from '@/Types/ChatHistory'
+import { TextData } from '@/Types/ChatMessage'
 
 export const cleanseColumn = (str: string) => {
   if (str) {
@@ -58,24 +59,49 @@ export const properCase = (text: string, onlyFirstChar = false) => {
   }
 }
 
-export const formatValue = (value: any, metadata: ColumnMetadata) => {
-  const { type, unit = '', additional_data } = metadata
-  const precision = additional_data?.precision ?? 0
-  let valueFormat = '0,0'
-  const precisionFormat = precision > 0 ? '.'.padEnd(precision + 1, '0') : ''
-
-  if (type === 'currency') {
-    const currency = unit ? unit : ''
-    valueFormat =
-      currency === '$'
-        ? `${currency}0,0${precisionFormat}`
-        : `0,0${precisionFormat}${currency}`
-  } else {
-    valueFormat =
-      unit && `${unit}`.length
-        ? `0,0${precisionFormat}${unit}`
-        : `0,0${precisionFormat}`
+export const formatValue = (
+  value: any,
+  metadata: ColumnMetadata | null,
+): TextData => {
+  let data: TextData = {
+    prefix: '',
+    value,
+    suffix: '',
   }
 
-  return numeral(value).format(valueFormat)
+  if (metadata) {
+    const { type, unit = '', additional_data, category } = metadata
+
+    const precision = additional_data?.precision ?? 0
+    const precisionFormat = precision > 0 ? '.'.padEnd(precision + 1, '0') : ''
+
+    let prefix = ''
+    let suffix = ''
+    let formattedValue = value
+
+    if (category === 'date') {
+      const datetimeArr = `${value}`.split(' ')
+      formattedValue = datetimeArr[0]
+    } else if (type === 'currency') {
+      const currency = unit ? unit : ''
+      if (currency === '$') {
+        prefix = currency
+      } else {
+        suffix = prefix
+      }
+      formattedValue = numeral(value).format(`0,0${precisionFormat}`)
+    } else {
+      if (unit && `${unit}`.length) {
+        suffix = unit
+      }
+      formattedValue = numeral(value).format(`0,0${precisionFormat}`)
+    }
+
+    data = {
+      prefix,
+      value: formattedValue,
+      suffix,
+    }
+  }
+  return data
 }

@@ -10,11 +10,11 @@ import {
 import { LoadingSpinner } from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { PinboardItem, selectConverseData } from '@/Store/App'
-import { resolveVisualization } from '@/Components/Visualization'
+import { DashboardVisualizer } from '@/Components/Visualization'
 import { ConverseData } from '@/Types/ChatMessage'
 
 const LoadingCard = () => (
-  <View style={[styles.visCard]}>
+  <View style={[styles.visCard, styles.loading]}>
     <LoadingSpinner size={'small'} />
   </View>
 )
@@ -27,14 +27,18 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
     return <LoadingCard />
   }
 
-  let data: ConverseData | null = null
-  data = converseData[id][0]
+  const data: ConverseData | null = converseData[id][0]
   if (!data) {
     return null
   }
+
+  const title = data.message
   return (
-    <View style={[styles.visCard, !isTextCard && { height: 300 }]}>
-      {resolveVisualization(data)}
+    <View style={[styles.visCard, !isTextCard && { height: 350 }]}>
+      <View marginV-4>
+        <Text style={styles.cardTitle}>{title}</Text>
+      </View>
+      <DashboardVisualizer data={data} />
     </View>
   )
 })
@@ -61,12 +65,12 @@ const PinboardComponents = ({ pinboardComponents }) => {
 
 const DashboardContainer = ({ navigation, route }) => {
   const { pinboardId } = route.params
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+  const { Layout, Colors } = useTheme()
   const { isLoading, pinboardComponents } = usePinboardData(pinboardId)
 
   return (
     <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
-      <View flex style={{ backgroundColor: Colors.WHITE }}>
+      <View flex style={{ backgroundColor: Colors.WHITE_SMOKE }}>
         {isLoading ? (
           <LoadingSpinner />
         ) : (
@@ -83,13 +87,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   visCard: {
-    flex: 1,
-    alignItems: 'center',
+    // flex: 1,
+    // alignItems: 'center',
     justifyContent: 'center',
     margin: 5,
+    marginVertical: 8,
+    padding: 12,
     height: 130,
     borderRadius: 6,
-    backgroundColor: Colors.NOTIFICATION_GREEN,
+    backgroundColor: Colors.WHITE,
+  },
+  loading: {
+    // backgroundColor: Colors.NOTIFICATION_GREEN,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.GREEN_DARK,
+    textAlign: 'left',
   },
 })
 
