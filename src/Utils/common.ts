@@ -84,11 +84,11 @@ export const formatValue = (
       formattedValue = datetimeArr[0]
     } else if (type === 'currency') {
       const currency = unit ? unit : ''
-      if (currency === '$') {
-        prefix = currency
-      } else {
-        suffix = prefix
-      }
+      // if (currency === '$') {
+      prefix = currency
+      // } else {
+      //   suffix = currency
+      // }
       formattedValue = numeral(value).format(`0,0${precisionFormat}`)
     } else {
       if (unit && `${unit}`.length) {

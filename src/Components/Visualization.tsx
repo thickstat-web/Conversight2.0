@@ -6,8 +6,10 @@ import ChartContainer from '@/Containers/Chat/ChartContainer'
 import TableContainer from '@/Containers/Chat/TableContainer'
 import { ChartType, ConverseData, TextData } from '@/Types/ChatMessage'
 
-export const TextContainer = ({ text }: { text: string }) => {
+export const TextContainer = ({ data }: { data: TextData }) => {
   const { Fonts } = useTheme()
+  const { prefix, value, suffix } = data
+  const displayValue = `${prefix} ${value} ${suffix}`.trim()
   return (
     <Text
       margin-4
@@ -15,7 +17,7 @@ export const TextContainer = ({ text }: { text: string }) => {
       selectable={true}
       selectionColor={Colors.GREEN_LIGHTEST}
     >
-      {text}
+      {displayValue}
     </Text>
   )
 }
@@ -134,7 +136,7 @@ export class ChatVisualizer extends Visualizer {
 
     let content = null
     if (this.isText()) {
-      content = <TextContainer text={textData.value} />
+      content = <TextContainer data={textData} />
     } else if (this.isChart()) {
       content = (
         <ChartContainer

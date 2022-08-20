@@ -20,16 +20,12 @@ const getStyledRowData = (
 ) => {
   return Object.values(row).map((value: any, index: number) => {
     const column = columns[index]
-    let isNumeric = false
     let metadata = columnMetadata[column]
-    if (columnMetadata[column]) {
-      metadata = columnMetadata[column]
-      isNumeric = metadata.isNumericFormat
-    }
+    let isNumeric = metadata ? metadata.isNumericFormat : false
     let displayValue = value
     if (isNumeric) {
       const { prefix, value: text, suffix } = formatValue(value, metadata)
-      displayValue = `${prefix}${text}${suffix}`
+      displayValue = `${prefix} ${text} ${suffix}`.trim()
     }
     return (
       <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>

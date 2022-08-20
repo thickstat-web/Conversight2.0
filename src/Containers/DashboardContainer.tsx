@@ -34,7 +34,7 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
 
   const title = data.message
   return (
-    <View style={[styles.visCard, !isTextCard && { height: 350 }]}>
+    <View style={[styles.visCard, !isTextCard && { maxHeight: 350 }]}>
       <View marginV-4>
         <Text style={styles.cardTitle}>{title}</Text>
       </View>
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   visCard: {
     // flex: 1,
     // alignItems: 'center',
-    justifyContent: 'center',
+    // justifyContent: 'top',
     margin: 5,
     marginVertical: 8,
     padding: 12,
