@@ -150,32 +150,49 @@ const DonutChart = ({ xAxisField, yAxisField, values }: ChartProps) => {
   )
 }
 
-const AreaChart = ({ xAxisField, yAxisField, values }: ChartProps) => {
+const AreaChart = ({
+  xAxisField,
+  yAxisField,
+  xAxisLabel,
+  yAxisLabel,
+  values,
+}: ChartProps) => {
   const { width: screenWidth } = useWindowDimensions()
   return (
     <VictoryChart
-      // animate={{ duration: 100, easing: 'linear' }}
-      // style={{ parent: { borderWidth: 1 } }}
       containerComponent={
+        // <VictoryZoomContainer
+        //   responsive={false}
+        //   height={380}
+        //   zoomDimension="x"
+        // />
         <VictoryContainer
-          height={400}
-          width={screenWidth - 24 * 2}
-          events={
+          height={380}
+          width={screenWidth - 44 * 2}
+          events={{ onPressIn: () => {} }}
+          style={
             {
-              // onPressIn: evt => console.log('Tapped...'),
+              // border: '4px solid #00ff00',
+              // backgroundColor: 'orange',
+              // padding: 0,
+              // margin: 0,
+              // borderWidth: 1,
+              // borderColor: 'red',
             }
           }
         />
       }
-      // height={300}
-      // width={screenWidth - 20 * 2}
+      width={screenWidth - 20 * 2}
       theme={VictoryTheme.material}
-      domainPadding={10}
       style={{
         parent: {
-          border: '1px solid #00ff00',
+          // alignItems: 'center',
+          // border: '4px solid #00ff00',
           // backgroundColor: 'orange',
-          // paddingBottom: 80,
+          // padding: 0,
+          // margin: 0,
+          // borderWidth: 4,
+          // borderColor: 'red',
         },
         // background: {
         //   fill: 'pink',
@@ -183,23 +200,37 @@ const AreaChart = ({ xAxisField, yAxisField, values }: ChartProps) => {
       }}
     >
       <VictoryAxis
-        // label="Top 10 Vendors by Spend"
-        axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
-        tickLabelComponent={
-          <VictoryLabel dx={2} dy={-8} angle={-60} textAnchor={'end'} />
-        }
+        label={xAxisLabel}
         style={{
-          axisLabel: {
-            fontSize: 16,
-            fontWeight: 'bold',
-            padding: 8,
-            fill: '#00AA39',
-          },
+          axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 48 },
           ticks: { size: 4 },
           tickLabels: { angle: -60, alignItems: 'baseline' },
         }}
+        tickFormat={x => `${x}`.split(' ')}
+        tickLabelComponent={
+          <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
+        }
+        // tickFormat={x => {
+        //   let label = x
+        //   for (let name of months) {
+        //     const monthRegex = new RegExp(name, 'i')
+        //     if (monthRegex.test(x)) {
+        //       label = x.replace(monthRegex, name.slice(0, 3).toUpperCase())
+        //     }
+        //   }
+        //   return label.split(' ')
+        // }}
       />
-      <VictoryAxis dependentAxis tickFormat={x => numeral(x).format('$0a')} />
+      <VictoryAxis
+        dependentAxis
+        label={yAxisLabel}
+        style={{
+          axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 36 },
+          ticks: { size: 4 },
+          // tickLabels: { angle: -60, alignItems: 'baseline' },
+        }}
+        tickFormat={x => numeral(x).format('0a')}
+      />
       <VictoryArea
         x={xAxisField}
         y={yAxisField}
