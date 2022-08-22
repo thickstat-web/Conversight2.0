@@ -52,19 +52,18 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
 const PinboardComponents = React.memo(
   ({ pinboardComponents }: { pinboardComponents: PinboardItem[] }) => {
     const textCards = pinboardComponents.filter(_ => _.isTextCard)
-    const chartOrTableCards = pinboardComponents.filter(_ => !_.isTextCard)
+    const chartAndTableCards = pinboardComponents.filter(_ => !_.isTextCard)
     const renderItem = ({ item, index }) => <Card item={item} />
-    const Footer = () =>
-      chartOrTableCards.map((item: PinboardItem) => <Card item={item} />)
+    const ChartAndTableCards = () =>
+      chartAndTableCards.map((item: PinboardItem) => <Card item={item} />)
     return (
       <FlatList
         style={{ margin: 8 }}
-        numColumns={2} // set number of columns
-        columnWrapperStyle={styles.row} // space them out evenly
+        numColumns={2}
+        columnWrapperStyle={styles.row}
         data={textCards}
-        // keyExtractor={keyExtractor}
         renderItem={renderItem}
-        ListFooterComponent={Footer}
+        ListFooterComponent={ChartAndTableCards}
         showsVerticalScrollIndicator={false}
       />
     )
