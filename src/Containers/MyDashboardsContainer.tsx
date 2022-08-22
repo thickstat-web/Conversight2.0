@@ -237,6 +237,11 @@ const MyDashboardsContainer = ({ navigation }) => {
       </Text>
     </View>
   )
+  const getItemLayout = (data, index) => ({
+    length: ITEM_HEIGHT,
+    offset: ITEM_HEIGHT * index,
+    index,
+  })
 
   return (
     <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
@@ -259,11 +264,7 @@ const MyDashboardsContainer = ({ navigation }) => {
               keyExtractor={keyExtractor}
               renderItem={renderItem(onTapItem)}
               showsVerticalScrollIndicator={false}
-              getItemLayout={(data, index) => ({
-                length: ITEM_HEIGHT,
-                offset: ITEM_HEIGHT * index,
-                index,
-              })}
+              getItemLayout={getItemLayout}
             />
           </>
         )}

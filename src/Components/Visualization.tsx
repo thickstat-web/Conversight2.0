@@ -1,10 +1,11 @@
 import React from 'react'
 import { StyleSheet } from 'react-native'
-import { Colors, Text, View } from 'react-native-ui-lib'
+import { Text, View } from 'react-native-ui-lib'
 import { useTheme } from '@/Hooks'
 import ChartContainer from '@/Containers/Chat/ChartContainer'
 import TableContainer from '@/Containers/Chat/TableContainer'
 import { ChartType, ConverseData, TextData } from '@/Types/ChatMessage'
+import { Colors } from '@/Theme/Variables'
 
 export const TextContainer = ({ data }: { data: TextData }) => {
   const { Fonts } = useTheme()
@@ -30,13 +31,13 @@ export const FormattedTextContainer = ({
   title: string
 }) => {
   const { Colors, Fonts } = useTheme()
-  const { prefix, value, suffix } = data
+  const { prefix, abbrValue, suffix } = data
   return (
     <View>
       <Text margin-4 style={[Fonts.textSmall, styles.message]}>
         <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>{prefix}</Text>
         <Text style={{ color: Colors.DARK, fontSize: 18, fontWeight: 'bold' }}>
-          {value}
+          {abbrValue}
         </Text>
         <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>{suffix}</Text>
       </Text>
@@ -156,12 +157,24 @@ export class ChatVisualizer extends Visualizer {
         />
       )
     } else if (this.isTable()) {
+      const renderSize = 5
+      const total = values.length
       content = (
-        <TableContainer
-          columns={columns}
-          columnMetadata={columnMetadata}
-          values={values.slice(0, 5)}
-        />
+        <>
+          <TableContainer
+            id={id}
+            columns={columns}
+            columnMetadata={columnMetadata}
+            values={values.slice(0, renderSize)}
+          />
+          {total > renderSize && (
+            <View style={styles.bottomCountWrapper}>
+              <Text style={styles.bottomCount}>
+                Showing {renderSize} of {total} rows
+              </Text>
+            </View>
+          )}
+        </>
       )
     }
     return content
@@ -205,16 +218,26 @@ export class DashboardVisualizer extends Visualizer {
         </>
       )
     } else if (this.isTable()) {
+      const renderSize = 5
+      const total = values.length
       content = (
         <>
           <View marginV-4>
             <Text style={styles.cardTitle}>{message}</Text>
           </View>
           <TableContainer
+            id={id}
             columns={columns}
             columnMetadata={columnMetadata}
-            values={values.slice(0, 5)}
+            values={values.slice(0, renderSize)}
           />
+          {total > renderSize && (
+            <View style={styles.bottomCountWrapper}>
+              <Text style={styles.bottomCount}>
+                Showing {renderSize} of {total} rows
+              </Text>
+            </View>
+          )}
         </>
       )
     }
@@ -230,10 +253,15 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.DARK,
+    color: Colors.GREEN_DARK,
     textAlign: 'left',
   },
-  // darkGreen: {
-  //   color: rgba(0, 68, 56, 0.6),
-  // },
+  bottomCountWrapper: {
+    // alignItems: 'flex-end',
+    paddingVertical: 6,
+    paddingLeft: 8,
+  },
+  bottomCount: {
+    color: Colors.GREEN_MAIN,
+  },
 })

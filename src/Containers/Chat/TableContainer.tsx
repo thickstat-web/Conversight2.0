@@ -5,6 +5,7 @@ import {
   View,
   ScrollView,
   TouchableOpacity,
+  FlatList,
 } from 'react-native'
 import { Table, Row } from 'react-native-table-component'
 import _ from 'lodash'
@@ -42,13 +43,15 @@ const getStyledRowData = (
 }
 
 interface TableProps {
+  id: string
   columns: string[]
   columnMetadata: ColumnMetadata
   values: Array<Record<string, any>>
 }
 
-function TableContainer({ columns, columnMetadata, values }: TableProps) {
+function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const columnWidth = columns.length <= 2 ? 160 : 120
+  const ROW_HEIGHT = 40
   const widthArr = new Array(columns.length).fill(columnWidth)
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
@@ -85,28 +88,54 @@ function TableContainer({ columns, columnMetadata, values }: TableProps) {
     )
   })
 
+  const renderItem = ({
+    item: row,
+    index,
+  }: {
+    item: Record<string, any>
+    index: number
+  }) => {
+    return (
+      <Row
+        key={`${index}`}
+        data={getStyledRowData(columns, columnMetadata, row)}
+        widthArr={widthArr}
+        style={[styles.row, index % 2 && styles.rowEven]}
+      />
+    )
+  }
+
   // const sortedRows = rows.map(item => Object.values(item))
+  const getItemLayout = (data, index) => ({
+    length: ROW_HEIGHT,
+    offset: ROW_HEIGHT * index,
+    index,
+  })
+
   return (
     <View style={styles.container}>
-      <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.tableWrapper}>
-          <Table borderStyle={styles.tableBorder}>
-            <Row
-              data={headerList}
-              widthArr={widthArr}
-              style={styles.header}
-              // textStyle={styles.headerText}
+          <Table>
+            <FlatList
+              data={rows}
+              initialNumToRender={20}
+              // contentContainerStyle={{ height: screenHeight * 0.68 }}
+              ListHeaderComponent={
+                <Table>
+                  <Row
+                    data={headerList}
+                    widthArr={widthArr}
+                    style={styles.header}
+                    // textStyle={styles.headerText}
+                  />
+                </Table>
+              }
+              showsHorizontalScrollIndicator={false}
+              getItemLayout={getItemLayout}
+              renderItem={renderItem}
+              listKey={id}
             />
-          </Table>
-          <Table borderStyle={styles.tableBorder}>
-            {rows.map((row, index) => (
-              <Row
-                key={`${index}`}
-                data={getStyledRowData(columns, columnMetadata, row)}
-                widthArr={widthArr}
-                style={[styles.row, index % 2 && styles.rowEven]}
-              />
-            ))}
           </Table>
         </View>
       </ScrollView>
@@ -120,7 +149,6 @@ const styles = StyleSheet.create({
   container: {
     // flex: 1,
     backgroundColor: '#fff',
-    // backgroundColor: 'red',
     borderRadius: 8,
     // borderWidth: 2,
     // borderColor: '#EAFAEA',

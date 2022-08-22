@@ -72,6 +72,7 @@ const AthenaMessageContainer = React.memo(
           >
             <View
               marginV-8
+              flex
               onTouchStart={() => setMove(false)}
               onTouchMove={() => setMove(true)}
               onTouchEnd={() => {

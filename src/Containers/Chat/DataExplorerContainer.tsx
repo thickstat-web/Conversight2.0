@@ -76,17 +76,19 @@ const DataExplorerContainer = ({
     .map(item => item.type)
 
   React.useLayoutEffect(() => {
-    const moreOptionsButton = () => (
-      <Button
-        label="..."
-        onPress={() => setVisible(true)}
-        labelStyle={styles.moreOptionsButton}
-      />
-    )
-    navigation.setOptions({
-      headerRight: moreOptionsButton,
-    })
-  }, [navigation])
+    if (formats.length > 1) {
+      const moreOptionsButton = () => (
+        <Button
+          label="..."
+          onPress={() => setVisible(true)}
+          labelStyle={styles.moreOptionsButton}
+        />
+      )
+      navigation.setOptions({
+        headerRight: moreOptionsButton,
+      })
+    }
+  }, [navigation, formats])
 
   const buildOptions = (onPress: (option: string) => void): LabelOptions[] => {
     const labelOptions: LabelOptions[] = formats
@@ -132,13 +134,15 @@ const DataExplorerContainer = ({
         >
           <ScrollView
             showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
             contentContainerStyle={styles.contentContainer}
             style={{ width: screenWidth }}
           >
             <TableContainer
+              id={id}
               columns={columns}
               columnMetadata={columnMetadata}
-              values={values.slice(0, 100)}
+              values={values.slice(0, 200)}
             />
           </ScrollView>
         </View>
@@ -206,15 +210,16 @@ const DataExplorerContainer = ({
             />
           )}
         </View>
-        <View
-          flex-1
-          style={{
-            backgroundColor: Colors.WHITE,
-            paddingTop: 24,
-            alignItems: 'center',
-          }}
-        >
-          {formats.length > 1 && (
+
+        {formats.length > 1 && (
+          <View
+            flex-1
+            style={{
+              backgroundColor: Colors.WHITE,
+              paddingTop: 24,
+              alignItems: 'center',
+            }}
+          >
             <View style={styles.dotsContainer}>
               {formats.map((_, index) => {
                 const opacity = currentSlideIndex === index ? 1 : 0.2
@@ -229,9 +234,8 @@ const DataExplorerContainer = ({
                 )
               })}
             </View>
-          )}
 
-          {/* <View row>
+            {/* <View row>
             <TouchableOpacity
               onPress={scrollPrevious}
               style={[styles.scrollButton]}
@@ -245,18 +249,21 @@ const DataExplorerContainer = ({
               <NextIcon />
             </TouchableOpacity>
           </View> */}
-        </View>
+          </View>
+        )}
 
-        <ActionSheet
-          visible={visible}
-          onDismiss={() => setVisible(false)}
-          title={'Change KPI'}
-          // message={'Message goes here'}
-          cancelButtonIndex={options.length - 1}
-          useNativeIOS={true}
-          dialogStyle={styles.actionSheet}
-          options={options}
-        />
+        {formats.length > 1 && (
+          <ActionSheet
+            visible={visible}
+            onDismiss={() => setVisible(false)}
+            title={'Change KPI'}
+            // message={'Message goes here'}
+            cancelButtonIndex={options.length - 1}
+            useNativeIOS={true}
+            dialogStyle={styles.actionSheet}
+            options={options}
+          />
+        )}
       </View>
     </SafeAreaView>
   )

@@ -15,6 +15,8 @@ import { ConverseData } from '@/Types/ChatMessage'
 import { navigate } from '@/Navigators/utils'
 import { DATA_EXPLORER } from '@/Constants/screens'
 
+const CARD_HEIGHT = 130
+
 const LoadingCard = () => (
   <View style={[styles.visCard, styles.loading]}>
     <LoadingSpinner size={'small'} />
@@ -37,7 +39,7 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
   return (
     <View
       flex
-      style={[styles.visCard, isTextCard && { height: 130 }]}
+      style={[styles.visCard, isTextCard && { height: CARD_HEIGHT }]}
       onTouchEnd={() => {
         navigate(DATA_EXPLORER, { id: data.id })
       }}
@@ -99,6 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.WHITE,
   },
   loading: {
+    height: CARD_HEIGHT,
     // backgroundColor: Colors.NOTIFICATION_GREEN,
   },
   cardTitle: {
