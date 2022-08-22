@@ -75,8 +75,9 @@ const AthenaMessageContainer = React.memo(
               onTouchStart={() => setMove(false)}
               onTouchMove={() => setMove(true)}
               onTouchEnd={() => {
+                navigate(DATA_EXPLORER, { id: message.id })
                 if (!move) {
-                  navigate(DATA_EXPLORER, { id: message.id })
+                  // navigate(DATA_EXPLORER, { id: message.id })
                   // console.log(
                   //   `visualFormats: ${JSON.stringify(visualFormats, null, 2)}
                   // \ncolumns: ${JSON.stringify(columns, null, 2)}
@@ -189,6 +190,8 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.65 }],
   },
   athenaMessageWrapper: {
+    // flex: 1,
+    // overflow: 'scroll',
     paddingHorizontal: 8,
     borderRadius: 16,
     borderBottomLeftRadius: 0,

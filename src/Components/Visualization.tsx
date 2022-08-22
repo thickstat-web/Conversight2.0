@@ -8,8 +8,8 @@ import { ChartType, ConverseData, TextData } from '@/Types/ChatMessage'
 
 export const TextContainer = ({ data }: { data: TextData }) => {
   const { Fonts } = useTheme()
-  const { prefix, value, suffix } = data
-  const displayValue = `${prefix} ${value} ${suffix}`.trim()
+  const { prefix, abbrValue, suffix } = data
+  const displayValue = `${prefix}${abbrValue} ${suffix}`.trim()
   return (
     <Text
       margin-4
@@ -35,7 +35,9 @@ export const FormattedTextContainer = ({
     <View>
       <Text margin-4 style={[Fonts.textSmall, styles.message]}>
         <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>{prefix}</Text>
-        <Text style={{ color: Colors.DARK, fontSize: 24 }}>{value}</Text>
+        <Text style={{ color: Colors.DARK, fontSize: 18, fontWeight: 'bold' }}>
+          {value}
+        </Text>
         <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>{suffix}</Text>
       </Text>
       <View>
@@ -50,8 +52,12 @@ export const FormattedTextContainer = ({
   )
 }
 
-class Visualizer extends React.PureComponent<{ data: ConverseData }> {
-  constructor(props: { data: ConverseData }) {
+interface VisualizerProps {
+  data: ConverseData
+}
+
+class Visualizer extends React.PureComponent<VisualizerProps> {
+  constructor(props: VisualizerProps) {
     super(props)
   }
 
@@ -119,7 +125,7 @@ class Visualizer extends React.PureComponent<{ data: ConverseData }> {
 }
 
 export class ChatVisualizer extends Visualizer {
-  constructor(props: { data: ConverseData }) {
+  constructor(props: VisualizerProps) {
     super(props)
   }
 
@@ -163,7 +169,7 @@ export class ChatVisualizer extends Visualizer {
 }
 
 export class DashboardVisualizer extends Visualizer {
-  constructor(props: { data: ConverseData }) {
+  constructor(props: VisualizerProps) {
     super(props)
   }
 
@@ -183,23 +189,33 @@ export class DashboardVisualizer extends Visualizer {
       content = <FormattedTextContainer data={textData} title={message} />
     } else if (this.isChart()) {
       content = (
-        <ChartContainer
-          key={id}
-          preferredChart={this.getPreferredChart()}
-          columns={columns}
-          columnMetadata={columnMetadata}
-          visualFormats={visualFormats}
-          values={values}
-          title={message}
-        />
+        <>
+          <View marginV-4>
+            <Text style={styles.cardTitle}>{message}</Text>
+          </View>
+          <ChartContainer
+            key={id}
+            preferredChart={this.getPreferredChart()}
+            columns={columns}
+            columnMetadata={columnMetadata}
+            visualFormats={visualFormats}
+            values={values}
+            title={message}
+          />
+        </>
       )
     } else if (this.isTable()) {
       content = (
-        <TableContainer
-          columns={columns}
-          columnMetadata={columnMetadata}
-          values={values.slice(0, 5)}
-        />
+        <>
+          <View marginV-4>
+            <Text style={styles.cardTitle}>{message}</Text>
+          </View>
+          <TableContainer
+            columns={columns}
+            columnMetadata={columnMetadata}
+            values={values.slice(0, 5)}
+          />
+        </>
       )
     }
     return content
@@ -210,6 +226,12 @@ const styles = StyleSheet.create({
   message: {
     fontSize: 14,
     lineHeight: 24,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.DARK,
+    textAlign: 'left',
   },
   // darkGreen: {
   //   color: rgba(0, 68, 56, 0.6),

@@ -8,6 +8,7 @@ import {
 } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
+import { formatDistance } from 'date-fns'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { LoadingSpinner, LayoutNoInternet } from '@/Components'
 import { useFetchPinboardsQuery } from '@/Services/modules/bot'
@@ -56,7 +57,7 @@ const PinboardCard = ({
   onTapItem: (text: Pinboard) => void
 }) => {
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
-  const { name, ownedByName, tags } = pinboard
+  const { name, ownedByName, tags, updatedAt } = pinboard
   const sharedBoard = ownedByName !== undefined && ownedByName !== null
 
   const showTags = 3
@@ -78,6 +79,13 @@ const PinboardCard = ({
     }
   }
 
+  let timeAgo = null
+  try {
+    timeAgo = formatDistance(new Date(updatedAt ?? new Date()), new Date(), {
+      addSuffix: true,
+    })
+  } catch (err) {}
+
   return (
     <TouchableOpacity
       marginB-16
@@ -86,7 +94,10 @@ const PinboardCard = ({
       style={styles.pinboard}
     >
       <View flex>
-        <Text style={[Fonts.textSmal, styles.boardname]}>{name}</Text>
+        <Text style={[Fonts.textSmal, styles.boardname]} numberOfLines={1}>
+          {name}
+        </Text>
+        {timeAgo && <Text margin-4>Last updated {timeAgo}</Text>}
         {sharedBoard && (
           <Text style={[Fonts.textSmal, styles.sharedBy]}>
             Shared by {ownedByName}

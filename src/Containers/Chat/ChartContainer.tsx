@@ -107,7 +107,7 @@ const PieChart = ({
   return (
     <View>
       <VictoryPie
-        width={screenWidth - 24 * 2}
+        width={screenWidth - 44 * 2}
         height={340}
         x={yAxisField}
         y={xAxisField}
@@ -128,6 +128,7 @@ const PieChart = ({
       <VictoryLegend
         x={32}
         y={12}
+        width={screenWidth - 44 * 2}
         colorScale={colorScale}
         orientation="vertical"
         symbolSpacer={10}
@@ -158,6 +159,7 @@ const AreaChart = ({ xAxisField, yAxisField, values }: ChartProps) => {
       containerComponent={
         <VictoryContainer
           height={400}
+          width={screenWidth - 24 * 2}
           events={
             {
               // onPressIn: evt => console.log('Tapped...'),
@@ -166,7 +168,7 @@ const AreaChart = ({ xAxisField, yAxisField, values }: ChartProps) => {
         />
       }
       // height={300}
-      // width={screenWidth - 24 * 2}
+      // width={screenWidth - 20 * 2}
       theme={VictoryTheme.material}
       domainPadding={10}
       style={{
@@ -226,7 +228,6 @@ const LineChart = ({
   return (
     <>
       <VictoryChart
-        // style={{ parent: { borderWidth: 1 } }}
         containerComponent={
           // <VictoryZoomContainer
           //   responsive={false}
@@ -235,20 +236,31 @@ const LineChart = ({
           // />
           <VictoryContainer
             height={380}
-            // style={{ padding: '50px 50px' }}
+            width={screenWidth - 44 * 2}
             events={{ onPressIn: () => {} }}
+            style={
+              {
+                // border: '4px solid #00ff00',
+                // backgroundColor: 'orange',
+                // padding: 0,
+                // margin: 0,
+                // borderWidth: 1,
+                // borderColor: 'red',
+              }
+            }
           />
         }
-        // height={340}
-        width={screenWidth - 16 * 2}
+        width={screenWidth - 20 * 2}
         theme={VictoryTheme.material}
-        // domainPadding={10}
         style={{
           parent: {
             // alignItems: 'center',
-            border: '1px solid #00ff00',
+            // border: '4px solid #00ff00',
             // backgroundColor: 'orange',
-            paddingLeft: 4,
+            // padding: 0,
+            // margin: 0,
+            // borderWidth: 4,
+            // borderColor: 'red',
           },
           // background: {
           //   fill: 'pink',
@@ -263,7 +275,9 @@ const LineChart = ({
             tickLabels: { angle: -60, alignItems: 'baseline' },
           }}
           tickFormat={x => `${x}`.split(' ')}
-          tickLabelComponent={<VictoryLabel angle={-45} textAnchor="end" />}
+          tickLabelComponent={
+            <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
+          }
           // tickFormat={x => {
           //   let label = x
           //   for (let name of months) {
@@ -294,9 +308,7 @@ const LineChart = ({
           // }}
           style={{
             data: { stroke: '#00AA39', strokeWidth: 1, fill: 'transparent' },
-            // parent: { border: '1px solid #ccc' },
           }}
-          // padding={{ left: 20, bottom: 60 }}
         />
       </VictoryChart>
     </>
@@ -314,16 +326,19 @@ const BarChart = ({
   const { width: screenWidth } = useWindowDimensions()
   return (
     <VictoryChart
-      // animate={{ duration: 100, easing: 'linear' }}
-      style={{ parent: { borderWidth: 1 } }}
-      // containerComponent={<VictoryContainer height={325} />}
-      height={380}
-      // width={screenWidth - 24 * 2}
+      containerComponent={
+        <VictoryContainer
+          height={380}
+          width={screenWidth - 48 * 2}
+          events={{ onPressIn: () => {} }}
+          style={{ paddingLeft: 8 }}
+        />
+      }
+      width={screenWidth - 24 * 2}
       theme={VictoryTheme.material}
       domainPadding={20}
       style={{
         parent: {
-          // alignItems: 'center',
           border: '1px solid #00ff00',
           // backgroundColor: 'orange',
           // paddingBottom: 80,
@@ -336,13 +351,12 @@ const BarChart = ({
       <VictoryAxis
         label={xAxisLabel}
         // axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
-        // tickLabelComponent={
-        //   <VictoryLabel dx={2} dy={-8} angle={-60} textAnchor={'end'} />
-        // }
+        tickLabelComponent={
+          <VictoryLabel dx={8} dy={-8} angle={-60} textAnchor={'end'} />
+        }
         style={{
           axisLabel: {
             fontSize: 16,
-            // fontWeight: 'bold',
             padding: 32,
             fill: Colors.GREEN_DARK,
           },
@@ -354,7 +368,9 @@ const BarChart = ({
       <VictoryAxis
         dependentAxis
         label={yAxisLabel}
-        tickFormat={x => numeral(x).format('0a')}
+        // axisLabelComponent={<VictoryLabel dy={-2} />}
+        padding={{ left: 40 }}
+        tickFormat={x => numeral(x).format('0.0a')}
         style={{
           axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 36 },
         }}
@@ -364,7 +380,7 @@ const BarChart = ({
         y={yAxisField}
         data={values.slice(0, 10)}
         horizontal={horizontal}
-        labels={({ datum }) => numeral(datum[yAxisField]).format('0,0a')}
+        labels={({ datum }) => numeral(datum[yAxisField]).format('0,0.0a')}
         alignment="middle"
         labelComponent={
           <VictoryLabel dx={10} dy={5} angle={-60} textAnchor={'start'} />
@@ -431,15 +447,18 @@ const ChartContainer = ({
     ? properCase(columnMetadata[chartFormat?.xField].alias)
     : ''
 
-  const yAxisLabel = chartFormat?.yField
-    ? properCase(
-        columnMetadata[
-          Array.isArray(chartFormat?.yField)
-            ? chartFormat?.yField[0]
-            : chartFormat?.yField
-        ].alias,
-      )
-    : ''
+  let yAxisLabel = ''
+  if (chartFormat?.yField) {
+    const metadata =
+      columnMetadata[
+        Array.isArray(chartFormat?.yField)
+          ? chartFormat?.yField[0]
+          : chartFormat?.yField
+      ]
+    yAxisLabel = metadata
+      ? `${properCase(metadata.alias)} (${metadata.unit})`
+      : ''
+  }
 
   if (!chartFormat) {
     chart = <Text>No matching chart found</Text>
@@ -477,7 +496,7 @@ const ChartContainer = ({
   }
 
   return (
-    <View flex style={styles.container}>
+    <View flex center style={styles.container}>
       {chart}
     </View>
   )

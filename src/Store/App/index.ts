@@ -41,16 +41,16 @@ export const processAndSetChatHistory = createAsyncThunk(
   processChatHistory,
 )
 
-// const buildConverseMap = (
-//   chatMessages: ChatMessage[],
-// ): Record<string, ConverseData[]> => {
-//   return chatMessages
-//     .filter(item => item.type === MessageType.ATHENA)
-//     .reduce((acc, item) => {
-//       acc[item.id] = [item.message as ConverseData]
-//       return acc
-//     }, {} as Record<string, ConverseData[]>)
-// }
+const buildConverseMap = (
+  chatMessages: ChatMessage[],
+): Record<string, ConverseData[]> => {
+  return chatMessages
+    .filter(item => item.type === MessageType.ATHENA)
+    .reduce((acc, item) => {
+      acc[item.id] = [item.message as ConverseData]
+      return acc
+    }, {} as Record<string, ConverseData[]>)
+}
 
 const addProcessChatHistory = (builder: ActionReducerMapBuilder<AppState>) => {
   builder
@@ -59,7 +59,7 @@ const addProcessChatHistory = (builder: ActionReducerMapBuilder<AppState>) => {
     })
     .addCase(processAndSetChatHistory.fulfilled, (state, action) => {
       state.processingChatMessages = false
-      // state.converseMap = buildConverseMap(action.payload)
+      state.converseMap = buildConverseMap(action.payload)
       state.chatMessages = action.payload
       state.chatHistoryLoaded = true
     })

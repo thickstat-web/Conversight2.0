@@ -13,8 +13,8 @@ import { ActionSheet, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/Components'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
-import { selectChatMessages } from '@/Store/App'
-import { AthenaMessage, ChartType } from '@/Types/ChatMessage'
+import { selectChatMessages, selectConverseData } from '@/Store/App'
+import { ChartType } from '@/Types/ChatMessage'
 import TableContainer from './TableContainer'
 import ChartContainer from './ChartContainer'
 import BackIcon from '@/Assets/Images/drawer/play-back.svg'
@@ -55,13 +55,15 @@ const DataExplorerContainer = ({
   const { t } = useTranslation()
   const { Layout, Colors, Common, Fonts } = useTheme()
   const { width: screenWidth } = useWindowDimensions()
-  const messages = useAppSelector(selectChatMessages)
+  // const messages = useAppSelector(selectChatMessages)
+  const converseData = useAppSelector(selectConverseData)
   const [visible, setVisible] = useState(false)
   const ref = React.useRef<any>()
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
 
   const { id } = route.params
-  const message = messages.find(item => item.id === id) as AthenaMessage
+  const message = converseData[id][0]
+  // const message = messages.find(item => item.id === id)
   const {
     columns,
     columnMetadata,
@@ -69,7 +71,7 @@ const DataExplorerContainer = ({
     message: title,
     visualFormats,
   } = message
-  const formats = visualFormats
+  const formats: string[] = visualFormats
     .filter(item => item.type in visualizationOptions)
     .map(item => item.type)
 
@@ -147,19 +149,26 @@ const DataExplorerContainer = ({
           style={[
             styles.contentContainer,
             {
+              justifyContent: 'flex-start',
               width: screenWidth,
             },
           ]}
         >
-          <ChartContainer
-            key={id}
-            preferredChart={item as ChartType}
-            columns={columns}
-            columnMetadata={columnMetadata}
-            visualFormats={visualFormats}
-            values={values}
-            title={title}
-          />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.contentContainer}
+            style={{ width: screenWidth }}
+          >
+            <ChartContainer
+              key={id}
+              preferredChart={item as ChartType}
+              columns={columns}
+              columnMetadata={columnMetadata}
+              visualFormats={visualFormats}
+              values={values}
+              title={title}
+            />
+          </ScrollView>
         </View>
       )
     }
@@ -182,20 +191,29 @@ const DataExplorerContainer = ({
   return (
     <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
       <View flex style={{ backgroundColor: Colors.WHITE }}>
-        <View flex-3 marginT-8 center>
-          <FlatList
-            data={formats}
-            ref={ref}
-            onMomentumScrollEnd={onScroll}
-            // contentContainerStyle={{ height: screenHeight * 0.68 }}
-            showsHorizontalScrollIndicator={false}
-            getItemLayout={getItemLayout}
-            horizontal
-            pagingEnabled
-            renderItem={renderItem}
-          />
+        <View flex-6 marginT-8 center>
+          {!!message?.message && (
+            <FlatList
+              data={formats}
+              ref={ref}
+              onMomentumScrollEnd={onScroll}
+              // contentContainerStyle={{ height: screenHeight * 0.68 }}
+              showsHorizontalScrollIndicator={false}
+              getItemLayout={getItemLayout}
+              horizontal
+              pagingEnabled
+              renderItem={renderItem}
+            />
+          )}
         </View>
-        <View flex-2 center style={{ backgroundColor: Colors.WHITE }}>
+        <View
+          flex-1
+          style={{
+            backgroundColor: Colors.WHITE,
+            paddingTop: 24,
+            alignItems: 'center',
+          }}
+        >
           {formats.length > 1 && (
             <View style={styles.dotsContainer}>
               {formats.map((_, index) => {
@@ -213,7 +231,7 @@ const DataExplorerContainer = ({
             </View>
           )}
 
-          <View row>
+          {/* <View row>
             <TouchableOpacity
               onPress={scrollPrevious}
               style={[styles.scrollButton]}
@@ -226,7 +244,7 @@ const DataExplorerContainer = ({
             >
               <NextIcon />
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
 
         <ActionSheet
@@ -278,4 +296,4 @@ const styles = StyleSheet.create({
   actionSheet: { borderRadius: 16 },
 })
 
-export default DataExplorerContainer
+export default React.memo(DataExplorerContainer)

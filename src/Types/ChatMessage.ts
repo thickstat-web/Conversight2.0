@@ -8,6 +8,7 @@ export interface RawConverseData {
   columnMetadata: ColumnMetadata
   columns: string[]
   base64Data: string
+  orderedColumns: string[]
   text: string
   utterance: string
   status: string
@@ -46,6 +47,8 @@ export enum MessageType {
 export interface TextData {
   prefix: string
   value: string
+  roundedValue: string
+  abbrValue: string
   suffix: string
 }
 

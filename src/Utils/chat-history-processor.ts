@@ -118,6 +118,7 @@ interface ProcessedResponse {
 
 const normalizeConverseData = (
   columns: string[],
+  orderedColumns: string[],
   column_metadata: MetaData,
   base64Value: string,
 ): ProcessedResponse => {
@@ -128,6 +129,7 @@ const normalizeConverseData = (
 
   // Cleanse column names
   const cleansedColumns = columns.map(cleanseColumn)
+  const cleansedOrderedColumns = orderedColumns.map(cleanseColumn)
 
   // Cleanse and find numberic columns from metadata
   const col_meta: MetaData = {}
@@ -167,7 +169,7 @@ const normalizeConverseData = (
     }
   }
   // console.log(`[Chart Rule Processor] Extract array of name, value pairs...`)
-  return { columns: cleansedColumns, columnMetadata: col_meta, values }
+  return { columns: cleansedOrderedColumns, columnMetadata: col_meta, values }
 }
 
 const engine = new Engine()
@@ -193,6 +195,7 @@ export const processConverseData = async (item: RawConverseData) => {
   // Process and transform base64 string to array of records
   const { columns, columnMetadata, values } = normalizeConverseData(
     item.columns,
+    item.orderedColumns,
     item.columnMetadata,
     item.base64Data,
   )

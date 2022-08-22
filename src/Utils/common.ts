@@ -66,6 +66,8 @@ export const formatValue = (
   let data: TextData = {
     prefix: '',
     value,
+    roundedValue: value,
+    abbrValue: value,
     suffix: '',
   }
 
@@ -78,10 +80,14 @@ export const formatValue = (
     let prefix = ''
     let suffix = ''
     let formattedValue = value
+    let roundedValue = value
+    let abbrValue = value
 
     if (category === 'date') {
       const datetimeArr = `${value}`.split(' ')
       formattedValue = datetimeArr[0]
+      roundedValue = datetimeArr[0]
+      abbrValue = datetimeArr[0]
     } else if (type === 'currency') {
       const currency = unit ? unit : ''
       // if (currency === '$') {
@@ -90,16 +96,22 @@ export const formatValue = (
       //   suffix = currency
       // }
       formattedValue = numeral(value).format(`0,0${precisionFormat}`)
+      roundedValue = numeral(value).format('0,0')
+      abbrValue = numeral(value).format('0.00a')
     } else {
       if (unit && `${unit}`.length) {
         suffix = unit
       }
       formattedValue = numeral(value).format(`0,0${precisionFormat}`)
+      roundedValue = numeral(value).format('0,0')
+      abbrValue = numeral(value).format('0.00a')
     }
 
     data = {
       prefix,
       value: formattedValue,
+      roundedValue,
+      abbrValue,
       suffix,
     }
   }

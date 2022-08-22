@@ -12,6 +12,8 @@ import { Colors } from '@/Theme/Variables'
 import { PinboardItem, selectConverseData } from '@/Store/App'
 import { DashboardVisualizer } from '@/Components/Visualization'
 import { ConverseData } from '@/Types/ChatMessage'
+import { navigate } from '@/Navigators/utils'
+import { DATA_EXPLORER } from '@/Constants/screens'
 
 const LoadingCard = () => (
   <View style={[styles.visCard, styles.loading]}>
@@ -32,36 +34,40 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
     return null
   }
 
-  const title = data.message
   return (
-    <View style={[styles.visCard, !isTextCard && { maxHeight: 350 }]}>
-      <View marginV-4>
-        <Text style={styles.cardTitle}>{title}</Text>
-      </View>
+    <View
+      flex
+      style={[styles.visCard, isTextCard && { height: 130 }]}
+      onTouchEnd={() => {
+        navigate(DATA_EXPLORER, { id: data.id })
+      }}
+    >
       <DashboardVisualizer data={data} />
     </View>
   )
 })
 
-const PinboardComponents = ({ pinboardComponents }) => {
-  const textCards = pinboardComponents.filter(_ => _.isTextCard)
-  const chartOrTableCards = pinboardComponents.filter(_ => !_.isTextCard)
-  const renderItem = ({ item, index }) => <Card item={item} />
-  const Footer = () =>
-    chartOrTableCards.map((item: PinboardItem) => <Card item={item} />)
-  return (
-    <FlatList
-      style={{ margin: 8 }}
-      numColumns={2} // set number of columns
-      columnWrapperStyle={styles.row} // space them out evenly
-      data={textCards}
-      // keyExtractor={keyExtractor}
-      renderItem={renderItem}
-      ListFooterComponent={Footer}
-      showsVerticalScrollIndicator={false}
-    />
-  )
-}
+const PinboardComponents = React.memo(
+  ({ pinboardComponents }: { pinboardComponents: PinboardItem[] }) => {
+    const textCards = pinboardComponents.filter(_ => _.isTextCard)
+    const chartOrTableCards = pinboardComponents.filter(_ => !_.isTextCard)
+    const renderItem = ({ item, index }) => <Card item={item} />
+    const Footer = () =>
+      chartOrTableCards.map((item: PinboardItem) => <Card item={item} />)
+    return (
+      <FlatList
+        style={{ margin: 8 }}
+        numColumns={2} // set number of columns
+        columnWrapperStyle={styles.row} // space them out evenly
+        data={textCards}
+        // keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ListFooterComponent={Footer}
+        showsVerticalScrollIndicator={false}
+      />
+    )
+  },
+)
 
 const DashboardContainer = ({ navigation, route }) => {
   const { pinboardId } = route.params
@@ -87,13 +93,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   visCard: {
-    // flex: 1,
-    // alignItems: 'center',
-    // justifyContent: 'top',
-    margin: 5,
-    marginVertical: 8,
+    margin: 6,
     padding: 12,
-    height: 130,
     borderRadius: 6,
     backgroundColor: Colors.WHITE,
   },

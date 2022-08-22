@@ -18,14 +18,20 @@ const getStyledRowData = (
   columnMetadata: ColumnMetadata,
   row: Record<string, any>,
 ) => {
-  return Object.values(row).map((value: any, index: number) => {
-    const column = columns[index]
+  // return Object.values(row).map((value: any, index: number) => {
+  return columns.map((column: string, index: number) => {
+    // const column = columns[index]
+    const value = row[column]
     let metadata = columnMetadata[column]
     let isNumeric = metadata ? metadata.isNumericFormat : false
     let displayValue = value
     if (isNumeric) {
-      const { prefix, value: text, suffix } = formatValue(value, metadata)
-      displayValue = `${prefix} ${text} ${suffix}`.trim()
+      const {
+        prefix,
+        roundedValue: text,
+        suffix,
+      } = formatValue(value, metadata)
+      displayValue = `${prefix}${text} ${suffix}`.trim()
     }
     return (
       <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
@@ -42,7 +48,7 @@ interface TableProps {
 }
 
 function TableContainer({ columns, columnMetadata, values }: TableProps) {
-  const columnWidth = columns.length <= 2 ? 180 : 120
+  const columnWidth = columns.length <= 2 ? 160 : 120
   const widthArr = new Array(columns.length).fill(columnWidth)
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
@@ -79,7 +85,7 @@ function TableContainer({ columns, columnMetadata, values }: TableProps) {
     )
   })
 
-  const sortedRows = rows.map(item => Object.values(item))
+  // const sortedRows = rows.map(item => Object.values(item))
   return (
     <View style={styles.container}>
       <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
@@ -93,7 +99,7 @@ function TableContainer({ columns, columnMetadata, values }: TableProps) {
             />
           </Table>
           <Table borderStyle={styles.tableBorder}>
-            {sortedRows.map((row, index) => (
+            {rows.map((row, index) => (
               <Row
                 key={`${index}`}
                 data={getStyledRowData(columns, columnMetadata, row)}

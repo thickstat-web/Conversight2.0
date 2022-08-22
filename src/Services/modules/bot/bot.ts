@@ -52,9 +52,18 @@ export const getChatHistory = (build: EndpointBuilder<any, any, any>) => {
             text,
             utterance,
             status,
+            isColumnReorder,
           } = item
+          const orderedColumns = isColumnReorder
+            ? ([] as string[]).concat(
+              colType?.date ?? [],
+              colType?.dim ?? [],
+              colType?.metrics ?? [],
+            )
+            : columns
           return {
             columns,
+            orderedColumns,
             columnMetadata: column_metadata,
             colType,
             createdAt,
@@ -224,6 +233,7 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
             id: Array.isArray(arg.dataId) ? arg.dataId[0] : `${arg.dataId}`,
             columnMetadata: {},
             columns: [] as string[],
+            orderedColumns: [] as string[],
             colType: { dim: [], date: [], metrics: [] },
             createdAt: 0,
             base64Data: '',
@@ -233,18 +243,40 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
             status: data.status,
           }
 
+          const {
+            ID,
+            columns,
+            colTypeString,
+            isColumnReorder,
+            createdAt,
+            val,
+            id,
+            displayUtterance,
+            status,
+          } = data
+
+          const colType = JSON.parse(colTypeString)
+          const orderedColumns = isColumnReorder
+            ? ([] as string[]).concat(
+              colType?.date ?? [],
+              colType?.dim ?? [],
+              colType?.metrics ?? [],
+            )
+            : columns
+
           if (data.status !== 'failed') {
             rawData = {
-              id: data.ID,
+              id: ID,
               columnMetadata: JSON.parse(data.colMetadata),
-              columns: data.columns,
-              colType: JSON.parse(data.colTypeString),
-              createdAt: data.createdAt,
-              base64Data: data.val,
+              columns,
+              orderedColumns,
+              colType,
+              createdAt,
+              base64Data: val,
               text: atob(data.questiontext),
-              pinboardItemId: data.id,
-              utterance: data.displayUtterance,
-              status: data.status,
+              pinboardItemId: id,
+              utterance: displayUtterance,
+              status,
             }
           }
           rawPinnedItemData.push(rawData)
