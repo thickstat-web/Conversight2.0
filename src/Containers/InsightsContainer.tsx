@@ -2,7 +2,11 @@ import React from 'react'
 import { FlatList, SafeAreaView, StyleSheet } from 'react-native'
 import { View, Text } from 'react-native-ui-lib'
 import { useTheme, useAppSelector, useInsightsData } from '@/Hooks'
-import { LoadingSpinner, DashboardVisualizer } from '@/Components'
+import {
+  LoadingSpinner,
+  DashboardVisualizer,
+  ChatVisualizer,
+} from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { selectConverseData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
@@ -41,12 +45,12 @@ const Card = React.memo(({ item, insightsData }: CardProps) => {
       }}
     >
       <View>
-        <Text>{insightDataItem?.answer}</Text>
+        <Text style={styles.cardTitle}>{insightDataItem?.answer}</Text>
       </View>
       {followupLoading ? (
         <LoadingCard />
       ) : data ? (
-        <DashboardVisualizer data={data} />
+        <ChatVisualizer data={data} />
       ) : null}
     </View>
   )
@@ -115,10 +119,11 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: Colors.GREEN_DARK,
     textAlign: 'left',
+    paddingBottom: 8,
   },
 })
 
