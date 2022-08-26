@@ -97,7 +97,7 @@ const PinboardCard = ({
         <Text style={[Fonts.textSmal, styles.boardname]} numberOfLines={1}>
           {name}
         </Text>
-        {timeAgo && <Text margin-4>Last updated {timeAgo}</Text>}
+        {timeAgo && <Text marginV-4>Last updated {timeAgo}</Text>}
         {sharedBoard && (
           <Text style={[Fonts.textSmal, styles.sharedBy]}>
             Shared by {ownedByName}
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   },
   tagWrapper: {
     marginRight: 8,
-    paddingVertical: 5,
+    paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 4,
     backgroundColor: Colors.WHITE,

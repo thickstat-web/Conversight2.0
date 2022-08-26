@@ -1,16 +1,10 @@
 import React from 'react'
-import { FlatList, Pressable, SafeAreaView, StyleSheet } from 'react-native'
-import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
-import {
-  useTheme,
-  useAppDispatch,
-  useAppSelector,
-  usePinboardData,
-} from '@/Hooks'
-import { LoadingSpinner } from '@/Components'
+import { FlatList, SafeAreaView, StyleSheet } from 'react-native'
+import { View } from 'react-native-ui-lib'
+import { useTheme, useAppSelector, usePinboardData } from '@/Hooks'
+import { DashboardVisualizer, LoadingSpinner } from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { PinboardItem, selectConverseData } from '@/Store/App'
-import { DashboardVisualizer } from '@/Components/Visualization'
 import { ConverseData } from '@/Types/ChatMessage'
 import { navigate } from '@/Navigators/utils'
 import { DATA_EXPLORER } from '@/Constants/screens'

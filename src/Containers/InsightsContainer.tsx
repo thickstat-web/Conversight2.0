@@ -1,67 +1,124 @@
-import React, { useEffect, useState } from 'react'
-import { StyleSheet, TextInput } from 'react-native'
-import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
-import { useTranslation } from 'react-i18next'
-import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { Brand, LayoutNoInternet } from '@/Components'
-// import { useSignInMutation } from '@/Services/modules/auth'
-// import { selectSignInEmail, selectSignInOrg, setAuthData } from '@/Store/Auth'
-// import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
-import Tooltip from '@/Components/Tooltip'
+import React from 'react'
+import { FlatList, SafeAreaView, StyleSheet } from 'react-native'
+import { View, Text } from 'react-native-ui-lib'
+import { useTheme, useAppSelector, useInsightsData } from '@/Hooks'
+import { LoadingSpinner, DashboardVisualizer } from '@/Components'
+import { Colors } from '@/Theme/Variables'
+import { selectConverseData } from '@/Store/App'
+import { ConverseData } from '@/Types/ChatMessage'
+import { InsightComponent, InsightData } from '@/Types/Insights'
+import { DATA_EXPLORER } from '@/Constants/screens'
+import { navigate } from '@/Navigators/utils'
 
-const InsightsContainer = () => {
-  const { t } = useTranslation()
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
-  const dispatch = useAppDispatch()
-  const [showTooltip, setShowTooltip] = useState(true)
-  // const signInEmail = useAppSelector(selectSignInEmail)
+const CARD_HEIGHT = 180
 
-  // const [signIn, { data, isLoading, isSuccess }] = useSignInMutation()
+const LoadingCard = () => (
+  <View style={[styles.visCard, styles.loading]}>
+    <LoadingSpinner size={'small'} />
+  </View>
+)
 
-  // useEffect(() => {
-  //   if (isSuccess && data && data.success) {
-  //     dispatch(setAuthData(data.data))
-  //     console.log(`[PasswordContainer] auth data: ${JSON.stringify(data.data)}`)
-  //   } else if (isSuccess && !data?.success) {
-  //     console.log(`[PasswordContainer] auth error: ${data?.error}`)
-  //   }
-  // }, [isSuccess, data, dispatch])
+interface CardProps {
+  item: InsightComponent
+  insightsData: InsightData[]
+}
+
+const Card = React.memo(({ item, insightsData }: CardProps) => {
+  const { id, followupLoading } = item
+  const converseData = useAppSelector(selectConverseData)
+
+  const data: ConverseData | null = converseData[id]
+    ? converseData[id][0]
+    : null
+  const insightDataItem = insightsData.find(itm => itm.id === id)
 
   return (
-    <LayoutNoInternet>
-      <View flex>
-        <View flex-4 center>
-          <Brand width={'60%'} />
-        </View>
-        <View flex-6 centerH margin-20>
-          <View flex center>
-            {/* <Text text60>Insights - In Progress</Text> */}
-            {showTooltip && (
-              <Tooltip
-                currentIndex={1}
-                total={3}
-                title="Ask Athena"
-                text="Many devices with high speed for yesterday?"
-                btnText="OK, got ya"
-                onPress={() => setShowTooltip(false)}
-              />
-            )}
-          </View>
-        </View>
+    <View
+      flex
+      style={[styles.visCard]}
+      onTouchEnd={() => {
+        navigate(DATA_EXPLORER, { id: data.id })
+      }}
+    >
+      <View>
+        <Text>{insightDataItem?.answer}</Text>
       </View>
-    </LayoutNoInternet>
+      {followupLoading ? (
+        <LoadingCard />
+      ) : data ? (
+        <DashboardVisualizer data={data} />
+      ) : null}
+    </View>
+  )
+})
+
+interface InsightComponentsProps {
+  isLoading: boolean
+  followupLoading: boolean
+  insightsComponents: InsightComponent[]
+  insightsData: InsightData[]
+  hasMoreFollowupComponent: boolean
+  loadMoreFollowupComponent: () => void
+}
+
+interface ListRenderItemProps {
+  item: InsightComponent
+  index: number
+}
+
+const InsightComponents = React.memo((props: InsightComponentsProps) => {
+  const {
+    insightsComponents,
+    insightsData,
+    hasMoreFollowupComponent,
+    loadMoreFollowupComponent,
+  } = props
+
+  const renderItem = ({ item }: ListRenderItemProps) => (
+    <Card item={item} insightsData={insightsData} />
+  )
+  return (
+    <FlatList
+      style={{ margin: 8 }}
+      contentContainerStyle={{ paddingBottom: 48 }}
+      data={insightsComponents}
+      renderItem={renderItem}
+      onEndReached={hasMoreFollowupComponent ? loadMoreFollowupComponent : null}
+      onEndReachedThreshold={0.5}
+      showsVerticalScrollIndicator={false}
+    />
+  )
+})
+
+const InsightsContainer = () => {
+  const { Layout, Colors } = useTheme()
+  const props = useInsightsData()
+  const { isLoading } = props
+
+  return (
+    <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
+      <View flex marginB-10 style={{ backgroundColor: Colors.WHITE_SMOKE }}>
+        {isLoading ? <LoadingSpinner /> : <InsightComponents {...props} />}
+      </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  hint: {
-    fontFamily: 'Montserrat-Regular',
-    padding: 13,
-    width: 300,
-    borderRadius: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  visCard: {
+    margin: 6,
+    padding: 12,
+    borderRadius: 6,
+    backgroundColor: Colors.WHITE,
+  },
+  loading: {
+    height: CARD_HEIGHT,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.GREEN_DARK,
+    textAlign: 'left',
   },
 })
 

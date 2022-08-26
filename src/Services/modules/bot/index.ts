@@ -1,5 +1,7 @@
 import { botApi } from '../../api'
 import {
+  fetchFollowupData,
+  fetchInsightsData,
   fetchPinboards,
   fetchPinnedItemData,
   fetchPinnedItems,
@@ -12,6 +14,8 @@ export const botApiSlice = botApi.injectEndpoints({
     fetchPinboards: fetchPinboards(build),
     fetchPinnedItems: fetchPinnedItems(build),
     fetchPinnedItemData: fetchPinnedItemData(build),
+    fetchInsightsData: fetchInsightsData(build),
+    fetchFollowupData: fetchFollowupData(build),
   }),
   overrideExisting: false,
 })
@@ -23,4 +27,6 @@ export const {
   useFetchPinnedItemsQuery,
   useLazyFetchPinnedItemsQuery,
   useFetchPinnedItemDataMutation,
+  useFetchInsightsDataMutation,
+  useFetchFollowupDataMutation,
 } = botApiSlice

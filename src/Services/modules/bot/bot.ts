@@ -8,12 +8,10 @@ import {
 } from '@/Types/ChatHistory'
 import { RawConverseData } from '@/Types/ChatMessage'
 import {
-  RawPinnedItemData,
   PinnedItemRequest,
   Pinboard,
   PinnedItem,
   FilterValue,
-  FilterCategory,
   Filter,
 } from '@/Types/Pinboard'
 import {
@@ -26,6 +24,8 @@ import {
   PinBoardComponent,
 } from '@/Types/PinnedItemsResponse'
 import { PinnedItemDataResponse } from '@/Types/PinnedItemDataResponse'
+import { InsightData, InsightsResponse } from '@/Types/Insights'
+import { FollowupRequest, FollowupResponse } from '@/Types/Followup'
 
 export const getChatHistory = (build: EndpointBuilder<any, any, any>) => {
   return build.mutation<
@@ -286,6 +286,118 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
       return {
         success: code === '200' && message === 'success',
         data: rawPinnedItemData,
+      }
+    },
+  })
+}
+
+export const fetchInsightsData = (build: EndpointBuilder<any, any, any>) => {
+  return build.mutation<
+    ResponseType<InsightData[]>,
+    Partial<string | string[]>
+  >({
+    query: (datasetIds: string | string[]) => {
+      const body = {
+        dataSetID: Array.isArray(datasetIds) ? datasetIds : [datasetIds],
+      }
+      return {
+        url: '/v2/proActiveInsights/user',
+        method: 'POST',
+        body,
+      }
+    },
+    transformResponse: (response: InsightsResponse) => {
+      const {
+        code,
+        message,
+        data: { proActiveInsightComp },
+      } = response
+
+      let insightsData: InsightData[] = []
+      if (typeof proActiveInsightComp === 'object') {
+        for (const datasetId in proActiveInsightComp) {
+          const insightsByDataset = proActiveInsightComp[datasetId]
+          if (insightsByDataset && Array.isArray(insightsByDataset)) {
+            insightsData = [...insightsData, ...insightsByDataset]
+          }
+        }
+      }
+
+      return {
+        success: code === '200' && message === 'success',
+        data: insightsData,
+      }
+    },
+  })
+}
+
+export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
+  return build.mutation<
+    ResponseType<RawConverseData[]>,
+    Partial<FollowupRequest>
+  >({
+    query: body => {
+      return {
+        url: '/v2/proActiveInsights/user/followup',
+        method: 'POST',
+        body,
+      }
+    },
+    transformResponse: (response: FollowupResponse) => {
+      const {
+        code,
+        message,
+        data: { proActiveInsightCompFollowup },
+      } = response
+
+      let rawFollowupConverseData: RawConverseData[] = []
+      for (const datasetId in proActiveInsightCompFollowup) {
+        const followupsByDataset = proActiveInsightCompFollowup[datasetId]
+        for (const componentId in followupsByDataset) {
+          const followupData = followupsByDataset[componentId]
+          if (followupData) {
+            const {
+              columns = [],
+              column_metadata = {},
+              colType,
+              isColumnReorder = false,
+              createdAt = Date.now(),
+              val = 'W10=',
+              text = '',
+              displayUtterance = '',
+              status = '',
+            } = followupData
+
+            const orderedColumns = isColumnReorder
+              ? ([] as string[]).concat(
+                colType?.date ?? [],
+                colType?.dim ?? [],
+                colType?.metrics ?? [],
+              )
+              : columns
+
+            if (status !== 'failed') {
+              const data = {
+                id: componentId,
+                columnMetadata: column_metadata,
+                columns,
+                orderedColumns,
+                colType,
+                createdAt,
+                base64Data: val,
+                text,
+                utterance: displayUtterance,
+                status,
+              }
+              rawFollowupConverseData = [...rawFollowupConverseData, data]
+            }
+          }
+        }
+      }
+
+      return {
+        success: code === '200' && message === 'success',
+        data: rawFollowupConverseData,
       }
     },
   })

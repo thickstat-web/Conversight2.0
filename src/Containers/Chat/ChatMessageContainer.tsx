@@ -5,12 +5,11 @@ import { Image } from 'react-native-ui-lib/src/components/image'
 import { useAppSelector, useTheme } from '@/Hooks'
 import { selectChatMessages, selectProcessingChatMessages } from '@/Store/App'
 import { ChatMessage, ConverseData, MessageType } from '@/Types/ChatMessage'
-import { LoadingSpinner } from '@/Components'
-import AthenaIcon from '@/Assets/Images/iconsSVG/athena.svg'
+import { ChatVisualizer, LoadingSpinner } from '@/Components'
 import { NO_DATA_AVAILABLE } from '@/Config'
-import { navigate } from '@/Navigators/utils'
 import { DATA_EXPLORER } from '@/Constants/screens'
-import { ChatVisualizer } from '@/Components/Visualization'
+import { navigate } from '@/Navigators/utils'
+import AthenaIcon from '@/Assets/Images/iconsSVG/athena.svg'
 
 interface UserMessageContainerProps {
   message: string

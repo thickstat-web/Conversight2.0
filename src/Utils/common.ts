@@ -117,3 +117,37 @@ export const formatValue = (
   }
   return data
 }
+
+type Extractor<T, P> = (item: T) => P
+
+function getNextBatch<T, P>(
+  arr: Array<T>,
+  offset: number,
+  limit: number,
+  extractor?: Extractor<T, P>,
+): T[] | P[] {
+  const result = arr.slice(offset, offset + limit)
+  if (extractor) {
+    return result.map(extractor)
+  }
+  return result
+}
+
+export function* generateBatches<T, P>(
+  arr: T[],
+  initialSize: number,
+  successiveSize: number,
+  extractor?: Extractor<T, P>,
+) {
+  let offset = 0
+
+  // Initial batch of result
+  yield getNextBatch(arr, offset, initialSize, extractor)
+  offset += initialSize
+
+  // Successive batches of result
+  while (offset < arr.length) {
+    yield getNextBatch(arr, offset, successiveSize, extractor)
+    offset += successiveSize
+  }
+}
