@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   bottomCountWrapper: {
     // alignItems: 'flex-end',
     paddingVertical: 6,
-    paddingLeft: 8,
+    paddingLeft: 0,
   },
   bottomCount: {
     color: Colors.GREEN_MAIN,

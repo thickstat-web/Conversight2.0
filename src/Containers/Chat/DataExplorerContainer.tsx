@@ -63,7 +63,6 @@ const DataExplorerContainer = ({
 
   const { id } = route.params
   const message = converseData[id][0]
-  // const message = messages.find(item => item.id === id)
   const {
     columns,
     columnMetadata,
@@ -101,7 +100,6 @@ const DataExplorerContainer = ({
   }
 
   const onSelect = (option: string) => {
-    // console.log(`[DataExplorerContainer] option: ${option}`)
     const index = formats.indexOf(option)
     // setCurrentSlideIndex(index)
     ref.current.scrollToIndex({ index })
@@ -134,7 +132,6 @@ const DataExplorerContainer = ({
         >
           <ScrollView
             showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}
             contentContainerStyle={styles.contentContainer}
             style={{ width: screenWidth }}
           >
@@ -196,19 +193,19 @@ const DataExplorerContainer = ({
     <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
       <View flex style={{ backgroundColor: Colors.WHITE }}>
         <View flex-6 marginT-8 center>
-          {!!message?.message && (
-            <FlatList
-              data={formats}
-              ref={ref}
-              onMomentumScrollEnd={onScroll}
-              // contentContainerStyle={{ height: screenHeight * 0.68 }}
-              showsHorizontalScrollIndicator={false}
-              getItemLayout={getItemLayout}
-              horizontal
-              pagingEnabled
-              renderItem={renderItem}
-            />
-          )}
+          {/* {!!message?.message && ( */}
+          <FlatList
+            data={formats}
+            ref={ref}
+            onMomentumScrollEnd={onScroll}
+            // contentContainerStyle={{ height: screenHeight * 0.68 }}
+            showsHorizontalScrollIndicator={false}
+            getItemLayout={getItemLayout}
+            horizontal
+            pagingEnabled
+            renderItem={renderItem}
+          />
+          {/* )} */}
         </View>
 
         {formats.length > 1 && (
