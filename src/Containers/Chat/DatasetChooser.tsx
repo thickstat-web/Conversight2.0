@@ -114,7 +114,7 @@ const DatasetChooser = ({ onSelect }: Props) => {
   ) => {
     const dataset = datasets.find(ds => ds.dataSetID === value)
     const timeAgo = formatDistance(
-      new Date(dataset?.updatedTime ?? new Date()),
+      new Date(dataset?.republishCompletedTime ?? new Date()),
       new Date(),
       {
         addSuffix: true,
@@ -135,7 +135,7 @@ const DatasetChooser = ({ onSelect }: Props) => {
           >
             {label}
           </Text>
-          <Text marginT-8>Last Update: {timeAgo}</Text>
+          <Text marginT-8>Last updated {timeAgo}</Text>
         </View>
         {isSelected ? <RadioSelectedIcon /> : <RadioIcon />}
       </View>

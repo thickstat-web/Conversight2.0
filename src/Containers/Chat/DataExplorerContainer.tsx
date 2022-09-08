@@ -13,6 +13,7 @@ import { ActionSheet, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/Components'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
+import { properCase } from '@/Utils/common'
 import { selectChatMessages, selectConverseData } from '@/Store/App'
 import { ChartType } from '@/Types/ChatMessage'
 import TableContainer from './TableContainer'
@@ -188,12 +189,19 @@ const DataExplorerContainer = ({
     }
   }
 
+  const Header = () => (
+    <View paddingV-8 paddingH-16>
+      <Text style={Fonts.textSmall}>{properCase(title, true)}</Text>
+    </View>
+  )
+
   const options = buildOptions(onSelect)
   return (
     <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
       <View flex style={{ backgroundColor: Colors.WHITE }}>
         <View flex-6 marginT-8 center>
           {/* {!!message?.message && ( */}
+          {title.length > 0 && <Header />}
           <FlatList
             data={formats}
             ref={ref}

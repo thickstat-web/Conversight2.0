@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   FlatList,
   Pressable,
@@ -16,7 +16,7 @@ import { Pinboard } from '@/Types/Pinboard'
 import { Colors } from '@/Theme/Variables'
 import { properCase } from '@/Utils/common'
 import { DASHBOARD_SCREEN } from '@/Constants/screens'
-import { MY_DASHBOARD, SHARED, VIEW_ALL } from '@/Config'
+import { ATHENA, MY_DASHBOARD, SHARED, VIEW_ALL } from '@/Config'
 
 interface TagProps {
   tag: string
@@ -49,144 +49,163 @@ const CardTag = ({ tag, remaining = false }: TagProps) => {
   )
 }
 
-const PinboardCard = ({
-  pinboard,
-  onTapItem,
-}: {
-  pinboard: Pinboard
-  onTapItem: (text: Pinboard) => void
-}) => {
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
-  const { name, ownedByName, tags, updatedAt } = pinboard
-  const sharedBoard = ownedByName !== undefined && ownedByName !== null
+const PinboardCard = React.memo(
+  ({
+    pinboard,
+    onTapItem,
+  }: {
+    pinboard: Pinboard
+    onTapItem: (text: Pinboard) => void
+  }) => {
+    const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+    const { name, ownedByName, tags, updatedAt } = pinboard
+    const sharedBoard = ownedByName !== undefined && ownedByName !== null
 
-  const showTags = 3
-  let renderedTags = null
-  if (tags.length > 0) {
-    renderedTags = tags
-      .slice(0, showTags)
-      .map((tag, index) => <CardTag key={`${index}`} tag={tag} />)
+    const showTags = 3
+    let renderedTags = null
+    if (tags.length > 0) {
+      renderedTags = tags
+        .slice(0, showTags)
+        .map((tag, index) => <CardTag key={`${index}`} tag={tag} />)
 
-    // Render remaining count tag
-    if (tags.length > showTags) {
-      renderedTags.push(
-        <CardTag
-          key={`${tags.length}`}
-          tag={`${tags.length - showTags}`}
-          remaining={true}
-        />,
+      // Render remaining count tag
+      if (tags.length > showTags) {
+        renderedTags.push(
+          <CardTag
+            key={`${tags.length}`}
+            tag={`${tags.length - showTags}`}
+            remaining={true}
+          />,
+        )
+      }
+    }
+
+    let timeAgo = null
+    try {
+      timeAgo = formatDistance(new Date(updatedAt ?? new Date()), new Date(), {
+        addSuffix: true,
+      })
+    } catch (err) {}
+
+    return (
+      <TouchableOpacity
+        marginB-16
+        marginH-16
+        onPress={() => onTapItem(pinboard)}
+        style={styles.pinboard}
+      >
+        <View flex>
+          <Text style={[Fonts.textSmal, styles.boardname]} numberOfLines={1}>
+            {name}
+          </Text>
+          {timeAgo && <Text marginV-4>Last updated {timeAgo}</Text>}
+          {sharedBoard && (
+            <Text style={[Fonts.textSmal, styles.sharedBy]}>
+              Shared by {ownedByName}
+            </Text>
+          )}
+        </View>
+        <View row>
+          <View flex row style={styles.tasContainer}>
+            {renderedTags}
+          </View>
+        </View>
+      </TouchableOpacity>
+    )
+  },
+)
+
+const TagFilter = React.memo(
+  ({
+    tagWithIndexes,
+    count,
+    onFilter,
+  }: {
+    tagWithIndexes: Record<string, number[]>
+    count: number
+    onFilter: (tags: string[]) => void
+  }) => {
+    const { Colors, Fonts } = useTheme()
+    const [filterTags, setFilterTags] = useState<string[]>([])
+
+    const allTagNames = Object.keys(tagWithIndexes)
+    const filterDefault = allTagNames.filter(
+      tag => ![ATHENA, MY_DASHBOARD, SHARED].includes(tag),
+    )
+
+    const athenaTagExists = allTagNames.includes(ATHENA)
+    let allTags = [VIEW_ALL, ATHENA, MY_DASHBOARD, SHARED, ...filterDefault]
+    if (!athenaTagExists) {
+      allTags = allTags.filter(tag => tag !== ATHENA)
+    }
+
+    const renderTag = ({ item: tag }: { item: string }) => {
+      const toggleTagSelection = () => {
+        setFilterTags(prevTags => {
+          let tags: string[] = []
+          if (tag === VIEW_ALL) {
+            tags = []
+          } else if (prevTags.includes(tag)) {
+            tags = prevTags.filter(item => item !== tag)
+          } else {
+            prevTags.push(tag)
+            tags = allTags.filter(item => prevTags.includes(item))
+          }
+          onFilter(tags)
+          return [...tags]
+        })
+      }
+
+      const selected =
+        (filterTags.length === 0 && tag === VIEW_ALL) ||
+        filterTags.includes(tag)
+      const tagsCount = tag === VIEW_ALL ? count : tagWithIndexes[tag].length
+      return (
+        <Pressable
+          onPress={toggleTagSelection}
+          style={[styles.filterTag, selected && styles.selectedTagWrapper]}
+        >
+          <Text style={[Fonts.textSmall, selected && { color: Colors.WHITE }]}>
+            {properCase(tag)}
+            <Text style={styles.tagText}> ({tagsCount})</Text>
+          </Text>
+        </Pressable>
       )
     }
-  }
 
-  let timeAgo = null
-  try {
-    timeAgo = formatDistance(new Date(updatedAt ?? new Date()), new Date(), {
-      addSuffix: true,
-    })
-  } catch (err) {}
-
-  return (
-    <TouchableOpacity
-      marginB-16
-      marginH-16
-      onPress={() => onTapItem(pinboard)}
-      style={styles.pinboard}
-    >
-      <View flex>
-        <Text style={[Fonts.textSmal, styles.boardname]} numberOfLines={1}>
-          {name}
-        </Text>
-        {timeAgo && <Text marginV-4>Last updated {timeAgo}</Text>}
-        {sharedBoard && (
-          <Text style={[Fonts.textSmal, styles.sharedBy]}>
-            Shared by {ownedByName}
-          </Text>
-        )}
-      </View>
-      <View row>
-        <View flex row style={styles.tasContainer}>
-          {renderedTags}
-        </View>
-      </View>
-    </TouchableOpacity>
-  )
-}
-
-const TagFilter = ({
-  tagWithIndexes,
-  count,
-  onFilter,
-}: {
-  tagWithIndexes: Record<string, number[]>
-  count: number
-  onFilter: (tags: string[]) => void
-}) => {
-  const { Colors, Fonts } = useTheme()
-  const [filterTags, setFilterTags] = useState<string[]>([])
-
-  const tagsExclMyDashboardShared = Object.keys(tagWithIndexes).filter(
-    tag => ![MY_DASHBOARD, SHARED].includes(tag),
-  )
-  const allTags = [VIEW_ALL, MY_DASHBOARD, SHARED, ...tagsExclMyDashboardShared]
-
-  const renderTag = ({ item: tag }: { item: string }) => {
-    const toggleTagSelection = () => {
-      setFilterTags(prevTags => {
-        let tags: string[] = []
-        if (tag === VIEW_ALL) {
-          tags = []
-        } else if (prevTags.includes(tag)) {
-          tags = prevTags.filter(item => item !== tag)
-        } else {
-          prevTags.push(tag)
-          tags = allTags.filter(item => prevTags.includes(item))
-        }
-        onFilter(tags)
-        return [...tags]
-      })
-    }
-
-    const selected =
-      (filterTags.length === 0 && tag === VIEW_ALL) || filterTags.includes(tag)
-    const tagsCount = tag === VIEW_ALL ? count : tagWithIndexes[tag].length
     return (
-      <Pressable
-        onPress={toggleTagSelection}
-        style={[styles.filterTag, selected && styles.selectedTagWrapper]}
+      <View
+        paddingT-4
+        paddingB-8
+        paddingH-16
+        style={{ backgroundColor: Colors.WHITE }}
       >
-        <Text style={[Fonts.textSmall, selected && { color: Colors.WHITE }]}>
-          {properCase(tag)}
-          <Text style={styles.tagText}> ({tagsCount})</Text>
-        </Text>
-      </Pressable>
+        <FlatList
+          data={allTags}
+          showsHorizontalScrollIndicator={false}
+          horizontal
+          extraData={tagWithIndexes}
+          keyExtractor={tag => tag}
+          renderItem={renderTag}
+        />
+      </View>
     )
-  }
-
-  return (
-    <View paddingT-12 paddingH-16 style={{ backgroundColor: Colors.WHITE }}>
-      <FlatList
-        data={allTags}
-        showsHorizontalScrollIndicator={false}
-        horizontal
-        extraData={`${filterTags.length}`}
-        keyExtractor={tag => tag}
-        renderItem={renderTag}
-      />
-    </View>
-  )
-}
+  },
+)
 
 const renderItem =
   (onTapItem: (text: Pinboard) => void) =>
-  ({ item }: { item: Pinboard }) =>
-    <PinboardCard pinboard={item} onTapItem={onTapItem} />
+  ({ item, index }: { item: Pinboard; index: number }) => {
+    // console.log(`[DashboardContainer] renderItem id: ${index}`)
+    return <PinboardCard pinboard={item} onTapItem={onTapItem} />
+  }
 
 const MyDashboardsContainer = ({ navigation }) => {
   const { t } = useTranslation()
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
   // const dispatch = useAppDispatch()
   const { data, isLoading } = useFetchPinboardsQuery()
+  // const { data, isLoading } = { data: [], isLoading: false }
   const pinboards = data?.data || []
   const [filteredTags, setFilteredTags] = useState<string[]>([])
 
@@ -205,38 +224,45 @@ const MyDashboardsContainer = ({ navigation }) => {
   })
 
   // Prepare section data
-  const sectionData: Array<SectionDataProps> = []
+  let sectionData: Array<SectionDataProps>
   if (filteredTags.length === 0) {
     const item: SectionDataProps = {
       title: 'All Dashboards',
       data: pinboards,
     }
-    sectionData.push(item)
+    sectionData = [item]
   } else {
-    filteredTags.forEach(tag => {
-      const item: SectionDataProps = {
-        title: tag,
-        data: tagWithIndexes[tag].map(index => pinboards[index]),
-      }
-      sectionData.push(item)
-    })
+    sectionData = filteredTags.map(tag => ({
+      title: tag,
+      data: tagWithIndexes[tag].map(index => pinboards[index]),
+    }))
   }
 
-  const onTapItem = (item: Pinboard) => {
-    const { id, name } = item
-    console.log(`[DashboardContainer] open dashboard: ${name}`)
-    navigation.navigate(DASHBOARD_SCREEN, { pinboardId: id })
-  }
-
-  const keyExtractor = (item: Pinboard) => item.id
-  const renderSection = ({ section: { title, data } }: SectionProps) => (
-    <View style={styles.sectionHeader}>
-      <Text style={[Fonts.textSmall]}>
-        {properCase(title)}
-        <Text style={{ color: Colors.GREEN_MAIN }}> ({data.length})</Text>
-      </Text>
-    </View>
+  const onTapItem = useCallback(
+    (item: Pinboard) => {
+      const { id, name } = item
+      // console.log(`[DashboardContainer] open dashboard: ${name}`)
+      navigation.navigate(DASHBOARD_SCREEN, { pinboardId: id })
+    },
+    [navigation],
   )
+
+  const keyExtractor = (item: Pinboard, index: number) => {
+    return `${index}:${item.id}`
+  }
+
+  const renderSection = ({ section: { title, data } }: SectionProps) => {
+    // console.log(`[DashboardContainer] renderSection title: ${title}`)
+    return (
+      <View style={styles.sectionHeader}>
+        <Text style={[Fonts.textSmall]}>
+          {properCase(title)}
+          <Text style={{ color: Colors.GREEN_MAIN }}> ({data.length})</Text>
+        </Text>
+      </View>
+    )
+  }
+
   const getItemLayout = (data, index) => ({
     length: ITEM_HEIGHT,
     offset: ITEM_HEIGHT * index,

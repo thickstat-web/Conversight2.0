@@ -1,6 +1,6 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { atob } from 'react-native-quick-base64'
-import { MY_DASHBOARD, SHARED } from '@/Config'
+import { ATHENA, MY_DASHBOARD, SHARED } from '@/Config'
 import { ResponseType } from '@/Types/Common'
 import {
   ChatHistoryRequestData,
@@ -109,20 +109,29 @@ function buildAppliedFilters(item: Created | Shared): Filter[] {
   })
 }
 
-const buildPinboard = (item: Created | Shared, shared: boolean): Pinboard => ({
-  id: item.pinBoardID,
-  name: item.pinName,
-  ownedById: item.ownerID,
-  shared,
-  tags: (Array.isArray(item.tags) ? item.tags : []).concat(
-    shared ? SHARED : MY_DASHBOARD,
-  ),
-  appliedFilters: Array.isArray(item.retainFilters)
-    ? buildAppliedFilters(item)
-    : [],
-  createdAt: item.createdAt,
-  updatedAt: item.updatedAt,
-})
+const buildPinboard = (item: Created | Shared, shared: boolean): Pinboard => {
+  const tags = Array.isArray(item.tags) ? item.tags : []
+  tags.push(
+    shared
+      ? (item as Shared).ownerName.toLowerCase() === ATHENA
+        ? ATHENA
+        : SHARED
+      : MY_DASHBOARD,
+  )
+
+  return {
+    id: item.pinBoardID,
+    name: item.pinName,
+    ownedById: item.ownerID,
+    shared,
+    tags,
+    appliedFilters: Array.isArray(item.retainFilters)
+      ? buildAppliedFilters(item)
+      : [],
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  }
+}
 
 export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
   return build.query<ResponseType<Pinboard[]>, void>({
@@ -139,16 +148,20 @@ export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
       // Build user's own pinboard list
       let ownedPinboards: Pinboard[] = []
       if (Array.isArray(created)) {
-        ownedPinboards = created.map(item => buildPinboard(item, false))
+        ownedPinboards = created
+          .filter(item => item.pinName.trim().length)
+          .map(item => buildPinboard(item, false))
       }
 
       // Build shared pinboard list
       let sharedPinboards: Pinboard[] = []
       if (Array.isArray(shared)) {
-        sharedPinboards = shared.map(item => ({
-          ...buildPinboard(item, true),
-          ownedByName: item.ownerName,
-        }))
+        sharedPinboards = shared
+          .filter(item => item.pinName.trim().length)
+          .map(item => ({
+            ...buildPinboard(item, true),
+            ownedByName: item.ownerName,
+          }))
       }
 
       const pinboards = [...ownedPinboards, ...sharedPinboards]
@@ -364,7 +377,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
               createdAt = Date.now(),
               val = 'W10=',
               text = '',
-              displayUtterance = '',
+              utterance = '',
               status = '',
             } = followupData
 
@@ -386,7 +399,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
                 createdAt,
                 base64Data: val,
                 text,
-                utterance: displayUtterance,
+                utterance,
                 status,
               }
               rawFollowupConverseData = [...rawFollowupConverseData, data]

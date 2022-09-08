@@ -113,7 +113,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     toggleModal,
   }: RenderCustomModalProps) => {
     const animationStyles = {
-      height: (screenHeight * 58) / 100,
+      height: (screenHeight * 56) / 100,
       width: screenWidth,
       transform: [
         {
@@ -141,6 +141,10 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
         animationType="slide"
         transparent
         onBackgroundPress={() => {
+          hideModal()
+          toggleModal(false)
+        }}
+        onRequestClose={() => {
           hideModal()
           toggleModal(false)
         }}

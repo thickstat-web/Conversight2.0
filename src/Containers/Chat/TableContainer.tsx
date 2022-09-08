@@ -20,26 +20,23 @@ const getStyledRowData = (
   row: Record<string, any>,
 ) => {
   // return Object.values(row).map((value: any, index: number) => {
-  return columns.map((column: string, index: number) => {
+  const dataFormatter = (column: string, index: number) => {
     // const column = columns[index]
     const value = row[column]
-    let metadata = columnMetadata[column]
+    let metadata = columnMetadata[column] || null
     let isNumeric = metadata ? metadata.isNumericFormat : false
     let displayValue = value
-    if (isNumeric) {
-      const {
-        prefix,
-        roundedValue: text,
-        suffix,
-      } = formatValue(value, metadata)
-      displayValue = `${prefix}${text} ${suffix}`.trim()
-    }
+    // if (isNumeric) {
+    const { prefix, roundedValue: text, suffix } = formatValue(value, metadata)
+    displayValue = `${prefix}${text} ${suffix}`.trim()
+    // }
     return (
       <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
         {displayValue}
       </Text>
     )
-  })
+  }
+  return columns.map(dataFormatter)
 }
 
 interface TableProps {
@@ -47,6 +44,11 @@ interface TableProps {
   columns: string[]
   columnMetadata: ColumnMetadata
   values: Array<Record<string, any>>
+}
+
+interface ItemProps {
+  item: Record<string, any>
+  index: number
 }
 
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
@@ -88,22 +90,14 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     )
   })
 
-  const renderItem = ({
-    item: row,
-    index,
-  }: {
-    item: Record<string, any>
-    index: number
-  }) => {
-    return (
-      <Row
-        key={`${index}`}
-        data={getStyledRowData(columns, columnMetadata, row)}
-        widthArr={widthArr}
-        style={[styles.row, index % 2 && styles.rowEven]}
-      />
-    )
-  }
+  const renderItem = ({ item: row, index }: ItemProps) => (
+    <Row
+      key={`${index}`}
+      data={getStyledRowData(columns, columnMetadata, row)}
+      widthArr={widthArr}
+      style={[styles.row, index % 2 && styles.rowEven]}
+    />
+  )
 
   // const sortedRows = rows.map(item => Object.values(item))
   const getItemLayout = (data, index) => ({

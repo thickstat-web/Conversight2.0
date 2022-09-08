@@ -47,22 +47,20 @@ const RecoverEnterPassword = ({ navigation }: Props) => {
     <ScrollView>
       <View style={Layout.colCenter}>
         <View style={[Layout.colVCenter, { marginTop: 90, marginBottom: 45 }]}>
-          {error
-            ? <Image source={lockError} style={{ width: 150, height: 150 }} />
-            : <Image source={lockOk} style={{ width: 150, height: 150 }} />
-          }
+          {error ? (
+            <Image source={lockError} style={{ width: 150, height: 150 }} />
+          ) : (
+            <Image source={lockOk} style={{ width: 150, height: 150 }} />
+          )}
         </View>
-        <View flex-1 >
-
-
-        </View>
+        <View flex-1></View>
         <Text
           marginB-20
           style={{ ...Fonts.textRegularBold, color: Colors.GREEN_DARK }}
         >
           Enter your new password
         </Text>
-        <View margin-5 centerV>
+        <View margin-5 centerV row>
           <TextInput
             onSubmitEditing={handleSubmit}
             onChangeText={x => setPassword(x)}
@@ -80,7 +78,9 @@ const RecoverEnterPassword = ({ navigation }: Props) => {
           />
           <View style={Common.inputIcon}>
             {error && (
-              <InputErrorIcon style={[Common.inputIcon, { right: 25, top: 2 }]} />
+              <InputErrorIcon
+                style={[Common.inputIcon, { right: 25, top: 2 }]}
+              />
             )}
             {error && !passSecured && (
               <PasswordSecuredIconError onPress={togglePasswordEye} />
@@ -93,13 +93,12 @@ const RecoverEnterPassword = ({ navigation }: Props) => {
               : !error && <PasswordSecuredIcon onPress={togglePasswordEye} />}
           </View>
         </View>
-        <View margin-5 centerV>
+        <View margin-5 centerV row>
           <TextInput
             onSubmitEditing={handleSubmit}
             onBlur={validate}
             placeholder="Repeat password"
             placeholderTextColor={Colors.GREEN_DARK}
-
             onChangeText={x => setRePassword(x)}
             style={[
               Common.textInput,
@@ -113,7 +112,9 @@ const RecoverEnterPassword = ({ navigation }: Props) => {
           />
           <View style={Common.inputIcon}>
             {error && (
-              <InputErrorIcon style={[Common.inputIcon, { right: 25, top: 2 }]} />
+              <InputErrorIcon
+                style={[Common.inputIcon, { right: 25, top: 2 }]}
+              />
             )}
             {error && !passSecured && (
               <PasswordSecuredIconError onPress={togglePasswordEye} />
@@ -128,7 +129,6 @@ const RecoverEnterPassword = ({ navigation }: Props) => {
         </View>
       </View>
     </ScrollView>
-
   )
 }
 

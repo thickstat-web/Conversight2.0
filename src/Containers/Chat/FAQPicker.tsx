@@ -72,7 +72,7 @@ const FAQPicker = ({ onSelect }: Props) => {
     setFilterTags,
   } = useFaq()
   const tagList = [VIEW_ALL, ...tags]
-  // console.log(`[FaqPicker] tags: ${tags}`)
+  // console.log(`[FaqPicker] filterTags: ${filterTags}`)
 
   const handleSelectedFaq = (value: PickerValue) => {
     const faq = value?.toString()
@@ -85,7 +85,11 @@ const FAQPicker = ({ onSelect }: Props) => {
     if (item === VIEW_ALL) {
       setFilterTags([])
     } else {
-      setFilterTags(prev => [...prev, item])
+      setFilterTags(prev => {
+        return prev.includes(item)
+          ? prev.filter(tag => tag !== item)
+          : [...prev, item]
+      })
     }
   }
 

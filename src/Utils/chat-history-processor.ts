@@ -65,6 +65,7 @@ const makeConverseData = (
     if (metadata) {
       formattedValue = formatValue(value, metadata)
     } else {
+      formattedValue = formatValue(value, null)
       console.log(`Metadata not available for column: ${columnName}`)
     }
   }

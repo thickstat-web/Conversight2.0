@@ -30,6 +30,7 @@ import {
   selectAllOrganizations,
   selectSignInOrg,
 } from '@/Store/Auth'
+import { clearChatMessages } from '@/Store/App'
 import { Button } from '@/Components'
 
 import MoreIcon from '@/Assets/Images/iconsSVG/more.svg'
@@ -66,6 +67,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
   const handleSignout = async () => {
     await logout()
     dispatch(cleanupAuthData())
+    dispatch(clearChatMessages())
   }
 
   return (

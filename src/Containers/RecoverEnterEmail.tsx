@@ -72,15 +72,15 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
 
   return (
     <ScrollView>
-      <View flex-1 style={[Layout.colCenter]}>
-        <View style={[Layout.colVCenter, { marginTop: 90, marginBottom: 45 }]}>
+      <View flex>
+        <View center style={{ marginTop: 90, marginBottom: 45 }}>
           {(emailInvalid || emailUnknown) && email.length ? (
             <Image source={lockError} style={styles.image} />
           ) : (
             <Image source={lockOk} style={styles.image} />
           )}
         </View>
-        <View flex-1>
+        <View flex center>
           <Text
             center
             marginB-20
@@ -124,7 +124,7 @@ const RecoverEnterEmail = ({ navigation }: Props) => {
             <ActivityIndicator color={Colors.GREEN_MAIN} />
           )}
         </View>
-        <View style={Layout.row}>
+        <View row center>
           <Text
             marginT-15
             style={[Fonts.text15Bold, { color: Colors.GREEN_DARK }]}

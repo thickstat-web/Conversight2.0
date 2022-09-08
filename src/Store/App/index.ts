@@ -59,7 +59,10 @@ const addProcessChatHistory = (builder: ActionReducerMapBuilder<AppState>) => {
     })
     .addCase(processAndSetChatHistory.fulfilled, (state, action) => {
       state.processingChatMessages = false
-      state.converseMap = buildConverseMap(action.payload)
+      state.converseMap = {
+        ...state.converseMap,
+        ...buildConverseMap(action.payload),
+      }
       state.chatMessages = action.payload
       state.chatHistoryLoaded = true
     })
@@ -101,6 +104,10 @@ const appSlice = createSlice({
         state.converseMap[id] = [message as ConverseData]
       }
     },
+    clearChatMessages: state => {
+      state.chatMessages = []
+    },
+
     // setPinboardItemLoading: (state, { payload }: PayloadAction<string>) => {
     //   const item: PinboardItem = {
     //     id: payload,
@@ -145,6 +152,7 @@ export const selectConverseData = (state: RootState) =>
 export const {
   setChatMessages,
   addChatMessage,
+  clearChatMessages,
   addConverseData,
   // setPinboardItemLoading,
 } = appSlice.actions

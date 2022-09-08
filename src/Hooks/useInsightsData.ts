@@ -16,9 +16,10 @@ export default function () {
   const dispatch = useAppDispatch()
 
   const { data: datasetResp, isLoading: datasetLoading } = useGetDatasetsQuery()
-  const [fetchInsightsData, { data, isLoading: insightsLoading }] =
+  const [fetchInsightsData, { isLoading: insightsLoading }] =
     useFetchInsightsDataMutation()
-  const [fetchFollowupData, { isLoading: followupLoading }] = useFetchFollowupDataMutation()
+  const [fetchFollowupData, { isLoading: followupLoading }] =
+    useFetchFollowupDataMutation()
 
   const [insightsData, setInsightsData] = useState<InsightData[]>([])
   const [batchGenerator, setBatchGenerator] =
@@ -35,9 +36,11 @@ export default function () {
       setInsightsComponents(prev => {
         const tempInsightsComponents = [...prev]
         const idx = prev.findIndex(item => item.id === converseData.id)
-        tempInsightsComponents[idx] = {
-          ...prev[idx],
-          followupLoading: false,
+        if (idx !== -1) {
+          tempInsightsComponents[idx] = {
+            ...prev[idx],
+            followupLoading: false,
+          }
         }
         return tempInsightsComponents
       })
@@ -45,17 +48,16 @@ export default function () {
     [dispatch],
   )
 
-  const makeFollowupRequest = (insightComponentIds: string[]) => {
-    const followupRequest: FollowupRequest = {
-      followup: [
-        {
-          dataSetID: '',
-          proActiveCompIDs: insightComponentIds,
-        },
-      ],
-    }
-    return followupRequest
-  }
+  const makeFollowupRequest = (
+    insightComponentIds: string[],
+  ): FollowupRequest => ({
+    followup: [
+      {
+        dataSetID: '',
+        proActiveCompIDs: insightComponentIds,
+      },
+    ],
+  })
 
   // Bulk load followup data as multiple batches
   const fetchFollowup = useCallback(
@@ -89,7 +91,7 @@ export default function () {
 
   useEffect(() => {
     // Initiate loding insights data for the entire datasets
-    console.log('[useInsightsData] useEffect #1....')
+    // console.log('[useInsightsData] useEffect #1....')
     const datasets = datasetResp?.data || []
     if (!datasetLoading && datasets.length) {
       const datasetIds = datasets.map(item => item.dataSetID)
@@ -99,7 +101,7 @@ export default function () {
           const { success, data } = insightsDataResp
           if (success && data && data.length) {
             const sortByUpdateTime = (a: InsightData, b: InsightData) =>
-              new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
             const sortedInsightsData = [...data].sort(sortByUpdateTime)
             setInsightsData(sortedInsightsData)
 
@@ -107,13 +109,13 @@ export default function () {
               id,
               followupLoading: true,
             })
-            const batches = generateBatches<InsightData, InsightComponent>(
+            const batchGen = generateBatches<InsightData, InsightComponent>(
               sortedInsightsData,
               4,
               2,
               extractor,
             )
-            setBatchGenerator(batches)
+            setBatchGenerator(batchGen)
           }
         })
     }
@@ -125,9 +127,9 @@ export default function () {
 
   return {
     isLoading: datasetLoading || insightsLoading,
+    insightsComponents,
     followupLoading,
     insightsData,
-    insightsComponents,
     hasMoreFollowupComponent: hasMore,
     loadMoreFollowupComponent: loadMore,
   }

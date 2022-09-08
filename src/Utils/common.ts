@@ -65,9 +65,9 @@ export const formatValue = (
 ): TextData => {
   let data: TextData = {
     prefix: '',
-    value,
-    roundedValue: value,
-    abbrValue: value,
+    value: isNaN(value) ? value : numeral(value).format('0,0'),
+    roundedValue: isNaN(value) ? value : numeral(value).format('0,0'),
+    abbrValue: isNaN(value) ? value : numeral(value).format('0.00a'),
     suffix: '',
   }
 
@@ -83,7 +83,11 @@ export const formatValue = (
     let roundedValue = value
     let abbrValue = value
 
-    if (category === 'date') {
+    if (category === 'flag') {
+      formattedValue = value
+      roundedValue = value
+      abbrValue = value
+    } else if (category === 'date') {
       const datetimeArr = `${value}`.split(' ')
       formattedValue = datetimeArr[0]
       roundedValue = datetimeArr[0]

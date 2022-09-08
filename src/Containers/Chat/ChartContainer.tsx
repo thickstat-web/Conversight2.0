@@ -471,9 +471,7 @@ const ChartContainer = ({
     )
   }
 
-  let chart = null
   const chartFormat = getChartFormat(preferredChart)
-
   const xAxisLabel = chartFormat?.xField
     ? properCase(columnMetadata[chartFormat?.xField].alias)
     : ''
@@ -486,11 +484,14 @@ const ChartContainer = ({
           ? chartFormat?.yField[0]
           : chartFormat?.yField
       ]
-    yAxisLabel = metadata
-      ? `${properCase(metadata.alias)} (${metadata.unit})`
-      : ''
+
+    if (metadata) {
+      const unit = metadata?.unit ? `(${metadata.unit})` : ''
+      yAxisLabel = `${properCase(metadata.alias)} ${unit}`
+    }
   }
 
+  let chart = null
   if (!chartFormat) {
     chart = <Text>No matching chart found</Text>
   } else if (

@@ -56,14 +56,16 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
   const handleRecover = () => navigation.navigate(RECOVER_ENTER_EMAIL)
 
   const handleSignIn = () => {
-    const signInReqData: SignInRequestData = {
-      email: signInEmail,
-      password: password,
-      deviceId: 'Web',
-      deviceName: 'mobile',
-      orgId: orgToBeChanged.orgId,
+    if (password.length) {
+      const signInReqData: SignInRequestData = {
+        email: signInEmail.trim(),
+        password: password.trim(),
+        deviceId: 'Web',
+        deviceName: 'mobile',
+        orgId: orgToBeChanged.orgId,
+      }
+      signIn(signInReqData)
     }
-    signIn(signInReqData)
   }
 
   useEffect(() => {
@@ -137,6 +139,7 @@ const ChangeOrganizationPasswordContainer = ({ navigation }: Props) => {
             ]}
             value={password}
             secureTextEntry={passSecured}
+            onSubmitEditing={handleSignIn}
           />
           <View style={Common.inputIcon}>
             {error && (

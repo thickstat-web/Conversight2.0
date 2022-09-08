@@ -52,8 +52,8 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
   const handleSignIn = () => {
     if (signInEmail && password && signInOrg) {
       const authData: SignInRequestData = {
-        email: signInEmail,
-        password: password,
+        email: signInEmail.trim(),
+        password: password.trim(),
         deviceId: 'Web',
         deviceName: 'mobile',
         orgId: signInOrg?.orgId,
@@ -94,7 +94,7 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
         <View style={Common.inputBox}>
           <TextInput
             placeholder="Password"
-            onChangeText={x => dispatch(setPassword(x))}
+            onChangeText={text => dispatch(setPassword(text))}
             placeholderTextColor={Colors.GREEN_DARK}
             style={[
               Common.textInput,
@@ -105,6 +105,7 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
             ]}
             value={password}
             secureTextEntry={passSecured}
+            onSubmitEditing={handleSignIn}
           />
           <View style={Common.inputIcon}>
             {error && (

@@ -31,10 +31,11 @@ const Stack = createStackNavigator()
 
 const LoginNavigator = () => {
   const { Colors, Fonts } = useTheme()
+  const renderBackButton = () => <BackArrow />
   return (
     <Stack.Navigator
       screenOptions={{
-        headerBackImage: () => <BackArrow />,
+        headerBackImage: renderBackButton,
         headerTitleAlign: 'center',
         headerStyle: { backgroundColor: Colors.GRAY },
         headerTitleStyle: { fontFamily: 'Montserrat-SemiBold' },
@@ -116,8 +117,9 @@ const LoginNavigator = () => {
         options={{
           title: 'Request a Demo',
           headerTitleAlign: 'center',
-          headerTransparent: true,
+          headerTransparent: false,
           headerShown: true,
+          headerBackTitleVisible: false,
           animationEnabled: true,
         }}
       />
@@ -129,7 +131,7 @@ const LoginNavigator = () => {
           headerTransparent: true,
           title: 'Request a Demo',
           headerShown: true,
-          headerTitleAlign: "center",
+          headerTitleAlign: 'center',
           animationEnabled: true,
         }}
       />

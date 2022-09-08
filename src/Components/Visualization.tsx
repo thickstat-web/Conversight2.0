@@ -7,6 +7,22 @@ import TableContainer from '@/Containers/Chat/TableContainer'
 import { ChartType, ConverseData, TextData } from '@/Types/ChatMessage'
 import { Colors } from '@/Theme/Variables'
 
+export const InsightsTextContainer = ({ data }: { data: TextData }) => {
+  const { Fonts } = useTheme()
+  const { prefix, value, suffix } = data
+  const displayValue = `${prefix}${value} ${suffix}`.trim()
+  return (
+    <Text
+      margin-4
+      style={[Fonts.textSmall, styles.message]}
+      selectable={true}
+      selectionColor={Colors.GREEN_LIGHTEST}
+    >
+      {displayValue}
+    </Text>
+  )
+}
+
 export const TextContainer = ({ data }: { data: TextData }) => {
   const { Fonts } = useTheme()
   const { prefix, abbrValue, suffix } = data
@@ -23,7 +39,7 @@ export const TextContainer = ({ data }: { data: TextData }) => {
   )
 }
 
-export const FormattedTextContainer = ({
+export const DashboardTextContainer = ({
   data,
   title,
 }: {
@@ -94,7 +110,7 @@ class Visualizer extends React.PureComponent<VisualizerProps> {
 
     const isPieChart = () =>
       values.length <= 10 &&
-      (query.includes('top') || query.includes('bottom')) &&
+      // (query.includes('top') || query.includes('bottom')) &&
       this.visualFormatIncludes('PieChart')
 
     const isColumnChart = () =>
@@ -122,6 +138,62 @@ class Visualizer extends React.PureComponent<VisualizerProps> {
     }
 
     return preferredChart
+  }
+}
+
+export class InsightsVisualizer extends Visualizer {
+  constructor(props: VisualizerProps) {
+    super(props)
+  }
+
+  render(): React.ReactNode {
+    const {
+      id,
+      columns,
+      columnMetadata,
+      textData,
+      values,
+      message,
+      visualFormats,
+    } = this.props.data
+
+    let content = null
+    if (this.isText()) {
+      content = <InsightsTextContainer data={textData} />
+    } else if (this.isChart()) {
+      content = (
+        <ChartContainer
+          key={id}
+          preferredChart={this.getPreferredChart()}
+          columns={columns}
+          columnMetadata={columnMetadata}
+          visualFormats={visualFormats}
+          values={values}
+          title={message}
+        />
+      )
+    } else if (this.isTable()) {
+      const renderSize = 5
+      const total = values.length
+      content = (
+        <>
+          <TableContainer
+            id={id}
+            columns={columns}
+            columnMetadata={columnMetadata}
+            values={values.slice(0, renderSize)}
+          />
+          {total > renderSize && (
+            <View style={styles.bottomCountWrapper}>
+              <Text style={styles.bottomCount}>
+                Showing {renderSize} of {total} rows
+              </Text>
+            </View>
+          )}
+        </>
+      )
+    }
+    return content
   }
 }
 
@@ -199,7 +271,7 @@ export class DashboardVisualizer extends Visualizer {
 
     let content = null
     if (this.isText()) {
-      content = <FormattedTextContainer data={textData} title={message} />
+      content = <DashboardTextContainer data={textData} title={message} />
     } else if (this.isChart()) {
       content = (
         <>
