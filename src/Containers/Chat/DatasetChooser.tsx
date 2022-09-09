@@ -20,11 +20,7 @@ import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import IconButton from '@/Components/IconButton'
 import { useGetDatasetsQuery } from '@/Services/modules/chat'
 import { Dataset } from '@/Types/Dataset'
-import {
-  SafeAreaView,
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 declare type RenderCustomModalProps = {
   visible: boolean

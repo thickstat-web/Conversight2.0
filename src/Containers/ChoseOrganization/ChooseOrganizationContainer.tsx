@@ -20,8 +20,11 @@ import {
   Dimensions,
   Animated,
   Easing,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
+import { useHeaderHeight } from '@react-navigation/elements'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { Brand } from '@/Components'
 import {
@@ -65,6 +68,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const ORG_INIT_STATE = { name: '', orgId: '' }
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
   const { Colors, Fonts } = useTheme()
+  const headerHeight = useHeaderHeight()
   const dispatch = useAppDispatch()
   const organizations = useAppSelector(selectAllOrganizations)
   const selectedOrg = useAppSelector(selectSignInOrg)
@@ -221,13 +225,11 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
             >
               {label}
             </Text>
-            <Text style={[styles.optionText, { color: Colors.GREEN_DARK }]}>
+            {/* <Text style={[styles.optionText, { color: Colors.GREEN_DARK }]}>
               {currentOrg?.name}
-            </Text>
+            </Text> */}
           </View>
-          <View>
-            <NewLabel />
-          </View>
+          {/*<View> <NewLabel /> </View>*/}
         </View>
         <View
           style={[styles.orgNameSeparator, { borderBottomColor: Colors.GRAY }]}
@@ -237,7 +239,10 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   }
 
   return (
-    <ScrollView keyboardShouldPersistTaps={'always'}>
+    <ScrollView
+      keyboardShouldPersistTaps={'always'}
+      showsVerticalScrollIndicator={false}
+    >
       <View marginB-25>
         <View center>
           <Brand height={290} width={'60%'} />
@@ -254,7 +259,12 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
             renderCustomModal={renderCustomPickerModal}
             renderItem={renderCustomPickerItem}
           />
-          <OrgPassword navigation={navigation} />
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={headerHeight}
+          >
+            <OrgPassword navigation={navigation} />
+          </KeyboardAvoidingView>
         </View>
       </View>
     </ScrollView>
@@ -270,7 +280,7 @@ const styles = StyleSheet.create({
   orgNameSeparator: {
     height: 1,
     marginVertical: 10,
-    opacity: 0.5,
+    opacity: 0.8,
     borderBottomWidth: 1,
   },
   pickerBox: {
@@ -301,6 +311,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Medium',
     fontSize: 16,
     fontWeight: '400',
+    paddingVertical: 8,
   },
   selectedOption: {
     fontWeight: '700',

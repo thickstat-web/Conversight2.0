@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dimensions, StyleSheet } from 'react-native'
+import { Dimensions, StatusBar, StyleSheet } from 'react-native'
 import { Avatar, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { DrawerNavigationState, ParamListBase } from '@react-navigation/native'
@@ -30,7 +30,7 @@ import {
   selectAllOrganizations,
   selectSignInOrg,
 } from '@/Store/Auth'
-import { clearChatMessages } from '@/Store/App'
+import { cleanupAppData } from '@/Store/App'
 import { Button } from '@/Components'
 
 import MoreIcon from '@/Assets/Images/iconsSVG/more.svg'
@@ -67,7 +67,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
   const handleSignout = async () => {
     await logout()
     dispatch(cleanupAuthData())
-    dispatch(clearChatMessages())
+    dispatch(cleanupAppData())
   }
 
   return (
@@ -110,7 +110,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
         >
           <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
           <TouchableOpacity
-            onPress={() => handleRedirect(WT_INSIGHTS)}
+            onPress={() => handleRedirect(t('bottomTabs.insights'))}
             style={styles.screenLink}
           >
             <InsightsIcon />
@@ -136,7 +136,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
           </TouchableOpacity>
           <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => handleRedirect(WALK_THROUGH_AUTHORIZED)}
             style={styles.screenLink}
           >
@@ -148,7 +148,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
               Walkthrough
             </Text>
           </TouchableOpacity>
-          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />  */}
 
           <TouchableOpacity
             onPress={() => handleRedirect(REQUEST_DEMO)}
@@ -164,7 +164,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
           </TouchableOpacity>
           <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => handleRedirect(READ_FAQ)}
             style={styles.screenLink}
           >
@@ -176,7 +176,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
               Read FAQ
             </Text>
           </TouchableOpacity>
-          <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} /> */}
         </View>
         <View marginT-24 width={300}>
           <Button
@@ -204,7 +204,9 @@ export default function DrawerNavigator({ navigation }: Props) {
 
   return (
     <Drawer.Navigator
-      screenOptions={{ drawerStyle: { width: '90%' } }}
+      screenOptions={{
+        drawerStyle: { width: '90%' },
+      }}
       drawerContent={renderDrawerView}
       initialRouteName={BOTTOM_TAB_NAVIGATOR}
     >
@@ -219,7 +221,6 @@ export default function DrawerNavigator({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  root: {},
   topBar: {
     width: '92%',
     padding: '4%',

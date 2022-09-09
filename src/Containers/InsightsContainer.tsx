@@ -72,7 +72,7 @@ const TagFilter = React.memo(
 
     return (
       <View
-        paddingT-4
+        paddingT-8
         paddingB-8
         paddingH-16
         style={{ backgroundColor: Colors.WHITE }}

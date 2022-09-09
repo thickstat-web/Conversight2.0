@@ -76,11 +76,13 @@ const DataExplorerContainer = ({
   React.useLayoutEffect(() => {
     if (formats.length > 1) {
       const moreOptionsButton = () => (
-        <Button
-          label="..."
-          onPress={() => setVisible(true)}
-          labelStyle={styles.moreOptionsButton}
-        />
+        <View style={{ paddingBottom: 2 }}>
+          <Button
+            label="..."
+            onPress={() => setVisible(true)}
+            labelStyle={styles.moreOptionsButton}
+          />
+        </View>
       )
       navigation.setOptions({
         headerRight: moreOptionsButton,

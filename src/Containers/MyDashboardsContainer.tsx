@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  FlatList,
-  Pressable,
-  SafeAreaView,
-  SectionList,
-  StyleSheet,
-} from 'react-native'
+import { FlatList, Pressable, SectionList, StyleSheet } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { formatDistance } from 'date-fns'
@@ -159,7 +153,8 @@ const TagFilter = React.memo(
       const selected =
         (filterTags.length === 0 && tag === VIEW_ALL) ||
         filterTags.includes(tag)
-      const tagsCount = tag === VIEW_ALL ? count : tagWithIndexes[tag].length
+      const tagsCount =
+        tag === VIEW_ALL ? count : tagWithIndexes[tag]?.length ?? 0
       return (
         <Pressable
           onPress={toggleTagSelection}
@@ -175,7 +170,7 @@ const TagFilter = React.memo(
 
     return (
       <View
-        paddingT-4
+        paddingT-8
         paddingB-8
         paddingH-16
         style={{ backgroundColor: Colors.WHITE }}

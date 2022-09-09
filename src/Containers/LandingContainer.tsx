@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ScrollView, StyleSheet } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { Brand, ButtonCustom, LayoutNoInternet } from '@/Components'
-import { useTheme } from '@/Hooks'
+import { useAppSelector, useTheme } from '@/Hooks'
 import { ENTER_EMAIL_SCREEN, REQUEST_DEMO } from '@/Constants/screens'
 import { Text, View } from 'react-native-ui-lib'
+// import { selectDatasetId } from '@/Store/Auth'
 
 type LoginProps = {
   navigation: any
@@ -14,13 +15,18 @@ const LandingContainer = ({ navigation }: LoginProps) => {
   const { t } = useTranslation()
   const { Colors, Fonts, Gutters, Layout } = useTheme()
 
+  // const selectedDatasetId = useAppSelector(selectDatasetId)
+
+  // useEffect(() => {
+  //   console.log(`[LoginContainer] datasetid: ${selectedDatasetId}`)
+  // })
+
   const handleRedirect = () => {
     navigation.navigate(ENTER_EMAIL_SCREEN)
   }
 
   return (
     <LayoutNoInternet>
-
       <ScrollView
         style={Layout.fill}
         contentContainerStyle={[
@@ -49,13 +55,15 @@ const LandingContainer = ({ navigation }: LoginProps) => {
               color={Colors.GREEN_MAIN}
             />
             <ButtonCustom
-              action={() => { navigation.navigate(REQUEST_DEMO) }}
+              action={() => {
+                navigation.navigate(REQUEST_DEMO)
+              }}
               label="Request a Demo"
               labelColor={Colors.WHITE}
               color={Colors.GREEN_DARK}
             />
             <ButtonCustom
-              action={() => { }}
+              action={() => {}}
               label="I'll Sign up later"
               labelColor={Colors.GREEN_MAIN}
               color="transparent"

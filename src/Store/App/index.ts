@@ -104,10 +104,9 @@ const appSlice = createSlice({
         state.converseMap[id] = [message as ConverseData]
       }
     },
-    clearChatMessages: state => {
-      state.chatMessages = []
+    cleanupAppData: state => {
+      Object.assign(state, initialState)
     },
-
     // setPinboardItemLoading: (state, { payload }: PayloadAction<string>) => {
     //   const item: PinboardItem = {
     //     id: payload,
@@ -152,7 +151,7 @@ export const selectConverseData = (state: RootState) =>
 export const {
   setChatMessages,
   addChatMessage,
-  clearChatMessages,
+  cleanupAppData,
   addConverseData,
   // setPinboardItemLoading,
 } = appSlice.actions

@@ -6,46 +6,45 @@ import { useAppSelector, useAppDispatch, useTheme } from '@/Hooks'
 import { Brand } from '@/Components'
 import { selectDatasetId, setSelectedDatasetId } from '@/Store/Auth'
 import { setDefaultTheme } from '@/Store/Theme'
-import {
-  useGetDatasetsQuery,
-  useLazyGetDatasetsQuery,
-} from '@/Services/modules/chat'
+import { useLazyGetDatasetsQuery } from '@/Services/modules/chat'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
 
 const StartupContainer = () => {
   const { Layout, Gutters, Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
-  const { data, isSuccess } = useGetDatasetsQuery()
-  // const [getDatasets] = useLazyGetDatasetsQuery()
+  const [getDatasets] = useLazyGetDatasetsQuery()
   const selectedDatasetId = useAppSelector(selectDatasetId)
 
   const { t } = useTranslation()
 
   const init = useCallback(async () => {
-    // const delayStart = new Promise(resolve =>
-    //   setTimeout(() => {
-    //     resolve(true)
-    //   }, 100),
-    // )
+    const delayStart = new Promise(resolve =>
+      setTimeout(() => {
+        resolve(true)
+      }, 100),
+    )
 
-    // Load all the initial datasets
-    // const [datasetsRes] = await Promise.all([getDatasets(), delayStart])
+    if (!selectedDatasetId) {
+      // Load all the initial datasets
+      const [datasetsResp] = await Promise.all([
+        // No to prefer cache data
+        getDatasets(undefined, false).unwrap(),
+        delayStart,
+      ])
 
-    // Set first dataset as default for chat
-    const datasets = data?.data
-    if (!selectedDatasetId && datasets && datasets?.length) {
-      dispatch(setSelectedDatasetId(datasets[0].dataSetID))
+      // Set first dataset as default for chat
+      const datasets = datasetsResp.data
+      if (datasets && datasets?.length) {
+        dispatch(setSelectedDatasetId(datasets[0].dataSetID))
+      }
     }
-
     setDefaultTheme({ theme: 'default', darkMode: null })
     navigateAndSimpleReset(DRAWER_NAVIGATOR)
-  }, [dispatch, selectedDatasetId, data])
+  }, [dispatch, selectedDatasetId])
 
   useEffect(() => {
-    if (isSuccess) {
-      init()
-    }
-  }, [init, isSuccess])
+    init()
+  }, [init])
 
   return (
     <View style={[Layout.fill, Layout.colCenter]}>

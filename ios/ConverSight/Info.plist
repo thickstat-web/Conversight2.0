@@ -35,8 +35,8 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library permission is required to add or change your photo images.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Montserrat-Black.ttf</string>

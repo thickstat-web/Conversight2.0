@@ -132,6 +132,7 @@ const ChatMessageContainer = ({
   isLoading,
   onTapMessage,
 }: ChatMessageContainerProps) => {
+  const { Colors, Fonts } = useTheme()
   let messageListRef = useRef()
   const chatMessagesProcessing = useAppSelector(selectProcessingChatMessages)
   const messages = useAppSelector(selectChatMessages)
@@ -143,6 +144,34 @@ const ChatMessageContainer = ({
     (animated: boolean = true) =>
     () =>
       messageListRef?.scrollToEnd({ animated })
+
+  const NoHistory = (
+    <View
+      flex
+      center
+      margin-24
+      marginT-150
+      padding-16
+      style={{
+        borderWidth: 1,
+        borderColor: Colors.GREEN_MAIN,
+        borderRadius: 8,
+        backgroundColor: Colors.NOTIFICATION_GREEN,
+      }}
+    >
+      <Text
+        style={[
+          Fonts.textRegular,
+          { fontWeight: 'bold', color: Colors.GREEN_MAIN, paddingTop: 4 },
+        ]}
+      >
+        No chat history exists.
+      </Text>
+      <Text style={[Fonts.textSmall, { marginTop: 16, lineHeight: 24 }]}>
+        Start a new chat or try switch other dataset if exists
+      </Text>
+    </View>
+  )
 
   return (
     <View flex>
@@ -157,6 +186,7 @@ const ChatMessageContainer = ({
           keyExtractor={keyExtractor}
           renderItem={renderItem(onTapMessage)}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={NoHistory}
         />
       )}
     </View>

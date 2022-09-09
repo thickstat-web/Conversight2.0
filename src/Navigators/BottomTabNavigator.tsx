@@ -51,6 +51,11 @@ const BottomTabNavigator = ({ navigation }: Props) => {
         name={t('bottomTabs.insights')}
         component={InsightsContainer}
         options={{
+          headerTintColor: Colors.WHITE,
+          headerStyle: {
+            backgroundColor: Colors.GREEN_MAIN,
+          },
+          headerShadowVisible: true,
           headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
@@ -70,6 +75,11 @@ const BottomTabNavigator = ({ navigation }: Props) => {
         component={MyDashboardsContainer}
         options={{
           title: 'My Dashboards',
+          headerTintColor: Colors.WHITE,
+          headerStyle: {
+            backgroundColor: Colors.GREEN_MAIN,
+          },
+          headerShadowVisible: true,
           headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',
