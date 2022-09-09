@@ -91,7 +91,6 @@ export default function () {
 
   useEffect(() => {
     // Initiate loding insights data for the entire datasets
-    // console.log('[useInsightsData] useEffect #1....')
     const datasets = datasetResp?.data || []
     if (!datasetLoading && datasets.length) {
       const datasetIds = datasets.map(item => item.dataSetID)

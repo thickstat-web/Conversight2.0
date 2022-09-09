@@ -82,7 +82,8 @@ const LoginNavigator = () => {
         // component={MainNavigator}
         options={{
           headerShown: false,
-          title: 'Home',
+          title: '',
+          headerBackTitleVisible: false,
           headerTitleAlign: 'center',
         }}
       />

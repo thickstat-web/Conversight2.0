@@ -4,10 +4,10 @@ import {
   Text,
   Picker,
   PickerValue,
-  Modal,
+  // Modal,
   PickerItemProps,
 } from 'react-native-ui-lib'
-import { StyleSheet, ScrollView } from 'react-native'
+import { Modal, StyleSheet, ScrollView } from 'react-native'
 import { formatDistance } from 'date-fns'
 
 // import { useTranslation } from 'react-i18next'
@@ -20,6 +20,11 @@ import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import IconButton from '@/Components/IconButton'
 import { useGetDatasetsQuery } from '@/Services/modules/chat'
 import { Dataset } from '@/Types/Dataset'
+import {
+  SafeAreaView,
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context'
 
 declare type RenderCustomModalProps = {
   visible: boolean
@@ -72,6 +77,7 @@ const DatasetChooser = ({ onSelect }: Props) => {
   const { data, isLoading } = useGetDatasetsQuery()
   const datasets = data?.data || []
   const selectedDatasetId = useAppSelector(selectDatasetId)
+  const insets = useSafeAreaInsets()
 
   const handleSelectedDataset = (value: PickerValue) => {
     const datasetId = value?.toString()
@@ -89,9 +95,14 @@ const DatasetChooser = ({ onSelect }: Props) => {
       <Modal
         visible={visible}
         animationType="slide"
+        transparent={true}
         onRequestClose={() => toggleModal(false)}
+        style={[styles.container, { backgroundColor: Colors.GREEN_MAIN }]}
       >
-        <View flex style={{ backgroundColor: Colors.WHITE }}>
+        <View
+          flex
+          style={{ marginTop: insets.top, backgroundColor: Colors.WHITE }}
+        >
           <Header title={MODAL_TITLE} onClose={() => toggleModal(false)} />
           <ScrollView style={[Layout.fill]}>
             {datasets.map((dataset: Dataset, index) => (
@@ -166,6 +177,9 @@ const DatasetChooser = ({ onSelect }: Props) => {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   orgOption: {
     alignSelf: 'center',
     flexDirection: 'row',

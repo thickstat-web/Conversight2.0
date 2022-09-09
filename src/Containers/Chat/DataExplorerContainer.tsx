@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import {
-  Animated,
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
@@ -197,50 +195,49 @@ const DataExplorerContainer = ({
 
   const options = buildOptions(onSelect)
   return (
-    <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
-      <View flex style={{ backgroundColor: Colors.WHITE }}>
-        <View flex-6 marginT-8 center>
-          {/* {!!message?.message && ( */}
-          {title.length > 0 && <Header />}
-          <FlatList
-            data={formats}
-            ref={ref}
-            onMomentumScrollEnd={onScroll}
-            // contentContainerStyle={{ height: screenHeight * 0.68 }}
-            showsHorizontalScrollIndicator={false}
-            getItemLayout={getItemLayout}
-            horizontal
-            pagingEnabled
-            renderItem={renderItem}
-          />
-          {/* )} */}
-        </View>
+    <View flex style={{ backgroundColor: Colors.WHITE }}>
+      <View flex-6 marginT-8 center>
+        {/* {!!message?.message && ( */}
+        {title.length > 0 && <Header />}
+        <FlatList
+          data={formats}
+          ref={ref}
+          onMomentumScrollEnd={onScroll}
+          // contentContainerStyle={{ height: screenHeight * 0.68 }}
+          showsHorizontalScrollIndicator={false}
+          getItemLayout={getItemLayout}
+          horizontal
+          pagingEnabled
+          renderItem={renderItem}
+        />
+        {/* )} */}
+      </View>
 
-        {formats.length > 1 && (
-          <View
-            flex-1
-            style={{
-              backgroundColor: Colors.WHITE,
-              paddingTop: 24,
-              alignItems: 'center',
-            }}
-          >
-            <View style={styles.dotsContainer}>
-              {formats.map((_, index) => {
-                const opacity = currentSlideIndex === index ? 1 : 0.2
-                return (
-                  <View
-                    key={index}
-                    style={{
-                      ...styles.dot,
-                      opacity,
-                    }}
-                  />
-                )
-              })}
-            </View>
+      {formats.length > 1 && (
+        <View
+          flex-1
+          style={{
+            backgroundColor: Colors.WHITE,
+            paddingTop: 24,
+            alignItems: 'center',
+          }}
+        >
+          <View style={styles.dotsContainer}>
+            {formats.map((_, index) => {
+              const opacity = currentSlideIndex === index ? 1 : 0.2
+              return (
+                <View
+                  key={index}
+                  style={{
+                    ...styles.dot,
+                    opacity,
+                  }}
+                />
+              )
+            })}
+          </View>
 
-            {/* <View row>
+          {/* <View row>
             <TouchableOpacity
               onPress={scrollPrevious}
               style={[styles.scrollButton]}
@@ -254,23 +251,22 @@ const DataExplorerContainer = ({
               <NextIcon />
             </TouchableOpacity>
           </View> */}
-          </View>
-        )}
+        </View>
+      )}
 
-        {formats.length > 1 && (
-          <ActionSheet
-            visible={visible}
-            onDismiss={() => setVisible(false)}
-            title={'Change KPI'}
-            // message={'Message goes here'}
-            cancelButtonIndex={options.length - 1}
-            useNativeIOS={true}
-            dialogStyle={styles.actionSheet}
-            options={options}
-          />
-        )}
-      </View>
-    </SafeAreaView>
+      {formats.length > 1 && (
+        <ActionSheet
+          visible={visible}
+          onDismiss={() => setVisible(false)}
+          title={'Change KPI'}
+          // message={'Message goes here'}
+          cancelButtonIndex={options.length - 1}
+          useNativeIOS={true}
+          dialogStyle={styles.actionSheet}
+          options={options}
+        />
+      )}
+    </View>
   )
 }
 

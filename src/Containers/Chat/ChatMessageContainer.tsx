@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { FlatList, StyleSheet } from 'react-native'
+import { FlatList, Platform, StyleSheet } from 'react-native'
 import { View, Text, TouchableOpacity } from 'react-native-ui-lib'
 import { Image } from 'react-native-ui-lib/src/components/image'
 import { useAppSelector, useTheme } from '@/Hooks'
@@ -75,8 +75,10 @@ const AthenaMessageContainer = React.memo(
               onTouchStart={() => setMove(false)}
               onTouchMove={() => setMove(true)}
               onTouchEnd={() => {
-                navigate(DATA_EXPLORER, { id: message.id })
-                if (!move) {
+                if (Platform.OS === 'android') {
+                  navigate(DATA_EXPLORER, { id: message.id })
+                } else if (!move) {
+                  navigate(DATA_EXPLORER, { id: message.id })
                   // navigate(DATA_EXPLORER, { id: message.id })
                   // console.log(
                   //   `visualFormats: ${JSON.stringify(visualFormats, null, 2)}

@@ -26,10 +26,14 @@ const getStyledRowData = (
     let metadata = columnMetadata[column] || null
     let isNumeric = metadata ? metadata.isNumericFormat : false
     let displayValue = value
-    // if (isNumeric) {
-    const { prefix, roundedValue: text, suffix } = formatValue(value, metadata)
-    displayValue = `${prefix}${text} ${suffix}`.trim()
-    // }
+    if (isNumeric) {
+      const {
+        prefix,
+        roundedValue: text,
+        suffix,
+      } = formatValue(value, metadata)
+      displayValue = `${prefix}${text} ${suffix}`.trim()
+    }
     return (
       <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
         {displayValue}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FlatList, Pressable, SafeAreaView, StyleSheet } from 'react-native'
+import { FlatList, Platform, Pressable, StyleSheet } from 'react-native'
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
 import { useTheme, useAppSelector, useInsightsData } from '@/Hooks'
@@ -98,6 +98,7 @@ interface CardProps {
 const Card = React.memo(({ item, insightsData }: CardProps) => {
   const { id, followupLoading } = item
   const converseData = useAppSelector(selectConverseData)
+  const [move, setMove] = useState(false)
 
   const data: ConverseData | null = converseData[id]
     ? converseData[id][0]
@@ -117,10 +118,15 @@ const Card = React.memo(({ item, insightsData }: CardProps) => {
 
   return (
     <View
-      flex
-      style={[styles.visCard]}
+      style={styles.visCard}
+      onTouchStart={() => setMove(false)}
+      onTouchMove={() => setMove(true)}
       onTouchEnd={() => {
-        navigate(DATA_EXPLORER, { id: data.id })
+        if (Platform.OS === 'android') {
+          navigate(DATA_EXPLORER, { id: data.id })
+        } else if (!move) {
+          navigate(DATA_EXPLORER, { id: data.id })
+        }
       }}
     >
       <View>
@@ -231,27 +237,25 @@ const InsightsContainer = () => {
   }
 
   return (
-    <SafeAreaView style={[Layout.fill]}>
-      <View flex marginB-10 style={{ backgroundColor: Colors.WHITE_SMOKE }}>
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : (
-          <>
-            {insightsData.length > 4 && (
-              <TagFilter
-                tagWithIndexes={tagWithIds}
-                count={insightsData.length}
-                onFilter={setFilteredTags}
-              />
-            )}
-            <InsightComponents
-              {...props}
-              insightsComponents={filteredInsightsComponents}
+    <View flex marginB-10 style={{ backgroundColor: Colors.WHITE_SMOKE }}>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          {insightsData.length > 4 && (
+            <TagFilter
+              tagWithIndexes={tagWithIds}
+              count={insightsData.length}
+              onFilter={setFilteredTags}
             />
-          </>
-        )}
-      </View>
-    </SafeAreaView>
+          )}
+          <InsightComponents
+            {...props}
+            insightsComponents={filteredInsightsComponents}
+          />
+        </>
+      )}
+    </View>
   )
 }
 

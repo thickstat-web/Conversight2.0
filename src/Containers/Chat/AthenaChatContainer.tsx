@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef } from 'react'
-import { SafeAreaView, StyleSheet } from 'react-native'
+import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
+import { useHeaderHeight } from '@react-navigation/elements'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
 import { selectDatasetId } from '@/Store/Auth'
 import { processAndSetChatHistory, selectChatHistoryLoaded } from '@/Store/App'
@@ -12,6 +13,8 @@ import ChatBox, { RefProps } from './ChatBox'
 
 const AthenaChatContainer = () => {
   const { t } = useTranslation()
+  const headerHeight = useHeaderHeight()
+
   const chatboxRef = useRef<RefProps>()
   const dispatch = useAppDispatch()
   const { Layout, Colors, Common, Fonts } = useTheme()
@@ -59,15 +62,15 @@ const AthenaChatContainer = () => {
   }
 
   return (
-    <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
-      <View flex style={{ backgroundColor: Colors.GRAY }}>
-        <ChatMessageContainer
-          isLoading={isLoading}
-          onTapMessage={setChatText}
-        />
+    <View flex style={{ backgroundColor: Colors.GRAY }}>
+      <ChatMessageContainer isLoading={isLoading} onTapMessage={setChatText} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={headerHeight}
+      >
         <ChatBox onDatasetChange={handleDatasetSelection} ref={chatboxRef} />
-      </View>
-    </SafeAreaView>
+      </KeyboardAvoidingView>
+    </View>
   )
 }
 

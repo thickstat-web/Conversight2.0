@@ -8,6 +8,8 @@ import {
   PickerItemProps,
 } from 'react-native-ui-lib'
 import { StyleSheet, ScrollView, FlatList, Pressable } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 // import { useTranslation } from 'react-i18next'
 import { useTheme, useFaq } from '@/Hooks'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
@@ -62,6 +64,7 @@ const FAQPicker = ({ onSelect }: Props) => {
   const MODAL_TITLE = 'Athena Recommendations'
   const VIEW_ALL = 'View All'
   // const { t } = useTranslation()
+  const insets = useSafeAreaInsets()
   const { Colors, Fonts, Layout } = useTheme()
   const {
     tagQuestionsMap,
@@ -137,9 +140,13 @@ const FAQPicker = ({ onSelect }: Props) => {
       <Modal
         visible={visible}
         animationType="slide"
+        transparent={true}
         onRequestClose={closeModal}
       >
-        <View flex style={{ backgroundColor: Colors.GRAY_LIGHT }}>
+        <View
+          flex
+          style={{ marginTop: insets.top, backgroundColor: Colors.GRAY_LIGHT }}
+        >
           <Header title={MODAL_TITLE} onClose={closeModal} />
           <View
             paddingV-8

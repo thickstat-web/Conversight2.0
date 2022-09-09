@@ -1,7 +1,7 @@
 import React, { useRef } from 'react'
-import { StyleSheet, } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { View, Text } from 'react-native-ui-lib'
-import { Brand, Button, LayoutNoInternet, } from '@/Components'
+import { Brand, Button, LayoutNoInternet } from '@/Components'
 import AthenaChatContainer from './Chat/AthenaChatContainer'
 
 const ChatContainer = () => {
@@ -30,7 +30,6 @@ const ChatContainer = () => {
         <AthenaChatContainer ref={chatRef} />
       </View>
     </LayoutNoInternet>
-
   )
 }
 

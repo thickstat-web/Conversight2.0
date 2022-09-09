@@ -270,32 +270,30 @@ const MyDashboardsContainer = ({ navigation }) => {
   })
 
   return (
-    <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
-      <View flex style={{ backgroundColor: Colors.WHITE }}>
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : (
-          <>
-            {pinboards.length > 4 && (
-              <TagFilter
-                tagWithIndexes={tagWithIndexes}
-                count={pinboards.length}
-                onFilter={setFilteredTags}
-              />
-            )}
-            <SectionList
-              contentContainerStyle={styles.cardsContainer}
-              sections={sectionData}
-              renderSectionHeader={renderSection}
-              keyExtractor={keyExtractor}
-              renderItem={renderItem(onTapItem)}
-              showsVerticalScrollIndicator={false}
-              getItemLayout={getItemLayout}
+    <View flex style={{ backgroundColor: Colors.WHITE }}>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <>
+          {pinboards.length > 4 && (
+            <TagFilter
+              tagWithIndexes={tagWithIndexes}
+              count={pinboards.length}
+              onFilter={setFilteredTags}
             />
-          </>
-        )}
-      </View>
-    </SafeAreaView>
+          )}
+          <SectionList
+            contentContainerStyle={styles.cardsContainer}
+            sections={sectionData}
+            renderSectionHeader={renderSection}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem(onTapItem)}
+            showsVerticalScrollIndicator={false}
+            getItemLayout={getItemLayout}
+          />
+        </>
+      )}
+    </View>
   )
 }
 

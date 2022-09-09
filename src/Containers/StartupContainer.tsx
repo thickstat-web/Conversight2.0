@@ -6,40 +6,46 @@ import { useAppSelector, useAppDispatch, useTheme } from '@/Hooks'
 import { Brand } from '@/Components'
 import { selectDatasetId, setSelectedDatasetId } from '@/Store/Auth'
 import { setDefaultTheme } from '@/Store/Theme'
-import { useLazyGetDatasetsQuery } from '@/Services/modules/chat'
+import {
+  useGetDatasetsQuery,
+  useLazyGetDatasetsQuery,
+} from '@/Services/modules/chat'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
 
 const StartupContainer = () => {
   const { Layout, Gutters, Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
-  const [getDatasets] = useLazyGetDatasetsQuery()
+  const { data, isSuccess } = useGetDatasetsQuery()
+  // const [getDatasets] = useLazyGetDatasetsQuery()
   const selectedDatasetId = useAppSelector(selectDatasetId)
 
   const { t } = useTranslation()
 
   const init = useCallback(async () => {
-    const delayStart = new Promise(resolve =>
-      setTimeout(() => {
-        resolve(true)
-      }, 100),
-    )
+    // const delayStart = new Promise(resolve =>
+    //   setTimeout(() => {
+    //     resolve(true)
+    //   }, 100),
+    // )
 
     // Load all the initial datasets
-    const [datasetsRes] = await Promise.all([getDatasets(), delayStart])
+    // const [datasetsRes] = await Promise.all([getDatasets(), delayStart])
 
     // Set first dataset as default for chat
-    const datasets = datasetsRes.data?.data
+    const datasets = data?.data
     if (!selectedDatasetId && datasets && datasets?.length) {
       dispatch(setSelectedDatasetId(datasets[0].dataSetID))
     }
 
     setDefaultTheme({ theme: 'default', darkMode: null })
     navigateAndSimpleReset(DRAWER_NAVIGATOR)
-  }, [dispatch, selectedDatasetId, getDatasets])
+  }, [dispatch, selectedDatasetId, data])
 
   useEffect(() => {
-    init()
-  }, [init])
+    if (isSuccess) {
+      init()
+    }
+  }, [init, isSuccess])
 
   return (
     <View style={[Layout.fill, Layout.colCenter]}>

@@ -1,5 +1,5 @@
-import React from 'react'
-import { FlatList, SafeAreaView, StyleSheet } from 'react-native'
+import React, { useState } from 'react'
+import { FlatList, Platform, StyleSheet } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { useTheme, useAppSelector, usePinboardData } from '@/Hooks'
 import { DashboardVisualizer, LoadingSpinner } from '@/Components'
@@ -20,6 +20,7 @@ const LoadingCard = () => (
 const Card = React.memo(({ item }: { item: PinboardItem }) => {
   const { id, loading, isTextCard } = item
   const converseData = useAppSelector(selectConverseData)
+  const [move, setMove] = useState(false)
 
   if (loading) {
     return <LoadingCard />
@@ -34,8 +35,14 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
     <View
       flex
       style={[styles.visCard, isTextCard && { height: CARD_HEIGHT }]}
+      onTouchStart={() => setMove(false)}
+      onTouchMove={() => setMove(true)}
       onTouchEnd={() => {
-        navigate(DATA_EXPLORER, { id: data.id })
+        if (Platform.OS === 'android') {
+          navigate(DATA_EXPLORER, { id: data.id })
+        } else if (!move) {
+          navigate(DATA_EXPLORER, { id: data.id })
+        }
       }}
     >
       <DashboardVisualizer data={data} />
@@ -70,15 +77,13 @@ const DashboardContainer = ({ navigation, route }) => {
   const { isLoading, pinboardComponents } = usePinboardData(pinboardId)
 
   return (
-    <SafeAreaView style={[Layout.fill, { backgroundColor: Colors.GREEN_MAIN }]}>
-      <View flex style={{ backgroundColor: Colors.WHITE_SMOKE }}>
-        {isLoading ? (
-          <LoadingSpinner />
-        ) : (
-          <PinboardComponents pinboardComponents={pinboardComponents} />
-        )}
-      </View>
-    </SafeAreaView>
+    <View flex style={{ backgroundColor: Colors.WHITE_SMOKE }}>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <PinboardComponents pinboardComponents={pinboardComponents} />
+      )}
+    </View>
   )
 }
 
