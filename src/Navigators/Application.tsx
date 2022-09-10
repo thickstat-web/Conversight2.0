@@ -175,6 +175,7 @@ const ApplicationNavigator = () => {
                       backgroundColor: Colors.GREEN_MAIN,
                     },
                     headerShown: true,
+                    headerBackImage: renderWhiteBackArrow,
                     headerBackTitleVisible: false,
                     animationEnabled: true,
                   }}

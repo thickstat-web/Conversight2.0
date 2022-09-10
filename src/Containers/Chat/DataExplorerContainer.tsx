@@ -53,7 +53,7 @@ const DataExplorerContainer = ({
 }: DataExplorerContainerProps) => {
   const { t } = useTranslation()
   const { Layout, Colors, Common, Fonts } = useTheme()
-  const { width: screenWidth } = useWindowDimensions()
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   // const messages = useAppSelector(selectChatMessages)
   const converseData = useAppSelector(selectConverseData)
   const [visible, setVisible] = useState(false)
@@ -133,6 +133,7 @@ const DataExplorerContainer = ({
         >
           <ScrollView
             showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}
             contentContainerStyle={styles.contentContainer}
             style={{ width: screenWidth }}
           >
@@ -196,23 +197,23 @@ const DataExplorerContainer = ({
   )
 
   const options = buildOptions(onSelect)
+  const tableOnly = formats.length === 1
+  const containerHeight = screenHeight * (tableOnly ? 0.8 : 0.7)
   return (
     <View flex style={{ backgroundColor: Colors.WHITE }}>
       <View flex-6 marginT-8 center>
-        {/* {!!message?.message && ( */}
         {title.length > 0 && <Header />}
         <FlatList
           data={formats}
           ref={ref}
           onMomentumScrollEnd={onScroll}
-          // contentContainerStyle={{ height: screenHeight * 0.68 }}
+          contentContainerStyle={{ height: containerHeight }}
           showsHorizontalScrollIndicator={false}
           getItemLayout={getItemLayout}
-          horizontal
+          horizontal={!tableOnly}
           pagingEnabled
           renderItem={renderItem}
         />
-        {/* )} */}
       </View>
 
       {formats.length > 1 && (
@@ -278,6 +279,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: Colors.WHITE,
+    paddingHorizontal: 8,
   },
   dotsContainer: {
     display: 'flex',
