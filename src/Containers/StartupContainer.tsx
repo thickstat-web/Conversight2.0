@@ -38,8 +38,10 @@ const StartupContainer = () => {
         dispatch(setSelectedDatasetId(datasets[0].dataSetID))
       }
     }
-    setDefaultTheme({ theme: 'default', darkMode: null })
-    navigateAndSimpleReset(DRAWER_NAVIGATOR)
+    setTimeout(() => {
+      setDefaultTheme({ theme: 'default', darkMode: null })
+      navigateAndSimpleReset(DRAWER_NAVIGATOR)
+    }, 50)
   }, [dispatch, selectedDatasetId])
 
   useEffect(() => {

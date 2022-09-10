@@ -42,9 +42,11 @@ export const TextContainer = ({ data }: { data: TextData }) => {
 export const DashboardTextContainer = ({
   data,
   title,
+  isError,
 }: {
   data: TextData
   title: string
+  isError: boolean
 }) => {
   const { Colors, Fonts } = useTheme()
   const { prefix, abbrValue, suffix } = data
@@ -62,7 +64,7 @@ export const DashboardTextContainer = ({
           style={{ fontSize: 16, color: 'rgba(0, 68, 56, 0.6)' }}
           numberOfLines={1}
         >
-          {title}
+          {isError ? '' : title}
         </Text>
       </View>
     </View>
@@ -267,11 +269,18 @@ export class DashboardVisualizer extends Visualizer {
       values,
       message,
       visualFormats,
+      isError,
     } = this.props.data
 
     let content = null
     if (this.isText()) {
-      content = <DashboardTextContainer data={textData} title={message} />
+      content = (
+        <DashboardTextContainer
+          data={textData}
+          title={message}
+          isError={isError}
+        />
+      )
     } else if (this.isChart()) {
       content = (
         <>

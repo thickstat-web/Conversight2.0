@@ -122,10 +122,8 @@ const Card = React.memo(({ item, insightsData }: CardProps) => {
       onTouchStart={() => setMove(false)}
       onTouchMove={() => setMove(true)}
       onTouchEnd={() => {
-        if (Platform.OS === 'android') {
-          navigate(DATA_EXPLORER, { id: data.id })
-        } else if (!move) {
-          navigate(DATA_EXPLORER, { id: data.id })
+        if (Platform.OS === 'android' || !move) {
+          navigate(DATA_EXPLORER, { id: data?.id })
         }
       }}
     >

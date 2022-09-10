@@ -75,20 +75,26 @@ const AthenaMessageContainer = React.memo(
               onTouchStart={() => setMove(false)}
               onTouchMove={() => setMove(true)}
               onTouchEnd={() => {
-                if (Platform.OS === 'android') {
+                if (Platform.OS === 'android' || !move) {
                   navigate(DATA_EXPLORER, { id: message.id })
-                } else if (!move) {
-                  navigate(DATA_EXPLORER, { id: message.id })
-                  // navigate(DATA_EXPLORER, { id: message.id })
-                  // console.log(
-                  //   `visualFormats: ${JSON.stringify(visualFormats, null, 2)}
-                  // \ncolumns: ${JSON.stringify(columns, null, 2)}
-                  // \ncolumnMetadata: ${JSON.stringify(columnMetadata, null, 2)}
-                  // \nvalue: ${value}
-                  // \nvalues: ${JSON.stringify(values, null, 2)}
-                  // `,
-                  // )
                 }
+                // console.log(
+                //   `visualFormats: ${JSON.stringify(
+                //     message.visualFormats,
+                //     null,
+                //     2,
+                //   )}
+                //   \ncolumns: ${JSON.stringify(message.columns, null, 2)}
+                //   \ncolumnMetadata: ${JSON.stringify(
+                //     message.columnMetadata,
+                //     null,
+                //     2,
+                //   )}
+                //   \nvalue: ${message.message}
+                //   \nvalues: ${JSON.stringify(message.values, null, 2)}
+                //   \ntext data: ${JSON.stringify(message.textData, null, 2)}
+                //   `,
+                // )
               }}
             >
               <ChatVisualizer data={message} />

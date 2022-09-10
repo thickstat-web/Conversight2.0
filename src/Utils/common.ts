@@ -72,7 +72,7 @@ export const formatValue = (
   }
 
   if (metadata) {
-    const { type, unit = '', additional_data, category } = metadata
+    const { type, unit = '', additional_data, category, isNumericFormat } = metadata
 
     const precision = additional_data?.precision ?? 0
     const precisionFormat = precision > 0 ? '.'.padEnd(precision + 1, '0') : ''
@@ -83,7 +83,7 @@ export const formatValue = (
     let roundedValue = value
     let abbrValue = value
 
-    if (category === 'flag') {
+    if (!isNumericFormat || category === 'flag') {
       formattedValue = value
       roundedValue = value
       abbrValue = value

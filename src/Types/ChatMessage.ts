@@ -58,6 +58,7 @@ export interface ConverseData {
   columns: string[]
   createdAt: number
   id: string
+  isError: boolean
   message: string
   utterance: string
   textData: TextData

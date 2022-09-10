@@ -75,6 +75,7 @@ const makeConverseData = (
     columns,
     createdAt,
     id,
+    isError: false,
     message: utterance,
     utterance,
     textData: formattedValue,
@@ -186,6 +187,7 @@ export const processConverseData = async (item: RawConverseData) => {
     const athenaMessage: ChatMessage = makeAthenaFailureMessage(text)
     const converseData = {
       id: item.id,
+      isError: true,
       textData: formatValue(text, null),
       message: utterance,
       visualFormats: [] as VisualFormat[],

@@ -38,9 +38,7 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
       onTouchStart={() => setMove(false)}
       onTouchMove={() => setMove(true)}
       onTouchEnd={() => {
-        if (Platform.OS === 'android') {
-          navigate(DATA_EXPLORER, { id: data.id })
-        } else if (!move) {
+        if (Platform.OS === 'android' || !move) {
           navigate(DATA_EXPLORER, { id: data.id })
         }
       }}
@@ -54,7 +52,9 @@ const PinboardComponents = React.memo(
   ({ pinboardComponents }: { pinboardComponents: PinboardItem[] }) => {
     const textCards = pinboardComponents.filter(_ => _.isTextCard)
     const chartAndTableCards = pinboardComponents.filter(_ => !_.isTextCard)
-    const renderItem = ({ item, index }) => <Card item={item} />
+    const renderItem = ({ item }: { item: PinboardItem }) => (
+      <Card item={item} />
+    )
     const ChartAndTableCards = () =>
       chartAndTableCards.map((item: PinboardItem) => <Card item={item} />)
     return (

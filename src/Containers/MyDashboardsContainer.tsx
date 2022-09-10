@@ -127,11 +127,17 @@ const TagFilter = React.memo(
       tag => ![ATHENA, MY_DASHBOARD, SHARED].includes(tag),
     )
 
+    const excludeTags: string[] = []
     const athenaTagExists = allTagNames.includes(ATHENA)
-    let allTags = [VIEW_ALL, ATHENA, MY_DASHBOARD, SHARED, ...filterDefault]
     if (!athenaTagExists) {
-      allTags = allTags.filter(tag => tag !== ATHENA)
+      excludeTags.push(ATHENA)
     }
+    const sharedTagExists = allTagNames.includes(SHARED)
+    if (!sharedTagExists) {
+      excludeTags.push(SHARED)
+    }
+    let allTags = [VIEW_ALL, ATHENA, MY_DASHBOARD, SHARED, ...filterDefault]
+    allTags = allTags.filter(tag => !excludeTags.includes(tag))
 
     const renderTag = ({ item: tag }: { item: string }) => {
       const toggleTagSelection = () => {

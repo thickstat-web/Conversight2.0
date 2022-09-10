@@ -242,20 +242,6 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
       if (Array.isArray(pinBoardComponentData)) {
         pinBoardComponentData.forEach(item => {
           const { data } = item
-          let rawData = {
-            id: Array.isArray(arg.dataId) ? arg.dataId[0] : `${arg.dataId}`,
-            columnMetadata: {},
-            columns: [] as string[],
-            orderedColumns: [] as string[],
-            colType: { dim: [], date: [], metrics: [] },
-            createdAt: 0,
-            base64Data: '',
-            text: `${data.text}`,
-            pinboardItemId: '',
-            utterance: data.utterance,
-            status: data.status,
-          }
-
           const {
             ID,
             columns,
@@ -264,20 +250,40 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
             createdAt,
             val,
             id,
+            text = '',
+            utterance,
             displayUtterance,
             status,
           } = data
 
-          const colType = JSON.parse(colTypeString)
-          const orderedColumns = isColumnReorder
-            ? ([] as string[]).concat(
-              colType?.date ?? [],
-              colType?.dim ?? [],
-              colType?.metrics ?? [],
-            )
-            : columns
+          let rawData = {
+            id: Array.isArray(arg.dataId) ? arg.dataId[0] : `${arg.dataId}`,
+            columnMetadata: {},
+            columns: [] as string[],
+            orderedColumns: [] as string[],
+            colType: { dim: [], date: [], metrics: [] },
+            createdAt: 0,
+            base64Data: '',
+            text: `${text}`,
+            pinboardItemId: '',
+            utterance,
+            status,
+          }
 
-          if (data.status !== 'failed') {
+          let orderedColumns: string[] = []
+          let colType = { dim: [], date: [], metrics: [] }
+          if (colTypeString) {
+            colType = JSON.parse(colTypeString)
+            orderedColumns = isColumnReorder
+              ? ([] as string[]).concat(
+                colType?.date ?? [],
+                colType?.dim ?? [],
+                colType?.metrics ?? [],
+              )
+              : columns
+          }
+
+          if (status !== 'failed') {
             rawData = {
               id: ID,
               columnMetadata: JSON.parse(data.colMetadata),

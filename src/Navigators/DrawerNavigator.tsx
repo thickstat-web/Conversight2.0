@@ -91,9 +91,9 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
             {authData?.displayName}
           </Text>
           <TouchableOpacity
-            onPress={
-              singleOrg ? undefined : () => handleRedirect(CHANGE_ORGANIZATION)
-            }
+            // onPress={
+            //   singleOrg ? undefined : () => handleRedirect(CHANGE_ORGANIZATION)
+            // }
             style={styles.changeOrg}
           >
             <Text color={Colors.GREEN_MAIN}>{selectedOrg?.name}</Text>
