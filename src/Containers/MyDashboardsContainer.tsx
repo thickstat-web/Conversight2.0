@@ -204,9 +204,7 @@ const renderItem =
 const MyDashboardsContainer = ({ navigation }) => {
   const { t } = useTranslation()
   const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
-  // const dispatch = useAppDispatch()
   const { data, isLoading } = useFetchPinboardsQuery()
-  // const { data, isLoading } = { data: [], isLoading: false }
   const pinboards = data?.data || []
   const [filteredTags, setFilteredTags] = useState<string[]>([])
 

@@ -136,6 +136,7 @@ const buildPinboard = (item: Created | Shared, shared: boolean): Pinboard => {
 export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
   return build.query<ResponseType<Pinboard[]>, void>({
     query: () => '/getPinBoardData',
+    keepUnusedDataFor: 0,
     transformResponse: (response: ListPinboardsResponse) => {
       const {
         code,
