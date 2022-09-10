@@ -83,7 +83,10 @@ const ApplicationNavigator = () => {
 
   return (
     <>
-      <StatusBar barStyle={isSignedIn ? 'light-content' : 'dark-content'} />
+      <StatusBar
+        barStyle={isSignedIn ? 'light-content' : 'dark-content'}
+        backgroundColor={isSignedIn ? Colors.GREEN_MAIN : 'transparent'}
+      />
       <SafeAreaProvider
         style={[
           {
