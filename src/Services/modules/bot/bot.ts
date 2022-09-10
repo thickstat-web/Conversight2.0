@@ -294,7 +294,7 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
               base64Data: val,
               text: atob(data.questiontext),
               pinboardItemId: id,
-              utterance: displayUtterance,
+              utterance: utterance.length ? utterance : displayUtterance,
               status,
             }
           }
