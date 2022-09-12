@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dimensions, StatusBar, StyleSheet } from 'react-native'
+import { Dimensions, Pressable, StatusBar, StyleSheet } from 'react-native'
 import { Avatar, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { DrawerNavigationState, ParamListBase } from '@react-navigation/native'
@@ -86,19 +86,20 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
           <Avatar size={100} />
           <Text
             marginT-20
+            marginB-4
             style={{ ...Fonts.text20Bold, color: Colors.GREEN_DARK }}
           >
             {authData?.displayName}
           </Text>
-          <TouchableOpacity
+          <Pressable
             // onPress={
             //   singleOrg ? undefined : () => handleRedirect(CHANGE_ORGANIZATION)
             // }
             style={styles.changeOrg}
           >
             <Text color={Colors.GREEN_MAIN}>{selectedOrg?.name}</Text>
-            {!singleOrg && <DownArrow style={styles.downArrow} />}
-          </TouchableOpacity>
+            {/* {!singleOrg && <DownArrow style={styles.downArrow} />} */}
+          </Pressable>
         </View>
 
         <View

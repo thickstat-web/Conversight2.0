@@ -135,12 +135,12 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
           loading={isLoading}
         />
       </View>
-      <ButtonCustom
+      {/* <ButtonCustom
         action={handleRecover}
         labelColor={Colors.GREEN_DARK}
         color="transparent"
         label="Recover Credentials?"
-      />
+      /> */}
     </View>
   )
 }

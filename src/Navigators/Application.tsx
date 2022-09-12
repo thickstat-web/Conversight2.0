@@ -209,7 +209,7 @@ const ApplicationNavigator = () => {
                     title: 'Profile & Settings',
                     headerBackTitleVisible: false,
                     headerTitleAlign: 'center',
-                    headerRight: renderSaveIcon,
+                    // headerRight: renderSaveIcon,
                     headerRightContainerStyle: { paddingRight: 15 },
                     headerTintColor: Colors.WHITE,
                     headerBackImage: renderWhiteBackArrow,

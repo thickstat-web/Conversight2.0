@@ -1,12 +1,12 @@
-import React, { FC, PropsWithChildren, useCallback, useEffect, useState } from 'react'
+import React, {
+  FC,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import { ScrollView, StyleSheet, Dimensions } from 'react-native'
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Switch,
-  Hint,
-} from 'react-native-ui-lib'
+import { View, Text, TouchableOpacity, Switch, Hint } from 'react-native-ui-lib'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { useGetSettingsMutation } from '@/Services/modules/settings'
 import {
@@ -17,9 +17,8 @@ import {
 import { GET_SETTING_QUERY } from '@/Constants/api'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import { CHANGE_AVATAR } from '@/Constants/screens'
-import DownArrow from "@/Assets/Images/drawer/down-arrow.svg"
-import { Slider } from '@miblanchard/react-native-slider';
-
+import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
+import { Slider } from '@miblanchard/react-native-slider'
 
 interface Props {
   navigation: NavigationProp<ParamListBase>
@@ -28,7 +27,6 @@ interface Props {
 interface HintProps {
   props: React.ReactNode
 }
-
 
 const SettingsContainer = ({ navigation }: Props) => {
   const { width: screenWidth } = Dimensions.get('screen')
@@ -65,8 +63,12 @@ const SettingsContainer = ({ navigation }: Props) => {
     fetchProfileSettings()
   }, [fetchProfileSettings])
 
-  const textStyle = { ...Fonts.textSmall, color: Colors.DARK, fontFamily: "Montserrat-Medium" }
-  const boldText = [textStyle, { fontFamily: "Montserrat-SemiBold" }]
+  const textStyle = {
+    ...Fonts.textSmall,
+    color: Colors.DARK,
+    fontFamily: 'Montserrat-Medium',
+  }
+  const boldText = [textStyle, { fontFamily: 'Montserrat-SemiBold' }]
 
   return (
     <ScrollView>
@@ -79,16 +81,22 @@ const SettingsContainer = ({ navigation }: Props) => {
           USER INFO
         </Text>
         <View backgroundColor={Colors.WHITE}>
-          <View
+          {/* <View
             marginH-25
             paddingV-14
             style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
           >
-            <Text style={[textStyle, { fontFamily: "Montserrat-SemiBold" }]}>Avatar</Text>
-            <TouchableOpacity onPress={() => navigation.navigate(CHANGE_AVATAR)}>
-              <Text style={[textStyle, { color: Colors.GREEN_MAIN, }]} >Change</Text>
+            <Text style={[textStyle, { fontFamily: 'Montserrat-SemiBold' }]}>
+              Avatar
+            </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate(CHANGE_AVATAR)}
+            >
+              <Text style={[textStyle, { color: Colors.GREEN_MAIN }]}>
+                Change
+              </Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
           <View
             marginH-25
             paddingV-14
@@ -106,11 +114,15 @@ const SettingsContainer = ({ navigation }: Props) => {
             message={email}
             borderRadius={8}
             visible={emailOpen}
-            customContent={<View style={{ paddingVertical: 6 }}>
-              <Text selectable={true} style={[textStyle,]}>{email}</Text>
-            </View>}
+            customContent={
+              <View style={{ paddingVertical: 6 }}>
+                <Text selectable={true} style={[textStyle]}>
+                  {email}
+                </Text>
+              </View>
+            }
             onBackgroundPress={() => setEmailOpen(false)}
-          // onPress={}
+            // onPress={}
           >
             <TouchableOpacity
               marginH-25
@@ -119,7 +131,12 @@ const SettingsContainer = ({ navigation }: Props) => {
               style={{ ...styles.settingBox, borderBottomColor: Colors.GRAY }}
             >
               <Text style={boldText}>Email</Text>
-              <Text numberOfLines={1} style={[textStyle, { width: screenWidth * 0.7 }]}>{email}</Text>
+              <Text
+                numberOfLines={1}
+                style={[textStyle, { width: screenWidth * 0.7 }]}
+              >
+                {email}
+              </Text>
             </TouchableOpacity>
           </Hint>
           <View
@@ -139,7 +156,7 @@ const SettingsContainer = ({ navigation }: Props) => {
             <Text style={textStyle}>{designation}</Text>
           </View>
         </View>
-        <Text
+        {/* <Text
           style={{ ...Fonts.textRegular, fontSize: 16 }}
           marginH-25
           marginV-15
@@ -272,7 +289,7 @@ const SettingsContainer = ({ navigation }: Props) => {
               />
             </View>
           </View>
-        </View>
+        </View> */}
       </View>
     </ScrollView>
   )
@@ -290,17 +307,17 @@ const styles = StyleSheet.create({
     borderRightWidth: 0,
   },
   sliderVal: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center"
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   sliderValue: {
     marginLeft: 5,
     paddingHorizontal: 12,
-    fontFamily: "Montserrat-Bold",
+    fontFamily: 'Montserrat-Bold',
     paddingVertical: 3,
-    borderRadius: 34
-  }
+    borderRadius: 34,
+  },
 })
 
 export default SettingsContainer

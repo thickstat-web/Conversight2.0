@@ -69,7 +69,11 @@ const RequestDemoContainer = ({ navigation }: Props) => {
           </View>
           <View style={{ height: screenHeight / 6 }}>
             {/* <Text center marginV-10 style={{ ...Fonts.titleSmall, fontSize: 24 }}>Request a Demo</Text> */}
-            <Text center marginH-40 style={Fonts.textSmall}>
+            <Text
+              center
+              marginH-40
+              style={[Fonts.textSmall, { lineHeight: 24 }]}
+            >
               If you would like a demo of ConverSight, please fill in this form
               and one of our representatives will be in touch with you soon.
             </Text>

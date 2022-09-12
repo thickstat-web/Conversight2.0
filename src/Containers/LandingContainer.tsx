@@ -47,7 +47,7 @@ const LandingContainer = ({ navigation }: LoginProps) => {
               Instantly. Anywhere.
             </Text>
           </View>
-          <View flex-3 bottom style={styles.btnBox}>
+          <View flex-3 bottom paddingB-48 style={styles.btnBox}>
             <ButtonCustom
               action={handleRedirect}
               label="Login"
@@ -62,12 +62,12 @@ const LandingContainer = ({ navigation }: LoginProps) => {
               labelColor={Colors.WHITE}
               color={Colors.GREEN_DARK}
             />
-            <ButtonCustom
+            {/* <ButtonCustom
               action={() => {}}
               label="I'll Sign up later"
               labelColor={Colors.GREEN_MAIN}
               color="transparent"
-            />
+            /> */}
           </View>
         </View>
       </ScrollView>
