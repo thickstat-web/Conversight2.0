@@ -235,6 +235,7 @@ android {
         }
 
     }
+    namespace 'com.conversight'
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
