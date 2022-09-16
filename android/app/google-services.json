@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "867153304310",
+    "firebase_url": "https://athena-174317.firebaseio.com",
+    "project_id": "athena-174317",
+    "storage_bucket": "athena-174317.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:867153304310:android:3d3b5b852472f5013a6ad7",
+        "android_client_info": {
+          "package_name": "com.conversight"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "867153304310-4r1k2pk93apas1vt35ckqib8sahnvl7i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.conversight",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "867153304310-bfonbb3d243iegnub06ibisqc84sk9rq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoD5es6OIuZa2ifxUXd9sQfpRMWzSc_dM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "867153304310-bfonbb3d243iegnub06ibisqc84sk9rq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "867153304310-m838hpfnop900rtjilq28qa1s0pfj9jh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.thickstat.conversight",
+                "app_store_id": "1439733726"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
