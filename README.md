@@ -19,6 +19,19 @@ cd ..
 yarn ios
 ```
 
+##### iOS build Steps
+
+Below are the workaround due to RN v0.70.1 upgrade
+
+```
+# Fix for node path due to nvm
+sudo ln -s $(which node) /usr/local/bin/node
+
+# Set following configurations before iOS build
+Set "CLANG_CXX_LANGUAGE_STANDARD" => "c++17" in node_modules/react-native-reanimated/RNReanimated.podspec
+Set :USE_HEADERMAP => "Yes" in node_modules/react-native-quick-base64/react-native-quick-base64.podspec
+```
+
 ##### Possible solutions for iOS build issues
 
 ```
@@ -39,11 +52,9 @@ pod install --repo-update
 yarn ios
 ```
 
+##### Testing Push notification on Simulator
+
 ```
-# Testing Push notification on Simulator
 xcrun simctl push 'iPhone 13' conversight-push-notification.apns
 xcrun simctl push 51B697C9-06AF-4244-8E29-564778920365 com.thickstat.conversight conversight-push-notification.apns
-
-# Fix for node path due to nvm
-sudo ln -s $(which node) /usr/local/bin/node
 ```
