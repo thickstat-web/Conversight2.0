@@ -268,6 +268,12 @@ const MyDashboardsContainer = ({ navigation }) => {
     index,
   })
 
+  const NoDashbord = (
+    <View flex center marginT-150>
+      <Text style={Fonts.textSmall}>No dashboard available</Text>
+    </View>
+  )
+
   return (
     <View flex style={{ backgroundColor: Colors.WHITE }}>
       {isLoading ? (
@@ -289,6 +295,7 @@ const MyDashboardsContainer = ({ navigation }) => {
             renderItem={renderItem(onTapItem)}
             showsVerticalScrollIndicator={false}
             getItemLayout={getItemLayout}
+            ListEmptyComponent={NoDashbord}
           />
         </>
       )}

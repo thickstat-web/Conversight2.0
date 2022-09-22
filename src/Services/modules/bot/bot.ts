@@ -135,20 +135,26 @@ const buildPinboard = (item: Created | Shared, shared: boolean): Pinboard => {
 
 export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
   return build.query<ResponseType<Pinboard[]>, void>({
-    query: () => `${getBotUrl()}/pinboard`,
+    query: () => `${getBotUrl()}/pinboard/data`,
     keepUnusedDataFor: 0,
     transformResponse: (response: ListPinboardsResponse) => {
       const {
         code,
         message,
-        data: {
-          GetPinboardData: { created, shared },
-        },
+        data,
       } = response
+
+      let created: Created[] = []
+      let shared: Shared[] = []
+      const { GetPinboardData } = data
+      if (GetPinboardData) {
+        created = GetPinboardData.created
+        shared = GetPinboardData.shared
+      }
 
       // Build user's own pinboard list
       let ownedPinboards: Pinboard[] = []
-      if (Array.isArray(created)) {
+      if (Array.isArray(created) && created.length) {
         ownedPinboards = created
           .filter(item => item.pinName.trim().length)
           .map(item => buildPinboard(item, false))
@@ -156,7 +162,7 @@ export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
 
       // Build shared pinboard list
       let sharedPinboards: Pinboard[] = []
-      if (Array.isArray(shared)) {
+      if (Array.isArray(shared) && shared.length) {
         sharedPinboards = shared
           .filter(item => item.pinName.trim().length)
           .map(item => ({
