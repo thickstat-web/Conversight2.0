@@ -24,10 +24,7 @@ export const getAPIUrl = () => `${Config.CS_API_HOST}`
 export const getBotUrl = () => `${Config.BOT_API_HOST}/v2`
 export const getIngressUrl = () => `${Config.INGRESS_API_HOST}`
 
-// Replace following credentials below for testing
-// athena@conversight.ai / gayathri.sundararajan@conversight.ai / pradeep.ramakrishnan@conversight.ai / sakthivel.murugasamy@conversight.ai
 export const DEFAULT_EMAIL = ''
-// Login!23 / gayathrisj / Test123 / sakthi
 export const DEFAULT_PASSWORD = ''
 
 export const NO_DATA_AVAILABLE = 'No data available'
