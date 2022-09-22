@@ -23,13 +23,9 @@ import {
   WT_INSIGHTS,
 } from '@/Constants/screens'
 import BottomTabNavigator from './BottomTabNavigator'
-import { useTheme, useAppDispatch, useAppSelector, useAuth } from '@/Hooks'
+import { useTheme, useAppDispatch, useAuth, useOrganization } from '@/Hooks'
 import { useLazyLogoutQuery } from '@/Services/modules/auth'
-import {
-  cleanupAuthData,
-  selectAllOrganizations,
-  selectSignInOrg,
-} from '@/Store/Auth'
+import { cleanupAuthData } from '@/Store/Auth'
 import { cleanupAppData } from '@/Store/App'
 import { Button } from '@/Components'
 
@@ -58,11 +54,10 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
   const { Fonts, Colors, Layout } = useTheme()
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
-  const [logout, { isLoading }] = useLazyLogoutQuery()
+  const { signInOrg, isSingleOrg } = useOrganization()
   const { authData } = useAuth()
-  const selectedOrg = useAppSelector(selectSignInOrg)
+  const [logout, { isLoading }] = useLazyLogoutQuery()
   const { width: windowWidth } = Dimensions.get('window')
-  const singleOrg = useAppSelector(selectAllOrganizations).length === 1
 
   const handleSignout = async () => {
     await logout()
@@ -93,12 +88,12 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
           </Text>
           <Pressable
             // onPress={
-            //   singleOrg ? undefined : () => handleRedirect(CHANGE_ORGANIZATION)
+            //   isSingleOrg ? undefined : () => handleRedirect(CHANGE_ORGANIZATION)
             // }
             style={styles.changeOrg}
           >
-            <Text color={Colors.GREEN_MAIN}>{selectedOrg?.name}</Text>
-            {/* {!singleOrg && <DownArrow style={styles.downArrow} />} */}
+            <Text color={Colors.GREEN_MAIN}>{signInOrg?.name}</Text>
+            {/* {!isSingleOrg && <DownArrow style={styles.downArrow} />} */}
           </Pressable>
         </View>
 

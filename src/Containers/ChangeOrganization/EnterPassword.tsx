@@ -2,7 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
 import { TouchableOpacity, View, Text, Button } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
-import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
+import {
+  useTheme,
+  useAppDispatch,
+  useAppSelector,
+  useOrganization,
+} from '@/Hooks'
 import { Button as ButtonLoading } from '@/Components'
 import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
@@ -10,7 +15,6 @@ import {
   selectSignInEmail,
   setAuthData,
   selectTempOrg,
-  setSelectedOrg,
   selectAuthData,
 } from '@/Store/Auth'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
@@ -38,6 +42,7 @@ const EnterPassword = ({ navigation }: Props) => {
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
+  const { setSignInOrgId } = useOrganization()
   const signInEmail = useAppSelector(selectSignInEmail)
   const orgToBeChanged = useAppSelector(selectTempOrg)
   const authData = useAppSelector(selectAuthData)
@@ -62,7 +67,7 @@ const EnterPassword = ({ navigation }: Props) => {
   useEffect(() => {
     if (isSuccess && data && data.success) {
       dispatch(setAuthData(data.data))
-      dispatch(setSelectedOrg(orgToBeChanged))
+      setSignInOrgId(orgToBeChanged.orgId)
       if (data.data && data.data.isFirstTimeLogin) {
         navigation.navigate(WALK_THROUGH)
       } else {

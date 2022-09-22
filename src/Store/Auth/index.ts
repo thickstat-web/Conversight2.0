@@ -5,7 +5,6 @@ import { AuthData } from '@/Types/SignInResponse'
 import { Org, OrgData } from '@/Types/VerifyEmailResponse'
 import { RootState } from '..'
 
-
 interface AuthState {
   email: string
   password: string

@@ -3,6 +3,7 @@ import { ActivityIndicator, View, Text } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { DRAWER_NAVIGATOR } from '@/Constants/screens'
 import {
+  useOrganization,
   useAppSelector,
   useAppDispatch,
   usePushNotification,
@@ -18,6 +19,7 @@ const StartupContainer = () => {
   const { t } = useTranslation()
   const { Layout, Gutters, Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
+  const { signInOrg } = useOrganization()
   usePushNotification()
   const [getDatasets] = useLazyGetDatasetsQuery()
   const selectedDatasetId = useAppSelector(selectDatasetId)
@@ -43,11 +45,14 @@ const StartupContainer = () => {
         dispatch(setSelectedDatasetId(datasets[0].dataSetID))
       }
     }
-    setTimeout(() => {
-      setDefaultTheme({ theme: 'default', darkMode: null })
-      navigateAndSimpleReset(DRAWER_NAVIGATOR)
-    }, 50)
-  }, [dispatch, selectedDatasetId])
+
+    if (signInOrg) {
+      setTimeout(() => {
+        setDefaultTheme({ theme: 'default', darkMode: null })
+        navigateAndSimpleReset(DRAWER_NAVIGATOR)
+      }, 50)
+    }
+  }, [dispatch, selectedDatasetId, signInOrg])
 
   useEffect(() => {
     init()

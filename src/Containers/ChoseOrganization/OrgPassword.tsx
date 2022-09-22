@@ -2,14 +2,18 @@ import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
-import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
+import {
+  useTheme,
+  useAppDispatch,
+  useAppSelector,
+  useOrganization,
+} from '@/Hooks'
 import { Button, ButtonCustom } from '@/Components'
 import { SignInRequestData } from '@/Types/SignInRequest'
 import { useSignInMutation } from '@/Services/modules/auth'
 import {
   selectPassword,
   selectSignInEmail,
-  selectSignInOrg,
   setAuthData,
   setPassword,
 } from '@/Store/Auth'
@@ -34,8 +38,8 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
   const [passSecured, setPassSecured] = useState<boolean>(true)
   const [error, setError] = useState<boolean>(false)
   const dispatch = useAppDispatch()
+  const { signInOrg } = useOrganization()
   const signInEmail = useAppSelector(selectSignInEmail)
-  const signInOrg = useAppSelector(selectSignInOrg)
 
   const [signIn, { data: resp, isLoading, isSuccess }] = useSignInMutation()
 

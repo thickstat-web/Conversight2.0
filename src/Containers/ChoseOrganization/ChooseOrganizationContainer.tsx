@@ -25,20 +25,13 @@ import {
 } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useHeaderHeight } from '@react-navigation/elements'
-import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
+import { useTheme, useAppDispatch, useOrganization } from '@/Hooks'
 import { Brand } from '@/Components'
-import {
-  selectAllOrganizations,
-  selectSignInOrg,
-  setPassword,
-} from '@/Store/Auth'
+import { setPassword } from '@/Store/Auth'
 import PickerIcon from '@/Assets/Images/iconsSVG/pickerIcon.svg'
 import SelectedOptionIcon from '@/Assets/Images/iconsSVG/selectedOptionArrow.svg'
 import NotSelectedOptionIcon from '@/Assets/Images/iconsSVG/notSelectedOptionArrow.svg'
 import NewLabel from '@/Assets/Images/iconsSVG/newLabel.svg'
-import { getOrgByOrgId } from '@/Utils/array'
-import { setSelectedOrg } from '@/Store/Auth'
-import { setCustomHosts, setDefaultHosts } from '@/Config'
 import OrgPassword from './OrgPassword'
 import { Org } from '@/Types/VerifyEmailResponse'
 
@@ -57,17 +50,14 @@ declare type RenderCustomModalProps = {
 
 const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const MODAL_TITLE = 'Choose Organization'
-  const ORG_INIT_STATE = { name: '', orgId: '' }
   const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
   const { Colors, Fonts } = useTheme()
+  const { organizations, signInOrg, setSignInOrgId, isSingleOrg } =
+    useOrganization()
   const headerHeight = useHeaderHeight()
   const dispatch = useAppDispatch()
-  const organizations = useAppSelector(selectAllOrganizations)
-  const selectedOrg = useAppSelector(selectSignInOrg)
   const [openModal, setOpenModal] = useState(false)
   const openModalAnim = useRef(new Animated.Value(0)).current
-
-  const singleOrg = organizations.length === 1
 
   const toggleModal = useCallback(
     (toValue = 0) => {
@@ -89,24 +79,8 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
 
   const hideModal = () => setOpenModal(false)
 
-  useEffect(() => {
-    if (singleOrg) {
-      dispatch(setSelectedOrg(organizations[0]))
-    } else {
-      dispatch(setSelectedOrg(ORG_INIT_STATE))
-    }
-  }, [])
-
-  const handleSelectOrg = (org: Org) => {
-    const current = getOrgByOrgId(organizations, org)
-    if (current?.apiConfig) {
-      const { apiServerHost, botServerHost, ingressServerHost } =
-        current.apiConfig
-      setCustomHosts(apiServerHost, botServerHost, ingressServerHost)
-    } else {
-      setDefaultHosts()
-    }
-    dispatch(setSelectedOrg(current))
+  const handleSelectOrg = (orgId: string) => {
+    setSignInOrgId(orgId)
     dispatch(setPassword(''))
     hideModal()
   }
@@ -137,7 +111,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     )
     return (
       <Modal
-        visible={singleOrg ? false : visible}
+        visible={isSingleOrg ? false : visible}
         presentationStyle="overFullScreen"
         style={styles.modalView}
         animationType="slide"
@@ -172,7 +146,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     <View
       style={[
         styles.pickerBox,
-        !!selectedOrg?.name
+        !!signInOrg?.name
           ? { borderColor: Colors.GREEN_MAIN }
           : { borderColor: Colors.GREEN_DARK },
       ]}
@@ -182,12 +156,12 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
         style={[
           Fonts.textRegular,
           styles.pickerLabel,
-          !!selectedOrg?.name && { color: Colors.GREEN_MAIN },
+          !!signInOrg?.name && { color: Colors.GREEN_MAIN },
         ]}
       >
-        {selectedOrg?.name || MODAL_TITLE}
+        {signInOrg?.name || MODAL_TITLE}
       </Text>
-      {!singleOrg && <PickerIcon style={styles.pickerIcon} width={20} />}
+      {!isSingleOrg && <PickerIcon style={styles.pickerIcon} width={20} />}
     </View>
   )
 
@@ -199,7 +173,6 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     label: string,
   ) => {
     const { isSelected } = props
-    // const currentOrg = getOrgByOrgId(organizations, value)
     return (
       <View key={label}>
         <View
@@ -224,7 +197,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
               {label}
             </Text>
             {/* <Text style={[styles.optionText, { color: Colors.GREEN_DARK }]}>
-              {currentOrg?.name}
+              {signInOrg?.name}
             </Text> */}
           </View>
           {/*<View> <NewLabel /> </View>*/}
@@ -248,7 +221,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
         <View center>
           <Picker
             mode={Picker.modes.SINGLE}
-            value={selectedOrg?.orgId}
+            value={signInOrg?.orgId}
             migrateTextField
             migrate
             onPress={showModal}
