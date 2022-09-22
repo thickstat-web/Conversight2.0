@@ -127,7 +127,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
         placeholder={'Ask Athena...'}
         onChangeText={setQuery}
         onSubmitEditing={handleSendMessage}
-        defaultValue={query}
+        value={query}
         style={styles.textInput}
       />
       <FAQPicker onSelect={handleSelectedFaq} />

@@ -44,11 +44,25 @@ const UserMessageContainer = React.memo(
 )
 
 export const FailureMessageContainer = ({ message }: { message: string }) => {
-  const { Fonts } = useTheme()
+  const { Colors, Fonts } = useTheme()
   return (
-    <Text margin-4 style={[Fonts.textSmall, styles.message]}>
-      {message}
-    </Text>
+    <View style={[styles.athenaMessageContainer, { marginTop: 0 }]}>
+      <View style={styles.athenaIcon}>
+        <Image source={AthenaIcon} forwardedRef={undefined} modifiers={{}} />
+      </View>
+      <View flex left>
+        <View
+          style={[
+            styles.athenaMessageWrapper,
+            { backgroundColor: Colors.WHITE },
+          ]}
+        >
+          <Text margin-4 marginV-8 style={[Fonts.textSmall, styles.message]}>
+            {message}
+          </Text>
+        </View>
+      </View>
+    </View>
   )
 }
 
@@ -217,7 +231,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
     marginRight: 16,
-    marginVertical: 12,
+    marginVertical: 4,
   },
   athenaIcon: {
     justifyContent: 'flex-end',
