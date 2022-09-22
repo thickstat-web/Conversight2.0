@@ -1,6 +1,6 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { atob } from 'react-native-quick-base64'
-import { ATHENA, MY_DASHBOARD, SHARED } from '@/Config'
+import { ATHENA, MY_DASHBOARD, SHARED, getBotUrl } from '@/Config'
 import { ResponseType } from '@/Types/Common'
 import {
   ChatHistoryRequestData,
@@ -33,7 +33,7 @@ export const getChatHistory = (build: EndpointBuilder<any, any, any>) => {
     Partial<ChatHistoryRequestData>
   >({
     query: body => ({
-      url: '/history',
+      url: `${getBotUrl()}/history`,
       method: 'POST',
       body,
     }),
@@ -135,7 +135,7 @@ const buildPinboard = (item: Created | Shared, shared: boolean): Pinboard => {
 
 export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
   return build.query<ResponseType<Pinboard[]>, void>({
-    query: () => '/getPinBoardData',
+    query: () => `${getBotUrl()}/pinboard`,
     keepUnusedDataFor: 0,
     transformResponse: (response: ListPinboardsResponse) => {
       const {
@@ -186,7 +186,7 @@ const getTitle = (item: PinBoardComponent) => {
 export const fetchPinnedItems = (build: EndpointBuilder<any, any, any>) => {
   return build.query<ResponseType<PinnedItem[]>, string>({
     query: (pinboardId: string) =>
-      `/pinboardComponent?pinBoardID=${pinboardId}`,
+      `${getBotUrl()}/pinboard/component?pinBoardID=${pinboardId}`,
     transformResponse: (response: ListPinnedItemsResponse) => {
       const {
         code,
@@ -223,7 +223,7 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
       const { pinboardId, dataId } = data
       const dataID = Array.isArray(dataId) ? dataId : [dataId]
       return {
-        url: `/PinBoardComponentData?pinBoardID=${pinboardId}`,
+        url: `${getBotUrl()}/pinboard/component/data?pinBoardID=${pinboardId}`,
         method: 'POST',
         body: { dataID },
       }
@@ -321,7 +321,7 @@ export const fetchInsightsData = (build: EndpointBuilder<any, any, any>) => {
         dataSetID: Array.isArray(datasetIds) ? datasetIds : [datasetIds],
       }
       return {
-        url: '/v2/proActiveInsights/user',
+        url: `${getBotUrl()}/v2/proActiveInsights/user`,
         method: 'POST',
         body,
       }
@@ -358,7 +358,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
   >({
     query: body => {
       return {
-        url: '/v2/proActiveInsights/user/followup',
+        url: `${getBotUrl()}/v2/proActiveInsights/user/followup`,
         method: 'POST',
         body,
       }

@@ -19,6 +19,11 @@ export interface ResponseType<T> {
   data?: T
 }
 
+export interface FCMTokenResponse {
+  code: number
+  message: string
+}
+
 export interface Error {
   code?: number
   message: string

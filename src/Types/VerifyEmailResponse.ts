@@ -39,3 +39,8 @@ export interface VerifyEmailResponse {
   errors: ErrorMessage[]
   orgData: OrgData[]
 }
+
+export interface Org {
+  orgId: string
+  name: string
+}

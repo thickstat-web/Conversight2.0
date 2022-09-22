@@ -38,17 +38,9 @@ import NotSelectedOptionIcon from '@/Assets/Images/iconsSVG/notSelectedOptionArr
 import NewLabel from '@/Assets/Images/iconsSVG/newLabel.svg'
 import { getOrgByOrgId } from '@/Utils/array'
 import { setSelectedOrg } from '@/Store/Auth'
+import { setCustomHosts, setDefaultHosts } from '@/Config'
 import OrgPassword from './OrgPassword'
-
-type Item = {
-  orgId: string
-  name: string
-  item: string
-}
-
-type Org = {
-  item: Item
-}
+import { Org } from '@/Types/VerifyEmailResponse'
 
 interface Props {
   navigation: any
@@ -105,8 +97,15 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     }
   }, [])
 
-  const handleSelectOrg = (org: any) => {
+  const handleSelectOrg = (org: Org) => {
     const current = getOrgByOrgId(organizations, org)
+    if (current?.apiConfig) {
+      const { apiServerHost, botServerHost, ingressServerHost } =
+        current.apiConfig
+      setCustomHosts(apiServerHost, botServerHost, ingressServerHost)
+    } else {
+      setDefaultHosts()
+    }
     dispatch(setSelectedOrg(current))
     dispatch(setPassword(''))
     hideModal()
@@ -129,13 +128,12 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
       ],
     }
 
-    const renderItem = (org: Org): ReactElement => (
-      <Picker.Item
-        key={org.item.orgId}
-        value={org.item.orgId}
-        label={org.item.name}
-        disabled={false}
-      />
+    const renderItem = ({
+      item: { orgId, name },
+    }: {
+      item: Org
+    }): ReactElement => (
+      <Picker.Item key={orgId} value={orgId} label={name} disabled={false} />
     )
     return (
       <Modal
@@ -201,7 +199,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
     label: string,
   ) => {
     const { isSelected } = props
-    const currentOrg = getOrgByOrgId(organizations, value)
+    // const currentOrg = getOrgByOrgId(organizations, value)
     return (
       <View key={label}>
         <View

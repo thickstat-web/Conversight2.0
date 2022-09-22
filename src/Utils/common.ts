@@ -155,3 +155,5 @@ export function* generateBatches<T, P>(
     offset += successiveSize
   }
 }
+
+export const makeTestID = (id: string) => ({ testID: `test:id/${id}` })

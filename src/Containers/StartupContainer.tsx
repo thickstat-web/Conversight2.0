@@ -2,7 +2,12 @@ import React, { useCallback, useEffect } from 'react'
 import { ActivityIndicator, View, Text } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { DRAWER_NAVIGATOR } from '@/Constants/screens'
-import { useAppSelector, useAppDispatch, useTheme } from '@/Hooks'
+import {
+  useAppSelector,
+  useAppDispatch,
+  usePushNotification,
+  useTheme,
+} from '@/Hooks'
 import { Brand } from '@/Components'
 import { selectDatasetId, setSelectedDatasetId } from '@/Store/Auth'
 import { setDefaultTheme } from '@/Store/Theme'
@@ -10,12 +15,12 @@ import { useLazyGetDatasetsQuery } from '@/Services/modules/chat'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
 
 const StartupContainer = () => {
+  const { t } = useTranslation()
   const { Layout, Gutters, Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
+  usePushNotification()
   const [getDatasets] = useLazyGetDatasetsQuery()
   const selectedDatasetId = useAppSelector(selectDatasetId)
-
-  const { t } = useTranslation()
 
   const init = useCallback(async () => {
     const delayStart = new Promise(resolve =>

@@ -1,11 +1,12 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
+import { getBotUrl } from '@/Config'
 import { ResponseType } from '@/Types/Common'
 import { FaqRequestData, FaqResponseData } from '@/Types/Faq'
 
 export const getFaq = (build: EndpointBuilder<any, any, any>) => {
   return build.mutation<ResponseType<string[]>, Partial<FaqRequestData>>({
     query: body => ({
-      url: '/faq',
+      url: `${getBotUrl()}/faq`,
       method: 'POST',
       body,
     }),

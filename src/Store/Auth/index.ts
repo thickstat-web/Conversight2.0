@@ -2,33 +2,30 @@ import { createSlice } from '@reduxjs/toolkit'
 import { DEFAULT_PASSWORD } from '@/Config'
 import { AUTH_REDUCER } from '@/Constants/redux'
 import { AuthData } from '@/Types/SignInResponse'
+import { Org, OrgData } from '@/Types/VerifyEmailResponse'
 import { RootState } from '..'
 
-type Org = {
-  orgId: string
-  name: string
-}
 
 interface AuthState {
   email: string
   password: string
-  organizations: any[]
+  fcmToken: string | null
+  organizations: OrgData[]
   signInOrg: Org | null
   authData: AuthData | null
   selectedDatasetId: string | null
-  allOrganizations: any[]
   selectedOrg: Org
   tempOrg: Org
 }
 
 const initialState: AuthState = {
   email: '',
+  fcmToken: null,
   password: DEFAULT_PASSWORD,
   organizations: [],
   signInOrg: null,
   authData: null,
   selectedDatasetId: null,
-  allOrganizations: [],
   selectedOrg: { name: '', orgId: '' },
   tempOrg: { name: '', orgId: '' },
 }
@@ -39,6 +36,9 @@ const authSlice = createSlice({
   reducers: {
     setSignInEmail: (state, { payload }) => {
       state.email = payload
+    },
+    setFCMToken: (state, { payload }) => {
+      state.fcmToken = payload
     },
     setAllOrganizations: (state, { payload }) => {
       state.organizations = [...payload]
@@ -66,6 +66,7 @@ const authSlice = createSlice({
 })
 
 export const selectSignInEmail = (state: RootState) => state.authReducer.email
+export const selectFCMToken = (state: RootState) => state.authReducer.fcmToken
 
 export const selectAllOrganizations = (state: RootState) =>
   state.authReducer.organizations
@@ -86,6 +87,7 @@ export const selectPassword = (state: RootState) => state.authReducer.password
 
 export const {
   setSignInEmail,
+  setFCMToken,
   setAllOrganizations,
   setSelectedOrg,
   setAuthData,

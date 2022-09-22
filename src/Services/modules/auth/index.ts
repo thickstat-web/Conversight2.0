@@ -1,10 +1,11 @@
 import { csApi } from '../../api'
-import { logout, signIn, verifyEmail, forgotPassword } from './authentication'
+import { verifyEmail, signIn, sendFCMToken, forgotPassword, logout, } from './authentication'
 
 export const authApi = csApi.injectEndpoints({
   endpoints: build => ({
-    signIn: signIn(build),
     verifyEmail: verifyEmail(build),
+    signIn: signIn(build),
+    sendFCMToken: sendFCMToken(build),
     logout: logout(build),
     forgotPassword: forgotPassword(build),
   }),
@@ -12,7 +13,8 @@ export const authApi = csApi.injectEndpoints({
 })
 
 export const {
-  useSignInMutation,
   useLazyVerifyEmailQuery,
+  useSignInMutation,
+  useSendFCMTokenMutation,
   useLazyLogoutQuery,
 } = authApi

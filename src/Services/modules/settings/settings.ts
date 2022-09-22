@@ -1,12 +1,13 @@
-import { ResponseType } from '@/Types/Common'
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
+import { getAPIUrl } from '@/Config'
+import { ResponseType } from '@/Types/Common'
 import { SettingsResponseData, MyProfile } from '@/Types/SettingsResponse'
 import { SettingsRequestData } from '@/Types/SettingsRequest'
 
 export const getSettings = (build: EndpointBuilder<any, any, any>) => {
   return build.mutation<ResponseType<MyProfile>, Partial<SettingsRequestData>>({
     query: body => ({
-      url: '/api/v1',
+      url: `${getAPIUrl()}/api/v1`,
       method: 'POST',
       body,
     }),

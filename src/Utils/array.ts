@@ -1,4 +1,6 @@
-export const getOrgByOrgId = (orgs: any, id: any) => {
+import { Org, OrgData } from "@/Types/VerifyEmailResponse"
+
+export const getOrgByOrgId = (orgs: OrgData[], id: Org) => {
   return orgs.find((x: any) => x.orgId === id)
 }
 

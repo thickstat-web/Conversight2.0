@@ -7,23 +7,22 @@ import {
   FetchBaseQueryMeta,
 } from '@reduxjs/toolkit/query/react'
 import { isStringExists } from '@/Utils/common'
-import { Config } from '@/Config'
 import { RootState } from '@/Store'
 import { logRequestResponse } from './logging'
 
-const csApiBaseQuery = fetchBaseQuery({ baseUrl: Config.CS_API_URL })
-const botAPIBaseQuery = fetchBaseQuery({ baseUrl: Config.BOT_API_URL })
-const ingressAPIBaseQuery = fetchBaseQuery({ baseUrl: Config.INGRESS_API_URL })
+const csApiBaseQuery = fetchBaseQuery({ baseUrl: 'https://' })
+const botAPIBaseQuery = fetchBaseQuery({ baseUrl: 'https://' })
+const ingressAPIBaseQuery = fetchBaseQuery({ baseUrl: 'https://' })
 
-const buildBaseQueryWithInterceptor = (
-  baseQuery: BaseQueryFn<
-    string | FetchArgs,
-    unknown,
-    FetchBaseQueryError,
-    {},
-    FetchBaseQueryMeta
-  >,
-) => {
+type BaseQuery = BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError,
+  {},
+  FetchBaseQueryMeta
+>
+
+const buildBaseQueryWithInterceptor = (baseQuery: BaseQuery) => {
   const baseQueryWithInterceptor: BaseQueryFn<
     string | FetchArgs,
     unknown,

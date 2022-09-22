@@ -1,4 +1,5 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
+import { getIngressUrl } from '@/Config'
 import { ResponseType } from '@/Types/Common'
 import {
   SendChatMessage,
@@ -12,7 +13,7 @@ export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
     Partial<SendChatMessage>
   >({
     query: body => ({
-      url: '/converse/v2',
+      url: `${getIngressUrl()}/converse/v2`,
       method: 'POST',
       body,
     }),
