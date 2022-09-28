@@ -34,10 +34,11 @@ export default function (pinboardId: string) {
       let ids: string[] = []
       let components: PinboardItem[] = []
       pinboardData.forEach(item => {
-        const { id } = item
+        const { id, title } = item
         ids.push(id)
         const pinItem: PinboardItem = {
           id,
+          title,
           loading: true,
           isTextCard: false,
         }

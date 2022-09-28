@@ -18,7 +18,7 @@ const LoadingCard = () => (
 )
 
 const Card = React.memo(({ item }: { item: PinboardItem }) => {
-  const { id, loading, isTextCard } = item
+  const { id, title, loading, isTextCard } = item
   const converseData = useAppSelector(selectConverseData)
   const [move, setMove] = useState(false)
 
@@ -30,6 +30,7 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
   if (!data) {
     return null
   }
+  const componentData = { ...data, message: title }
 
   return (
     <View
@@ -39,11 +40,11 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
       onTouchMove={() => setMove(true)}
       onTouchEnd={() => {
         if (Platform.OS === 'android' || !move) {
-          navigate(DATA_EXPLORER, { id: data.id })
+          navigate(DATA_EXPLORER, { id: data.id, title })
         }
       }}
     >
-      <DashboardVisualizer data={data} />
+      <DashboardVisualizer data={componentData} />
     </View>
   )
 })

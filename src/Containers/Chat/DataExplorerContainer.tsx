@@ -27,6 +27,7 @@ interface DataExplorerContainerProps {
   route: {
     params: {
       id: string
+      title: string
       formats: string[]
     }
   }
@@ -60,15 +61,9 @@ const DataExplorerContainer = ({
   const ref = React.useRef<any>()
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
 
-  const { id } = route.params
+  const { id, title } = route.params
   const message = converseData[id][0]
-  const {
-    columns,
-    columnMetadata,
-    values,
-    message: title,
-    visualFormats,
-  } = message
+  const { columns, columnMetadata, values, visualFormats } = message
   const formats: string[] = visualFormats
     .filter(item => item.type in visualizationOptions)
     .map(item => item.type)
@@ -192,7 +187,7 @@ const DataExplorerContainer = ({
 
   const Header = () => (
     <View paddingV-8 paddingH-16>
-      <Text style={Fonts.textSmall}>{properCase(title, true)}</Text>
+      <Text style={styles.cardTitle}>{properCase(title, true)}</Text>
     </View>
   )
 
@@ -201,8 +196,8 @@ const DataExplorerContainer = ({
   const containerHeight = screenHeight * (tableOnly ? 0.8 : 0.7)
   return (
     <View flex style={{ backgroundColor: Colors.WHITE }}>
-      <View flex-6 marginT-8 center>
-        {title.length > 0 && <Header />}
+      {title.length > 0 && <Header />}
+      <View flex-6 center>
         <FlatList
           data={formats}
           ref={ref}
@@ -280,6 +275,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: Colors.WHITE,
     paddingHorizontal: 8,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.GREEN_DARK,
   },
   dotsContainer: {
     display: 'flex',

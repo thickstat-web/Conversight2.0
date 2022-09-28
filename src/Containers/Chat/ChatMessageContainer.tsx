@@ -90,7 +90,10 @@ const AthenaMessageContainer = React.memo(
               onTouchMove={() => setMove(true)}
               onTouchEnd={() => {
                 if (Platform.OS === 'android' || !move) {
-                  navigate(DATA_EXPLORER, { id: message.id })
+                  navigate(DATA_EXPLORER, {
+                    id: message.id,
+                    title: message.message,
+                  })
                 }
                 // console.log(
                 //   `visualFormats: ${JSON.stringify(

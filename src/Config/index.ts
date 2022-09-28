@@ -1,3 +1,4 @@
+import { getSystemName, getSystemVersion } from 'react-native-device-info'
 export const CS_API_HOST = 'api.conversight.ai'
 export const BOT_API_HOST = 'bot.conversight.ai'
 export const INGRESS_API_HOST = 'ingress.conversight.ai'
@@ -26,6 +27,7 @@ export const getIngressUrl = () => `${Config.INGRESS_API_HOST}`
 
 export const DEFAULT_EMAIL = ''
 export const DEFAULT_PASSWORD = ''
+export const DEVICE_NAME = `${getSystemName()} v${getSystemVersion()}`
 
 export const NO_DATA_AVAILABLE = 'No data available'
 export const MY_DASHBOARD = 'my dashboard'

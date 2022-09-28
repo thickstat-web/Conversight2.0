@@ -14,6 +14,7 @@ import { ChatMessage, ConverseData, MessageType } from '@/Types/ChatMessage'
 
 export interface PinboardItem {
   id: string
+  title: string
   loading: boolean
   isTextCard: boolean
 }

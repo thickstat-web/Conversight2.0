@@ -96,6 +96,8 @@ const PieChart = ({
   let legendNames: LegendName[] = []
   values.forEach(item => {
     total += item[xAxisField]
+  })
+  values.forEach(item => {
     const name = {
       name: `${item[yAxisField]} (${numeral(
         (item[xAxisField] * 100) / total,

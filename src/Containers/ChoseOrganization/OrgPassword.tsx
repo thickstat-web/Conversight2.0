@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
+import { getUniqueId } from 'react-native-device-info'
 import { useTranslation } from 'react-i18next'
 import {
   useTheme,
@@ -29,7 +30,7 @@ import PasswordSecuredIconError from '@/Assets/Images/iconsSVG/passwordHideError
 import PasswordVisibleIconError from '@/Assets/Images/iconsSVG/passwordShowError.svg'
 import CloseIcon from '@/Assets/Images/iconsSVG/close.svg'
 import InputErrorIcon from '@/Assets/Images/iconsSVG/inputError.svg'
-import { DEFAULT_PASSWORD } from '@/Config'
+import { DEFAULT_PASSWORD, DEVICE_NAME } from '@/Config'
 
 const OrgPassword = ({ navigation }: { navigation: any }) => {
   const { t } = useTranslation()
@@ -53,13 +54,13 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
     }
   }, [])
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (signInEmail && password && signInOrg) {
       const authData: SignInRequestData = {
         email: signInEmail.trim(),
         password: password.trim(),
-        deviceId: 'Web',
-        deviceName: 'mobile',
+        deviceId: await getUniqueId(),
+        deviceName: DEVICE_NAME,
         orgId: signInOrg?.orgId,
       }
       signIn(authData)
