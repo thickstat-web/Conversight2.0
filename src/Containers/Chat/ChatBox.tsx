@@ -154,5 +154,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'Montserrat-Regular',
     fontSize: 16,
+    color:'black'
   },
 })

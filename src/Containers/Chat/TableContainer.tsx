@@ -13,6 +13,7 @@ import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import { properCase, formatValue } from '@/Utils/common'
+import { AdaptiveCard } from '@/Components'
 
 const getStyledRowData = (
   columns: string[],
@@ -20,7 +21,7 @@ const getStyledRowData = (
   row: Record<string, any>,
 ) => {
   // return Object.values(row).map((value: any, index: number) => {
-  const dataFormatter = (column: string, index: number) => {
+  const dataFormatter = (column: string) => {
     // const column = columns[index]
     const value = row[column]
     let metadata = columnMetadata[column] || null
@@ -104,38 +105,44 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   )
 
   // const sortedRows = rows.map(item => Object.values(item))
-  const getItemLayout = (data, index) => ({
+  const getItemLayout = (data: any, index: number) => ({
     length: ROW_HEIGHT,
     offset: ROW_HEIGHT * index,
     index,
   })
 
+  const isAdaptiveCard = values.length === 1
+
   return (
     <View style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.tableWrapper}>
-          <Table>
-            <FlatList
-              data={rows}
-              initialNumToRender={20}
-              // contentContainerStyle={{ height: screenHeight * 0.68 }}
-              ListHeaderComponent={
-                <Table>
-                  <Row
-                    data={headerList}
-                    widthArr={widthArr}
-                    style={styles.header}
-                    // textStyle={styles.headerText}
-                  />
-                </Table>
-              }
-              showsHorizontalScrollIndicator={false}
-              getItemLayout={getItemLayout}
-              renderItem={renderItem}
-              listKey={id}
-            />
-          </Table>
-        </View>
+        {isAdaptiveCard ? (
+          <AdaptiveCard columnMetadata={columnMetadata} values={values} />
+        ) : (
+          <View style={styles.tableWrapper}>
+            <Table>
+              <FlatList
+                data={rows}
+                initialNumToRender={20}
+                // contentContainerStyle={{ height: screenHeight * 0.68 }}
+                ListHeaderComponent={
+                  <Table>
+                    <Row
+                      data={headerList}
+                      widthArr={widthArr}
+                      style={styles.header}
+                      // textStyle={styles.headerText}
+                    />
+                  </Table>
+                }
+                showsHorizontalScrollIndicator={false}
+                getItemLayout={getItemLayout}
+                renderItem={renderItem}
+                listKey={id}
+              />
+            </Table>
+          </View>
+        )}
       </ScrollView>
     </View>
   )
@@ -172,11 +179,11 @@ const styles = StyleSheet.create({
   headerText: {
     // fontFamily: 'Montserrat-Regular',
     textAlign: 'center',
-    color: '#201D1D',
+    color: '#4d4d4d',
   },
   cell: {
     marginHorizontal: 6,
-    color: '#014E40',
+    color: '#595959',
   },
   number: { textAlign: 'right' },
   tableBorder: {
