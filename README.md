@@ -58,3 +58,31 @@ yarn ios
 xcrun simctl push 'iPhone 13' conversight-push-notification.apns
 xcrun simctl push 51B697C9-06AF-4244-8E29-564778920365 com.thickstat.conversight conversight-push-notification.apns
 ```
+
+##### Android Wireless Debugging
+
+- Enable Developer Options
+- Enable USB Debugging
+
+```
+adb tcpip 5555
+
+adb connect device-ip:port
+adb connect 198.168.2.43:5555
+
+adb devices
+adb devices -l
+
+# Install debug APK
+adb install app-debug.apk
+adb install -r app-debug.apk
+
+# When more than one device/emulator
+adb -s 62bb86d4 install app-debug.apk
+
+# Start/Open an installed app
+adb shell am start -n com.conversight/.MainActivity
+
+# When more than one device/emulator
+adb -s 62bb86d4 shell am start -n com.conversight/.MainActivity
+```
