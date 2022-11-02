@@ -1,10 +1,11 @@
 import { csApi } from '../../api'
-import { getDatasets, getHelpQuestions } from './chat'
+import { getDatasets, getHelpQuestions, getTextToVoice } from './chat'
 
 export const chatApi = csApi.injectEndpoints({
   endpoints: build => ({
     getDatasets: getDatasets(build),
     getHelpQuestions: getHelpQuestions(build),
+    getTextToVoice: getTextToVoice(build),
   }),
   overrideExisting: false,
 })
@@ -14,4 +15,5 @@ export const {
   useLazyGetDatasetsQuery,
   useGetHelpQuestionsQuery,
   useLazyGetHelpQuestionsQuery,
+  useGetTextToVoiceMutation,
 } = chatApi

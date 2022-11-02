@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import {
   FlatList,
   NativeScrollEvent,
@@ -68,7 +68,7 @@ const DataExplorerContainer = ({
     .filter(item => item.type in visualizationOptions)
     .map(item => item.type)
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (formats.length > 1) {
       const moreOptionsButton = () => (
         <View style={{ paddingBottom: 2 }}>
@@ -136,7 +136,7 @@ const DataExplorerContainer = ({
               id={id}
               columns={columns}
               columnMetadata={columnMetadata}
-              values={values.slice(0, 200)}
+              values={values}
             />
           </ScrollView>
         </View>
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: Colors.GREEN_DARK,
   },

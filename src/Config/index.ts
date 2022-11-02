@@ -1,7 +1,7 @@
 import { getSystemName, getSystemVersion } from 'react-native-device-info'
-export const CS_API_HOST = 'api.conversight.ai'
-export const BOT_API_HOST = 'bot.conversight.ai'
-export const INGRESS_API_HOST = 'ingress.conversight.ai'
+export const CS_API_HOST = 'api.staging.conversight.ai'
+export const BOT_API_HOST = 'bot.staging.conversight.ai'
+export const INGRESS_API_HOST = 'ingress.staging.conversight.ai'
 
 export const Config = {
   CS_API_HOST,
@@ -29,6 +29,7 @@ export const DEFAULT_EMAIL = ''
 export const DEFAULT_PASSWORD = ''
 export const DEVICE_NAME = `${getSystemName()} v${getSystemVersion()}`
 
+export const DEFAULT_ADAPTIVE_CARD_ROWS = 4
 export const NO_DATA_AVAILABLE = 'No data available'
 export const MY_DASHBOARD = 'my dashboard'
 export const ATHENA = 'athena'

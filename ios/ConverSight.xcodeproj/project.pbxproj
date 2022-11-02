@@ -13,6 +13,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		972A297B87EEBBC7A934A450 /* Pods_ConverSight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB2AD420816784623614C5DF /* Pods_ConverSight.framework */; };
+		D346CBD3290A93C700B1CBDC /* dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D346CBD2290A93C700B1CBDC /* dummy.swift */; };
 		D39DFCB728D3419D009ACC32 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D39DFCB628D3419D009ACC32 /* GoogleService-Info.plist */; };
 		D39FB62528D39B2400268073 /* Montserrat-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D39FB61128D39B2100268073 /* Montserrat-Medium.ttf */; };
 		D39FB62628D39B2400268073 /* Montserrat-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D39FB61228D39B2100268073 /* Montserrat-Light.ttf */; };
@@ -62,6 +63,8 @@
 		CB2AD420816784623614C5DF /* Pods_ConverSight.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ConverSight.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3210EEF28D3241B00FA2062 /* hermes.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = hermes.xcframework; path = "Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework"; sourceTree = "<group>"; };
 		D3210EF328D3320300FA2062 /* ConverSightDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = ConverSightDebug.entitlements; path = ConverSight/ConverSightDebug.entitlements; sourceTree = "<group>"; };
+		D346CBD1290A93C700B1CBDC /* ConverSight-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ConverSight-Bridging-Header.h"; sourceTree = "<group>"; };
+		D346CBD2290A93C700B1CBDC /* dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dummy.swift; sourceTree = "<group>"; };
 		D38BCEC028E32950008F3866 /* ConverSight.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = ConverSight.entitlements; path = ConverSight/ConverSight.entitlements; sourceTree = "<group>"; };
 		D39DFCB628D3419D009ACC32 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "ConverSight/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D39FB61128D39B2100268073 /* Montserrat-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Montserrat-Medium.ttf"; path = "../src/Assets/fonts/Montserrat/Montserrat-Medium.ttf"; sourceTree = "<group>"; };
@@ -158,6 +161,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				D346CBD2290A93C700B1CBDC /* dummy.swift */,
 				D39FB61628D39B2200268073 /* Montserrat-Black.ttf */,
 				D39FB61B28D39B2300268073 /* Montserrat-BlackItalic.ttf */,
 				D39FB62128D39B2400268073 /* Montserrat-Bold.ttf */,
@@ -185,6 +189,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				D346CBD1290A93C700B1CBDC /* ConverSight-Bridging-Header.h */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -266,7 +271,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1120;
+						LastSwiftMigration = 1320;
 					};
 				};
 			};
@@ -450,6 +455,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				D346CBD3290A93C700B1CBDC /* dummy.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -468,6 +474,7 @@
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -494,6 +501,7 @@
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = ConverSightTests/Info.plist;
@@ -603,6 +611,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.thickstat.conversight;
 				PRODUCT_NAME = ConverSight;
+				SWIFT_OBJC_BRIDGING_HEADER = "ConverSight-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -633,6 +642,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.thickstat.conversight;
 				PRODUCT_NAME = ConverSight;
+				SWIFT_OBJC_BRIDGING_HEADER = "ConverSight-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				USER_HEADER_SEARCH_PATHS = "";

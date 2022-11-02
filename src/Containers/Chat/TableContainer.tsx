@@ -2,18 +2,22 @@ import React, { useState } from 'react'
 import {
   StyleSheet,
   Text,
-  View,
   ScrollView,
   TouchableOpacity,
   FlatList,
 } from 'react-native'
+import { View } from 'react-native-ui-lib'
 import { Table, Row } from 'react-native-table-component'
+import { SvgCss } from 'react-native-svg'
 import _ from 'lodash'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import { properCase, formatValue } from '@/Utils/common'
 import { AdaptiveCard } from '@/Components'
+import { useTheme } from '@/Hooks'
+import menuIcon from '@/Assets/Images/xml-svg/menu'
+import settingsIcon from '@/Assets/Images/xml-svg/settings'
 
 const getStyledRowData = (
   columns: string[],
@@ -60,9 +64,11 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const columnWidth = columns.length <= 2 ? 160 : 120
   const ROW_HEIGHT = 40
   const widthArr = new Array(columns.length).fill(columnWidth)
+  const { Layout, Colors, Common, Fonts } = useTheme()
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
   const [rows, setRows] = useState(values)
+  const [table, setTable] = useState(true)
 
   // if (values.length > 10) {
   //   console.log(`col metadata: ${JSON.stringify(columnMetadata, null, 2)}`)
@@ -100,7 +106,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       key={`${index}`}
       data={getStyledRowData(columns, columnMetadata, row)}
       widthArr={widthArr}
-      style={[styles.row, index % 2 && styles.rowEven]}
+      style={[styles.row, index % 2 === 1 && styles.rowOdd]}
     />
   )
 
@@ -111,37 +117,94 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     index,
   })
 
-  const isAdaptiveCard = values.length === 1
+  const isSingleRecord = values.length === 1
 
   return (
     <View style={styles.container}>
+      {/* <TouchableOpacity
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          borderRadius: 6,
+          borderWidth: 2,
+          borderColor: '#EAFAEA',
+          justifyContent: 'space-evenly',
+          marginBottom: 4,
+        }}
+      >
+        <View
+          flex
+          row
+          center
+          padding-8
+          paddingH-16
+          style={[table && { backgroundColor: '#f0fcf4' }]}
+        >
+          <SvgCss
+            width="20"
+            height="20"
+            xml={menuIcon}
+            style={{ marginHorizontal: 4 }}
+          />
+          <Text
+            style={{
+              color: Colors.GREEN_MAIN,
+              fontWeight: table ? '500' : 'normal',
+            }}
+          >
+            Table
+          </Text>
+        </View>
+        <View
+          flex
+          row
+          center
+          padding-8
+          paddingH-16
+          style={[!table && { backgroundColor: '#f0fcf4' }]}
+        >
+          <SvgCss
+            width="20"
+            height="20"
+            xml={settingsIcon}
+            style={{ marginHorizontal: 4 }}
+          />
+          <Text
+            style={{
+              color: Colors.GREEN_MAIN,
+              fontWeight: !table ? '500' : 'normal',
+            }}
+          >
+            Adaptive Card
+          </Text>
+        </View>
+      </TouchableOpacity> */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {isAdaptiveCard ? (
+        {isSingleRecord ? (
           <AdaptiveCard columnMetadata={columnMetadata} values={values} />
         ) : (
-          <View style={styles.tableWrapper}>
-            <Table>
-              <FlatList
-                data={rows}
-                initialNumToRender={20}
-                // contentContainerStyle={{ height: screenHeight * 0.68 }}
-                ListHeaderComponent={
-                  <Table>
-                    <Row
-                      data={headerList}
-                      widthArr={widthArr}
-                      style={styles.header}
-                      // textStyle={styles.headerText}
-                    />
-                  </Table>
-                }
-                showsHorizontalScrollIndicator={false}
-                getItemLayout={getItemLayout}
-                renderItem={renderItem}
-                listKey={id}
-              />
-            </Table>
-          </View>
+          // <View style={styles.tableWrapper}>
+          <FlatList
+            data={rows}
+            initialNumToRender={20}
+            style={styles.tableWrapper}
+            // contentContainerStyle={styles.tableWrapper}
+            ListHeaderComponent={
+              <Table>
+                <Row
+                  data={headerList}
+                  widthArr={widthArr}
+                  style={styles.header}
+                  // textStyle={styles.headerText}
+                />
+              </Table>
+            }
+            showsHorizontalScrollIndicator={false}
+            getItemLayout={getItemLayout}
+            renderItem={renderItem}
+            listKey={id}
+          />
+          // </View>
         )}
       </ScrollView>
     </View>
@@ -194,7 +257,7 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: '#FFFFFF' /* '#E7E6E1' */,
   },
-  rowEven: {
+  rowOdd: {
     backgroundColor: '#f0fcf4' /* '#F0FBFC' '#F7F6E7' */,
   },
 })

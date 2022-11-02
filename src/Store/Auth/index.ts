@@ -15,6 +15,7 @@ interface AuthState {
   selectedDatasetId: string | null
   selectedOrg: Org
   tempOrg: Org
+  readInsights: boolean
 }
 
 const initialState: AuthState = {
@@ -27,6 +28,7 @@ const initialState: AuthState = {
   selectedDatasetId: null,
   selectedOrg: { name: '', orgId: '' },
   tempOrg: { name: '', orgId: '' },
+  readInsights: true,
 }
 
 const authSlice = createSlice({
@@ -61,6 +63,12 @@ const authSlice = createSlice({
     setPassword: (state, { payload }) => {
       state.password = payload
     },
+    enableReadInsights: (state) => {
+      state.readInsights = true
+    },
+    disableReadInsights: (state) => {
+      state.readInsights = false
+    },
   },
 })
 
@@ -83,6 +91,7 @@ export const selectDatasetId = (state: RootState) =>
 export const selectTempOrg = (state: RootState) => state.authReducer.tempOrg
 
 export const selectPassword = (state: RootState) => state.authReducer.password
+export const selectReadInsights = (state: RootState) => state.authReducer.readInsights
 
 export const {
   setSignInEmail,
@@ -94,6 +103,8 @@ export const {
   cleanupAuthData,
   setTempOrg,
   setPassword,
+  enableReadInsights,
+  disableReadInsights,
 } = authSlice.actions
 
 export default authSlice.reducer

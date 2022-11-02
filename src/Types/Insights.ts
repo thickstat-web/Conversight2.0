@@ -1,6 +1,13 @@
 export interface InsightComponent {
   id: string
   followupLoading: boolean
+  voiceLoading: boolean
+  voice: string
+}
+
+export interface InsightVoice {
+  id: string
+  voice: string
 }
 
 export interface InsightData {

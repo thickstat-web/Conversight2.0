@@ -1,7 +1,16 @@
-import React, { useState } from 'react'
-import { FlatList, Platform, Pressable, StyleSheet } from 'react-native'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  FlatList,
+  Platform,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native'
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
+import { SvgCss } from 'react-native-svg'
+import { pauseXML } from '@/Assets/Images/xml-svg/pause'
+import { playXML } from '@/Assets/Images/xml-svg/play'
 import { useTheme, useAppSelector, useInsightsData } from '@/Hooks'
 import { LoadingSpinner, InsightsVisualizer } from '@/Components'
 import { Colors } from '@/Theme/Variables'
@@ -12,6 +21,7 @@ import { DATA_EXPLORER } from '@/Constants/screens'
 import { navigate } from '@/Navigators/utils'
 import { properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
+import { PlayerState } from '@/Hooks/useInsightsData'
 
 const CARD_HEIGHT = 180
 
@@ -151,6 +161,7 @@ interface InsightComponentsProps {
   insightsData: InsightData[]
   hasMoreFollowupComponent: boolean
   loadMoreFollowupComponent: () => void
+  trackIndex: number
 }
 
 interface ListRenderItemProps {
@@ -160,12 +171,23 @@ interface ListRenderItemProps {
 
 const InsightComponents = React.memo((props: InsightComponentsProps) => {
   const { Colors, Fonts } = useTheme()
+  const flatListRef = useRef()
+
   const {
     insightsComponents,
     insightsData,
+    isLoading,
     hasMoreFollowupComponent,
     loadMoreFollowupComponent,
+    trackIndex,
   } = props
+
+  useEffect(() => {
+    if (flatListRef && flatListRef.current && trackIndex > 0) {
+      const params = { index: trackIndex }
+      flatListRef.current.scrollToIndex(params)
+    }
+  }, [trackIndex])
 
   const renderItem = ({ item }: ListRenderItemProps) => (
     <Card item={item} insightsData={insightsData} />
@@ -180,6 +202,7 @@ const InsightComponents = React.memo((props: InsightComponentsProps) => {
   return (
     <FlatList
       style={{ flex: 1 }}
+      ref={flatListRef}
       contentContainerStyle={styles.insightsContainer}
       data={insightsComponents}
       renderItem={renderItem}
@@ -191,10 +214,17 @@ const InsightComponents = React.memo((props: InsightComponentsProps) => {
   )
 })
 
-const InsightsContainer = () => {
+const InsightsContainer = ({ navigation }) => {
   const { Layout, Colors } = useTheme()
   const props = useInsightsData()
-  const { isLoading, insightsComponents, insightsData } = props
+  const {
+    isLoading,
+    insightsComponents,
+    insightsData,
+    playerState,
+    pausePlayer,
+    playPlayer,
+  } = props
   const [filteredTags, setFilteredTags] = useState<string[]>([])
 
   // Group list of insight indexes by tag
@@ -210,6 +240,33 @@ const InsightsContainer = () => {
       }
     })
   })
+
+  useLayoutEffect(() => {
+    const playButton = () => (
+      <TouchableOpacity
+        style={{ marginTop: 4, marginRight: 16 }}
+        onPress={
+          playerState === PlayerState.IDLE || playerState === PlayerState.PAUSED
+            ? playPlayer
+            : pausePlayer
+        }
+      >
+        <SvgCss
+          width="32"
+          height="32"
+          xml={
+            playerState === PlayerState.IDLE ||
+            playerState === PlayerState.PAUSED
+              ? playXML
+              : pauseXML
+          }
+        />
+      </TouchableOpacity>
+    )
+    navigation.setOptions({
+      headerRight: playButton,
+    })
+  }, [playerState, pausePlayer, playPlayer])
 
   // useEffect(() => {
   //   console.log('')
