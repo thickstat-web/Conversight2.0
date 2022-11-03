@@ -396,10 +396,10 @@ PODS:
     - React-Core
   - RNDeviceInfo (10.3.0):
     - React-Core
-  - RNFBApp (16.3.1):
+  - RNFBApp (16.4.1):
     - Firebase/CoreOnly (= 10.1.0)
     - React-Core
-  - RNFBMessaging (16.3.1):
+  - RNFBMessaging (16.4.1):
     - Firebase/Messaging (= 10.1.0)
     - FirebaseCoreExtension (= 10.1.0)
     - React-Core
@@ -445,7 +445,7 @@ PODS:
   - RNScreens (3.18.2):
     - React-Core
     - React-RCTImage
-  - RNSVG (13.4.0):
+  - RNSVG (13.5.0):
     - React-Core
   - SwiftAudioEx (0.15.3)
   - TOCropViewController (2.6.1)
@@ -677,13 +677,13 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 0c357f3156fcb16c8589ede67cc036330b6698ca
   RNCPicker: 0bf8ef8f7800524f32d2bb2a8bcadd53eda0ecd1
   RNDeviceInfo: 4701f0bf2a06b34654745053db0ce4cb0c53ada7
-  RNFBApp: fd0be13a015bddf4d0124df0cb0435a5b995a891
-  RNFBMessaging: 35fd46796739d0e66b3ea0b902213c93ccf50a06
+  RNFBApp: a90b27024d12821dc6bff87f261fed5fcf1e8a33
+  RNFBMessaging: 4b44076cebb6067c675db1d0a51d3b16d614c844
   RNGestureHandler: 62232ba8f562f7dea5ba1b3383494eb5bf97a4d3
   RNImageCropPicker: 648356d68fbf9911a1016b3e3723885d28373eda
   RNReanimated: 2a91e85fcd343f8af3c58d3425b99fdd285590a5
   RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
-  RNSVG: 07dbd870b0dcdecc99b3a202fa37c8ca163caec2
+  RNSVG: 38ca962c970dbce1ca38991a5aebf26d163f9efb
   SwiftAudioEx: 83eabba2940924fc1c0d5cb0896049921365229c
   TOCropViewController: edfd4f25713d56905ad1e0b9f5be3fbe0f59c863
   Yoga: 1f02ef4ce4469aefc36167138441b27d988282b1
