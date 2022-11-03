@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
+  ActivityIndicator,
   FlatList,
   Platform,
   Pressable,
@@ -12,7 +13,7 @@ import { SvgCss } from 'react-native-svg'
 import { pauseXML } from '@/Assets/Images/xml-svg/pause'
 import { playXML } from '@/Assets/Images/xml-svg/play'
 import { useTheme, useAppSelector, useInsightsData } from '@/Hooks'
-import { LoadingSpinner, InsightsVisualizer } from '@/Components'
+import { LoadingSpinner, InsightsVisualizer} from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { selectConverseData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
@@ -242,25 +243,24 @@ const InsightsContainer = ({ navigation }) => {
   })
 
   useLayoutEffect(() => {
+    const isPlayable =
+      playerState === PlayerState.IDLE ||
+      playerState === PlayerState.PAUSED ||
+      playerState === PlayerState.STOPPED
     const playButton = () => (
       <TouchableOpacity
         style={{ marginTop: 4, marginRight: 16 }}
-        onPress={
-          playerState === PlayerState.IDLE || playerState === PlayerState.PAUSED
-            ? playPlayer
-            : pausePlayer
-        }
+        onPress={isPlayable ? playPlayer : pausePlayer}
       >
-        <SvgCss
-          width="32"
-          height="32"
-          xml={
-            playerState === PlayerState.IDLE ||
-            playerState === PlayerState.PAUSED
-              ? playXML
-              : pauseXML
-          }
-        />
+        {playerState === PlayerState.LOADING ? (
+          <ActivityIndicator color={Colors.WHITE} />
+        ) : (
+          <SvgCss
+            width="32"
+            height="32"
+            xml={isPlayable ? playXML : pauseXML}
+          />
+        )}
       </TouchableOpacity>
     )
     navigation.setOptions({
