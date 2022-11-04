@@ -23,6 +23,7 @@ import { navigate } from '@/Navigators/utils'
 import { properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
 import { PlayerState } from '@/Hooks/useInsightsData'
+import { useIsFocused } from '@react-navigation/native'
 
 const CARD_HEIGHT = 180
 
@@ -267,6 +268,11 @@ const InsightsContainer = ({ navigation }) => {
       headerRight: playButton,
     })
   }, [playerState, pausePlayer, playPlayer])
+  const isFocused = useIsFocused()
+
+  useEffect(() => {
+    !isFocused && pausePlayer(false)
+  }, [isFocused])
 
   // useEffect(() => {
   //   console.log('')
