@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { AppState } from 'react-native'
+import { Alert, AppState, View } from 'react-native'
+import { useIsFocused } from '@react-navigation/native'
 import TrackPlayer, {
   Event,
   State,
@@ -233,8 +234,10 @@ export default function () {
     TrackPlayer.play().then(() => dispatch(enableReadInsights()))
   }, [playerState])
 
-  const pausePlayer = useCallback((updateStore=true) => {
-    TrackPlayer.pause().then(() =>updateStore && dispatch(disableReadInsights()))
+  const pausePlayer = useCallback((updateStore = true) => {
+    TrackPlayer.pause().then(
+      () => updateStore && dispatch(disableReadInsights()),
+    )
   }, [])
 
   const events = [

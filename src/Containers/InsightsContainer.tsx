@@ -13,7 +13,7 @@ import { SvgCss } from 'react-native-svg'
 import { pauseXML } from '@/Assets/Images/xml-svg/pause'
 import { playXML } from '@/Assets/Images/xml-svg/play'
 import { useTheme, useAppSelector, useInsightsData } from '@/Hooks'
-import { LoadingSpinner, InsightsVisualizer} from '@/Components'
+import { LoadingSpinner, InsightsVisualizer } from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { selectConverseData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
@@ -23,6 +23,7 @@ import { navigate } from '@/Navigators/utils'
 import { properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
 import { PlayerState } from '@/Hooks/useInsightsData'
+import { useIsFocused } from '@react-navigation/native'
 
 const CARD_HEIGHT = 180
 
@@ -267,6 +268,12 @@ const InsightsContainer = ({ navigation }) => {
       headerRight: playButton,
     })
   }, [playerState, pausePlayer, playPlayer])
+
+  const isFocused = useIsFocused()
+
+  useEffect(() => {
+    !isFocused && pausePlayer(false)
+  }, [isFocused])
 
   // useEffect(() => {
   //   console.log('')
