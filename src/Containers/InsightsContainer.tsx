@@ -13,7 +13,7 @@ import { SvgCss } from 'react-native-svg'
 import { pauseXML } from '@/Assets/Images/xml-svg/pause'
 import { playXML } from '@/Assets/Images/xml-svg/play'
 import { useTheme, useAppSelector, useInsightsData } from '@/Hooks'
-import { LoadingSpinner, InsightsVisualizer} from '@/Components'
+import { LoadingSpinner, InsightsVisualizer } from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { selectConverseData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
@@ -297,13 +297,13 @@ const InsightsContainer = ({ navigation }) => {
         <LoadingSpinner />
       ) : (
         <>
-          {insightsData.length > 4 && (
+          {/* {insightsData.length > 4 && (
             <TagFilter
               tagWithIndexes={tagWithIds}
               count={insightsData.length}
               onFilter={setFilteredTags}
             />
-          )}
+          )} */}
           <InsightComponents
             {...props}
             insightsComponents={filteredInsightsComponents}
