@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native'
+import { useIsFocused } from '@react-navigation/native'
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
 import { SvgCss } from 'react-native-svg'
@@ -23,7 +24,6 @@ import { navigate } from '@/Navigators/utils'
 import { properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
 import { PlayerState } from '@/Hooks/useInsightsData'
-import { useIsFocused } from '@react-navigation/native'
 
 const CARD_HEIGHT = 180
 
@@ -268,8 +268,8 @@ const InsightsContainer = ({ navigation }) => {
       headerRight: playButton,
     })
   }, [playerState, pausePlayer, playPlayer])
-  const isFocused = useIsFocused()
 
+  const isFocused = useIsFocused()
   useEffect(() => {
     !isFocused && pausePlayer(false)
   }, [isFocused])
