@@ -12,38 +12,9 @@ import _ from 'lodash'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { properCase, formatValue } from '@/Utils/common'
+import { properCase, getFormattedRowData } from '@/Utils/common'
 import { AdaptiveCard } from '@/Components'
 import { useTheme } from '@/Hooks'
-
-const getStyledRowData = (
-  columns: string[],
-  columnMetadata: ColumnMetadata,
-  row: Record<string, any>,
-) => {
-  // return Object.values(row).map((value: any, index: number) => {
-  const dataFormatter = (column: string) => {
-    // const column = columns[index]
-    const value = row[column]
-    let metadata = columnMetadata[column] || null
-    let isNumeric = metadata ? metadata.isNumericFormat : false
-    let displayValue = value
-    if (isNumeric) {
-      const {
-        prefix,
-        roundedValue: text,
-        suffix,
-      } = formatValue(value, metadata)
-      displayValue = `${prefix}${text} ${suffix}`.trim()
-    }
-    return (
-      <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
-        {displayValue}
-      </Text>
-    )
-  }
-  return columns.map(dataFormatter)
-}
 
 interface TableProps {
   id: string
@@ -56,6 +27,12 @@ interface ItemProps {
   item: Record<string, any>
   index: number
 }
+
+const textdataFormatter = (value: string, isNumeric: boolean) => (
+  <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
+    {value}
+  </Text>
+)
 
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const columnWidth = columns.length <= 2 ? 160 : 120
@@ -96,7 +73,12 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const renderItem = ({ item: row, index }: ItemProps) => (
     <Row
       key={`${index}`}
-      data={getStyledRowData(columns, columnMetadata, row)}
+      data={getFormattedRowData(
+        columns,
+        columnMetadata,
+        row,
+        textdataFormatter,
+      )}
       widthArr={widthArr}
       style={[styles.row, index % 2 === 1 && styles.rowOdd]}
     />
@@ -116,6 +98,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {isSingleRecord ? (
           <AdaptiveCard
+            columns={columns}
             columnMetadata={columnMetadata}
             values={values}
             expanedeView={false}

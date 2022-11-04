@@ -212,6 +212,7 @@ const DataExplorerContainer = ({
     if (isSingleRecord) {
       content = (
         <AdaptiveCard
+          columns={columns}
           columnMetadata={columnMetadata}
           values={values}
           expanedeView={true}

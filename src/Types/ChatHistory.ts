@@ -701,6 +701,7 @@ export interface VendorName2 {
 }
 
 export interface ColumnMetadata {
+  isNumericFormat?: boolean
   [key: string]: any
 }
 

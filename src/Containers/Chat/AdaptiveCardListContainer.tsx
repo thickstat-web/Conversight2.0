@@ -65,6 +65,7 @@ function AdaptiveCardListContainer({
     return (
       <View marginV-6>
         <AdaptiveCard
+          columns={columns}
           columnMetadata={columnMetadata}
           values={[row]}
           expanedeView={true}

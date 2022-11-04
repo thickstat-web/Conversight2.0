@@ -4,18 +4,20 @@ import { View } from 'react-native-ui-lib'
 import { SvgCss } from 'react-native-svg'
 import { DEFAULT_ADAPTIVE_CARD_ROWS } from '@/Config'
 import { useTheme } from '@/Hooks'
-import { properCase } from '@/Utils/common'
+import { getFormattedRowData, properCase } from '@/Utils/common'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import upArrow from '@/Assets/Images/xml-svg/upArrow'
 import downArrow from '@/Assets/Images/xml-svg/downArrow'
 
 export interface AdaptiveCardProps {
+  columns: string[]
   columnMetadata: ColumnMetadata
   values: Array<Record<string, any>>
   expanedeView: boolean
 }
 
 const AdaptiveCard = ({
+  columns,
   columnMetadata,
   values,
   expanedeView = true,
@@ -24,10 +26,12 @@ const AdaptiveCard = ({
   const [expanded, setExpanded] = useState(expanedeView)
   const [row] = values
   const rowValues = Object.entries(row)
+  const formattedValues = getFormattedRowData(columns, columnMetadata, row)
 
-  const renderedRow = rowValues
+  const renderedRow = columns
     .slice(0, expanded ? rowValues.length : DEFAULT_ADAPTIVE_CARD_ROWS)
-    .map(([col, val], index) => {
+    .map((col, index) => {
+      const val = formattedValues[index]
       return (
         <View
           key={index}
