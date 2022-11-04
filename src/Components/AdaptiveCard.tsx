@@ -4,40 +4,50 @@ import { View } from 'react-native-ui-lib'
 import { SvgCss } from 'react-native-svg'
 import { DEFAULT_ADAPTIVE_CARD_ROWS } from '@/Config'
 import { useTheme } from '@/Hooks'
-import { properCase } from '@/Utils/common'
+import { getFormattedRowData, properCase } from '@/Utils/common'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import upArrow from '@/Assets/Images/xml-svg/upArrow'
 import downArrow from '@/Assets/Images/xml-svg/downArrow'
 
 export interface AdaptiveCardProps {
+  columns: string[]
   columnMetadata: ColumnMetadata
   values: Array<Record<string, any>>
+  expanedeView: boolean
 }
 
-const AdaptiveCard = ({ columnMetadata, values }: AdaptiveCardProps) => {
+const AdaptiveCard = ({
+  columns,
+  columnMetadata,
+  values,
+  expanedeView = true,
+}: AdaptiveCardProps) => {
   const { Colors } = useTheme()
-  const [expanded, setExpanded] = useState(false)
-  const row = values[0]
+  const [expanded, setExpanded] = useState(expanedeView)
+  const [row] = values
   const rowValues = Object.entries(row)
+  const formattedValues = getFormattedRowData(columns, columnMetadata, row)
 
-  const renderedRow = rowValues
+  const renderedRow = columns
     .slice(0, expanded ? rowValues.length : DEFAULT_ADAPTIVE_CARD_ROWS)
-    .map(([col, val], index) => {
+    .map((col, index) => {
+      const val = formattedValues[index]
       return (
         <View
           key={index}
           style={[
-            styles.adaptiveCardContainer,
-            { backgroundColor: index % 2 === 1 ? '#f0fcf4' : '' },
+            styles.adaptiveCardItem,
+            // { borderBottomWidth: 1, borderBottomColor: '#EAFAEA' },
+            { backgroundColor: index % 2 === 0 ? '#f0fcf4' : '' },
           ]}
         >
-          <View style={styles.adaptiveCardProps}>
+          <View style={[styles.adaptiveCardColumn]}>
             <Text style={[{ color: Colors.GREEN_MAIN }, styles.propertyName]}>
               {properCase(columnMetadata[col].alias)}
             </Text>
           </View>
 
-          <View style={styles.adaptiveCardProps}>
+          <View style={styles.adaptiveCardColumn}>
             <Text
               style={styles.propertyValue}
               selectable={true}
@@ -51,7 +61,7 @@ const AdaptiveCard = ({ columnMetadata, values }: AdaptiveCardProps) => {
     })
 
   return (
-    <View>
+    <View style={styles.cardContainer}>
       {renderedRow}
       {rowValues.length > DEFAULT_ADAPTIVE_CARD_ROWS && (
         <View row right padding-10>
@@ -84,13 +94,31 @@ const AdaptiveCard = ({ columnMetadata, values }: AdaptiveCardProps) => {
 export default AdaptiveCard
 
 const styles = StyleSheet.create({
-  adaptiveCardProps: {
-    width: 150,
-    padding: 4,
-    paddingVertical: 10,
+  cardContainer: {
+    margin: 2,
+    borderWidth: 2,
+    // borderBottomWidth: 0,
+    borderColor: '#EAFAEA',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+
+    /* For box shadow */
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2,
+
+    elevation: 2,
   },
-  adaptiveCardContainer: {
-    flex: 1,
+  adaptiveCardColumn: {
+    width: 180,
+    padding: 4,
+    paddingVertical: 8,
+  },
+  adaptiveCardItem: {
     flexDirection: 'row',
   },
   propertyName: { fontWeight: '500' },

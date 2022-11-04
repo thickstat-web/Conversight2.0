@@ -122,6 +122,31 @@ export const formatValue = (
   return data
 }
 
+export const getFormattedRowData = (
+  columns: string[],
+  columnMetadata: ColumnMetadata,
+  row: Record<string, any>,
+  formatter?: (value: string, isNumeric: boolean) => string | JSX.Element,
+) => {
+  const dataFormatter = (column: string) => {
+    const value = row[column]
+    let displayValue = `${value}`
+    let isNumeric = false
+    let metadata = columnMetadata[column]
+    if (metadata?.isNumericFormat) {
+      isNumeric = true
+      const {
+        prefix,
+        roundedValue: text,
+        suffix,
+      } = formatValue(value, metadata)
+      displayValue = `${prefix}${text} ${suffix}`.trim()
+    }
+    return formatter ? formatter(displayValue, isNumeric) : displayValue
+  }
+  return columns.map(dataFormatter)
+}
+
 type Extractor<T, P> = (item: T) => P
 
 function getNextBatch<T, P>(

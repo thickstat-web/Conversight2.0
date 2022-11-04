@@ -8,45 +8,13 @@ import {
 } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { Table, Row } from 'react-native-table-component'
-import { SvgCss } from 'react-native-svg'
 import _ from 'lodash'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { properCase, formatValue } from '@/Utils/common'
+import { properCase, getFormattedRowData } from '@/Utils/common'
 import { AdaptiveCard } from '@/Components'
 import { useTheme } from '@/Hooks'
-import menuIcon from '@/Assets/Images/xml-svg/menu'
-import settingsIcon from '@/Assets/Images/xml-svg/settings'
-
-const getStyledRowData = (
-  columns: string[],
-  columnMetadata: ColumnMetadata,
-  row: Record<string, any>,
-) => {
-  // return Object.values(row).map((value: any, index: number) => {
-  const dataFormatter = (column: string) => {
-    // const column = columns[index]
-    const value = row[column]
-    let metadata = columnMetadata[column] || null
-    let isNumeric = metadata ? metadata.isNumericFormat : false
-    let displayValue = value
-    if (isNumeric) {
-      const {
-        prefix,
-        roundedValue: text,
-        suffix,
-      } = formatValue(value, metadata)
-      displayValue = `${prefix}${text} ${suffix}`.trim()
-    }
-    return (
-      <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
-        {displayValue}
-      </Text>
-    )
-  }
-  return columns.map(dataFormatter)
-}
 
 interface TableProps {
   id: string
@@ -60,6 +28,12 @@ interface ItemProps {
   index: number
 }
 
+const textdataFormatter = (value: string, isNumeric: boolean) => (
+  <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
+    {value}
+  </Text>
+)
+
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const columnWidth = columns.length <= 2 ? 160 : 120
   const ROW_HEIGHT = 40
@@ -68,11 +42,6 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
   const [rows, setRows] = useState(values)
-  const [table, setTable] = useState(true)
-
-  // if (values.length > 10) {
-  //   console.log(`col metadata: ${JSON.stringify(columnMetadata, null, 2)}`)
-  // }
 
   const sortTable = (column: string) => {
     const sortDirection = direction === 'desc' ? 'asc' : 'desc'
@@ -104,7 +73,12 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const renderItem = ({ item: row, index }: ItemProps) => (
     <Row
       key={`${index}`}
-      data={getStyledRowData(columns, columnMetadata, row)}
+      data={getFormattedRowData(
+        columns,
+        columnMetadata,
+        row,
+        textdataFormatter,
+      )}
       widthArr={widthArr}
       style={[styles.row, index % 2 === 1 && styles.rowOdd]}
     />
@@ -121,69 +95,15 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
 
   return (
     <View style={styles.container}>
-      {/* <TouchableOpacity
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          borderRadius: 6,
-          borderWidth: 2,
-          borderColor: '#EAFAEA',
-          justifyContent: 'space-evenly',
-          marginBottom: 4,
-        }}
-      >
-        <View
-          flex
-          row
-          center
-          padding-8
-          paddingH-16
-          style={[table && { backgroundColor: '#f0fcf4' }]}
-        >
-          <SvgCss
-            width="20"
-            height="20"
-            xml={menuIcon}
-            style={{ marginHorizontal: 4 }}
-          />
-          <Text
-            style={{
-              color: Colors.GREEN_MAIN,
-              fontWeight: table ? '500' : 'normal',
-            }}
-          >
-            Table
-          </Text>
-        </View>
-        <View
-          flex
-          row
-          center
-          padding-8
-          paddingH-16
-          style={[!table && { backgroundColor: '#f0fcf4' }]}
-        >
-          <SvgCss
-            width="20"
-            height="20"
-            xml={settingsIcon}
-            style={{ marginHorizontal: 4 }}
-          />
-          <Text
-            style={{
-              color: Colors.GREEN_MAIN,
-              fontWeight: !table ? '500' : 'normal',
-            }}
-          >
-            Adaptive Card
-          </Text>
-        </View>
-      </TouchableOpacity> */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         {isSingleRecord ? (
-          <AdaptiveCard columnMetadata={columnMetadata} values={values} />
+          <AdaptiveCard
+            columns={columns}
+            columnMetadata={columnMetadata}
+            values={values}
+            expanedeView={false}
+          />
         ) : (
-          // <View style={styles.tableWrapper}>
           <FlatList
             data={rows}
             initialNumToRender={20}
@@ -204,7 +124,6 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
             renderItem={renderItem}
             listKey={id}
           />
-          // </View>
         )}
       </ScrollView>
     </View>

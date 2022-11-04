@@ -9,16 +9,20 @@ import {
 } from 'react-native'
 import { ActionSheet, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/Components'
+import { AdaptiveCard, Button } from '@/Components'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
 import { properCase } from '@/Utils/common'
 import { selectChatMessages, selectConverseData } from '@/Store/App'
 import { ChartType } from '@/Types/ChatMessage'
 import TableContainer from './TableContainer'
 import ChartContainer from './ChartContainer'
+import AdaptiveCardListContainer from './AdaptiveCardListContainer'
 import BackIcon from '@/Assets/Images/drawer/play-back.svg'
 import NextIcon from '@/Assets/Images/drawer/play-forward.svg'
+import settingsIcon from '@/Assets/Images/xml-svg/settings'
+import menuIcon from '@/Assets/Images/xml-svg/menu'
 import { Colors } from '@/Theme/Variables'
+import { SvgCss } from 'react-native-svg'
 
 type VisualizationTypes = ChartType | 'Table'
 
@@ -58,6 +62,7 @@ const DataExplorerContainer = ({
   // const messages = useAppSelector(selectChatMessages)
   const converseData = useAppSelector(selectConverseData)
   const [visible, setVisible] = useState(false)
+  const [table, setTable] = useState(true)
   const ref = React.useRef<any>()
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
 
@@ -114,18 +119,67 @@ const DataExplorerContainer = ({
     setCurrentSlideIndex(current)
   }
 
-  const renderItem = ({ item }: { item: string }) => {
-    let content = null
-    if (item === 'Table') {
-      content = (
-        <View
-          style={[
-            styles.contentContainer,
-            {
-              width: screenWidth,
-            },
-          ]}
-        >
+  const isSingleRecord = values.length === 1
+
+  const TableOrAdaptiveCard = () => {
+    return (
+      <View
+        style={[
+          styles.contentContainer,
+          {
+            width: screenWidth,
+          },
+        ]}
+      >
+        <View style={styles.segmentWrapper}>
+          <TouchableOpacity
+            style={[
+              styles.segmentButton,
+              table && { backgroundColor: '#f0fcf4' },
+            ]}
+            onPress={() => setTable(true)}
+          >
+            <SvgCss
+              width="20"
+              height="20"
+              xml={menuIcon}
+              style={{ marginHorizontal: 4 }}
+            />
+            <Text
+              style={{
+                color: Colors.GREEN_MAIN,
+                fontWeight: table ? '500' : 'normal',
+              }}
+            >
+              Table
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            padding-8
+            paddingH-16
+            style={[
+              styles.segmentButton,
+              !table && { backgroundColor: '#f0fcf4' },
+            ]}
+            onPress={() => setTable(false)}
+          >
+            <SvgCss
+              width="20"
+              height="20"
+              xml={settingsIcon}
+              style={{ marginHorizontal: 4 }}
+            />
+            <Text
+              style={{
+                color: Colors.GREEN_MAIN,
+                fontWeight: !table ? '500' : 'normal',
+              }}
+            >
+              Card List
+            </Text>
+          </TouchableOpacity>
+        </View>
+        {table ? (
           <ScrollView
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
@@ -139,8 +193,33 @@ const DataExplorerContainer = ({
               values={values}
             />
           </ScrollView>
-        </View>
+        ) : (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <AdaptiveCardListContainer
+              id={id}
+              columns={columns}
+              columnMetadata={columnMetadata}
+              values={values}
+            />
+          </ScrollView>
+        )}
+      </View>
+    )
+  }
+
+  const renderItem = ({ item }: { item: string }) => {
+    let content = null
+    if (isSingleRecord) {
+      content = (
+        <AdaptiveCard
+          columns={columns}
+          columnMetadata={columnMetadata}
+          values={values}
+          expanedeView={true}
+        />
       )
+    } else if (item === 'Table') {
+      content = <TableOrAdaptiveCard />
     } else if (item.indexOf('Chart') !== -1) {
       content = (
         <View
@@ -202,7 +281,9 @@ const DataExplorerContainer = ({
           data={formats}
           ref={ref}
           onMomentumScrollEnd={onScroll}
-          contentContainerStyle={{ height: containerHeight }}
+          contentContainerStyle={{
+            height: containerHeight,
+          }}
           showsHorizontalScrollIndicator={false}
           getItemLayout={getItemLayout}
           horizontal={!tableOnly}
@@ -306,6 +387,22 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
   },
   actionSheet: { borderRadius: 16 },
+  segmentWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginVertical: 8,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#EAFAEA',
+  },
+  segmentButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 8,
+    paddingHorizontal: 16,
+  },
 })
 
 export default React.memo(DataExplorerContainer)

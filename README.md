@@ -7,6 +7,9 @@ git clone https://devops.conversight.ai/frontend/mobile/conversight2.0.git
 cd conversight2.0
 yarn install
 
+# Start the Metro development server
+yarn start --reset-cache
+
 # To run in Android eimulator or device
 yarn android
 
