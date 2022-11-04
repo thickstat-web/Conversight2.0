@@ -270,7 +270,6 @@ const InsightsContainer = ({ navigation }) => {
   }, [playerState, pausePlayer, playPlayer])
 
   const isFocused = useIsFocused()
-
   useEffect(() => {
     !isFocused && pausePlayer(false)
   }, [isFocused])
