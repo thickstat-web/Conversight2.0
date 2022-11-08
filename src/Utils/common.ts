@@ -72,7 +72,13 @@ export const formatValue = (
   }
 
   if (metadata) {
-    const { type, unit = '', additional_data, category, isNumericFormat } = metadata
+    const {
+      type,
+      unit = '',
+      additional_data,
+      category,
+      isNumericFormat,
+    } = metadata
 
     const precision = additional_data?.precision ?? 0
     const precisionFormat = precision > 0 ? '.'.padEnd(precision + 1, '0') : ''
@@ -83,15 +89,15 @@ export const formatValue = (
     let roundedValue = value
     let abbrValue = value
 
-    if (!isNumericFormat || category === 'flag') {
-      formattedValue = value
-      roundedValue = value
-      abbrValue = value
-    } else if (category === 'date') {
+    if (category === 'date') {
       const datetimeArr = `${value}`.split(' ')
       formattedValue = datetimeArr[0]
       roundedValue = datetimeArr[0]
       abbrValue = datetimeArr[0]
+    } else if (!isNumericFormat || category === 'flag') {
+      formattedValue = value
+      roundedValue = value
+      abbrValue = value
     } else if (type === 'currency') {
       const currency = unit ? unit : ''
       // if (currency === '$') {
@@ -133,7 +139,8 @@ export const getFormattedRowData = (
     let displayValue = `${value}`
     let isNumeric = false
     let metadata = columnMetadata[column]
-    if (metadata?.isNumericFormat) {
+    if (metadata?.isNumericFormat || metadata.category === 'date') {
+    //  console.log('the metadata values are ' + JSON.stringify(metadata))
       isNumeric = true
       const {
         prefix,
