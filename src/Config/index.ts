@@ -1,7 +1,22 @@
 import { getSystemName, getSystemVersion } from 'react-native-device-info'
-export const CS_API_HOST = 'api.staging.conversight.ai'
-export const BOT_API_HOST = 'bot.staging.conversight.ai'
-export const INGRESS_API_HOST = 'ingress.staging.conversight.ai'
+
+const env = {
+  STAGING: {
+    CS_API_HOST: 'api.staging.conversight.ai',
+    BOT_API_HOST: 'bot.staging.conversight.ai',
+    INGRESS_API_HOST: 'ingress.staging.conversight.ai'
+  },
+  PRODUCTION: {
+    CS_API_HOST: 'api.conversight.ai',
+    BOT_API_HOST: 'bot.conversight.ai',
+    INGRESS_API_HOST: 'ingress.conversight.ai'
+  },
+}
+
+/**
+ * Sets the target environment based on the build type (Debug or Release Build)
+ */
+export const { CS_API_HOST, BOT_API_HOST, INGRESS_API_HOST } = __DEV__ ? env.STAGING : env.PRODUCTION
 
 export const Config = {
   CS_API_HOST,
