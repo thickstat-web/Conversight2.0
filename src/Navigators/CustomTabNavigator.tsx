@@ -52,10 +52,10 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
 
   return (
     <ImageBackground
-      resizeMode="cover"
+      resizeMode='cover'
       style={{
         // backgroundColor: 'transparent',
-        marginTop: -50,
+        marginTop: -80,
       }}
       source={botNavBG}
     >
