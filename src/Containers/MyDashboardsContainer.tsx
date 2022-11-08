@@ -54,8 +54,8 @@ const PinboardCard = React.memo(
     const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
     const { name, ownedByName, tags, updatedAt } = pinboard
     const sharedBoard = ownedByName !== undefined && ownedByName !== null
-    
-    // For Getting Unique Tags From Duplicate Tags
+
+    // For Getting Unique Tags From Duplicate
     const uniqTags = Array.from(new Set(tags))
 
     const showTags = 3
@@ -69,8 +69,8 @@ const PinboardCard = React.memo(
       if (uniqTags.length > showTags) {
         renderedTags.push(
           <CardTag
-            key={`${uniqTags.length}`}
-            tag={`${uniqTags.length - showTags}`}
+            key={`${tags.length}`}
+            tag={`${tags.length - showTags}`}
             remaining={true}
           />,
         )
@@ -120,7 +120,7 @@ const TagFilter = React.memo(
   }: {
     tagWithIndexes: Record<string, number[]>
     count: number
-    onFilter: (uniqTags: string[]) => void
+    onFilter: (tags: string[]) => void
   }) => {
     const { Colors, Fonts } = useTheme()
     const [filterTags, setFilterTags] = useState<string[]>([])
@@ -145,17 +145,17 @@ const TagFilter = React.memo(
     const renderTag = ({ item: tag }: { item: string }) => {
       const toggleTagSelection = () => {
         setFilterTags(prevTags => {
-          let uniqTags: string[] = []
+          let tags: string[] = []
           if (tag === VIEW_ALL) {
-            uniqTags = []
+            tags = []
           } else if (prevTags.includes(tag)) {
-            uniqTags = prevTags.filter(item => item !== tag)
+            tags = prevTags.filter(item => item !== tag)
           } else {
             prevTags.push(tag)
-            uniqTags = allTags.filter(item => prevTags.includes(item))
+            tags = allTags.filter(item => prevTags.includes(item))
           }
-          onFilter(uniqTags)
-          return [...uniqTags]
+          onFilter(tags)
+          return [...tags]
         })
       }
 

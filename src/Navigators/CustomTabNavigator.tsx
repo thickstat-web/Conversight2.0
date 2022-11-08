@@ -52,7 +52,7 @@ const CustomTabNavigation = ({ state, descriptors, navigation }: Props) => {
 
   return (
     <ImageBackground
-      resizeMode='cover'
+      resizeMode="cover"
       style={{
         // backgroundColor: 'transparent',
         marginTop: -80,

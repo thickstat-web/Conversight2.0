@@ -127,7 +127,7 @@ const DataExplorerContainer = ({
         style={[
           styles.contentContainer,
           {
-            width: screenWidth
+            width: screenWidth,
           },
         ]}
       >
@@ -212,12 +212,12 @@ const DataExplorerContainer = ({
     if (isSingleRecord) {
       content = (
         <ScrollView>
-        <AdaptiveCard
-          columns={columns}
-          columnMetadata={columnMetadata}
-          values={values}
-          expanedeView={true}
-        />
+          <AdaptiveCard
+            columns={columns}
+            columnMetadata={columnMetadata}
+            values={values}
+            expanedeView={true}
+          />
         </ScrollView>
       )
     } else if (item === 'Table') {

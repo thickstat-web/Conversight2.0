@@ -60,17 +60,17 @@ export default function () {
 
   const updateInsightComponent =
     (id: string, data: Partial<InsightComponent>) =>
-      (prev: InsightComponent[]) => {
-        const tempInsightsComponents = [...prev]
-        const idx = prev.findIndex(item => item.id === id)
-        if (idx !== -1) {
-          tempInsightsComponents[idx] = {
-            ...prev[idx],
-            ...data,
-          }
+    (prev: InsightComponent[]) => {
+      const tempInsightsComponents = [...prev]
+      const idx = prev.findIndex(item => item.id === id)
+      if (idx !== -1) {
+        tempInsightsComponents[idx] = {
+          ...prev[idx],
+          ...data,
         }
-        return tempInsightsComponents
       }
+      return tempInsightsComponents
+    }
 
   const storeProcessedData = useCallback(
     ({ converseData }: { converseData: ConverseData }) => {
@@ -227,7 +227,10 @@ export default function () {
   }, [insightsData, readInsights])
 
   const playPlayer = useCallback(async () => {
-    if (playerState === PlayerState.STOPPED || await TrackPlayer.getCurrentTrack() === voices.length - 1) {
+    if (
+      playerState === PlayerState.STOPPED ||
+      (await TrackPlayer.getCurrentTrack()) === voices.length - 1
+    ) {
       await TrackPlayer.reset()
       await TrackPlayer.add(voices)
     }
@@ -238,7 +241,6 @@ export default function () {
     TrackPlayer.pause().then(
       () => updateStore && dispatch(disableReadInsights()),
     )
-    TrackPlayer.pause().then(() => updateStore && dispatch(disableReadInsights()))
   }, [])
 
   const events = [
