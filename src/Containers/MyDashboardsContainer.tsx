@@ -54,20 +54,23 @@ const PinboardCard = React.memo(
     const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
     const { name, ownedByName, tags, updatedAt } = pinboard
     const sharedBoard = ownedByName !== undefined && ownedByName !== null
+    
+    // For Getting Unique Tags From Duplicate Tags
+    const uniqTags = Array.from(new Set(tags))
 
     const showTags = 3
     let renderedTags = null
-    if (tags.length > 0) {
-      renderedTags = tags
+    if (uniqTags.length > 0) {
+      renderedTags = uniqTags
         .slice(0, showTags)
         .map((tag, index) => <CardTag key={`${index}`} tag={tag} />)
 
       // Render remaining count tag
-      if (tags.length > showTags) {
+      if (uniqTags.length > showTags) {
         renderedTags.push(
           <CardTag
-            key={`${tags.length}`}
-            tag={`${tags.length - showTags}`}
+            key={`${uniqTags.length}`}
+            tag={`${uniqTags.length - showTags}`}
             remaining={true}
           />,
         )
@@ -117,7 +120,7 @@ const TagFilter = React.memo(
   }: {
     tagWithIndexes: Record<string, number[]>
     count: number
-    onFilter: (tags: string[]) => void
+    onFilter: (uniqTags: string[]) => void
   }) => {
     const { Colors, Fonts } = useTheme()
     const [filterTags, setFilterTags] = useState<string[]>([])
@@ -142,17 +145,17 @@ const TagFilter = React.memo(
     const renderTag = ({ item: tag }: { item: string }) => {
       const toggleTagSelection = () => {
         setFilterTags(prevTags => {
-          let tags: string[] = []
+          let uniqTags: string[] = []
           if (tag === VIEW_ALL) {
-            tags = []
+            uniqTags = []
           } else if (prevTags.includes(tag)) {
-            tags = prevTags.filter(item => item !== tag)
+            uniqTags = prevTags.filter(item => item !== tag)
           } else {
             prevTags.push(tag)
-            tags = allTags.filter(item => prevTags.includes(item))
+            uniqTags = allTags.filter(item => prevTags.includes(item))
           }
-          onFilter(tags)
-          return [...tags]
+          onFilter(uniqTags)
+          return [...uniqTags]
         })
       }
 
