@@ -69,8 +69,8 @@ const PinboardCard = React.memo(
       if (uniqTags.length > showTags) {
         renderedTags.push(
           <CardTag
-            key={`${tags.length}`}
-            tag={`${tags.length - showTags}`}
+            key={`${uniqTags.length}`}
+            tag={`${uniqTags.length - showTags}`}
             remaining={true}
           />,
         )
