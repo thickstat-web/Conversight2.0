@@ -124,12 +124,11 @@ const DataExplorerContainer = ({
   const TableOrAdaptiveCard = () => {
     return (
       <View
-        style={[
-          styles.contentContainer,
-          {
-            width: screenWidth,
-          },
-        ]}
+        style={{
+          backgroundColor: Colors.WHITE,
+          paddingHorizontal: 8,
+          width: screenWidth,
+        }}
       >
         <View style={styles.segmentWrapper}>
           <TouchableOpacity
@@ -234,7 +233,6 @@ const DataExplorerContainer = ({
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.contentContainer}
-            style={{ width: screenWidth }}
           >
             <ChartContainer
               key={id}
@@ -265,24 +263,25 @@ const DataExplorerContainer = ({
   }
 
   const Header = () => (
-    <View paddingV-8 paddingH-16>
+    <View paddingT-6 paddingB-4 paddingH-16>
       <Text style={styles.cardTitle}>{properCase(title, true)}</Text>
     </View>
   )
 
   const options = buildOptions(onSelect)
   const tableOnly = formats.length === 1
-  const containerHeight = screenHeight * (tableOnly ? 0.8 : 0.7)
+  const containerHeight = screenHeight * (tableOnly ? 1 : 0.81)
   return (
     <View flex style={{ backgroundColor: Colors.WHITE }}>
       {title.length > 0 && <Header />}
-      <View flex-6 center>
+      <View flex-6>
         <FlatList
           data={formats}
           ref={ref}
           onMomentumScrollEnd={onScroll}
           contentContainerStyle={{
             height: containerHeight,
+            paddingBottom: 64,
           }}
           showsHorizontalScrollIndicator={false}
           getItemLayout={getItemLayout}
@@ -294,10 +293,9 @@ const DataExplorerContainer = ({
 
       {formats.length > 1 && (
         <View
-          flex-1
           style={{
             backgroundColor: Colors.WHITE,
-            paddingTop: 24,
+            paddingBottom: 32,
             alignItems: 'center',
           }}
         >
@@ -352,15 +350,16 @@ const DataExplorerContainer = ({
 const styles = StyleSheet.create({
   moreOptionsButton: { fontSize: 30 },
   contentContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    // alignItems: 'center',
+    // justifyContent: 'center',
     backgroundColor: Colors.WHITE,
     paddingHorizontal: 8,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: Colors.GREEN_DARK,
+    textAlign: 'center',
   },
   dotsContainer: {
     display: 'flex',
@@ -390,7 +389,7 @@ const styles = StyleSheet.create({
   segmentWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginVertical: 8,
+    marginVertical: 4,
     borderRadius: 6,
     borderWidth: 2,
     borderColor: '#EAFAEA',
@@ -400,7 +399,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 8,
+    padding: 6,
     paddingHorizontal: 16,
   },
 })

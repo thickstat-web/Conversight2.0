@@ -63,7 +63,7 @@ function AdaptiveCardListContainer({
 
   const renderAdaptiveCardItem = ({ item: row, index }: ItemProps) => {
     return (
-      <View marginV-6>
+      <View marginB-10>
         <AdaptiveCard
           columns={columns}
           columnMetadata={columnMetadata}
@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    marginTop: 2,
     // borderRadius: 8,
     // borderWidth: 2,
     // borderColor: '#EAFAEA',

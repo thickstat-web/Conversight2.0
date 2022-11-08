@@ -106,7 +106,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
         ) : (
           <FlatList
             data={rows}
-            initialNumToRender={20}
+            // initialNumToRender={20}
             style={styles.tableWrapper}
             // contentContainerStyle={styles.tableWrapper}
             ListHeaderComponent={
@@ -119,7 +119,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
                 />
               </Table>
             }
-            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
             getItemLayout={getItemLayout}
             renderItem={renderItem}
             listKey={id}

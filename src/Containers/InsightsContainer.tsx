@@ -303,13 +303,13 @@ const InsightsContainer = ({ navigation }) => {
         <LoadingSpinner />
       ) : (
         <>
-          {/* {insightsData.length > 4 && (
+          {insightsData.length > 4 && (
             <TagFilter
               tagWithIndexes={tagWithIds}
               count={insightsData.length}
               onFilter={setFilteredTags}
             />
-          )} */}
+          )}
           <InsightComponents
             {...props}
             insightsComponents={filteredInsightsComponents}

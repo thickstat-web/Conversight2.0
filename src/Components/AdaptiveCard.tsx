@@ -41,13 +41,13 @@ const AdaptiveCard = ({
             { backgroundColor: index % 2 === 0 ? '#f0fcf4' : '' },
           ]}
         >
-          <View style={[styles.adaptiveCardColumn]}>
+          <View style={styles.titleColumn}>
             <Text style={[{ color: Colors.GREEN_MAIN }, styles.propertyName]}>
               {properCase(columnMetadata[col].alias)}
             </Text>
           </View>
 
-          <View style={styles.adaptiveCardColumn}>
+          <View style={styles.valueColumn}>
             <Text
               style={styles.propertyValue}
               selectable={true}
@@ -95,7 +95,7 @@ export default AdaptiveCard
 
 const styles = StyleSheet.create({
   cardContainer: {
-    margin: 2,
+    // margin: 2,
     borderWidth: 2,
     // borderBottomWidth: 0,
     borderColor: '#EAFAEA',
@@ -113,14 +113,24 @@ const styles = StyleSheet.create({
 
     elevation: 2,
   },
-  adaptiveCardColumn: {
-    width: 180,
+  adaptiveCardItem: {
+    flexDirection: 'row',
+    paddingHorizontal: 2,
+  },
+  titleColumn: {
+    flex: 1,
     padding: 4,
     paddingVertical: 8,
   },
-  adaptiveCardItem: {
-    flexDirection: 'row',
+  valueColumn: {
+    flex: 2,
+    padding: 4,
+    paddingVertical: 8,
   },
-  propertyName: { fontWeight: '500' },
-  propertyValue: { color: '#595959' },
+  propertyName: {
+    fontWeight: '500',
+  },
+  propertyValue: {
+    color: '#595959',
+  },
 })
