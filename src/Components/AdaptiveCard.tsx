@@ -70,11 +70,12 @@ const AdaptiveCard = ({
             onPress={() => setExpanded(!expanded)}
           >
             <Text
-              style={{
-                color: Colors.GREEN_MAIN,
-                textDecorationLine: 'underline',
-                letterSpacing: 0.4,
-              }}
+              style={[
+                {
+                  color: Colors.GREEN_MAIN,
+                },
+                styles.expandCollapseStyle,
+              ]}
             >
               {expanded ? 'Collapse' : 'Expand'}
             </Text>
@@ -132,5 +133,9 @@ const styles = StyleSheet.create({
   },
   propertyValue: {
     color: '#595959',
+  },
+  expandCollapseStyle: {
+    textDecorationLine: 'underline',
+    letterSpacing: 0.8,
   },
 })

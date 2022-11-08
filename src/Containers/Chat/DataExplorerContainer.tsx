@@ -210,12 +210,14 @@ const DataExplorerContainer = ({
     let content = null
     if (isSingleRecord) {
       content = (
-        <AdaptiveCard
-          columns={columns}
-          columnMetadata={columnMetadata}
-          values={values}
-          expanedeView={true}
-        />
+        <ScrollView>
+          <AdaptiveCard
+            columns={columns}
+            columnMetadata={columnMetadata}
+            values={values}
+            expanedeView={true}
+          />
+        </ScrollView>
       )
     } else if (item === 'Table') {
       content = <TableOrAdaptiveCard />

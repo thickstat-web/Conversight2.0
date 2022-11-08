@@ -55,19 +55,22 @@ const PinboardCard = React.memo(
     const { name, ownedByName, tags, updatedAt } = pinboard
     const sharedBoard = ownedByName !== undefined && ownedByName !== null
 
+    // For Getting Unique Tags From Duplicate
+    const uniqTags = Array.from(new Set(tags))
+
     const showTags = 3
     let renderedTags = null
-    if (tags.length > 0) {
-      renderedTags = tags
+    if (uniqTags.length > 0) {
+      renderedTags = uniqTags
         .slice(0, showTags)
         .map((tag, index) => <CardTag key={`${index}`} tag={tag} />)
 
       // Render remaining count tag
-      if (tags.length > showTags) {
+      if (uniqTags.length > showTags) {
         renderedTags.push(
           <CardTag
-            key={`${tags.length}`}
-            tag={`${tags.length - showTags}`}
+            key={`${uniqTags.length}`}
+            tag={`${uniqTags.length - showTags}`}
             remaining={true}
           />,
         )

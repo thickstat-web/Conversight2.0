@@ -35,6 +35,7 @@ const textdataFormatter = (value: string, isNumeric: boolean) => (
 )
 
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
+  //console.log("The Table Values Are "+values.length)
   const columnWidth = columns.length <= 2 ? 160 : 120
   const ROW_HEIGHT = 40
   const widthArr = new Array(columns.length).fill(columnWidth)
@@ -56,6 +57,11 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       columnMetadata && columnMetadata[column]
         ? columnMetadata[column].alias
         : column
+    // console.log("columnLabel values are "+columnLabel)
+    // console.log("columnLabel column values are "+columnMetadata[column])
+    // console.log("column label column values are "+JSON.stringify(columnMetadata[column]))
+    // console.log("column alias values are "+columnMetadata[column].alias)
+    // console.log("column meta data is "+JSON.stringify(columnMetadata));
     return (
       <TouchableOpacity
         style={styles.headerLabel}
@@ -92,6 +98,8 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   })
 
   const isSingleRecord = values.length === 1
+
+  //console.log("the table values are "+ JSON.stringify(values));
 
   return (
     <View style={styles.container}>
