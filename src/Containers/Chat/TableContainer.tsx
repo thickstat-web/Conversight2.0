@@ -13,7 +13,6 @@ import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import { properCase, getFormattedRowData } from '@/Utils/common'
-import { AdaptiveCard } from '@/Components'
 import { useTheme } from '@/Hooks'
 
 interface TableProps {
@@ -97,42 +96,29 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     index,
   })
 
-  const isSingleRecord = values.length === 1
-
-  //console.log("the table values are "+ JSON.stringify(values));
-
   return (
     <View style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        {isSingleRecord ? (
-          <AdaptiveCard
-            columns={columns}
-            columnMetadata={columnMetadata}
-            values={values}
-            expanedeView={false}
-          />
-        ) : (
-          <FlatList
-            data={rows}
-            // initialNumToRender={20}
-            style={styles.tableWrapper}
-            // contentContainerStyle={styles.tableWrapper}
-            ListHeaderComponent={
-              <Table>
-                <Row
-                  data={headerList}
-                  widthArr={widthArr}
-                  style={styles.header}
-                  // textStyle={styles.headerText}
-                />
-              </Table>
-            }
-            showsVerticalScrollIndicator={false}
-            getItemLayout={getItemLayout}
-            renderItem={renderItem}
-            listKey={id}
-          />
-        )}
+        <FlatList
+          data={rows}
+          // initialNumToRender={20}
+          style={styles.tableWrapper}
+          // contentContainerStyle={styles.tableWrapper}
+          ListHeaderComponent={
+            <Table>
+              <Row
+                data={headerList}
+                widthArr={widthArr}
+                style={styles.header}
+                // textStyle={styles.headerText}
+              />
+            </Table>
+          }
+          showsVerticalScrollIndicator={false}
+          getItemLayout={getItemLayout}
+          renderItem={renderItem}
+          listKey={id}
+        />
       </ScrollView>
     </View>
   )

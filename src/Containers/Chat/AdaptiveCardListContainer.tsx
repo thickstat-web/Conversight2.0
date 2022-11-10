@@ -39,11 +39,12 @@ const getStyledRowData = (
   return columns.map(dataFormatter)
 }
 
-interface TableProps {
+interface AdaptiveCardListContainerProps {
   id: string
   columns: string[]
   columnMetadata: ColumnMetadata
   values: Array<Record<string, any>>
+  expandAll: boolean
 }
 
 interface ItemProps {
@@ -56,7 +57,8 @@ function AdaptiveCardListContainer({
   columns,
   columnMetadata,
   values,
-}: TableProps) {
+  expandAll,
+}: AdaptiveCardListContainerProps) {
   // const ROW_HEIGHT = 40
   const { Layout, Colors, Common, Fonts } = useTheme()
   const [rows, setRows] = useState(values)
@@ -68,7 +70,8 @@ function AdaptiveCardListContainer({
           columns={columns}
           columnMetadata={columnMetadata}
           values={[row]}
-          expanedeView={true}
+          expanedeView={expandAll}
+          expandable={true}
         />
       </View>
     )
@@ -76,7 +79,7 @@ function AdaptiveCardListContainer({
 
   return (
     <View style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      {/* <ScrollView showsVerticalScrollIndicator={false}> */}
         <FlatList
           data={rows}
           // initialNumToRender={20}
@@ -84,7 +87,7 @@ function AdaptiveCardListContainer({
           renderItem={renderAdaptiveCardItem}
           listKey={id}
         />
-      </ScrollView>
+      {/* </ScrollView> */}
     </View>
   )
 }
