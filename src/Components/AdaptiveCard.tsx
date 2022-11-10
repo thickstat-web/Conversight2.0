@@ -1,19 +1,18 @@
 import React, { useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import { View } from 'react-native-ui-lib'
-import { SvgCss } from 'react-native-svg'
 import { DEFAULT_ADAPTIVE_CARD_ROWS } from '@/Config'
 import { useTheme } from '@/Hooks'
+import { ExpandButton } from '@/Components'
 import { getFormattedRowData, properCase } from '@/Utils/common'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import upArrow from '@/Assets/Images/xml-svg/upArrow'
-import downArrow from '@/Assets/Images/xml-svg/downArrow'
 
 export interface AdaptiveCardProps {
   columns: string[]
   columnMetadata: ColumnMetadata
   values: Array<Record<string, any>>
   expanedeView: boolean
+  expandable: boolean
 }
 
 const AdaptiveCard = ({
@@ -21,6 +20,7 @@ const AdaptiveCard = ({
   columnMetadata,
   values,
   expanedeView = true,
+  expandable = true,
 }: AdaptiveCardProps) => {
   const { Colors } = useTheme()
   const [expanded, setExpanded] = useState(expanedeView)
@@ -63,36 +63,21 @@ const AdaptiveCard = ({
   return (
     <View style={styles.cardContainer}>
       {renderedRow}
-      {rowValues.length > DEFAULT_ADAPTIVE_CARD_ROWS && (
+      {expandable && rowValues.length > DEFAULT_ADAPTIVE_CARD_ROWS && (
         <View row right padding-10>
-          <TouchableOpacity
-            style={{ flexDirection: 'row' }}
+          <ExpandButton
+            collapsedText="Collapse"
+            expandedText="Expand"
+            expanded={expanded}
             onPress={() => setExpanded(!expanded)}
-          >
-            <Text
-              style={[
-                {
-                  color: Colors.GREEN_MAIN,
-                },
-                styles.expandCollapseStyle,
-              ]}
-            >
-              {expanded ? 'Collapse' : 'Expand'}
-            </Text>
-            <SvgCss
-              width="10"
-              height="10"
-              xml={expanded ? upArrow : downArrow}
-              style={{ marginTop: 4, marginHorizontal: 4 }}
-            />
-          </TouchableOpacity>
+          />
         </View>
       )}
     </View>
   )
 }
 
-export default AdaptiveCard
+export default React.memo(AdaptiveCard)
 
 const styles = StyleSheet.create({
   cardContainer: {
@@ -116,7 +101,6 @@ const styles = StyleSheet.create({
   },
   adaptiveCardItem: {
     flexDirection: 'row',
-    paddingHorizontal: 2,
   },
   titleColumn: {
     flex: 1,
@@ -133,9 +117,5 @@ const styles = StyleSheet.create({
   },
   propertyValue: {
     color: '#595959',
-  },
-  expandCollapseStyle: {
-    textDecorationLine: 'underline',
-    letterSpacing: 0.8,
   },
 })

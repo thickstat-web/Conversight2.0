@@ -9,7 +9,7 @@ import {
 } from 'react-native'
 import { ActionSheet, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
-import { AdaptiveCard, Button } from '@/Components'
+import { AdaptiveCard, Button, ExpandButton } from '@/Components'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
 import { properCase } from '@/Utils/common'
 import { selectChatMessages, selectConverseData } from '@/Store/App'
@@ -23,6 +23,8 @@ import settingsIcon from '@/Assets/Images/xml-svg/settings'
 import menuIcon from '@/Assets/Images/xml-svg/menu'
 import { Colors } from '@/Theme/Variables'
 import { SvgCss } from 'react-native-svg'
+import upArrow from '@/Assets/Images/xml-svg/upArrow'
+import downArrow from '@/Assets/Images/xml-svg/downArrow'
 
 type VisualizationTypes = ChartType | 'Table'
 
@@ -120,6 +122,7 @@ const DataExplorerContainer = ({
   }
 
   const isSingleRecord = values.length === 1
+  const [expandedAll, setExpandedAll] = useState(false)
 
   const TableOrAdaptiveCard = () => {
     return (
@@ -193,14 +196,26 @@ const DataExplorerContainer = ({
             />
           </ScrollView>
         ) : (
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <AdaptiveCardListContainer
-              id={id}
-              columns={columns}
-              columnMetadata={columnMetadata}
-              values={values}
-            />
-          </ScrollView>
+          <>
+            <View row right padding-10>
+              <ExpandButton
+                collapsedText="Collapse All"
+                expandedText="Expand All"
+                expanded={expandedAll}
+                onPress={() => setExpandedAll(!expandedAll)}
+              />
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false}
+            nestedScrollEnabled={true}>
+              <AdaptiveCardListContainer
+                id={id}
+                columns={columns}
+                columnMetadata={columnMetadata}
+                values={values}
+                expandAll={expandedAll}
+              />
+            </ScrollView>
+          </>
         )}
       </View>
     )
@@ -216,6 +231,7 @@ const DataExplorerContainer = ({
             columnMetadata={columnMetadata}
             values={values}
             expanedeView={true}
+            expandable={true}
           />
         </ScrollView>
       )
@@ -402,6 +418,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 6,
+    paddingHorizontal: 16,
+  },
+  expandall: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 16,
   },
 })

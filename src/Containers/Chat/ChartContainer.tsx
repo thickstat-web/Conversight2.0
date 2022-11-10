@@ -283,7 +283,7 @@ const LineChart = ({
             }
           />
         }
-        width={screenWidth - 20 * 2}
+        width={screenWidth - 24 * 2}
         theme={VictoryTheme.material}
         style={{
           parent: {

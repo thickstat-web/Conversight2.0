@@ -2,6 +2,7 @@ import React from 'react'
 import { StyleSheet } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
 import { useTheme } from '@/Hooks'
+import { AdaptiveCard } from '@/Components'
 import ChartContainer from '@/Containers/Chat/ChartContainer'
 import TableContainer from '@/Containers/Chat/TableContainer'
 import { ChartType, ConverseData, TextData } from '@/Types/ChatMessage'
@@ -28,14 +29,15 @@ export const TextContainer = ({ data }: { data: TextData }) => {
   const { prefix, abbrValue, suffix } = data
   const displayValue = `${prefix}${abbrValue} ${suffix}`.trim()
   return (
-    <Text
-      margin-4
-      style={[Fonts.textSmall, styles.message]}
-      selectable={true}
-      selectionColor={Colors.GREEN_LIGHTEST}
-    >
-      {displayValue}
-    </Text>
+    <View padding-4>
+      <Text
+        style={[Fonts.textSmall, styles.message]}
+        selectable={true}
+        selectionColor={Colors.GREEN_LIGHTEST}
+      >
+        {displayValue}
+      </Text>
+    </View>
   )
 }
 
@@ -96,6 +98,11 @@ class Visualizer extends React.PureComponent<VisualizerProps> {
   isChart() {
     const { values } = this.props.data
     return this.visualFormatIncludes('Chart') && values.length < 100
+  }
+
+  isAdaptiveCard() {
+    const { values } = this.props.data
+    return this.visualFormatIncludes('Table') && values.length === 1
   }
 
   isTable() {
@@ -174,6 +181,16 @@ export class InsightsVisualizer extends Visualizer {
           title={message}
         />
       )
+    } else if (this.isAdaptiveCard()) {
+      content = (
+        <AdaptiveCard
+          columns={columns}
+          columnMetadata={columnMetadata}
+          values={values}
+          expandable={false}
+          expanedeView={false}
+        />
+      )
     } else if (this.isTable()) {
       const renderSize = 5
       const total = values.length
@@ -228,6 +245,16 @@ export class ChatVisualizer extends Visualizer {
           visualFormats={visualFormats}
           values={values}
           title={message}
+        />
+      )
+    } else if (this.isAdaptiveCard()) {
+      content = (
+        <AdaptiveCard
+          columns={columns}
+          columnMetadata={columnMetadata}
+          values={values}
+          expandable={false}
+          expanedeView={false}
         />
       )
     } else if (this.isTable()) {
@@ -297,6 +324,16 @@ export class DashboardVisualizer extends Visualizer {
             title={message}
           />
         </>
+      )
+    } else if (this.isAdaptiveCard()) {
+      content = (
+        <AdaptiveCard
+          columns={columns}
+          columnMetadata={columnMetadata}
+          values={values}
+          expandable={false}
+          expanedeView={false}
+        />
       )
     } else if (this.isTable()) {
       const renderSize = 5

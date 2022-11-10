@@ -46,7 +46,7 @@ const UserMessageContainer = React.memo(
 export const FailureMessageContainer = ({ message }: { message: string }) => {
   const { Colors, Fonts } = useTheme()
   return (
-    <View style={[styles.athenaMessageContainer, { marginTop: 0 }]}>
+    <View style={styles.athenaMessageContainer}>
       <View style={styles.athenaIcon}>
         <Image source={AthenaIcon} forwardedRef={undefined} modifiers={{}} />
       </View>
@@ -57,7 +57,7 @@ export const FailureMessageContainer = ({ message }: { message: string }) => {
             { backgroundColor: Colors.WHITE },
           ]}
         >
-          <Text margin-4 marginV-8 style={[Fonts.textSmall, styles.message]}>
+          <Text margin-8 marginV-12 style={[Fonts.textSmall, styles.message]}>
             {message}
           </Text>
         </View>
@@ -76,16 +76,23 @@ const AthenaMessageContainer = React.memo(
         <View style={styles.athenaIcon}>
           <Image source={AthenaIcon} forwardedRef={undefined} modifiers={{}} />
         </View>
-        <View flex left>
+        <View flex row>
           <View
-            style={[
-              styles.athenaMessageWrapper,
-              { backgroundColor: Colors.WHITE },
-            ]}
+            flex
+            onTouchStart={() => setMove(false)}
+            onTouchMove={() => setMove(true)}
+            onTouchEnd={() => {
+              if (Platform.OS === 'android' || !move) {
+                navigate(DATA_EXPLORER, {
+                  id: message.id,
+                  title: message.message,
+                })
+              }
+            }}
           >
-            <View
-              marginV-8
-              flex
+            {/* <View
+              // flex
+              style={{}}
               onTouchStart={() => setMove(false)}
               onTouchMove={() => setMove(true)}
               onTouchEnd={() => {
@@ -113,9 +120,16 @@ const AthenaMessageContainer = React.memo(
                 //   `,
                 // )
               }}
+            > */}
+            <View
+              style={[
+                styles.athenaMessageWrapper,
+                { backgroundColor: Colors.WHITE, padding: 8 },
+              ]}
             >
               <ChatVisualizer data={message} />
             </View>
+            {/* </View> */}
           </View>
         </View>
       </View>
@@ -220,7 +234,7 @@ export default React.memo(ChatMessageContainer)
 
 const styles = StyleSheet.create({
   userMessageWrapper: {
-    marginRight: 16,
+    marginRight: 8,
     marginVertical: 8,
     padding: 16,
     borderRadius: 16,
@@ -232,16 +246,17 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-end',
-    justifyContent: 'flex-start',
-    marginRight: 16,
-    marginVertical: 4,
+    // justifyContent: 'flex-start',
+    // marginVertical: 4,
+    // paddingVertical:8,
+    marginRight: 8,
   },
   athenaIcon: {
     justifyContent: 'flex-end',
     marginLeft: 2,
-    marginRight: 4,
-    bottom: -16,
-    width: 52,
+    marginRight: 0,
+    bottom: -12,
+    // width: 52,
     transform: [{ scale: 0.65 }],
   },
   athenaMessageWrapper: {
