@@ -3,6 +3,7 @@ import { StyleSheet, Text } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { DEFAULT_ADAPTIVE_CARD_ROWS } from '@/Config'
 import { useTheme } from '@/Hooks'
+import { Colors } from '@/Theme/Variables'
 import { ExpandButton } from '@/Components'
 import { getFormattedRowData, properCase } from '@/Utils/common'
 import { ColumnMetadata } from '@/Types/ChatHistory'
@@ -26,10 +27,11 @@ const AdaptiveCard = ({
   const [expanded, setExpanded] = useState(expanedeView)
   const [row] = values
   const rowValues = Object.entries(row)
+  const totalRows = rowValues.length
   const formattedValues = getFormattedRowData(columns, columnMetadata, row)
 
   const renderedRow = columns
-    .slice(0, expanded ? rowValues.length : DEFAULT_ADAPTIVE_CARD_ROWS)
+    .slice(0, expanded ? totalRows : DEFAULT_ADAPTIVE_CARD_ROWS)
     .map((col, index) => {
       const val = formattedValues[index]
       return (
@@ -37,7 +39,6 @@ const AdaptiveCard = ({
           key={index}
           style={[
             styles.adaptiveCardItem,
-            // { borderBottomWidth: 1, borderBottomColor: '#EAFAEA' },
             { backgroundColor: index % 2 === 0 ? '#f0fcf4' : '' },
           ]}
         >
@@ -61,19 +62,35 @@ const AdaptiveCard = ({
     })
 
   return (
-    <View style={styles.cardContainer}>
-      {renderedRow}
-      {expandable && rowValues.length > DEFAULT_ADAPTIVE_CARD_ROWS && (
-        <View row right padding-10>
-          <ExpandButton
-            collapsedText="Collapse"
-            expandedText="Expand"
-            expanded={expanded}
-            onPress={() => setExpanded(!expanded)}
-          />
+    <>
+      <View style={styles.cardContainer}>{renderedRow}</View>
+
+      {totalRows > DEFAULT_ADAPTIVE_CARD_ROWS && (
+        <View
+          row
+          paddingH-12
+          paddingV-6
+          right
+          style={{ justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <View>
+            {!expanded && (
+              <Text style={styles.bottomCount}>
+                Showing {DEFAULT_ADAPTIVE_CARD_ROWS} of {totalRows} rows
+              </Text>
+            )}
+          </View>
+          {expandable && (
+            <ExpandButton
+              collapsedText="Collapse"
+              expandedText="Expand"
+              expanded={expanded}
+              onPress={() => setExpanded(!expanded)}
+            />
+          )}
         </View>
       )}
-    </View>
+    </>
   )
 }
 
@@ -81,9 +98,9 @@ export default React.memo(AdaptiveCard)
 
 const styles = StyleSheet.create({
   cardContainer: {
-    // margin: 2,
-    borderWidth: 2,
-    // borderBottomWidth: 0,
+    margin: 2,
+    minWidth: 300,
+    borderWidth: 1,
     borderColor: '#EAFAEA',
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
@@ -94,7 +111,7 @@ const styles = StyleSheet.create({
       width: 0,
       height: 1,
     },
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.2,
     shadowRadius: 2,
 
     elevation: 2,
@@ -104,7 +121,7 @@ const styles = StyleSheet.create({
   },
   titleColumn: {
     flex: 1,
-    padding: 4,
+    paddingHorizontal: 6,
     paddingVertical: 8,
   },
   valueColumn: {
@@ -117,5 +134,8 @@ const styles = StyleSheet.create({
   },
   propertyValue: {
     color: '#595959',
+  },
+  bottomCount: {
+    color: Colors.GREEN_MAIN,
   },
 })

@@ -140,7 +140,7 @@ export const getFormattedRowData = (
     let isNumeric = false
     let metadata = columnMetadata[column]
     if (metadata?.isNumericFormat || metadata.category === 'date') {
-    //  console.log('the metadata values are ' + JSON.stringify(metadata))
+      //  console.log('the metadata values are ' + JSON.stringify(metadata))
       isNumeric = true
       const {
         prefix,
@@ -189,3 +189,36 @@ export function* generateBatches<T, P>(
 }
 
 export const makeTestID = (id: string) => ({ testID: `test:id/${id}` })
+
+let timerId: NodeJS.Timeout
+
+/**
+ * 
+ * @param func Debounce function: Input as function which needs to be debounced and delay is the debounced time in milliseconds
+ * @param delay 
+ */
+export const debounce = (func: () => void, delay: number) => {
+  // Cancels the setTimeout method execution
+  clearTimeout(timerId)
+
+  // Executes the func after delay time.
+  timerId = setTimeout(func, delay)
+}
+
+
+let throttleTimerId: NodeJS.Timeout | undefined
+export const throttle = (func: () => void, delay: number) => {
+  // If setTimeout is already scheduled, no need to do anything
+  if (throttleTimerId) {
+    return
+  }
+
+  // Schedule a setTimeout after delay seconds
+  throttleTimerId = setTimeout(() => {
+    func()
+
+    // Once setTimeout function execution is finished, timerId = undefined so that in <br>
+    // the next scroll event function execution can be scheduled by the setTimeout
+    throttleTimerId = undefined;
+  }, delay)
+}

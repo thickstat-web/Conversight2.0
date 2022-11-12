@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, AppState, View } from 'react-native'
-import { useIsFocused } from '@react-navigation/native'
-import TrackPlayer, {
-  Event,
-  State,
-  Track,
-  useTrackPlayerEvents,
-} from 'react-native-track-player'
+// import { AppState } from 'react-native'
+// import { useIsFocused } from '@react-navigation/native'
 import { useAppDispatch, useAppSelector } from '.'
 import {
   useFetchFollowupDataMutation,
@@ -17,25 +11,24 @@ import {
   useGetTextToVoiceMutation,
 } from '@/Services/modules/chat'
 import {
-  enableReadInsights,
-  disableReadInsights,
+  // enableReadInsights,
+  // disableReadInsights,
   selectReadInsights,
 } from '@/Store/Auth'
 import { addConverseData } from '@/Store/App'
-import { generateBatches } from '@/Utils/common'
+import {
+  AudioTrack,
+  insightComponentExtractor,
+  makeFollowupRequest,
+  makeTextToVoiceRequestData,
+  responseToAudioTrack,
+  updateInsightComponent,
+  VoiceResponse,
+} from './helper'
+// import { generateBatches } from '@/Utils/common'
 import { processConverseData } from '@/Utils/chat-history-processor'
-import { FollowupRequest } from '@/Types/Followup'
 import { ConverseData } from '@/Types/ChatMessage'
 import { InsightComponent, InsightData, InsightVoice } from '@/Types/Insights'
-import { Text2VoiceRequest } from '@/Types/Voice'
-
-export enum PlayerState {
-  IDLE,
-  LOADING,
-  PLAYING,
-  PAUSED,
-  STOPPED,
-}
 
 export default function () {
   const dispatch = useAppDispatch()
@@ -54,23 +47,39 @@ export default function () {
     InsightComponent[]
   >([])
   const [hasMore, setHasMore] = useState(false)
-  const [trackIndex, setTrackIndex] = useState(0)
-  const [playerState, setPlayerState] = useState<PlayerState>(PlayerState.IDLE)
-  const [voices, setVoices] = useState<Track[]>([])
+  const [loadingInsightsAudio, setLoadingInsightsAudio] = useState(true)
+  const [insightsAudioList, setInsightsAudioList] = useState<AudioTrack[]>([])
 
-  const updateInsightComponent =
-    (id: string, data: Partial<InsightComponent>) =>
-    (prev: InsightComponent[]) => {
-      const tempInsightsComponents = [...prev]
-      const idx = prev.findIndex(item => item.id === id)
-      if (idx !== -1) {
-        tempInsightsComponents[idx] = {
-          ...prev[idx],
-          ...data,
-        }
-      }
-      return tempInsightsComponents
+  useEffect(() => {
+    // Initiate loading insights data for the entire datasets
+    const datasets = datasetResp?.data || []
+    if (!datasetLoading && datasets.length) {
+      const datasetIds = datasets.map(item => item.dataSetID)
+      fetchInsightsData(datasetIds)
+        .unwrap()
+        .then(async insightsDataResp => {
+          const { success, data } = insightsDataResp
+          if (success && data && data.length) {
+            const sortByUpdateTime = (a: InsightData, b: InsightData) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            const sortedInsightsData = [...data].sort(sortByUpdateTime)
+            setInsightsData(sortedInsightsData)
+            setInsightsComponents(
+              sortedInsightsData.map(insightComponentExtractor),
+            )
+
+            // const batchGenerator = generateBatches<InsightData, InsightComponent>(
+            //   sortedInsightsData,
+            //   4,
+            //   4,
+            //   insightComponentExtractor,
+            // )
+            // batchGenerator.
+            // setBatchGenerator(batchGenerator)
+          }
+        })
     }
+  }, [datasetResp, datasetLoading, fetchInsightsData])
 
   const storeProcessedData = useCallback(
     ({ converseData }: { converseData: ConverseData }) => {
@@ -83,17 +92,6 @@ export default function () {
     [dispatch],
   )
 
-  const makeFollowupRequest = (
-    insightComponentIds: string[],
-  ): FollowupRequest => ({
-    followup: [
-      {
-        dataSetID: '',
-        proActiveCompIDs: insightComponentIds,
-      },
-    ],
-  })
-
   // Bulk load followup data as multiple batches
   const fetchFollowup = useCallback(
     async (insightComponentIds: string[]) => {
@@ -101,10 +99,8 @@ export default function () {
       fetchFollowupData(followupRequest)
         .unwrap()
         .then(resp => {
-          resp.data?.forEach(rawFollowupComponentData => {
-            processConverseData(rawFollowupComponentData).then(
-              storeProcessedData,
-            )
+          resp.data?.forEach(rawFollowupData => {
+            processConverseData(rawFollowupData).then(storeProcessedData)
           })
         })
     },
@@ -124,180 +120,46 @@ export default function () {
     }
   }, [batchGenerator, fetchFollowup])
 
-  const insightComponentExtractor = ({
-    id,
-  }: InsightData): InsightComponent => ({
-    id,
-    followupLoading: true,
-    voiceLoading: true,
-    voice: '',
-  })
-
-  useEffect(() => {
-    // Initiate loading insights data for the entire datasets
-    const datasets = datasetResp?.data || []
-    if (!datasetLoading && datasets.length) {
-      const datasetIds = datasets.map(item => item.dataSetID)
-      fetchInsightsData(datasetIds)
-        .unwrap()
-        .then(async insightsDataResp => {
-          const { success, data } = insightsDataResp
-          if (success && data && data.length) {
-            const sortByUpdateTime = (a: InsightData, b: InsightData) =>
-              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-            const sortedInsightsData = [...data].sort(sortByUpdateTime)
-            setInsightsData(sortedInsightsData)
-
-            const batchGen = generateBatches<InsightData, InsightComponent>(
-              sortedInsightsData,
-              4,
-              2,
-              insightComponentExtractor,
-            )
-            setBatchGenerator(batchGen)
-          }
-        })
-    }
-  }, [datasetResp, datasetLoading, fetchInsightsData])
-
-  useEffect(() => {
-    loadMore()
-  }, [loadMore])
-
-  useEffect(() => {
-    async function setupPlayer() {
-      // console.log(`[useInsightsData] setupPlayer()...`)
-      await TrackPlayer.setupPlayer()
-    }
-    setupPlayer()
-    return () => {
-      TrackPlayer.reset()
-    }
-  }, [])
-
-  const makeText2VoiceReqData = (text: string): Text2VoiceRequest => ({
-    text,
-    textType: 'text',
-    voiceLib: 'google',
-    output: 'base64',
-    lang: 'en-IN',
-    voiceId: 'en-IN-Wavenet-D',
-    pitch: 0,
-    speakingRate: 1,
-  })
-
-  async function getInsightText2Voice(sortedInsightsData: InsightData[]) {
-    const text2VoiceRespList = sortedInsightsData.map(
+  // Convert all the insights text in to audio with parallel request
+  async function convertTextToVoice(insightsData: InsightData[]) {
+    // Make a parallel voice to text request
+    const text2VoiceRespList = insightsData.map(
       async ({ id, answer }: InsightData) => {
-        const data = makeText2VoiceReqData(answer)
-        return { id, resp: await getText2Voice(data).unwrap() }
+        const data = makeTextToVoiceRequestData(answer)
+        const result: VoiceResponse = {
+          id,
+          resp: await getText2Voice(data).unwrap(),
+        }
+        return result
       },
     )
 
-    const text2VoiceList = (await Promise.all(text2VoiceRespList)).map(
-      ({ id, resp }) => ({ id, voice: resp?.data ?? '' }),
-    )
-    return text2VoiceList
+    // Wait for all the parallel requests to complete and conver to AudioTrack format
+    return (await Promise.all(text2VoiceRespList)).map(responseToAudioTrack)
   }
 
   useEffect(() => {
-    async function startPlayer() {
-      const insightVoiceList = await getInsightText2Voice(insightsData)
-      const voices = insightVoiceList.map(({ id, voice }) => ({
-        id,
-        url: voice,
-      }))
-      setVoices(voices)
-      await TrackPlayer.reset()
-      // console.log(`[useInsightsData] voices: ${JSON.stringify(voices, null, 2)}`)
-      await TrackPlayer.add(voices)
-      TrackPlayer.play()
+    const initTextToVoiceConversion = async () => {
+      // setLoadingInsightsAudio(true)
+      const insightsVoiceList = await convertTextToVoice(insightsData)
+      setInsightsAudioList(insightsVoiceList)
+      setLoadingInsightsAudio(false)
     }
 
-    if (insightsData.length && readInsights) {
-      TrackPlayer.getQueue().then(tracks => {
-        if (tracks.length) {
-          TrackPlayer.play()
-        } else {
-          setPlayerState(PlayerState.LOADING)
-          startPlayer()
-        }
-      })
+    if (!insightsLoading && insightsData.length) {
+      initTextToVoiceConversion()
     }
-  }, [insightsData, readInsights])
-
-  const playPlayer = useCallback(async () => {
-    if (
-      playerState === PlayerState.STOPPED ||
-      (await TrackPlayer.getCurrentTrack()) === voices.length - 1
-    ) {
-      await TrackPlayer.reset()
-      await TrackPlayer.add(voices)
-    }
-    TrackPlayer.play().then(() => dispatch(enableReadInsights()))
-  }, [playerState, voices])
-
-  const pausePlayer = useCallback((updateStore = true) => {
-    TrackPlayer.pause().then(
-      () => updateStore && dispatch(disableReadInsights()),
-    )
-  }, [])
-
-  const events = [
-    Event.PlaybackState,
-    Event.PlaybackMetadataReceived,
-    Event.PlaybackTrackChanged,
-    Event.PlaybackError,
-  ]
-  useTrackPlayerEvents(events, async event => {
-    if (event.type === Event.PlaybackState) {
-      // console.log(`[useInsightsData] player state: ${JSON.stringify(event)}`)
-      if (event.state === State.Playing) {
-        setPlayerState(PlayerState.PLAYING)
-      } else if (
-        event.state === State.Connecting ||
-        event.state === State.Buffering ||
-        event.state === State.Ready
-      ) {
-        setPlayerState(PlayerState.LOADING)
-      } else if (event.state === State.Paused) {
-        setPlayerState(PlayerState.PAUSED)
-      } else if (event.state === State.Stopped) {
-        setPlayerState(PlayerState.STOPPED)
-      }
-    } else if (event.type === Event.PlaybackMetadataReceived) {
-      // console.log(`[useInsightsData] player metadata: ${JSON.stringify(event)}`)
-    } else if (
-      event.type === Event.PlaybackTrackChanged &&
-      event.nextTrack != null
-    ) {
-      const index = await TrackPlayer.getCurrentTrack()
-      setTrackIndex(index || 0)
-    }
-  })
-
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (nextAppState.match(/inactive|background/)) {
-        pausePlayer(false)
-      }
-    })
-
-    return () => {
-      subscription.remove()
-    }
-  }, [pausePlayer])
+  }, [insightsLoading, insightsData])
 
   return {
     isLoading: datasetLoading || insightsLoading,
+    loadingInsightsAudio,
     insightsComponents,
     followupLoading,
     insightsData,
+    insightsAudioList,
     hasMoreFollowupComponent: hasMore,
     loadMoreFollowupComponent: loadMore,
-    trackIndex,
-    playerState,
-    pausePlayer,
-    playPlayer,
+    fetchFollowup,
   }
 }

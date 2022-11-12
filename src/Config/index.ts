@@ -44,7 +44,7 @@ export const DEFAULT_EMAIL = ''
 export const DEFAULT_PASSWORD = ''
 export const DEVICE_NAME = `${getSystemName()} v${getSystemVersion()}`
 
-export const DEFAULT_ADAPTIVE_CARD_ROWS = 4
+export const DEFAULT_ADAPTIVE_CARD_ROWS = 5
 export const NO_DATA_AVAILABLE = 'No data available'
 export const MY_DASHBOARD = 'my dashboard'
 export const ATHENA = 'athena'

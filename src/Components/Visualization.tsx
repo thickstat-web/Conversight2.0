@@ -375,9 +375,8 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   bottomCountWrapper: {
-    // alignItems: 'flex-end',
     paddingVertical: 6,
-    paddingLeft: 0,
+    paddingLeft: 2,
   },
   bottomCount: {
     color: Colors.GREEN_MAIN,

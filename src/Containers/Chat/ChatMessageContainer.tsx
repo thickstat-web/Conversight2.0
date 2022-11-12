@@ -76,32 +76,7 @@ const AthenaMessageContainer = React.memo(
         <View style={styles.athenaIcon}>
           <Image source={AthenaIcon} forwardedRef={undefined} modifiers={{}} />
         </View>
-        <View flex row>
-          <View
-            flex
-            onTouchStart={() => setMove(false)}
-            onTouchMove={() => setMove(true)}
-            onTouchEnd={() => {
-              if (Platform.OS === 'android' || !move) {
-                navigate(DATA_EXPLORER, {
-                  id: message.id,
-                  title: message.message,
-                })
-              }
-            }}
-          >
-            {/* <View
-              // flex
-              style={{}}
-              onTouchStart={() => setMove(false)}
-              onTouchMove={() => setMove(true)}
-              onTouchEnd={() => {
-                if (Platform.OS === 'android' || !move) {
-                  navigate(DATA_EXPLORER, {
-                    id: message.id,
-                    title: message.message,
-                  })
-                }
+        {/* 
                 // console.log(
                 //   `visualFormats: ${JSON.stringify(
                 //     message.visualFormats,
@@ -119,18 +94,27 @@ const AthenaMessageContainer = React.memo(
                 //   \ntext data: ${JSON.stringify(message.textData, null, 2)}
                 //   `,
                 // )
-              }}
             > */}
-            <View
-              style={[
-                styles.athenaMessageWrapper,
-                { backgroundColor: Colors.WHITE, padding: 8 },
-              ]}
-            >
-              <ChatVisualizer data={message} />
-            </View>
-            {/* </View> */}
-          </View>
+        <View
+          style={[
+            styles.athenaMessageWrapper,
+            {
+              backgroundColor: Colors.WHITE,
+              padding: 4,
+            },
+          ]}
+          onTouchStart={() => setMove(false)}
+          onTouchMove={() => setMove(true)}
+          onTouchEnd={() => {
+            if (Platform.OS === 'android' || !move) {
+              navigate(DATA_EXPLORER, {
+                id: message.id,
+                title: message.message,
+              })
+            }
+          }}
+        >
+          <ChatVisualizer data={message} />
         </View>
       </View>
     )

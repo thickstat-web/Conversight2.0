@@ -1,4 +1,11 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   ActivityIndicator,
   FlatList,
@@ -7,13 +14,18 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native'
-import { useIsFocused } from '@react-navigation/native'
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
 import { SvgCss } from 'react-native-svg'
 import { pauseXML } from '@/Assets/Images/xml-svg/pause'
 import { playXML } from '@/Assets/Images/xml-svg/play'
-import { useTheme, useAppSelector, useInsightsData } from '@/Hooks'
+import {
+  useTheme,
+  useAppSelector,
+  useInsightsData,
+  PlayerState,
+  useAudioPlayer,
+} from '@/Hooks'
 import { LoadingSpinner, InsightsVisualizer } from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { selectConverseData } from '@/Store/App'
@@ -21,11 +33,44 @@ import { ConverseData } from '@/Types/ChatMessage'
 import { InsightComponent, InsightData } from '@/Types/Insights'
 import { DATA_EXPLORER } from '@/Constants/screens'
 import { navigate } from '@/Navigators/utils'
-import { properCase } from '@/Utils/common'
+import { debounce, properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
-import { PlayerState } from '@/Hooks/useInsightsData'
+import { AudioTrack } from '@/Hooks/helper'
 
 const CARD_HEIGHT = 180
+
+export type ViewToken = {
+  item: any
+  key: string
+  index?: number
+  // indicated whether this item is viewable or not
+  isViewable: boolean
+  section?: any
+}
+
+export type ViewableItemsProps = {
+  viewableItems: Array<ViewToken>
+  changed: Array<ViewToken>
+}
+
+// const addUpdatedTracks =
+//   (
+//     viewableItems: ViewToken[],
+//     callback: (index: number) => void | Promise<void>,
+//   ) =>
+//   () => {
+//     let startIndex = 0
+//     if (viewableItems.length && viewableItems[0]?.index) {
+//       startIndex = viewableItems[0].index
+//     }
+//     viewableItems.forEach(_ => {
+//       if (_.index && _.index < startIndex) {
+//         startIndex = _.index
+//       }
+//     })
+
+//     debounce(() => callback(startIndex), 500)
+//   }
 
 const LoadingCard = () => (
   <View style={[styles.visCard, styles.loading]}>
@@ -105,12 +150,19 @@ const TagFilter = React.memo(
 interface CardProps {
   item: InsightComponent
   insightsData: InsightData[]
+  fetchFollowup: (insightComponentIds: string[]) => Promise<void>
 }
 
-const Card = React.memo(({ item, insightsData }: CardProps) => {
+const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
   const { id, followupLoading } = item
   const converseData = useAppSelector(selectConverseData)
   const [move, setMove] = useState(false)
+
+  useEffect(() => {
+    if (followupLoading) {
+      fetchFollowup([id])
+    }
+  }, [followupLoading, id, fetchFollowup])
 
   const data: ConverseData | null = converseData[id]
     ? converseData[id][0]
@@ -158,12 +210,20 @@ const Card = React.memo(({ item, insightsData }: CardProps) => {
 
 interface InsightComponentsProps {
   isLoading: boolean
+  loadingInsightsAudio: boolean
   followupLoading: boolean
   insightsComponents: InsightComponent[]
   insightsData: InsightData[]
-  hasMoreFollowupComponent: boolean
-  loadMoreFollowupComponent: () => void
+  insightsAudioList: AudioTrack[]
+  // hasMoreFollowupComponent: boolean
+  // loadMoreFollowupComponent: () => void
+  fetchFollowup: (insightComponentIds: string[]) => Promise<void>
+  playserState: PlayerState
   trackIndex: number
+  play: () => Promise<void>
+  pausePlayer: () => Promise<void>
+  addAudioTracks: (audioTracks: AudioTrack[]) => Promise<void>
+  playTrackByIndex: (index: number) => Promise<void>
 }
 
 interface ListRenderItemProps {
@@ -173,26 +233,75 @@ interface ListRenderItemProps {
 
 const InsightComponents = React.memo((props: InsightComponentsProps) => {
   const { Colors, Fonts } = useTheme()
-  const flatListRef = useRef()
+  const flatListRef = useRef<FlatList<InsightComponent>>()
 
   const {
     insightsComponents,
     insightsData,
-    isLoading,
-    hasMoreFollowupComponent,
-    loadMoreFollowupComponent,
+    // insightsAudioList,
+    // loadingInsightsAudio,
+    // hasMoreFollowupComponent,
+    // loadMoreFollowupComponent,
+    fetchFollowup,
+    // playserState,
     trackIndex,
+    // play,
+    pausePlayer,
+    // addAudioTracks,
+    // playTrackByIndex,
   } = props
 
   useEffect(() => {
-    if (flatListRef && flatListRef.current && trackIndex > 0) {
-      const params = { index: trackIndex }
-      flatListRef.current.scrollToIndex(params)
+    if (
+      flatListRef &&
+      flatListRef.current &&
+      trackIndex > 0 &&
+      trackIndex < insightsComponents.length
+    ) {
+      flatListRef.current.scrollToIndex({ index: trackIndex })
     }
-  }, [trackIndex])
+  }, [trackIndex, insightsComponents])
 
-  const renderItem = ({ item }: ListRenderItemProps) => (
-    <Card item={item} insightsData={insightsData} />
+  // useEffect(() => {
+  //   const insightIds = new Set(insightsComponents.map(_ => _.id))
+  //   const filteredAudioTracks = insightsAudioList.filter(_ =>
+  //     insightIds.has(_.id),
+  //   )
+  //   const updateAudioTracks = async () => {
+  //     await addAudioTracks(filteredAudioTracks)
+  //     console.log('[InsightComponents] updateAudioTracks - audio track updated')
+  //   }
+
+  //   if (filteredAudioTracks.length) {
+  //     updateAudioTracks()
+  //   }
+  // }, [insightsComponents, insightsAudioList, addAudioTracks, play, pausePlayer])
+
+  // const viewabilityConfig = useMemo(
+  //   () => ({
+  //     minimumViewTime: 1000,
+  //     waitForInteraction: true,
+  //     // viewAreaCoveragePercentThreshold: 60,
+  //     itemVisiblePercentThreshold: 60,
+  //   }),
+  //   [],
+  // )
+
+  // const handleOnViewableItemsChanged = useCallback(
+  //   ({ viewableItems }: ViewableItemsProps) => {
+  //     debounce(addUpdatedTracks(viewableItems, playTrackByIndex), 500)
+  //   },
+  // )
+
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemProps) => (
+      <Card
+        item={item}
+        insightsData={insightsData}
+        fetchFollowup={fetchFollowup}
+      />
+    ),
+    [insightsData, fetchFollowup],
   )
 
   const NoInsights = (
@@ -208,8 +317,11 @@ const InsightComponents = React.memo((props: InsightComponentsProps) => {
       contentContainerStyle={styles.insightsContainer}
       data={insightsComponents}
       renderItem={renderItem}
-      onEndReached={hasMoreFollowupComponent ? loadMoreFollowupComponent : null}
-      onEndReachedThreshold={0.5}
+      // viewabilityConfig={viewabilityConfig}
+      // onViewableItemsChanged={handleOnViewableItemsChanged}
+      // onEndReached={hasMoreFollowupComponent ? loadMoreFollowupComponent : null}
+      // onEndReachedThreshold={0.5}
+      onScrollBeginDrag={pausePlayer}
       showsVerticalScrollIndicator={false}
       ListEmptyComponent={NoInsights}
     />
@@ -220,14 +332,28 @@ const InsightsContainer = ({ navigation }) => {
   const { Layout, Colors } = useTheme()
   const props = useInsightsData()
   const {
+    loadingInsightsAudio,
     isLoading,
     insightsComponents,
     insightsData,
-    playerState,
-    pausePlayer,
-    playPlayer,
+    insightsAudioList,
   } = props
+
+  const {
+    addAudioTracks,
+    play,
+    playTrackByIndex,
+    pause,
+    playerState,
+    trackIndex,
+  } = useAudioPlayer()
+
   const [filteredTags, setFilteredTags] = useState<string[]>([])
+
+  const handleTagFilter = async (filters: string[]) => {
+    await pause()
+    setFilteredTags(filters)
+  }
 
   // Group list of insight indexes by tag
   const tagWithIds: Record<string, string[]> = {}
@@ -243,17 +369,18 @@ const InsightsContainer = ({ navigation }) => {
     })
   })
 
-  useLayoutEffect(() => {
-    const isPlayable =
-      playerState === PlayerState.IDLE ||
-      playerState === PlayerState.PAUSED ||
-      playerState === PlayerState.STOPPED
-    const playButton = () => (
+  const playButton = useCallback(() => {
+    // const isPlayable =
+    //   playerState === PlayerState.IDLE ||
+    //   playerState === PlayerState.PAUSED ||
+    //   playerState === PlayerState.STOPPED
+    return (
       <TouchableOpacity
         style={{ marginTop: 4, marginRight: 16 }}
-        onPress={isPlayable ? playPlayer : pausePlayer}
+        // onPress={isPlayable ? play : pause}
       >
-        {playerState === PlayerState.LOADING ? (
+        {loadingInsightsAudio && <ActivityIndicator color={Colors.WHITE} />}
+        {/* {loadingInsightsAudio || playerState === PlayerState.LOADING ? (
           <ActivityIndicator color={Colors.WHITE} />
         ) : (
           <SvgCss
@@ -261,18 +388,15 @@ const InsightsContainer = ({ navigation }) => {
             height="32"
             xml={isPlayable ? playXML : pauseXML}
           />
-        )}
+        )} */}
       </TouchableOpacity>
     )
-    navigation.setOptions({
-      headerRight: playButton,
-    })
-  }, [playerState, pausePlayer, playPlayer])
+  }, [loadingInsightsAudio, Colors.WHITE])
+  // }, [playerState, play, pause, loadingInsightsAudio, Colors.WHITE])
 
-  const isFocused = useIsFocused()
-  useEffect(() => {
-    !isFocused && pausePlayer(false)
-  }, [isFocused])
+  useLayoutEffect(() => {
+    navigation.setOptions({ headerRight: playButton })
+  }, [navigation, playButton])
 
   // useEffect(() => {
   //   console.log('')
@@ -297,6 +421,30 @@ const InsightsContainer = ({ navigation }) => {
     )
   }
 
+  // const filteredAudioTracks = useMemo(() => {
+  //   const insightIds = new Set(filteredInsightsComponents.map(_ => _.id))
+  //   return insightsAudioList.filter(_ => insightIds.has(_.id))
+  // }, [filteredInsightsComponents, insightsAudioList])
+
+  // useEffect(() => {
+  //   const initPlayer = async () => {
+  //     // await addAudioTracks(filteredAudioTracks)
+  //   }
+  //   if (filteredAudioTracks.length) {
+  //     initPlayer()
+  //   }
+  // }, [filteredAudioTracks, addAudioTracks])
+
+  useEffect(() => {
+    const initPlayer = async () => {
+      await addAudioTracks(insightsAudioList)
+      await play()
+    }
+    if (!loadingInsightsAudio && insightsAudioList.length) {
+      initPlayer()
+    }
+  }, [loadingInsightsAudio, insightsAudioList, play, addAudioTracks])
+
   return (
     <View flex marginB-10 style={{ backgroundColor: Colors.WHITE_SMOKE }}>
       {isLoading ? (
@@ -307,11 +455,17 @@ const InsightsContainer = ({ navigation }) => {
             <TagFilter
               tagWithIndexes={tagWithIds}
               count={insightsData.length}
-              onFilter={setFilteredTags}
+              onFilter={handleTagFilter}
             />
           )}
           <InsightComponents
             {...props}
+            playserState={playerState}
+            trackIndex={trackIndex}
+            addAudioTracks={addAudioTracks}
+            play={play}
+            pausePlayer={pause}
+            playTrackByIndex={playTrackByIndex}
             insightsComponents={filteredInsightsComponents}
           />
         </>
