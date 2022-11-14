@@ -88,8 +88,9 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
           style={[styles.hint, { backgroundColor: Colors.DARK_BLUE }]}
           onPress={() => setError(false)}
         >
-          <Text style={[Fonts.regular]} color={Colors.WHITE}>
-            Wrong Password
+          <Text style={[Fonts.regular, { flex: 1 }]} color={Colors.WHITE}>
+            {/* Wrong Password */}
+            {resp?.error}
           </Text>
           <CloseIcon style={{ marginLeft: 20 }} />
         </TouchableOpacity>
