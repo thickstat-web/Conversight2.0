@@ -91,10 +91,9 @@ export const formatValue = (
 
     if (category === 'date') {
       const datetimeArr = `${value}`.split(' ')
-      // console.log("the date values are "+value)
-      formattedValue = datetimeArr[1]
-      roundedValue = datetimeArr[1]
-      abbrValue = datetimeArr[1]
+      formattedValue = datetimeArr[0]
+      roundedValue = datetimeArr[0]
+      abbrValue = datetimeArr[0]
     } else if (!isNumericFormat || category === 'flag') {
       formattedValue = value
       roundedValue = value
