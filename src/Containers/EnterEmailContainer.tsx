@@ -40,11 +40,12 @@ const EnterEmailContainer = ({ navigation }: Props) => {
     useLazyVerifyEmailQuery()
 
   const setAndCheckEmail = (val: string) => {
-    const isValid = validateEmail(val)
+    const emailTrimed = val.trim()
+    const isValid = validateEmail(emailTrimed)
     setEmailInvalid(!isValid)
     setEmailUnknown(false)
     setErrorHintOpen(false)
-    setEmail(val)
+    setEmail(emailTrimed)
   }
 
   const handleVerifyEmail = async () => {
@@ -91,9 +92,9 @@ const EnterEmailContainer = ({ navigation }: Props) => {
               style={{ ...styles.hint, backgroundColor: Colors.DARK_BLUE }}
               onPress={() => setErrorHintOpen(false)}
             >
-              <Text style={[Fonts.text15, {}]} color={Colors.WHITE}>
-                Email doesn't exist in the database.
-                {/* {data?.error} */}
+              <Text style={[Fonts.text15, { flex: 1 }]} color={Colors.WHITE}>
+                {/* Email doesn't exist in the database. */}
+                {data?.error}
               </Text>
               <CloseIcon style={{ marginLeft: 10 }} />
             </TouchableOpacity>
