@@ -20,7 +20,8 @@ export const getDatasets = (build: EndpointBuilder<any, any, any>) => {
 
 export const getHelpQuestions = (build: EndpointBuilder<any, any, any>) => {
   return build.query<ResponseType<HelpQuestion[]>, string>({
-    query: (datasetId: string) => `${getAPIUrl()}/kbnet/helpQuestions?datasetID=${datasetId}`,
+    query: (datasetId: string) =>
+      `${getAPIUrl()}/kbnet/helpQuestions?datasetID=${datasetId}`,
     transformResponse: (response: HelpQuestionResponse) => {
       const { msg, question_list = [] } = response
       return { success: msg === 'success', data: question_list }
@@ -29,10 +30,7 @@ export const getHelpQuestions = (build: EndpointBuilder<any, any, any>) => {
 }
 
 export const getTextToVoice = (build: EndpointBuilder<any, any, any>) => {
-  return build.mutation<
-    ResponseType<string>,
-    Partial<Text2VoiceRequest>
-  >({
+  return build.mutation<ResponseType<string>, Partial<Text2VoiceRequest>>({
     query: (body: Text2VoiceRequest) => ({
       url: `${getAPIUrl()}/api/v1/mp3`,
       method: 'POST',

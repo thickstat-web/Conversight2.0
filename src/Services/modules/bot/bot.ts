@@ -26,6 +26,7 @@ import {
 import { PinnedItemDataResponse } from '@/Types/PinnedItemDataResponse'
 import { InsightData, InsightsResponse } from '@/Types/Insights'
 import { FollowupRequest, FollowupResponse } from '@/Types/Followup'
+import { buildOrderedColumns } from '@/Utils/common'
 
 export const getChatHistory = (build: EndpointBuilder<any, any, any>) => {
   return build.mutation<
@@ -54,16 +55,13 @@ export const getChatHistory = (build: EndpointBuilder<any, any, any>) => {
             status,
             isColumnReorder,
           } = item
-          const orderedColumns = isColumnReorder
-            ? ([] as string[]).concat(
-              colType?.date ?? [],
-              colType?.dim ?? [],
-              colType?.metrics ?? [],
-            )
-            : columns
           return {
             columns,
-            orderedColumns,
+            orderedColumns: buildOrderedColumns(
+              isColumnReorder,
+              colType,
+              columns,
+            ),
             columnMetadata: column_metadata,
             colType,
             createdAt,
@@ -138,11 +136,7 @@ export const fetchPinboards = (build: EndpointBuilder<any, any, any>) => {
     query: () => `${getBotUrl()}/pinboard/data`,
     keepUnusedDataFor: 0,
     transformResponse: (response: ListPinboardsResponse) => {
-      const {
-        code,
-        message,
-        data,
-      } = response
+      const { code, message, data } = response
 
       let created: Created[] = []
       let shared: Shared[] = []
@@ -281,13 +275,11 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
           let colType = { dim: [], date: [], metrics: [] }
           if (colTypeString) {
             colType = JSON.parse(colTypeString)
-            orderedColumns = isColumnReorder
-              ? ([] as string[]).concat(
-                colType?.date ?? [],
-                colType?.dim ?? [],
-                colType?.metrics ?? [],
-              )
-              : columns
+            orderedColumns = buildOrderedColumns(
+              isColumnReorder,
+              colType,
+              columns,
+            )
           }
 
           if (status !== 'failed') {
@@ -376,7 +368,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
         data: { proActiveInsightCompFollowup },
       } = response
 
-      let rawFollowupConverseData: RawConverseData[] = []
+      let rawConverseData: RawConverseData[] = []
       for (const datasetId in proActiveInsightCompFollowup) {
         const followupsByDataset = proActiveInsightCompFollowup[datasetId]
         for (const componentId in followupsByDataset) {
@@ -394,20 +386,16 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
               status = '',
             } = followupData
 
-            const orderedColumns = isColumnReorder
-              ? ([] as string[]).concat(
-                colType?.date ?? [],
-                colType?.dim ?? [],
-                colType?.metrics ?? [],
-              )
-              : columns
-
             if (status !== 'failed') {
               const data = {
                 id: componentId,
                 columnMetadata: column_metadata,
                 columns,
-                orderedColumns,
+                orderedColumns: buildOrderedColumns(
+                  isColumnReorder,
+                  colType,
+                  columns,
+                ),
                 colType,
                 createdAt,
                 base64Data: val,
@@ -415,7 +403,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
                 utterance,
                 status,
               }
-              rawFollowupConverseData = [...rawFollowupConverseData, data]
+              rawConverseData = [...rawConverseData, data]
             }
           }
         }
@@ -423,7 +411,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
 
       return {
         success: code === '200' && message === 'success',
-        data: rawFollowupConverseData,
+        data: rawConverseData,
       }
     },
   })

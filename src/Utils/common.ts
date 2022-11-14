@@ -1,5 +1,5 @@
 import numeral from 'numeral'
-import { ColumnMetadata } from '@/Types/ChatHistory'
+import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import { TextData } from '@/Types/ChatMessage'
 
 export const cleanseColumn = (str: string) => {
@@ -193,9 +193,9 @@ export const makeTestID = (id: string) => ({ testID: `test:id/${id}` })
 let timerId: NodeJS.Timeout
 
 /**
- * 
+ *
  * @param func Debounce function: Input as function which needs to be debounced and delay is the debounced time in milliseconds
- * @param delay 
+ * @param delay
  */
 export const debounce = (func: () => void, delay: number) => {
   // Cancels the setTimeout method execution
@@ -204,7 +204,6 @@ export const debounce = (func: () => void, delay: number) => {
   // Executes the func after delay time.
   timerId = setTimeout(func, delay)
 }
-
 
 let throttleTimerId: NodeJS.Timeout | undefined
 export const throttle = (func: () => void, delay: number) => {
@@ -219,6 +218,17 @@ export const throttle = (func: () => void, delay: number) => {
 
     // Once setTimeout function execution is finished, timerId = undefined so that in <br>
     // the next scroll event function execution can be scheduled by the setTimeout
-    throttleTimerId = undefined;
+    throttleTimerId = undefined
   }, delay)
+}
+
+export const buildOrderedColumns = (
+  isColumnReorder: boolean,
+  colType: ColType,
+  columns: string[],
+) => {
+  const date = colType?.date ?? []
+  const dim = colType?.dim ?? []
+  const metrics = colType?.metrics ?? []
+  return isColumnReorder ? ([] as string[]).concat(date, dim, metrics) : columns
 }

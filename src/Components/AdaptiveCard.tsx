@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { StyleSheet, Text } from 'react-native'
 import { View } from 'react-native-ui-lib'
-import { DEFAULT_ADAPTIVE_CARD_ROWS } from '@/Config'
+import { COLLAPSE, DEFAULT_ADAPTIVE_CARD_ROWS, EXPAND } from '@/Config'
 import { useTheme } from '@/Hooks'
 import { Colors } from '@/Theme/Variables'
 import { ExpandButton } from '@/Components'
@@ -82,8 +82,8 @@ const AdaptiveCard = ({
           </View>
           {expandable && (
             <ExpandButton
-              collapsedText="Collapse"
-              expandedText="Expand"
+              collapsedText={COLLAPSE}
+              expandedText={EXPAND}
               expanded={expanded}
               onPress={() => setExpanded(!expanded)}
             />

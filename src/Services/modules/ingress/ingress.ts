@@ -6,6 +6,7 @@ import {
   SendChatMessageResponse,
 } from '@/Types/SendChatMessage'
 import { RawConverseData } from '@/Types/ChatMessage'
+import { buildOrderedColumns } from '@/Utils/common'
 
 export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
   return build.mutation<
@@ -37,29 +38,21 @@ export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
         val,
         id,
         isColumnReorder,
-        processedUtterance,
+        // processedUtterance,
         text,
         utterance,
         status,
       } = data
-      const orderedColumns = isColumnReorder
-        ? ([] as string[]).concat(
-          colType?.date ?? [],
-          colType?.dim ?? [],
-          colType?.metrics ?? [],
-        )
-        : columns
       let transformedData = {
         columns,
-        orderedColumns,
+        orderedColumns: buildOrderedColumns(isColumnReorder, colType, columns),
         columnMetadata: column_metadata,
         colType,
         createdAt,
         base64Data: val,
         id,
-        displayUtterance: utterance,
         text,
-        utterance: processedUtterance,
+        utterance,
         status,
       }
       return {

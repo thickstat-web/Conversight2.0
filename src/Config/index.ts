@@ -18,7 +18,7 @@ const env = {
  */
 export const { CS_API_HOST, BOT_API_HOST, INGRESS_API_HOST } = __DEV__
   ? env.STAGING
-  : env.STAGING
+  : env.PRODUCTION
 
 export const Config = {
   CS_API_HOST,
@@ -56,3 +56,7 @@ export const MY_DASHBOARD = 'my dashboard'
 export const ATHENA = 'athena'
 export const SHARED = 'shared'
 export const VIEW_ALL = 'view all'
+export const EXPAND = 'Expand'
+export const COLLAPSE = 'Collapse'
+export const EXPAND_ALL = 'Expand All'
+export const COLLAPSE_ALL = 'Collapse All'

@@ -1,43 +1,9 @@
 import React, { useState } from 'react'
-import {
-  StyleSheet,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-} from 'react-native'
+import { StyleSheet, FlatList } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { properCase, formatValue } from '@/Utils/common'
 import { AdaptiveCard } from '@/Components'
 import { useTheme } from '@/Hooks'
-
-const getStyledRowData = (
-  columns: string[],
-  columnMetadata: ColumnMetadata,
-  row: Record<string, any>,
-) => {
-  const dataFormatter = (column: string) => {
-    const value = row[column]
-    let metadata = columnMetadata[column] || null
-    let isNumeric = metadata ? metadata.isNumericFormat : false
-    let displayValue = value
-    if (isNumeric) {
-      const {
-        prefix,
-        roundedValue: text,
-        suffix,
-      } = formatValue(value, metadata)
-      displayValue = `${prefix}${text} ${suffix}`.trim()
-    }
-    return (
-      <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
-        {displayValue}
-      </Text>
-    )
-  }
-  return columns.map(dataFormatter)
-}
 
 interface AdaptiveCardListContainerProps {
   id: string
@@ -59,9 +25,7 @@ function AdaptiveCardListContainer({
   values,
   expandAll,
 }: AdaptiveCardListContainerProps) {
-  // const ROW_HEIGHT = 40
   const { Layout, Colors, Common, Fonts } = useTheme()
-  const [rows, setRows] = useState(values)
 
   const renderAdaptiveCardItem = ({ item: row, index }: ItemProps) => {
     return (
@@ -79,15 +43,14 @@ function AdaptiveCardListContainer({
 
   return (
     <View style={styles.container}>
-      {/* <ScrollView showsVerticalScrollIndicator={false}> */}
-        <FlatList
-          data={rows}
-          // initialNumToRender={20}
-          // getItemLayout={getItemLayout}
-          renderItem={renderAdaptiveCardItem}
-          listKey={id}
-        />
-      {/* </ScrollView> */}
+      <FlatList
+        data={values}
+        // initialNumToRender={20}
+        // getItemLayout={getItemLayout}
+        renderItem={renderAdaptiveCardItem}
+        style={{ paddingBottom: 200 }}
+        listKey={id}
+      />
     </View>
   )
 }

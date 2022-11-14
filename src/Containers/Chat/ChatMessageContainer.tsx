@@ -154,17 +154,16 @@ const ChatMessageContainer = ({
   onTapMessage,
 }: ChatMessageContainerProps) => {
   const { Colors, Fonts } = useTheme()
-  let messageListRef = useRef()
+  const messageListRef = useRef<FlatList<ChatMessage[]>>()
   const chatMessagesProcessing = useAppSelector(selectProcessingChatMessages)
   const messages = useAppSelector(selectChatMessages)
 
-  const setMessageListRef = ref => (messageListRef = ref)
   const keyExtractor = (item: ChatMessage) => item.id
 
   const scrollToEnd =
     (animated: boolean = true) =>
     () =>
-      messageListRef?.scrollToEnd({ animated })
+      messageListRef?.current?.scrollToEnd({ animated })
 
   const NoHistory = (
     <View
@@ -201,7 +200,7 @@ const ChatMessageContainer = ({
       ) : (
         <FlatList
           data={messages}
-          ref={setMessageListRef}
+          ref={messageListRef}
           onLayout={scrollToEnd(false)}
           onContentSizeChange={scrollToEnd()}
           keyExtractor={keyExtractor}

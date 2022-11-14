@@ -23,7 +23,7 @@ import settingsIcon from '@/Assets/Images/xml-svg/settings'
 import menuIcon from '@/Assets/Images/xml-svg/menu'
 import { Colors } from '@/Theme/Variables'
 import { SvgCss } from 'react-native-svg'
-import { DEFAULT_ADAPTIVE_CARD_ROWS } from '@/Config'
+import { COLLAPSE_ALL, DEFAULT_ADAPTIVE_CARD_ROWS, EXPAND_ALL } from '@/Config'
 
 type VisualizationTypes = ChartType | 'Table'
 
@@ -63,7 +63,7 @@ export type TableOrAdaptiveCardProps = {
 }
 
 const Header = ({ title }: { title: string }) => (
-  <View paddingT-6 paddingB-4 paddingH-16>
+  <View paddingV-6 paddingH-16>
     <Text style={styles.cardTitle}>{properCase(title, true)}</Text>
   </View>
 )
@@ -151,10 +151,10 @@ const TableOrAdaptiveCard = memo(
         ) : (
           <>
             {columns.length > DEFAULT_ADAPTIVE_CARD_ROWS && (
-              <View row right padding-10>
+              <View row right padding-10 paddingT-4>
                 <ExpandButton
-                  collapsedText="Collapse All"
-                  expandedText="Expand All"
+                  collapsedText={COLLAPSE_ALL}
+                  expandedText={EXPAND_ALL}
                   expanded={expandedAll}
                   onPress={() => setExpandedAll(!expandedAll)}
                 />
@@ -253,7 +253,11 @@ const DataExplorerContainer = ({
     let content = null
     if (isSingleRecord) {
       content = (
-        <ScrollView>
+        <ScrollView
+          contentContainerStyle={{
+            paddingBottom: 64,
+          }}
+        >
           <AdaptiveCard
             columns={columns}
             columnMetadata={columnMetadata}
