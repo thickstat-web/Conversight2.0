@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { memo, useEffect, useLayoutEffect, useState } from 'react'
 import {
   FlatList,
   NativeScrollEvent,
@@ -13,7 +13,7 @@ import { AdaptiveCard, Button, ExpandButton } from '@/Components'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
 import { properCase } from '@/Utils/common'
 import { selectChatMessages, selectConverseData } from '@/Store/App'
-import { ChartType } from '@/Types/ChatMessage'
+import { ChartType, ConverseData } from '@/Types/ChatMessage'
 import TableContainer from './TableContainer'
 import ChartContainer from './ChartContainer'
 import AdaptiveCardListContainer from './AdaptiveCardListContainer'
@@ -23,8 +23,7 @@ import settingsIcon from '@/Assets/Images/xml-svg/settings'
 import menuIcon from '@/Assets/Images/xml-svg/menu'
 import { Colors } from '@/Theme/Variables'
 import { SvgCss } from 'react-native-svg'
-import upArrow from '@/Assets/Images/xml-svg/upArrow'
-import downArrow from '@/Assets/Images/xml-svg/downArrow'
+import { DEFAULT_ADAPTIVE_CARD_ROWS } from '@/Config'
 
 type VisualizationTypes = ChartType | 'Table'
 
@@ -54,77 +53,31 @@ const visualizationOptions: Record<Partial<VisualizationTypes>, string> = {
   Table: 'Table',
 }
 
-const DataExplorerContainer = ({
-  navigation,
-  route,
-}: DataExplorerContainerProps) => {
-  const { t } = useTranslation()
-  const { Layout, Colors, Common, Fonts } = useTheme()
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
-  // const messages = useAppSelector(selectChatMessages)
-  const converseData = useAppSelector(selectConverseData)
-  const [visible, setVisible] = useState(false)
-  const [table, setTable] = useState(true)
-  const ref = React.useRef<any>()
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+export type TableOrAdaptiveCardProps = {
+  screenWidth: number
+  table: boolean
+  setTable: (table: boolean) => void
+  expandedAll: boolean
+  setExpandedAll: (table: boolean) => void
+  data: ConverseData
+}
 
-  const { id, title } = route.params
-  const message = converseData[id][0]
-  const { columns, columnMetadata, values, visualFormats } = message
-  const formats: string[] = visualFormats
-    .filter(item => item.type in visualizationOptions)
-    .map(item => item.type)
+const Header = ({ title }: { title: string }) => (
+  <View paddingT-6 paddingB-4 paddingH-16>
+    <Text style={styles.cardTitle}>{properCase(title, true)}</Text>
+  </View>
+)
 
-  useLayoutEffect(() => {
-    if (formats.length > 1) {
-      const moreOptionsButton = () => (
-        <View style={{ paddingBottom: 2 }}>
-          <Button
-            label="..."
-            onPress={() => setVisible(true)}
-            labelStyle={styles.moreOptionsButton}
-          />
-        </View>
-      )
-      navigation.setOptions({
-        headerRight: moreOptionsButton,
-      })
-    }
-  }, [navigation, formats])
-
-  const buildOptions = (onPress: (option: string) => void): LabelOptions[] => {
-    const labelOptions: LabelOptions[] = formats
-      .filter(item => visualizationOptions[item as VisualizationTypes])
-      .map(item => ({
-        label: visualizationOptions[item as VisualizationTypes],
-        onPress: () => onPress(item),
-      }))
-    return [...labelOptions, { label: 'Cancel', onPress: () => {} }]
-  }
-
-  const onSelect = (option: string) => {
-    const index = formats.indexOf(option)
-    // setCurrentSlideIndex(index)
-    ref.current.scrollToIndex({ index })
-  }
-
-  const getItemLayout = (data, index) => ({
-    length: screenWidth,
-    offset: screenWidth * index,
-    index,
-  })
-
-  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const totalWidth = event.nativeEvent.layoutMeasurement.width
-    const xPos = event.nativeEvent.contentOffset.x
-    const current = Math.floor(xPos / totalWidth)
-    setCurrentSlideIndex(current)
-  }
-
-  const isSingleRecord = values.length === 1
-  const [expandedAll, setExpandedAll] = useState(false)
-
-  const TableOrAdaptiveCard = () => {
+const TableOrAdaptiveCard = memo(
+  ({
+    screenWidth,
+    table,
+    setTable,
+    expandedAll,
+    setExpandedAll,
+    data,
+  }: TableOrAdaptiveCardProps) => {
+    const { id, columns, columnMetadata, values } = data
     return (
       <View
         style={{
@@ -197,16 +150,20 @@ const DataExplorerContainer = ({
           </ScrollView>
         ) : (
           <>
-            <View row right padding-10>
-              <ExpandButton
-                collapsedText="Collapse All"
-                expandedText="Expand All"
-                expanded={expandedAll}
-                onPress={() => setExpandedAll(!expandedAll)}
-              />
-            </View>
-            <ScrollView showsVerticalScrollIndicator={false}
-            nestedScrollEnabled={true}>
+            {columns.length > DEFAULT_ADAPTIVE_CARD_ROWS && (
+              <View row right padding-10>
+                <ExpandButton
+                  collapsedText="Collapse All"
+                  expandedText="Expand All"
+                  expanded={expandedAll}
+                  onPress={() => setExpandedAll(!expandedAll)}
+                />
+              </View>
+            )}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              nestedScrollEnabled={true}
+            >
               <AdaptiveCardListContainer
                 id={id}
                 columns={columns}
@@ -219,7 +176,78 @@ const DataExplorerContainer = ({
         )}
       </View>
     )
+  },
+)
+
+const DataExplorerContainer = ({
+  navigation,
+  route,
+}: DataExplorerContainerProps) => {
+  const { t } = useTranslation()
+  const { Layout, Colors, Common, Fonts } = useTheme()
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
+  // const messages = useAppSelector(selectChatMessages)
+  const converseData = useAppSelector(selectConverseData)
+  const [visible, setVisible] = useState(false)
+  const [table, setTable] = useState(true)
+  const ref = React.useRef<any>()
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0)
+
+  const { id, title } = route.params
+  const message = converseData[id][0]
+  const { columns, columnMetadata, values, visualFormats } = message
+  const formats: string[] = visualFormats
+    .filter(item => item.type in visualizationOptions)
+    .map(item => item.type)
+
+  useLayoutEffect(() => {
+    if (formats.length > 1) {
+      const moreOptionsButton = () => (
+        <View style={{ paddingBottom: 2 }}>
+          <Button
+            label="..."
+            onPress={() => setVisible(true)}
+            labelStyle={styles.moreOptionsButton}
+          />
+        </View>
+      )
+      navigation.setOptions({
+        headerRight: moreOptionsButton,
+      })
+    }
+  }, [navigation, formats])
+
+  const buildOptions = (onPress: (option: string) => void): LabelOptions[] => {
+    const labelOptions: LabelOptions[] = formats
+      .filter(item => visualizationOptions[item as VisualizationTypes])
+      .map(item => ({
+        label: visualizationOptions[item as VisualizationTypes],
+        onPress: () => onPress(item),
+      }))
+    return [...labelOptions, { label: 'Cancel', onPress: () => {} }]
   }
+
+  const onSelect = (option: string) => {
+    const index = formats.indexOf(option)
+    // setCurrentSlideIndex(index)
+    ref.current.scrollToIndex({ index })
+  }
+
+  const getItemLayout = (data, index) => ({
+    length: screenWidth,
+    offset: screenWidth * index,
+    index,
+  })
+
+  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const totalWidth = event.nativeEvent.layoutMeasurement.width
+    const xPos = event.nativeEvent.contentOffset.x
+    const current = Math.floor(xPos / totalWidth)
+    setCurrentSlideIndex(current)
+  }
+
+  const isSingleRecord = values.length === 1
+  const [expandedAll, setExpandedAll] = useState(false)
 
   const renderItem = ({ item }: { item: string }) => {
     let content = null
@@ -236,7 +264,16 @@ const DataExplorerContainer = ({
         </ScrollView>
       )
     } else if (item === 'Table') {
-      content = <TableOrAdaptiveCard />
+      content = (
+        <TableOrAdaptiveCard
+          screenWidth={screenWidth}
+          table={table}
+          setTable={setTable}
+          expandedAll={expandedAll}
+          setExpandedAll={setExpandedAll}
+          data={message}
+        />
+      )
     } else if (item.indexOf('Chart') !== -1) {
       content = (
         <View
@@ -280,18 +317,12 @@ const DataExplorerContainer = ({
     }
   }
 
-  const Header = () => (
-    <View paddingT-6 paddingB-4 paddingH-16>
-      <Text style={styles.cardTitle}>{properCase(title, true)}</Text>
-    </View>
-  )
-
   const options = buildOptions(onSelect)
   const tableOnly = formats.length === 1
   const containerHeight = screenHeight * (tableOnly ? 1 : 0.81)
   return (
     <View flex style={{ backgroundColor: Colors.WHITE }}>
-      {title.length > 0 && <Header />}
+      {title.length > 0 && <Header title={title} />}
       <View flex-6>
         <FlatList
           data={formats}

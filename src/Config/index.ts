@@ -4,19 +4,21 @@ const env = {
   STAGING: {
     CS_API_HOST: 'api.staging.conversight.ai',
     BOT_API_HOST: 'bot.staging.conversight.ai',
-    INGRESS_API_HOST: 'ingress.staging.conversight.ai'
+    INGRESS_API_HOST: 'ingress.staging.conversight.ai',
   },
   PRODUCTION: {
     CS_API_HOST: 'api.conversight.ai',
     BOT_API_HOST: 'bot.conversight.ai',
-    INGRESS_API_HOST: 'ingress.conversight.ai'
+    INGRESS_API_HOST: 'ingress.conversight.ai',
   },
 }
 
 /**
  * Sets the target environment based on the build type (Debug or Release Build)
  */
-export const { CS_API_HOST, BOT_API_HOST, INGRESS_API_HOST } = __DEV__ ? env.STAGING : env.PRODUCTION
+export const { CS_API_HOST, BOT_API_HOST, INGRESS_API_HOST } = __DEV__
+  ? env.STAGING
+  : env.STAGING
 
 export const Config = {
   CS_API_HOST,
@@ -24,7 +26,11 @@ export const Config = {
   INGRESS_API_HOST,
 }
 
-export const setCustomHosts = (apiHost: string, botHost: string, ingressHost: string) => {
+export const setCustomHosts = (
+  apiHost: string,
+  botHost: string,
+  ingressHost: string,
+) => {
   Config.CS_API_HOST = apiHost
   Config.BOT_API_HOST = botHost
   Config.INGRESS_API_HOST = ingressHost
