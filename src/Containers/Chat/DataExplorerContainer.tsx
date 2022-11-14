@@ -259,9 +259,10 @@ const DataExplorerContainer = ({
           }}
         >
           <AdaptiveCard
+            id={id}
             columns={columns}
             columnMetadata={columnMetadata}
-            values={values}
+            row={values[0]}
             expanedeView={true}
             expandable={true}
           />
@@ -309,6 +310,10 @@ const DataExplorerContainer = ({
     return content
   }
 
+  const keyExtractor = (format: string, index: number) => {
+    return `${format}:${index}`
+  }
+
   const scrollPrevious = () => {
     if (currentSlideIndex > 0) {
       ref.current.scrollToIndex({ index: currentSlideIndex - 1 })
@@ -337,10 +342,11 @@ const DataExplorerContainer = ({
             paddingBottom: 64,
           }}
           showsHorizontalScrollIndicator={false}
-          getItemLayout={getItemLayout}
+          getItemLayout={!tableOnly ? getItemLayout : undefined}
           horizontal={!tableOnly}
           pagingEnabled
           renderItem={renderItem}
+          keyExtractor={keyExtractor}
         />
       </View>
 
