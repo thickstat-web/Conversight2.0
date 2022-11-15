@@ -27,7 +27,7 @@ const renderAdaptiveCardItem =
         columns={columns}
         columnMetadata={columnMetadata}
         row={row}
-        expanedeView={expandAll}
+        expandAll={expandAll}
         expandable={true}
       />
     )

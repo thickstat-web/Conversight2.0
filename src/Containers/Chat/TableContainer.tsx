@@ -85,7 +85,11 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
         textdataFormatter,
       )}
       widthArr={widthArr}
-      style={[styles.row, index % 2 === 1 && styles.rowOdd]}
+      style={[
+        styles.row,
+        index % 2 === 1 && styles.rowOdd,
+        { height: ROW_HEIGHT },
+      ]}
     />
   )
 

@@ -13,7 +13,7 @@ export interface AdaptiveCardProps {
   columns: string[]
   columnMetadata: ColumnMetadata
   row: Record<string, any>
-  expanedeView: boolean
+  expandAll: boolean
   expandable: boolean
 }
 
@@ -22,11 +22,11 @@ const AdaptiveCard = ({
   columns,
   columnMetadata,
   row,
-  expanedeView = true,
+  expandAll = true,
   expandable = true,
 }: AdaptiveCardProps) => {
   const { Colors } = useTheme()
-  const [expanded, setExpanded] = useState(expanedeView)
+  const [expanded, setExpanded] = useState(expandAll)
   const rowValues = Object.entries(row)
   const totalRows = rowValues.length
   const formattedValues = useMemo(
@@ -35,7 +35,7 @@ const AdaptiveCard = ({
   )
 
   const renderedRow = columns
-    .slice(0, expanded ? totalRows : 5)
+    .slice(0, expandAll ? totalRows : expanded ? totalRows : 4)
     .map((col, colIndex) => {
       const val = formattedValues[colIndex]
       return (

@@ -189,7 +189,7 @@ export class InsightsVisualizer extends Visualizer {
           columnMetadata={columnMetadata}
           row={values[0]}
           expandable={false}
-          expanedeView={false}
+          expandAll={false}
         />
       )
     } else if (this.isTable()) {
@@ -256,7 +256,7 @@ export class ChatVisualizer extends Visualizer {
           columnMetadata={columnMetadata}
           row={values[0]}
           expandable={false}
-          expanedeView={false}
+          expandAll={false}
         />
       )
     } else if (this.isTable()) {
@@ -335,7 +335,7 @@ export class DashboardVisualizer extends Visualizer {
           columnMetadata={columnMetadata}
           row={values[0]}
           expandable={false}
-          expanedeView={false}
+          expandAll={false}
         />
       )
     } else if (this.isTable()) {
