@@ -1,6 +1,7 @@
 import numeral from 'numeral'
 import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import { TextData } from '@/Types/ChatMessage'
+import moment from 'moment'
 
 export const cleanseColumn = (str: string) => {
   if (str) {
@@ -59,6 +60,23 @@ export const properCase = (text: string, onlyFirstChar = false) => {
   }
 }
 
+const replaceDateFormats = function (str: string) {
+  if (str)
+    return (
+      str
+        .toLowerCase()
+        // .replace('%d', 'dd')
+        .replace('%d', 'DD')
+        .replace('%m', 'MM')
+        // .replace('%y', 'yy')
+        .replace('%y', 'YYYY')
+        .replace('%h', 'hh')
+        .replace('%m', 'mm')
+        .replace('%s', 'ss')
+    )
+  else return str
+}
+
 export const formatValue = (
   value: any,
   metadata: ColumnMetadata | null,
@@ -90,10 +108,26 @@ export const formatValue = (
     let abbrValue = value
 
     if (category === 'date') {
-      const datetimeArr = `${value}`.split(' ')
-      formattedValue = datetimeArr[0]
-      roundedValue = datetimeArr[0]
-      abbrValue = datetimeArr[0]
+      const dateStr = `${value}`.trim()
+      let formattedDateStr = ''
+      if (!(dateStr === '')) {
+        const pattern = /[0-9]{2}-[0-9]{2}-[0-9]{4}/g
+        const result = dateStr.match(pattern)
+        const DATE_FORMAT = replaceDateFormats(type)
+        if (result?.length) {
+          const [matchedDate] = result
+          const [mm, dd, yyyy] = matchedDate.split('-')
+          formattedDateStr = moment(`${yyyy}-${mm}-${dd}`).format(DATE_FORMAT)
+        } else {
+          const tmpFormattedDateStr = moment(dateStr).format(DATE_FORMAT)
+          if (!(tmpFormattedDateStr === 'Invalid Date')) {
+            formattedDateStr = tmpFormattedDateStr
+          }
+        }
+      }
+      formattedValue = formattedDateStr
+      roundedValue = formattedDateStr
+      abbrValue = formattedDateStr
     } else if (!isNumericFormat || category === 'flag') {
       formattedValue = value
       roundedValue = value
