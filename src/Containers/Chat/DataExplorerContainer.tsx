@@ -263,7 +263,7 @@ const DataExplorerContainer = ({
             columns={columns}
             columnMetadata={columnMetadata}
             row={values[0]}
-            expanedeView={true}
+            expandAll={false}
             expandable={true}
           />
         </ScrollView>
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     // alignItems: 'center',
     // justifyContent: 'center',
     backgroundColor: Colors.WHITE,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
   cardTitle: {
     fontSize: 14,
