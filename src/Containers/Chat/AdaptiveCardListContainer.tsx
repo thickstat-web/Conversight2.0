@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 import { StyleSheet, FlatList } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { ColumnMetadata } from '@/Types/ChatHistory'
@@ -18,6 +18,27 @@ interface ItemProps {
   index: number
 }
 
+const renderAdaptiveCardItem =
+  (columns: string[], columnMetadata: ColumnMetadata, expandAll: boolean) =>
+  ({ item: row, index }: ItemProps) => {
+    return (
+      <AdaptiveCard
+        id={index}
+        columns={columns}
+        columnMetadata={columnMetadata}
+        row={row}
+        expanedeView={expandAll}
+        expandable={true}
+      />
+    )
+  }
+
+const keyExtractor = (_: Record<string, any>, index: number) => {
+  return `${index}`
+}
+
+const Separator = () => <View marginV-5 />
+
 function AdaptiveCardListContainer({
   id,
   columns,
@@ -27,29 +48,17 @@ function AdaptiveCardListContainer({
 }: AdaptiveCardListContainerProps) {
   const { Layout, Colors, Common, Fonts } = useTheme()
 
-  const renderAdaptiveCardItem = ({ item: row, index }: ItemProps) => {
-    return (
-      <View marginB-10>
-        <AdaptiveCard
-          columns={columns}
-          columnMetadata={columnMetadata}
-          values={[row]}
-          expanedeView={expandAll}
-          expandable={true}
-        />
-      </View>
-    )
-  }
-
   return (
-    <View style={styles.container}>
+    <View key={id} style={styles.container}>
       <FlatList
         data={values}
-        // initialNumToRender={20}
-        // getItemLayout={getItemLayout}
-        renderItem={renderAdaptiveCardItem}
-        style={{ paddingBottom: 200 }}
+        contentContainerStyle={{ flex: 1 }}
+        renderItem={renderAdaptiveCardItem(columns, columnMetadata, expandAll)}
+        initialNumToRender={25}
+        keyExtractor={keyExtractor}
         listKey={id}
+        ItemSeparatorComponent={Separator}
+        style={{ paddingBottom: 200 }}
       />
     </View>
   )

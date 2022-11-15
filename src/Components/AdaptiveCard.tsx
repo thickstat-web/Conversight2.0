@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { StyleSheet, Text } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { COLLAPSE, DEFAULT_ADAPTIVE_CARD_ROWS, EXPAND } from '@/Config'
@@ -9,37 +9,41 @@ import { getFormattedRowData, properCase } from '@/Utils/common'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 
 export interface AdaptiveCardProps {
+  id: number | string
   columns: string[]
   columnMetadata: ColumnMetadata
-  values: Array<Record<string, any>>
+  row: Record<string, any>
   expanedeView: boolean
   expandable: boolean
 }
 
 const AdaptiveCard = ({
+  id,
   columns,
   columnMetadata,
-  values,
+  row,
   expanedeView = true,
   expandable = true,
 }: AdaptiveCardProps) => {
   const { Colors } = useTheme()
   const [expanded, setExpanded] = useState(expanedeView)
-  const [row] = values
   const rowValues = Object.entries(row)
   const totalRows = rowValues.length
-  const formattedValues = getFormattedRowData(columns, columnMetadata, row)
+  const formattedValues = useMemo(
+    () => getFormattedRowData(columns, columnMetadata, row),
+    [columnMetadata, columns, row],
+  )
 
   const renderedRow = columns
-    .slice(0, expanded ? totalRows : DEFAULT_ADAPTIVE_CARD_ROWS)
-    .map((col, index) => {
-      const val = formattedValues[index]
+    .slice(0, expanded ? totalRows : 5)
+    .map((col, colIndex) => {
+      const val = formattedValues[colIndex]
       return (
         <View
-          key={index}
+          key={colIndex}
           style={[
             styles.adaptiveCardItem,
-            { backgroundColor: index % 2 === 0 ? '#f0fcf4' : '' },
+            { backgroundColor: colIndex % 2 === 0 ? '#f0fcf4' : '' },
           ]}
         >
           <View style={styles.titleColumn}>

@@ -184,9 +184,10 @@ export class InsightsVisualizer extends Visualizer {
     } else if (this.isAdaptiveCard()) {
       content = (
         <AdaptiveCard
+          id={id}
           columns={columns}
           columnMetadata={columnMetadata}
-          values={values}
+          row={values[0]}
           expandable={false}
           expanedeView={false}
         />
@@ -250,9 +251,10 @@ export class ChatVisualizer extends Visualizer {
     } else if (this.isAdaptiveCard()) {
       content = (
         <AdaptiveCard
+          id={id}
           columns={columns}
           columnMetadata={columnMetadata}
-          values={values}
+          row={values[0]}
           expandable={false}
           expanedeView={false}
         />
@@ -328,9 +330,10 @@ export class DashboardVisualizer extends Visualizer {
     } else if (this.isAdaptiveCard()) {
       content = (
         <AdaptiveCard
+          id={id}
           columns={columns}
           columnMetadata={columnMetadata}
-          values={values}
+          row={values[0]}
           expandable={false}
           expanedeView={false}
         />
