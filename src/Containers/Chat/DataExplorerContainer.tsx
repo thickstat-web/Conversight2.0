@@ -263,7 +263,7 @@ const DataExplorerContainer = ({
             columns={columns}
             columnMetadata={columnMetadata}
             row={values[0]}
-            expandAll={true}
+            expandAll={false}
             expandable={true}
           />
         </ScrollView>

@@ -35,7 +35,10 @@ const AdaptiveCard = ({
   )
 
   const renderedRow = columns
-    .slice(0, expandAll ? totalRows : expanded ? totalRows : 4)
+    .slice(
+      0,
+      expandAll ? totalRows : expanded ? totalRows : DEFAULT_ADAPTIVE_CARD_ROWS,
+    )
     .map((col, colIndex) => {
       const val = formattedValues[colIndex]
       return (
