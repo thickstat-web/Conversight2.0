@@ -121,22 +121,25 @@ export default function () {
   }, [batchGenerator, fetchFollowup])
 
   // Convert all the insights text in to audio with parallel request
-  async function convertTextToVoice(insightsData: InsightData[]) {
-    // Make a parallel voice to text request
-    const text2VoiceRespList = insightsData.map(
-      async ({ id, answer }: InsightData) => {
-        const data = makeTextToVoiceRequestData(answer)
-        const result: VoiceResponse = {
-          id,
-          resp: await getText2Voice(data).unwrap(),
-        }
-        return result
-      },
-    )
+  const convertTextToVoice = useCallback(
+    async (insightsData: InsightData[]) => {
+      // Make a parallel voice to text request
+      const text2VoiceRespList = insightsData.map(
+        async ({ id, answer }: InsightData) => {
+          const data = makeTextToVoiceRequestData(answer)
+          const result: VoiceResponse = {
+            id,
+            resp: await getText2Voice(data).unwrap(),
+          }
+          return result
+        },
+      )
 
-    // Wait for all the parallel requests to complete and conver to AudioTrack format
-    return (await Promise.all(text2VoiceRespList)).map(responseToAudioTrack)
-  }
+      // Wait for all the parallel requests to complete and conver to AudioTrack format
+      return (await Promise.all(text2VoiceRespList)).map(responseToAudioTrack)
+    },
+    [getText2Voice],
+  )
 
   useEffect(() => {
     const initTextToVoiceConversion = async () => {
@@ -149,7 +152,7 @@ export default function () {
     if (!insightsLoading && insightsData.length) {
       initTextToVoiceConversion()
     }
-  }, [insightsLoading, insightsData])
+  }, [insightsLoading, insightsData, convertTextToVoice])
 
   return {
     isLoading: datasetLoading || insightsLoading,
