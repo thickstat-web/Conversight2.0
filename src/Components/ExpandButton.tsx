@@ -20,30 +20,26 @@ const ExpandButton = ({
   expandedText,
   collapsedText,
 }: ExpandButtonProps) => {
-
-
   const { Colors } = useTheme()
   return (
-    <View>
-      <TouchableOpacity style={{ flexDirection: 'row' }} onPress={onPress}>
-        <Text
-          style={[
-            {
-              color: Colors.GREEN_MAIN,
-            },
-            styles.expandCollapseStyle,
-          ]}
-        >
-          {expanded ? collapsedText : expandedText}
-        </Text>
-        <SvgCss
-          width="10"
-          height="10"
-          xml={expanded ? upArrow : downArrow}
-          style={{ marginTop: 4, marginHorizontal: 4 }}
-        />
-      </TouchableOpacity>
-    </View>
+    <TouchableOpacity style={styles.buttonContainer} onPress={onPress}>
+      <Text
+        style={[
+          {
+            color: Colors.GREEN_MAIN,
+          },
+          styles.expandCollapseStyle,
+        ]}
+      >
+        {expanded ? collapsedText : expandedText}
+      </Text>
+      <SvgCss
+        width="10"
+        height="10"
+        xml={expanded ? upArrow : downArrow}
+        style={styles.icon}
+      />
+    </TouchableOpacity>
   )
 }
 
@@ -52,9 +48,17 @@ ExpandButton.defaultProps = {
   style: {},
 }
 const styles = StyleSheet.create({
+  buttonContainer: {
+    flexDirection: 'row',
+    padding: 4,
+  },
   expandCollapseStyle: {
     textDecorationLine: 'underline',
     letterSpacing: 0.8,
+  },
+  icon: {
+    marginTop: 4,
+    marginHorizontal: 4,
   },
 })
 

@@ -37,7 +37,7 @@ const keyExtractor = (_: Record<string, any>, index: number) => {
   return `${index}`
 }
 
-const Separator = () => <View marginV-5 />
+const Separator = () => <View marginV-3 />
 
 function AdaptiveCardListContainer({
   id,

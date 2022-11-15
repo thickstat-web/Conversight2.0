@@ -151,7 +151,7 @@ const TableOrAdaptiveCard = memo(
         ) : (
           <>
             {columns.length > DEFAULT_ADAPTIVE_CARD_ROWS && (
-              <View row right padding-10 paddingT-4>
+              <View row right paddingH-4 paddingV-2>
                 <ExpandButton
                   collapsedText={COLLAPSE_ALL}
                   expandedText={EXPAND_ALL}
@@ -254,9 +254,8 @@ const DataExplorerContainer = ({
     if (isSingleRecord) {
       content = (
         <ScrollView
-          contentContainerStyle={{
-            paddingBottom: 64,
-          }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.adaptiveCardContainer}
         >
           <AdaptiveCard
             id={id}
@@ -284,8 +283,8 @@ const DataExplorerContainer = ({
         <View
           style={[
             styles.contentContainer,
+            styles.chartContainer,
             {
-              justifyContent: 'flex-start',
               width: screenWidth,
             },
           ]}
@@ -337,28 +336,25 @@ const DataExplorerContainer = ({
           data={formats}
           ref={ref}
           onMomentumScrollEnd={onScroll}
-          contentContainerStyle={{
-            height: containerHeight,
-            paddingBottom: 64,
-          }}
+          contentContainerStyle={
+            {
+              // height: containerHeight,
+            }
+          }
+          style={{ paddingBottom: 64 }}
           showsHorizontalScrollIndicator={false}
-          getItemLayout={!tableOnly ? getItemLayout : undefined}
+          showsVerticalScrollIndicator={false}
+          // getItemLayout={!tableOnly ? getItemLayout : undefined}
           horizontal={!tableOnly}
-          pagingEnabled
+          pagingEnabled={!tableOnly}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
         />
       </View>
 
       {formats.length > 1 && (
-        <View
-          style={{
-            backgroundColor: Colors.WHITE,
-            paddingBottom: 32,
-            alignItems: 'center',
-          }}
-        >
-          <View style={styles.dotsContainer}>
+        <View style={styles.dotsContainer}>
+          <View style={styles.dotsWrapper}>
             {formats.map((_, index) => {
               const opacity = currentSlideIndex === index ? 1 : 0.2
               return (
@@ -420,7 +416,18 @@ const styles = StyleSheet.create({
     color: Colors.GREEN_DARK,
     textAlign: 'center',
   },
+  adaptiveCardContainer: {
+    paddingBottom: 120,
+  },
+  chartContainer: {
+    justifyContent: 'flex-start',
+  },
   dotsContainer: {
+    backgroundColor: Colors.WHITE,
+    paddingBottom: 32,
+    alignItems: 'center',
+  },
+  dotsWrapper: {
     display: 'flex',
     flexDirection: 'row',
   },
@@ -448,7 +455,8 @@ const styles = StyleSheet.create({
   segmentWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
-    marginVertical: 4,
+    marginTop: 4,
+    marginBottom: 2,
     borderRadius: 6,
     borderWidth: 2,
     borderColor: '#EAFAEA',

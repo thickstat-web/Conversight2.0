@@ -29,57 +29,63 @@ const AdaptiveCard = ({
   const [expanded, setExpanded] = useState(expandAll)
   const rowValues = Object.entries(row)
   const totalRows = rowValues.length
+
   const formattedValues = useMemo(
     () => getFormattedRowData(columns, columnMetadata, row),
     [columnMetadata, columns, row],
   )
 
-  const renderedRow = columns
-    .slice(
-      0,
-      expandAll ? totalRows : expanded ? totalRows : DEFAULT_ADAPTIVE_CARD_ROWS,
-    )
-    .map((col, colIndex) => {
-      const val = formattedValues[colIndex]
-      return (
-        <View
-          key={colIndex}
-          style={[
-            styles.adaptiveCardItem,
-            { backgroundColor: colIndex % 2 === 0 ? '#f0fcf4' : '' },
-          ]}
-        >
-          <View style={styles.titleColumn}>
-            <Text style={[{ color: Colors.GREEN_MAIN }, styles.propertyName]}>
-              {properCase(columnMetadata[col].alias)}
-            </Text>
-          </View>
+  useEffect(() => {
+    setExpanded(expandAll)
+  }, [expandAll])
 
-          <View style={styles.valueColumn}>
-            <Text
-              style={styles.propertyValue}
-              selectable={true}
-              selectionColor={Colors.GREEN_LIGHTEST}
-            >
-              {val}
-            </Text>
+  const renderedRow = useMemo(() => {
+    return columns
+      .slice(0, expanded ? totalRows : DEFAULT_ADAPTIVE_CARD_ROWS)
+      .map((col, colIndex) => {
+        const val = formattedValues[colIndex]
+        return (
+          <View
+            key={colIndex}
+            style={[
+              styles.adaptiveCardItem,
+              { backgroundColor: colIndex % 2 === 0 ? '#f0fcf4' : '' },
+            ]}
+          >
+            <View style={styles.titleColumn}>
+              <Text style={[{ color: Colors.GREEN_MAIN }, styles.propertyName]}>
+                {properCase(columnMetadata[col].alias)}
+              </Text>
+            </View>
+
+            <View style={styles.valueColumn}>
+              <Text
+                style={styles.propertyValue}
+                selectable={true}
+                selectionColor={Colors.GREEN_LIGHTEST}
+              >
+                {val}
+              </Text>
+            </View>
           </View>
-        </View>
-      )
-    })
+        )
+      })
+  }, [
+    Colors.GREEN_LIGHTEST,
+    Colors.GREEN_MAIN,
+    columnMetadata,
+    columns,
+    expanded,
+    formattedValues,
+    totalRows,
+  ])
 
   return (
     <>
       <View style={styles.cardContainer}>{renderedRow}</View>
 
       {totalRows > DEFAULT_ADAPTIVE_CARD_ROWS && (
-        <View
-          row
-          paddingH-12
-          paddingV-6
-          right
-          style={{ justifyContent: 'space-between', alignItems: 'center' }}
-        >
+        <View row paddingH-12 right style={styles.cardFooter}>
           <View>
             {!expanded && (
               <Text style={styles.bottomCount}>
@@ -144,5 +150,9 @@ const styles = StyleSheet.create({
   },
   bottomCount: {
     color: Colors.GREEN_MAIN,
+  },
+  cardFooter: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 })
