@@ -15,6 +15,7 @@ import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 import com.swmansion.reanimated.ReanimatedPackage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import com.oblador.vectoricons.VectorIconsPackage;  
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -31,6 +32,7 @@ public class MainApplication extends Application implements ReactApplication {
       // Packages that cannot be autolinked yet can be added manually here, for
       // example:
       // packages.add(new MyReactNativePackage());
+      new VectorIconsPackage();
       return packages;
     }
 
