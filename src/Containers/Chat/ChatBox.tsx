@@ -94,13 +94,13 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
 
   const onSpeechStart = (e: any) => {
     //Invoked when .start() is called without error
-    console.log('onSpeechStart: ', e)
+    // console.log('onSpeechStart: ', e)
     setStarted('The Speech has started')
   }
 
   const onSpeechEnd = (e: any) => {
     //Invoked when SpeechRecognizer stops recognition
-    console.log('onSpeechEnd: ', e)
+    // console.log('onSpeechEnd: ', e)
     setEnd('The Speech has ended')
   }
 
@@ -112,23 +112,23 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
 
   const onSpeechResults = (e: { value: React.SetStateAction<never[]> }) => {
     //Invoked when SpeechRecognizer is finished recognizing
-    console.log('onSpeechResults: ', e)
+    // console.log('onSpeechResults: ', e)
     const outputVoice = e.value
     const finalOutputVoice = outputVoice[0]
-    console.log('The final output voice is ' + finalOutputVoice)
+    // console.log('The final output voice is ' + finalOutputVoice)
     setResults(e.value)
     // setQuery(finalOutputVoice)
   }
 
-  console.log(
-    'On speech results has trigged and the value is ' + onSpeechResults,
-  )
+  // console.log(
+  //   'On speech results has trigged and the value is ' + onSpeechResults,
+  // )
 
   const onSpeechPartialResults = (e: {
     value: React.SetStateAction<never[]>
   }) => {
     //Invoked when any results are computed
-    console.log('onSpeechPartialResults: ', e)
+    // console.log('onSpeechPartialResults: ', e)
     setPartialResults(e.value)
     const partialOutputVoice = e.value
     const finalPartialOutputVoice = partialOutputVoice[0]
@@ -156,7 +156,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
       setEnd('')
     } catch (e) {
       //eslint-disable-next-line
-      console.error(e)
+      // console.error(e)
     }
   }
 
