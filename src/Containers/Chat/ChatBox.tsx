@@ -32,7 +32,7 @@ import { TouchableHighlight as TouchableOpacity } from 'react-native-gesture-han
 // import { PulseAnimation } from 'react-native-animated-pulse'
 
 export declare type RefProps = {
-  setUtterance: (text: string, finalOutputVoice: any) => void
+  setUtterance: (text: string) => void
 }
 
 interface ChatBoxOptions {
@@ -45,9 +45,9 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
 ) => {
   // const [pitch, setPitch] = useState('')
   // const [error, setError] = useState('')
-  const [end, setEnd] = useState('')
-  const [started, setStarted] = useState('')
-  const [results, setResults] = useState([])
+  // const [end, setEnd] = useState('')
+  // const [started, setStarted] = useState('')
+  // const [results, setResults] = useState([])
   const [partialResults, setPartialResults] = useState([])
   const { Colors, Fonts } = useTheme()
   const dispatch = useAppDispatch()
@@ -92,17 +92,17 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     }
   }, [])
 
-  const onSpeechStart = (e: any) => {
-    //Invoked when .start() is called without error
-    // console.log('onSpeechStart: ', e)
-    setStarted('The Speech has started')
-  }
+  // const onSpeechStart = (e: any) => {
+  //   //Invoked when .start() is called without error
+  //   // console.log('onSpeechStart: ', e)
+  //   setStarted('The Speech has started')
+  // }
 
-  const onSpeechEnd = (e: any) => {
-    //Invoked when SpeechRecognizer stops recognition
-    // console.log('onSpeechEnd: ', e)
-    setEnd('The Speech has ended')
-  }
+  // const onSpeechEnd = (e: any) => {
+  //   //Invoked when SpeechRecognizer stops recognition
+  //   // console.log('onSpeechEnd: ', e)
+  //   setEnd('The Speech has ended')
+  // }
 
   // const onSpeechError = (e: { error: any }) => {
   //   //Invoked when an error occurs.
@@ -110,15 +110,15 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
   //   setError(JSON.stringify(e.error))
   // }
 
-  const onSpeechResults = (e: { value: React.SetStateAction<never[]> }) => {
-    //Invoked when SpeechRecognizer is finished recognizing
-    // console.log('onSpeechResults: ', e)
-    const outputVoice = e.value
-    const finalOutputVoice = outputVoice[0]
-    // console.log('The final output voice is ' + finalOutputVoice)
-    setResults(e.value)
-    // setQuery(finalOutputVoice)
-  }
+  // const onSpeechResults = (e: { value: React.SetStateAction<never[]> }) => {
+  //   //Invoked when SpeechRecognizer is finished recognizing
+  //   // console.log('onSpeechResults: ', e)
+  //   const outputVoice = e.value
+  //   const finalOutputVoice = outputVoice[0]
+  //   // console.log('The final output voice is ' + finalOutputVoice)
+  //   setResults(e.value)
+  //   // setQuery(finalOutputVoice)
+  // }
 
   // console.log(
   //   'On speech results has trigged and the value is ' + onSpeechResults,
@@ -148,12 +148,12 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     //Starts listening for speech for a specific locale
     try {
       await Voice.start('en-US')
-      setPitch('')
-      setError('')
-      setStarted('')
-      setResults([])
+      // setPitch('')
+      // setError('')
+      // setStarted('')
+      // setResults([])
       setPartialResults([])
-      setEnd('')
+      // setEnd('')
     } catch (e) {
       //eslint-disable-next-line
       // console.error(e)
