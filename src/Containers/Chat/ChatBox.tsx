@@ -124,6 +124,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     >
       <DatasetChooser onSelect={onDatasetChange} />
       <TextInput
+        placeholderTextColor={'#00AA39'}
         placeholder={'Ask Athena...'}
         onChangeText={setQuery}
         onSubmitEditing={handleSendMessage}
