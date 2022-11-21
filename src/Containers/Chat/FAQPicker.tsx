@@ -234,6 +234,7 @@ const styles = StyleSheet.create({
   },
   faqButton: {
     marginRight: 0,
+    marginLeft: 0,
   },
   itemSeparator: {
     height: 1,

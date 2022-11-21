@@ -4,8 +4,9 @@ import React, {
   useImperativeHandle,
   ForwardRefRenderFunction,
 } from 'react'
-import { StyleSheet, TextInput } from 'react-native'
+import { Pressable, StyleSheet, TextInput } from 'react-native'
 import { View } from 'react-native-ui-lib'
+import Icon from 'react-native-vector-icons/Ionicons'
 import { useSendChatMessageMutation } from '@/Services/modules/ingress'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
 import {
@@ -129,6 +130,14 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
         value={query}
         style={styles.textInput}
       />
+      {query && (
+        <Pressable
+          style={styles.cleanButtonContainer}
+          onPress={() => setQuery('')}
+        >
+          <Icon name={'close-circle'} size={26} color={Colors.GREEN_MAIN} />
+        </Pressable>
+      )}
       <FAQPicker onSelect={handleSelectedFaq} />
       <View style={{ paddingRight: 8 }}>
         <SendButton
@@ -144,6 +153,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
 
 export default forwardRef(ChatBox)
 
+const BUTTON_SIZE = 40
 const styles = StyleSheet.create({
   chatboxWrapper: {
     flexDirection: 'row',
@@ -167,10 +177,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 40,
   },
-  faqpicker: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    margin: 8,
+  cleanButtonContainer: {
+    height: 26,
+    width: 26,
+    borderRadius: 13,
+    // backgroundColor: '#02b53e',
+    // backgroundColor: '#00AA39',
+    marginHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    opacity: 0.5,
   },
 })
