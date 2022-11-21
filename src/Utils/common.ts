@@ -228,8 +228,8 @@ let timerId: NodeJS.Timeout
 
 /**
  *
- * @param func Debounce function: Input as function which needs to be debounced and delay is the debounced time in milliseconds
- * @param delay
+ * @param func a function which needs to be debounced
+ * @param delay is the debounced time in milliseconds
  */
 export const debounce = (func: () => void, delay: number) => {
   // Cancels the setTimeout method execution
