@@ -7,6 +7,7 @@ import Voice, {
   SpeechEndEvent,
   SpeechErrorEvent,
   SpeechResultsEvent,
+  SpeechStartEvent,
   SpeechVolumeChangeEvent,
 } from '@react-native-voice/voice'
 import { useTheme } from '@/Hooks'
@@ -35,19 +36,18 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
   const stopRecognizing = useCallback(async () => {
     try {
       await Voice.stop()
-      await Voice.destroy()
+      // await Voice.destroy()
     } catch (e) {
       console.error(e)
     } finally {
       setMicState(MicState.STOPPED)
       setListening(false)
-      // console.log('Speech recognition has ended')
+      // console.log('Speech recognition has stopped')
     }
   }, [])
 
   const stopWhenTimedout = useCallback(() => {
     debounce(() => {
-      // console.log('Timedout: Invoking stopRecognizing()...')
       stopRecognizing()
     }, 4000)
   }, [stopRecognizing])
@@ -62,9 +62,16 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
     }
   }
 
+  const onSpeechStart = useCallback((e: SpeechStartEvent) => {
+    console.log('The Speech has started')
+    if (e && e.error) {
+      console.log('onSpeechStart: ', e.error)
+    }
+  }, [])
+
   const onSpeechEnd = useCallback(
     (e: SpeechEndEvent) => {
-      // console.log('The Speech has ended')
+      console.log('The Speech has ended')
       if (e && e.error) {
         console.log('onSpeechEnd: ', e.error)
       }
@@ -86,25 +93,30 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
 
   const onSpeechResults = useCallback(
     (e: SpeechResultsEvent) => {
-      //Invoked when SpeechRecognizer is finished recognizing
       if (e.value) {
-        // console.log('onSpeechResults: ', e.value)
-        setQuery(e.value.join(' '))
+        const text = e.value[0]
+        if (text.length && text !== query) {
+          // console.log(`[SendButton] onSpeechResults: value: ${text}`)
+          setQuery(text)
+        }
       }
       stopWhenTimedout()
     },
-    [setQuery, stopWhenTimedout],
+    [query, setQuery, stopWhenTimedout],
   )
 
   const onSpeechPartialResults = useCallback(
     (e: SpeechResultsEvent) => {
       if (e.value) {
-        // console.log('onSpeechPartialResults: ', e.value)
-        setQuery(e.value.join(' '))
+        const text = e.value[0]
+        if (text.length && text !== query) {
+          // console.log(`[SendButton] onSpeechPartialResults: value: ${text}`)
+          setQuery(text)
+        }
       }
       stopWhenTimedout()
     },
-    [setQuery, stopWhenTimedout],
+    [query, setQuery, stopWhenTimedout],
   )
 
   const onSpeechVolumeChanged = useCallback((e: SpeechVolumeChangeEvent) => {
@@ -117,20 +129,14 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
     // Voice.onSpeechStart = onSpeechStart
     Voice.onSpeechEnd = onSpeechEnd
     Voice.onSpeechError = onSpeechError
-    Voice.onSpeechPartialResults = onSpeechPartialResults
     Voice.onSpeechResults = onSpeechResults
-    Voice.onSpeechVolumeChanged = onSpeechVolumeChanged
+    Voice.onSpeechPartialResults = onSpeechPartialResults
+    // Voice.onSpeechVolumeChanged = onSpeechVolumeChanged
 
     return () => {
       Voice.destroy().then(Voice.removeAllListeners)
     }
-  }, [
-    onSpeechEnd,
-    onSpeechError,
-    onSpeechResults,
-    onSpeechPartialResults,
-    onSpeechVolumeChanged,
-  ])
+  }, [])
 
   const toggleMicrophone = async () => {
     if (listening) {

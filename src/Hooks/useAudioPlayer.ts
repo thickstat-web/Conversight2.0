@@ -29,7 +29,7 @@ export default function () {
   const dispatch = useAppDispatch()
   const isFocused = useIsFocused()
   const [trackIndex, setTrackIndex] = useState(0)
-  const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([])
+  // const [audioTracks, setAudioTracks] = useState<AudioTrack[]>([])
   const [playerState, setPlayerState] = useState<PlayerState>(PlayerState.IDLE)
 
   /* Audio player - Convert text to audio, play and pause functionalities */
@@ -46,7 +46,7 @@ export default function () {
     const { type } = event
     if (type === Event.PlaybackState) {
       const { state } = event
-      console.log(`[useAudioPlayer] player state: ${JSON.stringify(event)}`)
+      // console.log(`[useAudioPlayer] player state: ${JSON.stringify(event)}`)
       if (state === State.Playing) {
         setPlayerState(PlayerState.PLAYING)
       } else if (state === State.Connecting || state === State.Buffering) {
@@ -86,15 +86,12 @@ export default function () {
     [dispatch],
   )
 
-  const playTrackByIndex = useCallback(
-    async (index: number) => {
-      // console.log(`[useAudionPlayer] playTrackByIndex: ${index}, audioTracks: ${audioTracks.length}`)
-      await addAudioTracks(audioTracks.slice(index, audioTracks.length))
-      // await TrackPlayer.skip(index)
-      // await TrackPlayer.play()
-    },
-    [addAudioTracks, audioTracks],
-  )
+  const playTrackByIndex = useCallback(async (index: number) => {
+    // console.log(`[useAudionPlayer] playTrackByIndex: ${index}, audioTracks: ${audioTracks.length}`)
+    // await addAudioTracks(audioTracks.slice(index, audioTracks.length))
+    // await TrackPlayer.skip(index)
+    // await TrackPlayer.play()
+  }, [])
 
   const pause = useCallback(
     async (updateStore = false) => {
