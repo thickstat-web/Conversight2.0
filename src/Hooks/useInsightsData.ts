@@ -146,12 +146,12 @@ export default function () {
       // setLoadingInsightsAudio(true)
       const insightsVoiceList = await convertTextToVoice(insightsData)
       setInsightsAudioList(insightsVoiceList)
-      setLoadingInsightsAudio(false)
     }
 
     if (!insightsLoading && insightsData.length) {
       initTextToVoiceConversion()
     }
+    setLoadingInsightsAudio(false)
   }, [insightsLoading, insightsData, convertTextToVoice])
 
   return {

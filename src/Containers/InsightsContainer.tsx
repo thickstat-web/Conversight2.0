@@ -2,7 +2,6 @@ import React, {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -304,6 +303,12 @@ const InsightComponents = React.memo((props: InsightComponentsProps) => {
     [insightsData, fetchFollowup],
   )
 
+  const handleScrollToIndexFailure = ({ index }: { index: number }) => {
+    console.log(
+      `[InsightsContainer] trying to scroll to item index ${index} that is not rendered yet`,
+    )
+  }
+
   const NoInsights = (
     <View flex center marginT-150>
       <Text style={Fonts.textSmall}>No insights data available</Text>
@@ -322,6 +327,7 @@ const InsightComponents = React.memo((props: InsightComponentsProps) => {
       // onEndReached={hasMoreFollowupComponent ? loadMoreFollowupComponent : null}
       // onEndReachedThreshold={0.5}
       onScrollBeginDrag={pausePlayer}
+      onScrollToIndexFailed={handleScrollToIndexFailure}
       showsVerticalScrollIndicator={false}
       ListEmptyComponent={NoInsights}
     />
@@ -435,15 +441,23 @@ const InsightsContainer = ({ navigation }) => {
   //   }
   // }, [filteredAudioTracks, addAudioTracks])
 
+  const [focused, setFocused] = useState(true)
   useEffect(() => {
     const initPlayer = async () => {
       await addAudioTracks(insightsAudioList)
       await play()
     }
-    if (!loadingInsightsAudio && insightsAudioList.length) {
+    if (!loadingInsightsAudio && insightsAudioList.length && focused) {
       initPlayer()
     }
-  }, [loadingInsightsAudio, insightsAudioList, play, addAudioTracks])
+  }, [loadingInsightsAudio, insightsAudioList, play, addAudioTracks, focused])
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', async () => {
+      setFocused(false)
+    })
+    return unsubscribe
+  }, [navigation, pause])
 
   return (
     <View flex marginB-10 style={{ backgroundColor: Colors.WHITE_SMOKE }}>
