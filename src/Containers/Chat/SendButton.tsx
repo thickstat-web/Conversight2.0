@@ -7,6 +7,7 @@ import Voice, {
   SpeechEndEvent,
   SpeechErrorEvent,
   SpeechResultsEvent,
+  SpeechVolumeChangeEvent,
 } from '@react-native-voice/voice'
 import { useTheme } from '@/Hooks'
 import { debounce } from '@/Utils/common'
@@ -46,8 +47,9 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
 
   const stopWhenTimedout = useCallback(() => {
     debounce(() => {
+      // console.log('Timedout: Invoking stopRecognizing()...')
       stopRecognizing()
-    }, 3000)
+    }, 4000)
   }, [stopRecognizing])
 
   const startRecognizing = async () => {
@@ -105,18 +107,30 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
     [setQuery, stopWhenTimedout],
   )
 
+  const onSpeechVolumeChanged = useCallback((e: SpeechVolumeChangeEvent) => {
+    if (e.value) {
+      // console.log('onSpeechVolumeChanged: value:', e.value)
+    }
+  }, [])
+
   useEffect(() => {
     // Voice.onSpeechStart = onSpeechStart
     Voice.onSpeechEnd = onSpeechEnd
     Voice.onSpeechError = onSpeechError
-    Voice.onSpeechResults = onSpeechResults
     Voice.onSpeechPartialResults = onSpeechPartialResults
-    // Voice.onSpeechVolumeChanged = onSpeechVolumeChanged
+    Voice.onSpeechResults = onSpeechResults
+    Voice.onSpeechVolumeChanged = onSpeechVolumeChanged
 
     return () => {
       Voice.destroy().then(Voice.removeAllListeners)
     }
-  }, [onSpeechPartialResults, onSpeechResults, onSpeechEnd, onSpeechError])
+  }, [
+    onSpeechEnd,
+    onSpeechError,
+    onSpeechResults,
+    onSpeechPartialResults,
+    onSpeechVolumeChanged,
+  ])
 
   const toggleMicrophone = async () => {
     if (listening) {
