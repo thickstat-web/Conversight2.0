@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { StyleSheet, Pressable, ActivityIndicator } from 'react-native'
+import {
+  StyleSheet,
+  Pressable,
+  ActivityIndicator,
+  Platform,
+} from 'react-native'
 import { View } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { PulseAnimation } from 'react-native-animated-pulse'
@@ -36,7 +41,9 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
   const stopRecognizing = useCallback(async () => {
     try {
       await Voice.stop()
-      // await Voice.destroy()
+      if (Platform.OS === 'ios') {
+        await Voice.destroy()
+      }
     } catch (e) {
       // console.error(e)
     } finally {
@@ -49,6 +56,7 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
   const stopWhenTimedout = useCallback(() => {
     debounce(() => {
       stopRecognizing()
+      // console.log('Timedout: Stopping speech recognition...')
     }, 4000)
   }, [stopRecognizing])
 
