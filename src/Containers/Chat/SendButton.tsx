@@ -38,7 +38,7 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
       await Voice.stop()
       // await Voice.destroy()
     } catch (e) {
-      console.error(e)
+      // console.error(e)
     } finally {
       setMicState(MicState.STOPPED)
       setListening(false)
@@ -58,38 +58,38 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
       setMicState(MicState.LISTENING)
       stopWhenTimedout()
     } catch (e) {
-      console.error(e)
+      // console.error(e)
     }
   }
 
   const onSpeechStart = useCallback((e: SpeechStartEvent) => {
-    console.log('The Speech has started')
+    // console.log('The Speech has started')
     if (e && e.error) {
-      console.log('onSpeechStart: ', e.error)
+      // console.log('onSpeechStart: ', e.error)
     }
   }, [])
 
   const onSpeechEnd = useCallback(
     (e: SpeechEndEvent) => {
-      console.log('The Speech has ended')
+      // console.log('The Speech has ended')
       if (e && e.error) {
-        console.log('onSpeechEnd: ', e.error)
+        // console.log('onSpeechEnd: ', e.error)
       }
       stopRecognizing()
     },
     [stopRecognizing],
   )
 
-  const onSpeechError = useCallback(
-    async (e: SpeechErrorEvent) => {
-      // console.log('Speech ends with error')
-      if (e && e.error) {
-        console.log('onSpeechError: ', e.error)
-      }
-      stopRecognizing()
-    },
-    [stopRecognizing],
-  )
+  // const onSpeechError = useCallback(
+  //   async (e: SpeechErrorEvent) => {
+  //     // console.log('Speech ends with error')
+  //     if (e && e.error) {
+  //       console.log('onSpeechError: ', e.error)
+  //     }
+  //     stopRecognizing()
+  //   },
+  //   [stopRecognizing],
+  // )
 
   const onSpeechResults = useCallback(
     (e: SpeechResultsEvent) => {
@@ -128,7 +128,7 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
   useEffect(() => {
     // Voice.onSpeechStart = onSpeechStart
     Voice.onSpeechEnd = onSpeechEnd
-    Voice.onSpeechError = onSpeechError
+    // Voice.onSpeechError = onSpeechError
     Voice.onSpeechResults = onSpeechResults
     Voice.onSpeechPartialResults = onSpeechPartialResults
     // Voice.onSpeechVolumeChanged = onSpeechVolumeChanged
