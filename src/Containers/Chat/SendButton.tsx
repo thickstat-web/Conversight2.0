@@ -5,10 +5,8 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import { PulseAnimation } from 'react-native-animated-pulse'
 import Voice, {
   SpeechEndEvent,
-  SpeechErrorEvent,
   SpeechResultsEvent,
   SpeechStartEvent,
-  SpeechVolumeChangeEvent,
 } from '@react-native-voice/voice'
 import { useTheme } from '@/Hooks'
 import { debounce } from '@/Utils/common'
@@ -119,11 +117,11 @@ const SendButton = ({ loading, query, setQuery, onPress }: SendButtonProps) => {
     [query, setQuery, stopWhenTimedout],
   )
 
-  const onSpeechVolumeChanged = useCallback((e: SpeechVolumeChangeEvent) => {
-    if (e.value) {
-      // console.log('onSpeechVolumeChanged: value:', e.value)
-    }
-  }, [])
+  // const onSpeechVolumeChanged = useCallback((e: SpeechVolumeChangeEvent) => {
+  //   if (e.value) {
+  //     // console.log('onSpeechVolumeChanged: value:', e.value)
+  //   }
+  // }, [])
 
   useEffect(() => {
     // Voice.onSpeechStart = onSpeechStart
