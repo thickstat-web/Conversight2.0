@@ -1,16 +1,8 @@
-import React, { ReactNode } from 'react'
-import {
-  View,
-  Text,
-  Picker,
-  PickerValue,
-  // Modal,
-  PickerItemProps,
-} from 'react-native-ui-lib'
-import { Modal, StyleSheet, ScrollView } from 'react-native'
+import React, { ReactNode, useEffect, useState } from 'react'
+import { View, Text, Picker, PickerValue } from 'react-native-ui-lib'
+import { Modal, StyleSheet, FlatList } from 'react-native'
 import { formatDistance } from 'date-fns'
 
-// import { useTranslation } from 'react-i18next'
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
 import { setSelectedDatasetId, selectDatasetId } from '@/Store/Auth'
 import RadioIcon from '@/Assets/Images/iconsSVG/radio.svg'
@@ -21,6 +13,8 @@ import IconButton from '@/Components/IconButton'
 import { useGetDatasetsQuery } from '@/Services/modules/chat'
 import { Dataset } from '@/Types/Dataset'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import SearchBar from 'react-native-dynamic-search-bar'
+import { DEFAULT_DATASET_SHOW_COUNT } from '@/Config'
 
 declare type RenderCustomModalProps = {
   visible: boolean
@@ -65,15 +59,128 @@ const Header = ({ title, onClose }: HeaderProps) => {
   )
 }
 
-const DatasetChooser = ({ onSelect }: Props) => {
-  const MODAL_TITLE = 'Choose Dataset'
-  // const { t } = useTranslation()
-  const dispatch = useAppDispatch()
-  const { Colors, Fonts, Layout } = useTheme()
-  const { data, isLoading } = useGetDatasetsQuery()
-  const datasets = data?.data || []
-  const selectedDatasetId = useAppSelector(selectDatasetId)
+type SearchDatasetListProps = {
+  modalTitle: string
+  toggleModal: (show: boolean) => void
+  dataSets: Dataset[]
+}
+
+const SearchDatasetList = ({
+  modalTitle: MODAL_TITLE,
+  toggleModal,
+  dataSets,
+}: SearchDatasetListProps) => {
   const insets = useSafeAreaInsets()
+  const { Colors } = useTheme()
+  const [searchText, setSearchText] = useState('')
+
+  const filterBySearchText = (dataset: Dataset) => {
+    return dataset.datasetName
+      .toLowerCase()
+      .match(searchText.trim().toLowerCase())
+  }
+
+  const filteredDataSet = searchText.trim().length
+    ? dataSets.filter(filterBySearchText)
+    : dataSets
+  const showSearchBox = dataSets.length >= DEFAULT_DATASET_SHOW_COUNT
+
+  return (
+    <View
+      flex
+      style={{
+        marginTop: insets.top,
+        backgroundColor: Colors.WHITE,
+      }}
+    >
+      <Header title={MODAL_TITLE} onClose={() => toggleModal(false)} />
+      {showSearchBox && (
+        <View
+          style={{
+            paddingBottom: 8,
+            backgroundColor: Colors.GREEN_MAIN,
+          }}
+        >
+          <SearchBar
+            darkMode="false"
+            fontColor={Colors}
+            iconColor="#00AA39"
+            shadowColor="#282828"
+            cancelIconColor="#c6c6c6" // backgroundColor="rgba(0,0,0,0.2)"
+            placeholder="Search dataset here"
+            selectionColor={'white'}
+            value={searchText}
+            onChangeText={setSearchText}
+            onClearPress={() => setSearchText('')}
+            style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+          />
+        </View>
+      )}
+      <FlatList
+        data={filteredDataSet}
+        renderItem={({ item: dataset, index }) => (
+          <Picker.Item
+            key={`${dataset.dataSetID}-${index}`}
+            value={dataset.dataSetID}
+            label={dataset.datasetName}
+          />
+        )}
+        keyExtractor={(item, index) => `${item.dataSetID}-${index}`}
+        extraData={searchText}
+      />
+    </View>
+  )
+}
+
+type PickerItemProps = {
+  label: string
+  timeAgo: string
+  isSelected: boolean
+}
+
+const PickerItem = React.memo(
+  ({ label, timeAgo, isSelected }: PickerItemProps) => {
+    const { Colors, Fonts } = useTheme()
+    const backgroundColor = isSelected ? Colors.NOTIFICATION_GREEN : Colors.GRAY
+
+    return (
+      <View
+        key={label}
+        row
+        style={[
+          styles.item,
+          {
+            backgroundColor,
+          },
+        ]}
+      >
+        <View flex>
+          <Text
+            style={[
+              Fonts.textRegularBold,
+              styles.optionLabel,
+              {
+                color: Colors.GREEN_DARK,
+              },
+            ]}
+          >
+            {label}
+          </Text>
+          <Text marginT-8>Last updated {timeAgo}</Text>
+        </View>
+        {isSelected ? <RadioSelectedIcon /> : <RadioIcon />}
+      </View>
+    )
+  },
+)
+
+const DatasetChooser = ({ onSelect }: Props) => {
+  const DATA_SET_CHOOSER_COUNTER = 'Choose Dataset'
+  const dispatch = useAppDispatch()
+  const { Colors } = useTheme()
+  const { data, isLoading } = useGetDatasetsQuery()
+  const dataSets = data?.data || []
+  const selectedDatasetId = useAppSelector(selectDatasetId)
 
   const handleSelectedDataset = (value: PickerValue) => {
     const datasetId = value?.toString()
@@ -95,21 +202,11 @@ const DatasetChooser = ({ onSelect }: Props) => {
         onRequestClose={() => toggleModal(false)}
         style={[styles.container, { backgroundColor: Colors.GREEN_MAIN }]}
       >
-        <View
-          flex
-          style={{ marginTop: insets.top, backgroundColor: Colors.WHITE }}
-        >
-          <Header title={MODAL_TITLE} onClose={() => toggleModal(false)} />
-          <ScrollView style={[Layout.fill]}>
-            {datasets.map((dataset: Dataset, index) => (
-              <Picker.Item
-                key={`${dataset.dataSetID}-${index}`}
-                value={dataset.dataSetID}
-                label={dataset.datasetName}
-              />
-            ))}
-          </ScrollView>
-        </View>
+        <SearchDatasetList
+          modalTitle={DATA_SET_CHOOSER_COUNTER}
+          toggleModal={toggleModal}
+          dataSets={dataSets}
+        />
       </Modal>
     )
   }
@@ -119,7 +216,7 @@ const DatasetChooser = ({ onSelect }: Props) => {
     { isSelected }: PickerItemProps & PickerProps,
     label: string,
   ) => {
-    const dataset = datasets.find(ds => ds.dataSetID === value)
+    const dataset = dataSets.find(ds => ds.dataSetID === value)
     const timeAgo = formatDistance(
       new Date(dataset?.republishCompletedTime ?? new Date()),
       new Date(),
@@ -127,25 +224,8 @@ const DatasetChooser = ({ onSelect }: Props) => {
         addSuffix: true,
       },
     )
-    const backgroundColor = isSelected ? Colors.NOTIFICATION_GREEN : Colors.GRAY
     return (
-      <View key={label} row style={[styles.item, { backgroundColor }]}>
-        <View flex>
-          <Text
-            style={[
-              Fonts.textRegularBold,
-              styles.optionLabel,
-              {
-                color: Colors.GREEN_DARK,
-              },
-            ]}
-          >
-            {label}
-          </Text>
-          <Text marginT-8>Last updated {timeAgo}</Text>
-        </View>
-        {isSelected ? <RadioSelectedIcon /> : <RadioIcon />}
-      </View>
+      <PickerItem label={label} timeAgo={timeAgo} isSelected={isSelected} />
     )
   }
 
