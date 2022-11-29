@@ -1,16 +1,23 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { FlatList, Pressable, SectionList, StyleSheet } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { useTranslation } from 'react-i18next'
 import { formatDistance } from 'date-fns'
-import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
-import { LoadingSpinner, LayoutNoInternet } from '@/Components'
+import { useTheme } from '@/Hooks'
+import { LoadingSpinner } from '@/Components'
 import { useFetchPinboardsQuery } from '@/Services/modules/bot'
 import { Pinboard } from '@/Types/Pinboard'
 import { Colors } from '@/Theme/Variables'
 import { properCase } from '@/Utils/common'
 import { DASHBOARD_SCREEN } from '@/Constants/screens'
-import { ATHENA, MY_DASHBOARD, SHARED, VIEW_ALL } from '@/Config'
+import {
+  ATHENA,
+  DEFAULT_DASHBOARD_SHOW_COUNT,
+  MY_DASHBOARD,
+  SHARED,
+  VIEW_ALL,
+} from '@/Config'
+import SearchBar from 'react-native-dynamic-search-bar'
 
 interface TagProps {
   tag: string
@@ -29,7 +36,7 @@ interface SectionDataProps {
 const ITEM_HEIGHT = 160
 
 const CardTag = ({ tag, remaining = false }: TagProps) => {
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+  const { Fonts } = useTheme()
   return (
     <View
       style={[styles.tagWrapper, remaining && styles.tagRemainingContainer]}
@@ -54,6 +61,7 @@ const PinboardCard = React.memo(
     const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
     const { name, ownedByName, tags, updatedAt } = pinboard
     const sharedBoard = ownedByName !== undefined && ownedByName !== null
+    const [searchText, setSearchText] = useState('')
 
     // For Getting Unique Tags From Duplicate
     const uniqTags = Array.from(new Set(tags))
@@ -206,37 +214,57 @@ const renderItem =
 
 const MyDashboardsContainer = ({ navigation }) => {
   const { t } = useTranslation()
-  const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+  const { Colors, Fonts } = useTheme()
   const { data, isLoading } = useFetchPinboardsQuery()
   const pinboards = data?.data || []
   const [filteredTags, setFilteredTags] = useState<string[]>([])
+  const [searchText, setSearchText] = useState('')
+
+  const filterBySearchText = (dashboardName: Pinboard) => {
+    return dashboardName.name
+      .toLowerCase()
+      .match(searchText.trim().toLowerCase())
+  }
+
+  const filterDashboardsBySearchText = (pinboards: Pinboard[]) => {
+    return searchText.trim().length
+      ? pinboards.filter(filterBySearchText)
+      : pinboards
+  }
+
+  const showSearchBox = pinboards.length >= DEFAULT_DASHBOARD_SHOW_COUNT
 
   // Group list of pinbord indexes by tag
-  const tagWithIndexes: Record<string, number[]> = {}
-  pinboards.forEach((pinboard: Pinboard, index: number) => {
-    pinboard.tags.forEach((item: string) => {
-      const tag = item.trim().toLowerCase()
-      if (tag.length > 0) {
-        if (!tagWithIndexes[tag]) {
-          tagWithIndexes[tag] = []
+  const tagWithIndexes = useMemo(() => {
+    const tagWithIndexes: Record<string, number[]> = {}
+    pinboards.forEach((pinboard: Pinboard, index: number) => {
+      pinboard.tags.forEach((item: string) => {
+        const tag = item.trim().toLowerCase()
+        if (tag.length > 0) {
+          if (!tagWithIndexes[tag]) {
+            tagWithIndexes[tag] = []
+          }
+          tagWithIndexes[tag].push(index)
         }
-        tagWithIndexes[tag].push(index)
-      }
+      })
     })
-  })
+    return tagWithIndexes
+  }, [pinboards])
 
   // Prepare section data
   let sectionData: Array<SectionDataProps>
   if (filteredTags.length === 0) {
     const item: SectionDataProps = {
       title: 'All Dashboards',
-      data: pinboards,
+      data: filterDashboardsBySearchText(pinboards),
     }
     sectionData = [item]
   } else {
     sectionData = filteredTags.map(tag => ({
       title: tag,
-      data: tagWithIndexes[tag].map(index => pinboards[index]),
+      data: filterDashboardsBySearchText(
+        tagWithIndexes[tag].map(index => pinboards[index]),
+      ),
     }))
   }
 
@@ -279,6 +307,28 @@ const MyDashboardsContainer = ({ navigation }) => {
 
   return (
     <View flex style={{ backgroundColor: Colors.WHITE }}>
+      {showSearchBox && (
+        <View
+          style={{
+            paddingBottom: 8,
+            backgroundColor: Colors.GREEN_MAIN,
+          }}
+        >
+          <SearchBar
+            darkMode="false"
+            fontColor={Colors}
+            iconColor="#00AA39"
+            shadowColor="#282828"
+            cancelIconColor="#c6c6c6" // backgroundColor="rgba(0,0,0,0.2)"
+            placeholder="Search dashboard here"
+            selectionColor={'white'}
+            value={searchText}
+            onChangeText={setSearchText}
+            onClearPress={() => setSearchText('')}
+            style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+          />
+        </View>
+      )}
       {isLoading ? (
         <LoadingSpinner />
       ) : (
