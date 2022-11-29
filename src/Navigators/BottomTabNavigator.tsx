@@ -79,7 +79,7 @@ const BottomTabNavigator = ({ navigation }: Props) => {
           headerStyle: {
             backgroundColor: Colors.GREEN_MAIN,
           },
-          headerShadowVisible: true,
+          headerShadowVisible: false,
           headerTitleAlign: 'center',
           tabBarIconStyle: { display: 'none' },
           tabBarLabelPosition: 'beside-icon',

@@ -107,7 +107,7 @@ const SearchDatasetList = ({
             iconColor="#00AA39"
             shadowColor="#282828"
             cancelIconColor="#c6c6c6" // backgroundColor="rgba(0,0,0,0.2)"
-            placeholder="Search dataset here"
+            placeholder="Search datasets..."
             selectionColor={'white'}
             value={searchText}
             onChangeText={setSearchText}

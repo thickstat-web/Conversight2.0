@@ -58,10 +58,9 @@ const PinboardCard = React.memo(
     pinboard: Pinboard
     onTapItem: (text: Pinboard) => void
   }) => {
-    const { Gutters, Layout, Colors, Common, Fonts } = useTheme()
+    const { Fonts } = useTheme()
     const { name, ownedByName, tags, updatedAt } = pinboard
     const sharedBoard = ownedByName !== undefined && ownedByName !== null
-    const [searchText, setSearchText] = useState('')
 
     // For Getting Unique Tags From Duplicate
     const uniqTags = Array.from(new Set(tags))
@@ -208,47 +207,46 @@ const TagFilter = React.memo(
 const renderItem =
   (onTapItem: (text: Pinboard) => void) =>
   ({ item, index }: { item: Pinboard; index: number }) => {
-    // console.log(`[DashboardContainer] renderItem id: ${index}`)
     return <PinboardCard pinboard={item} onTapItem={onTapItem} />
   }
+
+const filterDashboardsBySearchText = (
+  dashboards: Pinboard[],
+  searchText: string,
+) => {
+  const searchTextFilter = ({ name }: Pinboard) =>
+    name.toLowerCase().match(searchText.trim().toLowerCase())
+
+  return searchText.trim().length
+    ? dashboards.filter(searchTextFilter)
+    : dashboards
+}
 
 const MyDashboardsContainer = ({ navigation }) => {
   const { t } = useTranslation()
   const { Colors, Fonts } = useTheme()
   const { data, isLoading } = useFetchPinboardsQuery()
-  const pinboards = data?.data || []
   const [filteredTags, setFilteredTags] = useState<string[]>([])
   const [searchText, setSearchText] = useState('')
 
-  const filterBySearchText = (dashboardName: Pinboard) => {
-    return dashboardName.name
-      .toLowerCase()
-      .match(searchText.trim().toLowerCase())
-  }
-
-  const filterDashboardsBySearchText = (pinboards: Pinboard[]) => {
-    return searchText.trim().length
-      ? pinboards.filter(filterBySearchText)
-      : pinboards
-  }
-
+  const pinboards = useMemo(() => data?.data ?? [], [data?.data])
   const showSearchBox = pinboards.length >= DEFAULT_DASHBOARD_SHOW_COUNT
 
   // Group list of pinbord indexes by tag
   const tagWithIndexes = useMemo(() => {
-    const tagWithIndexes: Record<string, number[]> = {}
+    const tmpTagWithIndexes: Record<string, number[]> = {}
     pinboards.forEach((pinboard: Pinboard, index: number) => {
       pinboard.tags.forEach((item: string) => {
         const tag = item.trim().toLowerCase()
         if (tag.length > 0) {
-          if (!tagWithIndexes[tag]) {
-            tagWithIndexes[tag] = []
+          if (!tmpTagWithIndexes[tag]) {
+            tmpTagWithIndexes[tag] = []
           }
-          tagWithIndexes[tag].push(index)
+          tmpTagWithIndexes[tag].push(index)
         }
       })
     })
-    return tagWithIndexes
+    return tmpTagWithIndexes
   }, [pinboards])
 
   // Prepare section data
@@ -256,7 +254,7 @@ const MyDashboardsContainer = ({ navigation }) => {
   if (filteredTags.length === 0) {
     const item: SectionDataProps = {
       title: 'All Dashboards',
-      data: filterDashboardsBySearchText(pinboards),
+      data: filterDashboardsBySearchText(pinboards, searchText),
     }
     sectionData = [item]
   } else {
@@ -264,6 +262,7 @@ const MyDashboardsContainer = ({ navigation }) => {
       title: tag,
       data: filterDashboardsBySearchText(
         tagWithIndexes[tag].map(index => pinboards[index]),
+        searchText,
       ),
     }))
   }
@@ -316,11 +315,11 @@ const MyDashboardsContainer = ({ navigation }) => {
         >
           <SearchBar
             darkMode="false"
-            fontColor={Colors}
+            fontColor={Colors.WHITE}
             iconColor="#00AA39"
             shadowColor="#282828"
             cancelIconColor="#c6c6c6" // backgroundColor="rgba(0,0,0,0.2)"
-            placeholder="Search dashboard here"
+            placeholder="Search dashboards..."
             selectionColor={'white'}
             value={searchText}
             onChangeText={setSearchText}

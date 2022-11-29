@@ -95,8 +95,10 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     }
   }
 
-  const sendMessage = (utterance: string) => {
+  const sendMessage = (queryText: string) => {
     // Add user message to the chat message list
+    // iOS fix: Replace Single/Double quotation marks(“”/‘’) with Apostrophe quote(')
+    const utterance = queryText.replace(/[“”‘’]/g, "'")
     const userMessage = makeUserMessage(utterance)
     dispatch(addChatMessage(userMessage))
     sendAndTransformResponse(utterance)
