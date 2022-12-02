@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   StyleSheet,
   Text,
@@ -42,6 +42,10 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
   const [rows, setRows] = useState(values)
+
+  useEffect(() => {
+    setRows(values)
+  }, [values])
 
   const sortTable = (column: string) => {
     const sortDirection = direction === 'desc' ? 'asc' : 'desc'

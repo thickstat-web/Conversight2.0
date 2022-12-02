@@ -8,17 +8,14 @@ import {
   useWindowDimensions,
 } from 'react-native'
 import { ActionSheet, Text, TouchableOpacity, View } from 'react-native-ui-lib'
-import { useTranslation } from 'react-i18next'
-import { AdaptiveCard, Button, ExpandButton } from '@/Components'
+import { AdaptiveCard, Button, ExpandButton, SearchBar } from '@/Components'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
 import { properCase } from '@/Utils/common'
-import { selectChatMessages, selectConverseData } from '@/Store/App'
+import { selectConverseData } from '@/Store/App'
 import { ChartType, ConverseData } from '@/Types/ChatMessage'
 import TableContainer from './TableContainer'
 import ChartContainer from './ChartContainer'
 import AdaptiveCardListContainer from './AdaptiveCardListContainer'
-import BackIcon from '@/Assets/Images/drawer/play-back.svg'
-import NextIcon from '@/Assets/Images/drawer/play-forward.svg'
 import settingsIcon from '@/Assets/Images/xml-svg/settings'
 import menuIcon from '@/Assets/Images/xml-svg/menu'
 import { Colors } from '@/Theme/Variables'
@@ -78,6 +75,20 @@ const TableOrAdaptiveCard = memo(
     data,
   }: TableOrAdaptiveCardProps) => {
     const { id, columns, columnMetadata, values } = data
+    const [searchText, setSearchText] = useState('')
+
+    const searchTextFilter = (
+      row: { [s: string]: unknown } | ArrayLike<unknown>,
+    ) => {
+      return Object.values(row).some(value =>
+        `${value}`.toLowerCase().match(searchText.trim().toLowerCase()),
+      )
+    }
+
+    const filteredValues = searchText.trim().length
+      ? values.filter(searchTextFilter)
+      : values
+    //console.log(JSON.stringify(filteredValues, null, 2))
     return (
       <View
         style={{
@@ -134,6 +145,30 @@ const TableOrAdaptiveCard = memo(
             </Text>
           </TouchableOpacity>
         </View>
+        <View
+          style={{
+            marginTop: 5,
+            paddingBottom: 5,
+          }}
+        >
+          {
+            <SearchBar
+              searchText={searchText}
+              setSearchText={setSearchText}
+              placeholderText={'Search values...'}
+              selectionColor={Colors.GREEN_LIGHT}
+              placeholderTextColor={Colors.DARK}
+              cursorColor={Colors.WHITE}
+              textColor={Colors.TEXT_BLACK}
+              iconColor={Colors.DARK}
+              style={{
+                marginHorizontal: 2,
+                backgroundColor: '#EAFAEA',
+                borderColor: 'green',
+              }}
+            />
+          }
+        </View>
         {table ? (
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -145,7 +180,7 @@ const TableOrAdaptiveCard = memo(
               id={id}
               columns={columns}
               columnMetadata={columnMetadata}
-              values={values}
+              values={filteredValues}
             />
           </ScrollView>
         ) : (
@@ -168,7 +203,7 @@ const TableOrAdaptiveCard = memo(
                 id={id}
                 columns={columns}
                 columnMetadata={columnMetadata}
-                values={values}
+                values={filteredValues}
                 expandAll={expandedAll}
               />
             </ScrollView>
@@ -183,10 +218,8 @@ const DataExplorerContainer = ({
   navigation,
   route,
 }: DataExplorerContainerProps) => {
-  const { t } = useTranslation()
-  const { Layout, Colors, Common, Fonts } = useTheme()
+  const { Colors } = useTheme()
   const { width: screenWidth, height: screenHeight } = useWindowDimensions()
-  // const messages = useAppSelector(selectChatMessages)
   const converseData = useAppSelector(selectConverseData)
   const [visible, setVisible] = useState(false)
   const [table, setTable] = useState(true)
@@ -405,8 +438,6 @@ const DataExplorerContainer = ({
 const styles = StyleSheet.create({
   moreOptionsButton: { fontSize: 30 },
   contentContainer: {
-    // alignItems: 'center',
-    // justifyContent: 'center',
     backgroundColor: Colors.WHITE,
     paddingHorizontal: 4,
   },

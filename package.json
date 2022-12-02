@@ -20,7 +20,6 @@
     "type-check": "tsc"
   },
   "dependencies": {
-    "@freakycoder/react-native-bounceable": "^1.0.3",
     "@miblanchard/react-native-slider": "^2.1.0",
     "@react-native-async-storage/async-storage": "^1.17.10",
     "@react-native-community/netinfo": "^9.3.6",
@@ -45,7 +44,6 @@
     "react-native": "^0.70.6",
     "react-native-animated-pulse": "^1.0.1",
     "react-native-device-info": "^10.3.0",
-    "react-native-dynamic-search-bar": "^2.0.2",
     "react-native-gesture-handler": "^2.8.0",
     "react-native-get-random-values": "^1.8.0",
     "react-native-image-crop-picker": "^0.38.1",
