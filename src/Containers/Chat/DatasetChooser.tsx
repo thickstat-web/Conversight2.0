@@ -1,9 +1,9 @@
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { View, Text, Picker, PickerValue } from 'react-native-ui-lib'
 import { Modal, StyleSheet, FlatList } from 'react-native'
 import { formatDistance } from 'date-fns'
-
 import { useTheme, useAppDispatch, useAppSelector } from '@/Hooks'
+import { SearchBar } from '@/Components'
 import { setSelectedDatasetId, selectDatasetId } from '@/Store/Auth'
 import RadioIcon from '@/Assets/Images/iconsSVG/radio.svg'
 import RadioSelectedIcon from '@/Assets/Images/iconsSVG/radio-selected.svg'
@@ -13,7 +13,6 @@ import IconButton from '@/Components/IconButton'
 import { useGetDatasetsQuery } from '@/Services/modules/chat'
 import { Dataset } from '@/Types/Dataset'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import SearchBar from 'react-native-dynamic-search-bar'
 import { DEFAULT_DATASET_SHOW_COUNT } from '@/Config'
 
 declare type RenderCustomModalProps = {
@@ -102,17 +101,19 @@ const SearchDatasetList = ({
           }}
         >
           <SearchBar
-            darkMode="false"
-            fontColor={Colors}
-            iconColor="#00AA39"
-            shadowColor="#282828"
-            cancelIconColor="#c6c6c6" // backgroundColor="rgba(0,0,0,0.2)"
-            placeholder="Search datasets..."
-            selectionColor={'white'}
-            value={searchText}
-            onChangeText={setSearchText}
-            onClearPress={() => setSearchText('')}
-            style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            placeholderText={'Search datasets...'}
+            selectionColor={Colors.GREEN_LIGHT}
+            placeholderTextColor={Colors.GREEN_LIGHTEST}
+            cursorColor={Colors.WHITE}
+            textColor={Colors.WHITE}
+            iconColor={Colors.WHITE}
+            style={{
+              marginHorizontal: 16,
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderColor: 'green',
+            }}
           />
         </View>
       )}

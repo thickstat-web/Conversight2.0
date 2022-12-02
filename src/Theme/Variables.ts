@@ -35,6 +35,7 @@ export const Colors: ThemeColors = {
   GRAY_LIGHT: '#E6E8ED',
   GRAY_DARK: '#9A9A9A',
   DARK: '#004438',
+  TEXT_BLACK: '#595959',
 }
 
 export const NavigationColors: Partial<ThemeNavigationColors> = {

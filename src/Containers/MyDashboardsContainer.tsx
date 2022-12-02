@@ -1,10 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { FlatList, Pressable, SectionList, StyleSheet } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
-import { useTranslation } from 'react-i18next'
 import { formatDistance } from 'date-fns'
 import { useTheme } from '@/Hooks'
-import { LoadingSpinner } from '@/Components'
+import { LoadingSpinner, SearchBar } from '@/Components'
 import { useFetchPinboardsQuery } from '@/Services/modules/bot'
 import { Pinboard } from '@/Types/Pinboard'
 import { Colors } from '@/Theme/Variables'
@@ -17,7 +16,6 @@ import {
   SHARED,
   VIEW_ALL,
 } from '@/Config'
-import SearchBar from 'react-native-dynamic-search-bar'
 
 interface TagProps {
   tag: string
@@ -223,7 +221,6 @@ const filterDashboardsBySearchText = (
 }
 
 const MyDashboardsContainer = ({ navigation }) => {
-  const { t } = useTranslation()
   const { Colors, Fonts } = useTheme()
   const { data, isLoading } = useFetchPinboardsQuery()
   const [filteredTags, setFilteredTags] = useState<string[]>([])
@@ -314,17 +311,19 @@ const MyDashboardsContainer = ({ navigation }) => {
           }}
         >
           <SearchBar
-            darkMode="false"
-            fontColor={Colors.WHITE}
-            iconColor="#00AA39"
-            shadowColor="#282828"
-            cancelIconColor="#c6c6c6" // backgroundColor="rgba(0,0,0,0.2)"
-            placeholder="Search dashboards..."
-            selectionColor={'white'}
-            value={searchText}
-            onChangeText={setSearchText}
-            onClearPress={() => setSearchText('')}
-            style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            placeholderText={'Search dashboards...'}
+            selectionColor={Colors.GREEN_LIGHT}
+            placeholderTextColor={Colors.GREEN_LIGHTEST}
+            cursorColor={Colors.WHITE}
+            textColor={Colors.WHITE}
+            iconColor={Colors.WHITE}
+            style={{
+              marginHorizontal: 16,
+              backgroundColor: 'rgba(0,0,0,0.2)',
+              borderColor: 'green',
+            }}
           />
         </View>
       )}

@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { StyleSheet, FlatList } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import { AdaptiveCard } from '@/Components'
-import { useTheme } from '@/Hooks'
 
 interface AdaptiveCardListContainerProps {
   id: string
@@ -46,8 +45,6 @@ function AdaptiveCardListContainer({
   values,
   expandAll,
 }: AdaptiveCardListContainerProps) {
-  const { Layout, Colors, Common, Fonts } = useTheme()
-
   return (
     <View key={id} style={styles.container}>
       <FlatList
@@ -70,10 +67,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    marginTop: 2,
-    // borderRadius: 8,
-    // borderWidth: 2,
-    // borderColor: '#EAFAEA',
   },
   cell: {
     marginHorizontal: 6,
