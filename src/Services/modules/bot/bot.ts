@@ -89,7 +89,9 @@ function buildAppliedFilters(item: Created | Shared): Filter[] {
       dateValueFrom,
       dateValueTo,
       data_set,
+      operator,
       value,
+      dateValues,
       isDefault,
     } = filter
     return {
@@ -99,9 +101,11 @@ function buildAppliedFilters(item: Created | Shared): Filter[] {
       dateFrom: dateValueFrom,
       dateTo: dateValueTo,
       datasetId: data_set,
+      operator,
       value: Array.isArray(value)
         ? (value as FilterValue[])
         : (value as string),
+      dateValues: Array.isArray(dateValues) ? dateValues : [],
       isDefault,
     }
   })

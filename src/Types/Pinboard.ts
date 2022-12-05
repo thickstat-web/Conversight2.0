@@ -10,6 +10,11 @@ export interface FilterValue {
   name: string | number
 }
 
+export interface DateValue {
+  dateValueFrom: string
+  dateValueTo: string
+}
+
 export interface Filter {
   category: string | FilterCategory
   column: string
@@ -17,7 +22,9 @@ export interface Filter {
   dateFrom?: string
   dateTo?: string
   datasetId: string
+  operator: string
   value: string | FilterValue[]
+  dateValues: DateValue[]
   isDefault: boolean
 }
 

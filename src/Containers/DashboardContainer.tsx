@@ -8,6 +8,8 @@ import { PinboardItem, selectConverseData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
 import { navigate } from '@/Navigators/utils'
 import { DATA_EXPLORER } from '@/Constants/screens'
+import { Filter } from '@/Types/Pinboard'
+import { buildDashboardFilters, DashboardFilters } from './MyDashboardsHelper'
 
 const CARD_HEIGHT = 130
 
@@ -72,23 +74,35 @@ const PinboardComponents = React.memo(
   },
 )
 
+type RouteParams = {
+  pinboardId: string
+  appliedFilters: Filter[]
+}
+
 const DashboardContainer = ({ navigation, route }) => {
-  const { pinboardId } = route.params
-  const { Layout, Colors } = useTheme()
+  const { pinboardId, appliedFilters } = route.params as RouteParams
+  const { Colors } = useTheme()
   const { isLoading, pinboardComponents } = usePinboardData(pinboardId)
+  const filters = buildDashboardFilters(appliedFilters)
 
   return (
     <View flex style={{ backgroundColor: Colors.WHITE_SMOKE }}>
       {isLoading ? (
         <LoadingSpinner />
       ) : (
-        <PinboardComponents pinboardComponents={pinboardComponents} />
+        <>
+          {filters.length > 0 && <DashboardFilters filters={filters} />}
+          <PinboardComponents pinboardComponents={pinboardComponents} />
+        </>
       )}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  icon: {
+    paddingHorizontal: 6,
+  },
   row: {
     flex: 1,
     justifyContent: 'space-around',
@@ -104,7 +118,7 @@ const styles = StyleSheet.create({
     // backgroundColor: Colors.NOTIFICATION_GREEN,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: Colors.GREEN_DARK,
     textAlign: 'left',

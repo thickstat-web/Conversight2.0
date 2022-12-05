@@ -266,9 +266,12 @@ const MyDashboardsContainer = ({ navigation }) => {
 
   const onTapItem = useCallback(
     (item: Pinboard) => {
-      const { id, name } = item
+      const { id, name, appliedFilters } = item
       // console.log(`[DashboardContainer] open dashboard: ${name}`)
-      navigation.navigate(DASHBOARD_SCREEN, { pinboardId: id })
+      navigation.navigate(DASHBOARD_SCREEN, {
+        pinboardId: id,
+        appliedFilters,
+      })
     },
     [navigation],
   )

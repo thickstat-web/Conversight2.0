@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: Colors.GREEN_DARK,
     textAlign: 'left',
