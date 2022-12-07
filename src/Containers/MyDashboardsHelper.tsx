@@ -20,6 +20,13 @@ const dateValueMapper = (value: DateValue) =>
 
 const valueMapper = (value: FilterValue) => `${value.name}`
 
+function buildFilterValues(value: string | FilterValue[]): string {
+  return Array.isArray(value)
+    ? value.length === 0
+      ? 'all'
+      : value.map(valueMapper).join(', ')
+    : value
+}
 const filterMapper = (filter: Filter) => {
   let generatedFilter: DasboardFilter | null = null
   if (filter.category === 'dateFilter') {
@@ -56,7 +63,7 @@ const filterMapper = (filter: Filter) => {
       columnId: column,
       columnName: resolvedColumn,
       operator: operator === '' ? 'is' : operator,
-      value: Array.isArray(value) ? value.map(valueMapper).join(', ') : value,
+      value: buildFilterValues(value),
     }
   } else if (filter.category === 'calculated dimension') {
     const { category, column, resolvedColumn, operator, value } = filter
@@ -65,7 +72,7 @@ const filterMapper = (filter: Filter) => {
       columnId: column,
       columnName: resolvedColumn,
       operator: operator === '' ? 'is' : operator,
-      value: Array.isArray(value) ? value.map(valueMapper).join(', ') : value,
+      value: buildFilterValues(value),
     }
   }
   return generatedFilter

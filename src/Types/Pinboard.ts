@@ -2,6 +2,7 @@ import { ColType, ColumnMetadata } from './ChatHistory'
 
 export type FilterCategory =
   | 'dateFilter'
+  | 'date'
   | 'dimensions'
   | 'calculated dimension'
 
@@ -16,7 +17,7 @@ export interface DateValue {
 }
 
 export interface Filter {
-  category: string | FilterCategory
+  category: FilterCategory
   column: string
   resolvedColumn: string
   dateFrom?: string
