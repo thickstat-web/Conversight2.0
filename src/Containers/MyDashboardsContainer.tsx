@@ -255,13 +255,15 @@ const MyDashboardsContainer = ({ navigation }) => {
     }
     sectionData = [item]
   } else {
-    sectionData = filteredTags.map(tag => ({
-      title: tag,
-      data: filterDashboardsBySearchText(
-        tagWithIndexes[tag].map(index => pinboards[index]),
-        searchText,
-      ),
-    }))
+    sectionData = filteredTags
+      .map(tag => ({
+        title: tag,
+        data: filterDashboardsBySearchText(
+          tagWithIndexes[tag].map(index => pinboards[index]),
+          searchText,
+        ),
+      }))
+      .filter(({ data: items }) => items.length > 0)
   }
 
   const onTapItem = useCallback(
