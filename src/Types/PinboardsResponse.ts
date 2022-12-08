@@ -1,3 +1,5 @@
+import { FilterCategory } from './Pinboard'
+
 /* Get All Pinboards Response */
 export interface SharedTo {
   userID: string
@@ -18,7 +20,7 @@ export interface RetainFilter {
   id: string
   processedID: string
   processedRequestID: string
-  category: string
+  category: FilterCategory
   dateValueFrom: string
   dateValueTo: string
   value: any
@@ -60,7 +62,7 @@ export interface RetainFilter2 {
   id: string
   processedID: string
   processedRequestID: string
-  category: string
+  category: FilterCategory
   dateValueFrom: string
   dateValueTo: string
   value: any[]

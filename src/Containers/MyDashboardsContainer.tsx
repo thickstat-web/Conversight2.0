@@ -230,18 +230,17 @@ const MyDashboardsContainer = ({ navigation }) => {
   const showSearchBox = pinboards.length >= DEFAULT_DASHBOARD_SHOW_COUNT
 
   // Group list of pinbord indexes by tag
-  const tagWithIndexes = useMemo(() => {
+  const tagWithIndexes: Record<string, number[]> = useMemo(() => {
     const tmpTagWithIndexes: Record<string, number[]> = {}
     pinboards.forEach((pinboard: Pinboard, index: number) => {
-      pinboard.tags.forEach((item: string) => {
-        const tag = item.trim().toLowerCase()
-        if (tag.length > 0) {
-          if (!tmpTagWithIndexes[tag]) {
-            tmpTagWithIndexes[tag] = []
-          }
-          tmpTagWithIndexes[tag].push(index)
-        }
-      })
+      pinboard.tags
+        .filter(tag => tag.length > 0)
+        .forEach((item: string) => {
+          const tag = item.trim().toLowerCase()
+          tmpTagWithIndexes[tag] = Array.from(
+            new Set([...(tmpTagWithIndexes[tag] || []), index]),
+          )
+        })
     })
     return tmpTagWithIndexes
   }, [pinboards])
