@@ -213,7 +213,7 @@ const filterDashboardsBySearchText = (
   searchText: string,
 ) => {
   const searchTextFilter = ({ name }: Pinboard) =>
-    name.toLowerCase().match(searchText.trim().toLowerCase())
+    name.toLowerCase().includes(searchText.trim().toLowerCase())
 
   return searchText.trim().length
     ? dashboards.filter(searchTextFilter)

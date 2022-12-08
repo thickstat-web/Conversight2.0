@@ -76,7 +76,7 @@ const SearchDatasetList = ({
   const filterBySearchText = (dataset: Dataset) => {
     return dataset.datasetName
       .toLowerCase()
-      .match(searchText.trim().toLowerCase())
+      .includes(searchText.trim().toLowerCase())
   }
 
   const filteredDataSet = searchText.trim().length

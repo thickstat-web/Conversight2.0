@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useLayoutEffect, useState } from 'react'
+import React, { memo, useLayoutEffect, useState } from 'react'
 import {
   FlatList,
   NativeScrollEvent,
@@ -9,7 +9,7 @@ import {
 } from 'react-native'
 import { ActionSheet, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import { AdaptiveCard, Button, ExpandButton, SearchBar } from '@/Components'
-import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
+import { useAppSelector, useTheme } from '@/Hooks'
 import { properCase } from '@/Utils/common'
 import { selectConverseData } from '@/Store/App'
 import { ChartType, ConverseData } from '@/Types/ChatMessage'
@@ -81,7 +81,7 @@ const TableOrAdaptiveCard = memo(
       row: { [s: string]: unknown } | ArrayLike<unknown>,
     ) => {
       return Object.values(row).some(value =>
-        `${value}`.toLowerCase().match(searchText.trim().toLowerCase()),
+        `${value}`.toLowerCase().includes(searchText.trim().toLowerCase()),
       )
     }
 
@@ -367,6 +367,7 @@ const DataExplorerContainer = ({
       <View flex-6>
         <FlatList
           data={formats}
+          keyboardShouldPersistTaps={'always'}
           ref={ref}
           onMomentumScrollEnd={onScroll}
           contentContainerStyle={
