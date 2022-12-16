@@ -122,10 +122,10 @@ class Visualizer extends React.PureComponent<VisualizerProps> {
       // (query.includes('top') || query.includes('bottom')) &&
       this.visualFormatIncludes('PieChart')
 
-    const isColumnChart = () =>
+    const isBarChart = () =>
       values.length > 10 &&
       values.length < 100 &&
-      this.visualFormatIncludes('ColumnChart')
+      this.visualFormatIncludes('BarChart')
 
     const isLineChart = () =>
       (values.length > 1 || query.includes('compare')) &&
@@ -136,8 +136,8 @@ class Visualizer extends React.PureComponent<VisualizerProps> {
 
     if (isPieChart()) {
       preferredChart = 'PieChart'
-    } else if (isColumnChart()) {
-      preferredChart = 'ColumnChart'
+    } else if (isBarChart()) {
+      preferredChart = 'BarChart'
     } else if (isLineChart()) {
       preferredChart = 'LineChart'
     } else if (isAreaChart()) {

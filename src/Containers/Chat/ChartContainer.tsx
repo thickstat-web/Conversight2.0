@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
 import {
@@ -13,6 +13,7 @@ import {
   VictoryLegend,
   VictoryContainer,
   VictoryZoomContainer,
+  VictoryBrushContainer,
 } from 'victory-native'
 import numeral from 'numeral'
 import { useTheme } from '@/Hooks'
@@ -160,116 +161,28 @@ const AreaChart = ({
   values,
 }: ChartProps) => {
   const { width: screenWidth } = useWindowDimensions()
-  return (
-    <VictoryChart
-      containerComponent={
-        // <VictoryZoomContainer
-        //   responsive={false}
-        //   height={380}
-        //   zoomDimension="x"
-        // />
-        <VictoryContainer
-          height={380}
-          width={screenWidth - 44 * 2}
-          events={{ onPressIn: () => {} }}
-          style={
-            {
-              // border: '4px solid #00ff00',
-              // backgroundColor: 'orange',
-              // padding: 0,
-              // margin: 0,
-              // borderWidth: 1,
-              // borderColor: 'red',
-            }
-          }
-        />
-      }
-      width={screenWidth - 20 * 2}
-      theme={VictoryTheme.material}
-      style={{
-        parent: {
-          // alignItems: 'center',
-          // border: '4px solid #00ff00',
-          // backgroundColor: 'orange',
-          // padding: 0,
-          // margin: 0,
-          // borderWidth: 4,
-          // borderColor: 'red',
-        },
-        // background: {
-        //   fill: 'pink',
-        // },
-      }}
-    >
-      <VictoryAxis
-        label={xAxisLabel}
-        style={{
-          axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 48 },
-          ticks: { size: 4 },
-          tickLabels: { angle: -60, alignItems: 'baseline' },
-        }}
-        tickFormat={x => `${x}`.split(' ')}
-        tickLabelComponent={
-          <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
-        }
-        // tickFormat={x => {
-        //   let label = x
-        //   for (let name of months) {
-        //     const monthRegex = new RegExp(name, 'i')
-        //     if (monthRegex.test(x)) {
-        //       label = x.replace(monthRegex, name.slice(0, 3).toUpperCase())
-        //     }
-        //   }
-        //   return label.split(' ')
-        // }}
-      />
-      <VictoryAxis
-        dependentAxis
-        label={yAxisLabel}
-        style={{
-          axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 36 },
-          ticks: { size: 4 },
-          // tickLabels: { angle: -60, alignItems: 'baseline' },
-        }}
-        tickFormat={x => numeral(x).format('0a')}
-      />
-      <VictoryArea
-        x={xAxisField}
-        y={yAxisField}
-        data={values}
-        style={{
-          data: { fill: '#27DC61', stroke: '#00AA39', strokeWidth: 1 },
-          parent: { border: '1px solid #ccc' },
-        }}
-      />
-    </VictoryChart>
-  )
-}
-
-const LineChart = ({
-  xAxisField,
-  yAxisField,
-  xAxisLabel,
-  yAxisLabel,
-  values,
-}: ChartProps) => {
-  const { width: screenWidth } = useWindowDimensions()
-  // console.log(
-  //   `[LineChart] values: ${JSON.stringify(values.slice(0, 20), null, 2)}`,
-  // )
-  // console.log('--------------------\n\n')
+  const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
+  const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
+  const xValues = values.map(item => item[xAxisLabel])
   return (
     <>
       <VictoryChart
+        domainPadding={30}
+        height={400}
+        width={screenWidth}
         containerComponent={
           // <VictoryZoomContainer
           //   responsive={false}
           //   height={380}
           //   zoomDimension="x"
           // />
-          <VictoryContainer
-            height={380}
-            width={screenWidth - 44 * 2}
+          <VictoryZoomContainer
+            responsive={false}
+            zoomDimension="x"
+            allowPan={true}
+            allowZoom={true}
+            zoomDomain={zoomDomain}
+            onZoomDomainChange={setSelectedDomain}
             events={{ onPressIn: () => {} }}
             style={
               {
@@ -283,10 +196,10 @@ const LineChart = ({
             }
           />
         }
-        width={screenWidth - 24 * 2}
-        theme={VictoryTheme.material}
         style={{
           parent: {
+            maxWidth: '100%',
+            maxHeight: '100%',
             // alignItems: 'center',
             // border: '4px solid #00ff00',
             // backgroundColor: 'orange',
@@ -299,18 +212,120 @@ const LineChart = ({
           //   fill: 'pink',
           // },
         }}
+        padding={{ left: 70, top: 10, bottom: 150, right: 10 }}
       >
         <VictoryAxis
+          axisLabelComponent={<VictoryLabel />}
           label={xAxisLabel}
-          style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 48 },
-            ticks: { size: 4 },
-            tickLabels: { angle: -60, alignItems: 'baseline' },
-          }}
-          tickFormat={x => `${x}`.split(' ')}
+          tickFormat={x => `${x}`}
           tickLabelComponent={
             <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
           }
+          style={{
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 120 },
+            ticks: { size: 4 },
+            tickLabels: { angle: -90, alignItems: 'baseline' },
+          }}
+        />
+        <VictoryAxis
+          axisLabelComponent={<VictoryLabel />}
+          dependentAxis
+          label={yAxisLabel}
+          padding={{ left: 40 }}
+          tickFormat={x => numeral(x).format('0a')}
+          style={{
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 45 },
+            ticks: { size: 4 },
+            // tickLabels: { angle: -60, alignItems: 'baseline' },
+          }}
+        />
+        <VictoryArea
+          x={xAxisField}
+          y={yAxisField}
+          data={values}
+          style={{
+            data: { fill: '#27DC61', stroke: '#00AA39', strokeWidth: 1 },
+            parent: { border: '1px solid #ccc' },
+          }}
+        />
+      </VictoryChart>
+      <ChartPreviewer
+        screenWidth={screenWidth}
+        selectedDomain={selectedDomain}
+        setZoomDomain={setZoomDomain}
+        xValues={xValues}
+        xAxisLabel={xAxisLabel}
+        xAxisField={xAxisField}
+        yAxisField={yAxisField}
+        values={values}
+      />
+    </>
+  )
+}
+
+const LineChart = ({
+  xAxisField,
+  yAxisField,
+  xAxisLabel,
+  yAxisLabel,
+  values,
+}: ChartProps) => {
+  const { width: screenWidth } = useWindowDimensions()
+  const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
+  const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
+  const xValues = values.map(item => item[xAxisLabel])
+
+  // console.log(
+  //   `[LineChart] values: ${JSON.stringify(values.slice(0, 20), null, 2)}`,
+  // )
+  // console.log('--------------------\n\n')
+  return (
+    <>
+      <VictoryChart
+        domainPadding={30}
+        height={400}
+        width={screenWidth}
+        containerComponent={
+          <VictoryZoomContainer
+            responsive={false}
+            zoomDimension="x"
+            allowPan={true}
+            allowZoom={true}
+            zoomDomain={zoomDomain}
+            onZoomDomainChange={setSelectedDomain}
+            width={screenWidth}
+            events={{ onPressIn: () => {} }}
+          />
+        }
+        style={{
+          parent: {
+            maxWidth: '100%',
+            maxHeight: '100%',
+            // alignItems: 'center',
+            // border: '4px solid #00ff00',
+            // backgroundColor: 'orange',
+            // padding: 0,
+            // margin: 0,
+            // borderWidth: 4,
+            // borderColor: 'red',
+          },
+          // background: {
+          //   fill: 'pink',
+          // },
+        }}
+        padding={{ left: 70, top: 10, bottom: 150, right: 10 }}
+      >
+        <VictoryAxis
+          label={xAxisLabel}
+          tickFormat={x => `${x}`}
+          tickLabelComponent={
+            <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
+          }
+          style={{
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 120 },
+            ticks: { size: 4 },
+            tickLabels: { angle: -90, alignItems: 'baseline' },
+          }}
           // tickFormat={x => {
           //   let label = x
           //   for (let name of months) {
@@ -325,8 +340,9 @@ const LineChart = ({
         <VictoryAxis
           dependentAxis
           label={yAxisLabel}
+          padding={{ left: 40 }}
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 36 },
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
             ticks: { size: 4 },
             // tickLabels: { angle: -60, alignItems: 'baseline' },
           }}
@@ -344,6 +360,17 @@ const LineChart = ({
           }}
         />
       </VictoryChart>
+      <ChartPreviewer
+        screenWidth={screenWidth}
+        selectedDomain={selectedDomain}
+        setZoomDomain={setZoomDomain}
+        xValues={xValues}
+        // x={x}
+        xAxisLabel={xAxisLabel}
+        xAxisField={xAxisField}
+        yAxisField={yAxisField}
+        values={values}
+      />
     </>
   )
 }
@@ -353,85 +380,104 @@ const BarChart = ({
   yAxisField,
   xAxisLabel,
   yAxisLabel,
-  horizontal = true,
+  horizontal = false,
   values,
 }: BarChartProps) => {
+  const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
+  const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
   const { width: screenWidth } = useWindowDimensions()
+  const xValues = values.map(item => item[xAxisLabel])
   return (
-    <VictoryChart
-      containerComponent={
-        <VictoryContainer
-          height={380}
-          width={screenWidth - 48 * 2}
-          events={{ onPressIn: () => {} }}
-          style={{ paddingLeft: 8 }}
+    <>
+      <VictoryChart
+        domainPadding={30}
+        height={400}
+        width={screenWidth}
+        containerComponent={
+          <VictoryZoomContainer
+            responsive={false}
+            zoomDimension="x"
+            allowZoom={true}
+            allowPan={true}
+            zoomDomain={zoomDomain}
+            onZoomDomainChange={setSelectedDomain}
+          />
+        }
+        style={{ parent: { maxWidth: '100%', maxHeight: '100%' } }}
+        padding={{ left: 70, top: 10, bottom: 150, right: 10 }}
+      >
+        <VictoryAxis // X Axis Container
+          axisLabelComponent={<VictoryLabel />}
+          label={xAxisLabel}
+          // axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
+          tickLabelComponent={
+            <VictoryLabel dx={8} dy={-8} angle={-60} textAnchor={'end'} />
+          }
+          style={{
+            axisLabel: {
+              fontSize: 16,
+              padding: 120,
+              fill: Colors.GREEN_DARK,
+            },
+            ticks: { size: 4 },
+            tickLabels: { angle: -90, alignItems: 'baseline' },
+          }}
+          tickFormat={x => `${x}`}
         />
-      }
-      width={screenWidth - 24 * 2}
-      theme={VictoryTheme.material}
-      domainPadding={20}
-      style={{
-        parent: {
-          border: '1px solid #00ff00',
-          // backgroundColor: 'orange',
-          // paddingBottom: 80,
-        },
-        // background: {
-        //   fill: 'pink',
-        // },
-      }}
-    >
-      <VictoryAxis
-        label={xAxisLabel}
-        // axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
-        tickLabelComponent={
-          <VictoryLabel dx={8} dy={-8} angle={-60} textAnchor={'end'} />
-        }
-        style={{
-          axisLabel: {
-            fontSize: 16,
-            padding: 32,
-            fill: Colors.GREEN_DARK,
-          },
-          ticks: { size: 4 },
-          tickLabels: { angle: -60, alignItems: 'baseline' },
-        }}
-        tickFormat={x => `${x}`.split(' ')}
+        <VictoryAxis // Y Axis Conatiner
+          axisLabelComponent={<VictoryLabel />}
+          dependentAxis
+          label={yAxisLabel}
+          // axisLabelComponent={<VictoryLabel dy={-2} />}
+          padding={{ left: 40 }}
+          tickFormat={x => numeral(x).format('0.0a')}
+          style={{
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
+          }}
+        />
+        <VictoryBar
+          x={xAxisField}
+          y={yAxisField}
+          data={values}
+          horizontal={horizontal}
+          labels={({ datum }) => numeral(datum[yAxisField]).format('0,0.0a')}
+          barRatio={1}
+          alignment="middle"
+          labelComponent={
+            <VictoryLabel dx={10} dy={5} angle={-90} textAnchor={'start'} />
+          }
+          style={{
+            // labels: { fill: '#ffff00' },
+            data: {
+              fill: '#27DC61',
+              stroke: 'black',
+              strokeWidth: 1,
+              width: 10,
+            },
+          }}
+          cornerRadius={{
+            topLeft: 4,
+            topRight: 4,
+          }}
+        />
+      </VictoryChart>
+
+      <ChartPreviewer
+        screenWidth={screenWidth}
+        selectedDomain={selectedDomain}
+        setZoomDomain={setZoomDomain}
+        xValues={xValues}
+        // x={x}
+        xAxisLabel={xAxisLabel}
+        xAxisField={xAxisField}
+        yAxisField={yAxisField}
+        values={values}
       />
-      <VictoryAxis
-        dependentAxis
-        label={yAxisLabel}
-        // axisLabelComponent={<VictoryLabel dy={-2} />}
-        padding={{ left: 40 }}
-        tickFormat={x => numeral(x).format('0.0a')}
-        style={{
-          axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 36 },
-        }}
-      />
-      <VictoryBar
-        x={xAxisField}
-        y={yAxisField}
-        data={values.slice(0, 10)}
-        horizontal={horizontal}
-        labels={({ datum }) => numeral(datum[yAxisField]).format('0,0.0a')}
-        alignment="middle"
-        labelComponent={
-          <VictoryLabel dx={10} dy={5} angle={-60} textAnchor={'start'} />
-        }
-        style={{
-          // labels: { fill: '#ffff00' },
-          data: { fill: '#27DC61', stroke: '#00AA39', strokeWidth: 1 },
-        }}
-        cornerRadius={{
-          topLeft: 4,
-          topRight: 4,
-        }}
-      />
-    </VictoryChart>
+    </>
   )
 }
 
-const ColumnChart = ({
+const HorizontalBarChart = ({
   xAxisField,
   yAxisField,
   xAxisLabel,
@@ -445,7 +491,7 @@ const ColumnChart = ({
       xAxisLabel={xAxisLabel}
       yAxisLabel={yAxisLabel}
       values={values}
-      horizontal={false}
+      horizontal={true}
     />
   )
 }
@@ -454,7 +500,7 @@ const chartMap = {
   AreaChart,
   LineChart,
   BarChart,
-  ColumnChart,
+  HorizontalBarChart,
   PieChart,
   DonutChart,
 }
@@ -497,7 +543,7 @@ const ChartContainer = ({
   if (!chartFormat) {
     chart = <Text>No matching chart found</Text>
   } else if (
-    ['AreaChart', 'LineChart', 'BarChart', 'ColumnChart'].includes(
+    ['AreaChart', 'LineChart', 'BarChart', 'HorizontalBarChart'].includes(
       chartFormat?.type,
     ) &&
     typeof chartFormat?.yField === 'string'
@@ -543,3 +589,76 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 })
+
+function ChartPreviewer({
+  selectedDomain,
+  setZoomDomain,
+  xValues,
+  x,
+  xAxisLabel,
+  xAxisField,
+  yAxisField,
+  values,
+}: any) {
+  const { width: screenWidth } = useWindowDimensions()
+  return (
+    <View>
+      <Text style={{ marginLeft: 24, paddingBottom: 20 , color:Colors.GREEN_MAIN }}>Drag to view specific details</Text>
+      <VictoryChart
+        width={screenWidth}
+        height={200}
+        scale={{
+          x: 'time',
+        }}
+        padding={{
+          top: 0,
+          left: 30,
+          right: 30,
+          bottom: 150,
+        }}
+        containerComponent={
+          <VictoryBrushContainer
+            responsive={false}
+            brushDimension="x"
+            brushDomain={selectedDomain}
+            onBrushDomainChange={setZoomDomain}
+          />
+        }
+      >
+        <VictoryAxis
+          tickValues={xValues}
+          tickFormat={x => `${x}`}
+          label={xAxisLabel}
+          tickLabelComponent={
+            <VictoryLabel dx={8} dy={-8} angle={-60} textAnchor={'end'} />
+          }
+          style={{
+            axisLabel: {
+              fontSize: 16,
+              padding: 120,
+              fill: Colors.GREEN_DARK,
+            },
+            ticks: {
+              size: 4,
+            },
+            tickLabels: {
+              angle: -90,
+              alignItems: 'baseline',
+            },
+          }}
+        />
+        <VictoryLine
+          style={{
+            data: {
+              stroke: Colors.GREEN_LIGHT,
+            },
+          }}
+          labelComponent={<VictoryLabel angle={45} />}
+          x={xAxisField}
+          y={yAxisField}
+          data={values}
+        />
+      </VictoryChart>
+    </View>
+  )
+}

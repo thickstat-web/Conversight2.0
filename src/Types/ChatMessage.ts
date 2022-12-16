@@ -18,7 +18,7 @@ export interface RawConverseData {
 export type ChartType =
   | 'AreaChart'
   | 'BarChart'
-  | 'ColumnChart'
+  | 'HorizontalBarChart'
   | 'DonutChart'
   // | 'DualAxes'
   // | 'FunnelChart'
