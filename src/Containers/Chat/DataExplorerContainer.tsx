@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
 } from 'react-native'
 import { ActionSheet, Text, TouchableOpacity, View } from 'react-native-ui-lib'
+import Icon from 'react-native-vector-icons/Ionicons'
 import { AdaptiveCard, Button, ExpandButton, SearchBar } from '@/Components'
 import { useAppSelector, useTheme } from '@/Hooks'
 import { properCase } from '@/Utils/common'
@@ -43,7 +44,7 @@ interface LabelOptions {
 const visualizationOptions: Record<Partial<VisualizationTypes>, string> = {
   AreaChart: 'Area Chart',
   BarChart: 'Bar Chart',
-  ColumnChart: 'Column Chart',
+  HorizontalBarChart: 'Horizontal Bar Chart',
   DonutChart: 'Donut Chart',
   LineChart: 'Line Chart',
   PieChart: 'Pie Chart',
@@ -229,6 +230,7 @@ const DataExplorerContainer = ({
   const { id, title } = route.params
   const message = converseData[id][0]
   const { columns, columnMetadata, values, visualFormats } = message
+  const [visualFormat, setVisualFormat] = useState(visualFormats[0].type)
   const formats: string[] = visualFormats
     .filter(item => item.type in visualizationOptions)
     .map(item => item.type)
@@ -237,18 +239,40 @@ const DataExplorerContainer = ({
     if (formats.length > 1) {
       const moreOptionsButton = () => (
         <View style={{ paddingBottom: 2 }}>
-          <Button
-            label="..."
+          <TouchableOpacity
+            style={{
+              flexDirection: 'row',
+              borderWidth: 1,
+              borderColor: Colors.WHITE,
+              paddingHorizontal: 16,
+              paddingVertical: 5,
+              borderRadius: 16,
+              alignItems:"center"
+            }}
             onPress={() => setVisible(true)}
-            labelStyle={styles.moreOptionsButton}
-          />
+          >
+            <Text
+              style={{
+                color: Colors.WHITE,
+                fontWeight: table ? '500' : 'normal',
+              }}
+            >
+              {visualizationOptions[visualFormat as VisualizationTypes]}
+            </Text>
+            <Icon
+              style={{ marginLeft: 4 }}
+              name="chevron-down-sharp"
+              size={20}
+              color={Colors.WHITE}
+            />
+          </TouchableOpacity>
         </View>
       )
       navigation.setOptions({
         headerRight: moreOptionsButton,
       })
     }
-  }, [navigation, formats])
+  }, [navigation, formats, visualizationOptions, visualFormat])
 
   const buildOptions = (onPress: (option: string) => void): LabelOptions[] => {
     const labelOptions: LabelOptions[] = formats
@@ -261,9 +285,10 @@ const DataExplorerContainer = ({
   }
 
   const onSelect = (option: string) => {
-    const index = formats.indexOf(option)
-    // setCurrentSlideIndex(index)
-    ref.current.scrollToIndex({ index })
+    setVisualFormat(option)
+    // const index = formats.indexOf(option)
+    // // setCurrentSlideIndex(index)
+    // ref.current.scrollToIndex({ index })
   }
 
   const getItemLayout = (data, index) => ({
@@ -365,7 +390,8 @@ const DataExplorerContainer = ({
     <View flex style={{ backgroundColor: Colors.WHITE }}>
       {title.length > 0 && <Header title={title} />}
       <View flex-6>
-        <FlatList
+        {visualFormat && renderItem({ item: visualFormat })}
+        {/* <FlatList
           data={formats}
           keyboardShouldPersistTaps={'always'}
           ref={ref}
@@ -383,10 +409,10 @@ const DataExplorerContainer = ({
           pagingEnabled={!tableOnly}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
-        />
+        /> */}
       </View>
 
-      {formats.length > 1 && (
+      {/* {formats.length > 1 && (
         <View style={styles.dotsContainer}>
           <View style={styles.dotsWrapper}>
             {formats.map((_, index) => {
@@ -401,9 +427,9 @@ const DataExplorerContainer = ({
                 />
               )
             })}
-          </View>
+          </View> */}
 
-          {/* <View row>
+      {/* <View row>
             <TouchableOpacity
               onPress={scrollPrevious}
               style={[styles.scrollButton]}
@@ -417,8 +443,8 @@ const DataExplorerContainer = ({
               <NextIcon />
             </TouchableOpacity>
           </View> */}
-        </View>
-      )}
+      {/* </View>
+      )} */}
 
       {formats.length > 1 && (
         <ActionSheet

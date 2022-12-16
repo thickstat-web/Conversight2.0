@@ -15,6 +15,7 @@ import {
 } from 'react-native'
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { SvgCss } from 'react-native-svg'
 import { pauseXML } from '@/Assets/Images/xml-svg/pause'
 import { playXML } from '@/Assets/Images/xml-svg/play'
@@ -182,21 +183,35 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
   return (
     <View
       style={styles.visCard}
-      onTouchStart={() => setMove(false)}
-      onTouchMove={() => setMove(true)}
-      onTouchEnd={() => {
-        if (Platform.OS === 'android' || !move) {
-          navigate(DATA_EXPLORER, { id: data?.id, title: data?.message })
-        }
-      }}
+      // onTouchStart={() => setMove(false)}
+      // onTouchMove={() => setMove(true)}
+      // onTouchEnd={() => {
+      //   if (Platform.OS === 'android' || !move) {
+      //     // navigate(DATA_EXPLORER, { id: data?.id, title: data?.message })
+      //   }
+      // }}
     >
       <View>
-        <Text style={styles.cardTitle}>
-          {properCase(insightDataItem?.answer ?? '', true)}
-        </Text>
-        {timeAgo && (
-          <Text style={styles.timeAgo}>{properCase(timeAgo, true)}</Text>
-        )}
+        <Pressable
+          style={{ flex: 1, flexDirection: 'row' }}
+          onPress={() =>
+            navigate(DATA_EXPLORER, { id: data?.id, title: data?.message })
+          }
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>
+              {properCase(insightDataItem?.answer ?? '', true)}
+            </Text>
+            {timeAgo && (
+              <Text style={styles.timeAgo}>{properCase(timeAgo, true)}</Text>
+            )}
+          </View>
+          <MaterialCommunityIcons
+            name="text-box-search-outline"
+            color={Colors.GREEN_MAIN}
+            size={25}
+          />
+        </Pressable>
       </View>
       {followupLoading ? (
         <LoadingCard />
