@@ -68,3 +68,5 @@ src/Navigators/Tab*.tsx
 src/Utils/chat-history-data.json
 android/app/src/main/assets/index.android.bundle
 package-lock.json
+coverage/
+package_licenses.csv
