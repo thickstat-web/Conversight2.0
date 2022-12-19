@@ -175,7 +175,7 @@ const TableOrAdaptiveCard = memo(
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
             contentContainerStyle={styles.contentContainer}
-            style={{ width: screenWidth }}
+            // style={{ width: screenWidth }}
           >
             <TableContainer
               id={id}
@@ -466,7 +466,6 @@ const styles = StyleSheet.create({
   moreOptionsButton: { fontSize: 30 },
   contentContainer: {
     backgroundColor: Colors.WHITE,
-    paddingHorizontal: 4,
   },
   cardTitle: {
     fontSize: 14,
