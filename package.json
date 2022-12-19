@@ -141,6 +141,7 @@
   },
   "husky": {
     "hooks": {
+      "pre-applypatch": "echo \"[Husky] pre-applypatch\"",
       "pre-commit": "npm run package-license-report && license-checker --onlyAllow 'BSD;MIT;Apache-2.0;ISC' && npm test"
     }
   }
