@@ -139,6 +139,7 @@ const styles = StyleSheet.create({
     // flex: 1,
     backgroundColor: '#fff',
     borderRadius: 8,
+    alignItems:'center',
     // borderWidth: 2,
     // borderColor: '#EAFAEA',
   },
