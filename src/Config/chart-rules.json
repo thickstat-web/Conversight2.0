@@ -106,7 +106,7 @@
           {
             "fact": "dataCount",
             "operator": "lessThanInclusive",
-            "value": 150
+            "value": 20
           }
         ]
       },
@@ -181,7 +181,7 @@
           {
             "fact": "dataCount",
             "operator": "lessThanInclusive",
-            "value": 150
+            "value": 20
           }
         ]
       },

@@ -11,7 +11,7 @@ type SearchBarProps = {
   cursorColor: string
   textColor: string
   iconColor: string
-  style?: ViewStyle
+  style: ViewStyle
 }
 
 const SearchBar = ({

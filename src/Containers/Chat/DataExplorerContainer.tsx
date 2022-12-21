@@ -247,7 +247,7 @@ const DataExplorerContainer = ({
               paddingHorizontal: 16,
               paddingVertical: 5,
               borderRadius: 16,
-              alignItems:"center"
+              alignItems: 'center',
             }}
             onPress={() => setVisible(true)}
           >
@@ -359,6 +359,7 @@ const DataExplorerContainer = ({
               visualFormats={visualFormats}
               values={values}
               title={title}
+              enableChartPreview={true}
             />
           </ScrollView>
         </View>

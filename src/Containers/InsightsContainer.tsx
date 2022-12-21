@@ -15,6 +15,7 @@ import {
 } from 'react-native'
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
+import Icon from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { SvgCss } from 'react-native-svg'
 import { pauseXML } from '@/Assets/Images/xml-svg/pause'
@@ -206,17 +207,18 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
               <Text style={styles.timeAgo}>{properCase(timeAgo, true)}</Text>
             )}
           </View>
-          <MaterialCommunityIcons
-            name="text-box-search-outline"
-            color={Colors.GREEN_MAIN}
-            size={25}
+          <Icon
+            style={styles.icon}
+            name="expand-outline"
+            size={20}
+            color={Colors.GREEN_DARK}
           />
         </Pressable>
       </View>
       {followupLoading ? (
         <LoadingCard />
       ) : data ? (
-        <InsightsVisualizer data={data} />
+        <InsightsVisualizer data={data} enableChartPreview={false} />
       ) : null}
     </View>
   )
@@ -536,6 +538,9 @@ const styles = StyleSheet.create({
   timeAgo: {
     color: Colors.GRAY_DARK,
     paddingBottom: 8,
+  },
+  icon: {
+    paddingLeft: 8,
   },
   insightsContainer: {
     paddingBottom: 48,

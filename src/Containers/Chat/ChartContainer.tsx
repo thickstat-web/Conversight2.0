@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Dimensions, StyleSheet, useWindowDimensions } from 'react-native'
+import { StyleSheet, useWindowDimensions } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
 import {
   VictoryArea,
@@ -28,6 +28,7 @@ interface ChartProps {
   xAxisField: string
   yAxisField: string
   values: Array<Record<string, number>>
+  enableChartPreview: boolean
 }
 
 interface PieChartProps extends ChartProps {
@@ -45,6 +46,7 @@ interface ChartContainerProps {
   columnMetadata: ColumnMetadata
   visualFormats: VisualFormat[]
   values: Array<Record<string, any>>
+  enableChartPreview: boolean
 }
 
 interface LegendName {
@@ -159,10 +161,17 @@ const AreaChart = ({
   xAxisLabel,
   yAxisLabel,
   values,
+  enableChartPreview,
 }: ChartProps) => {
   const { width: screenWidth } = useWindowDimensions()
-  const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
-  const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
+  const [selectedDomain, setSelectedDomain] = useState<{
+    x: [any, any]
+    y: [any, any]
+  }>()
+  const [zoomDomain, setZoomDomain] = useState<{
+    x: [any, any]
+    y: [any, any]
+  }>()
   const xValues = values.map(item => item[xAxisLabel])
   return (
     <>
@@ -249,16 +258,18 @@ const AreaChart = ({
           }}
         />
       </VictoryChart>
-      <ChartPreviewer
-        screenWidth={screenWidth}
-        selectedDomain={selectedDomain}
-        setZoomDomain={setZoomDomain}
-        xValues={xValues}
-        xAxisLabel={xAxisLabel}
-        xAxisField={xAxisField}
-        yAxisField={yAxisField}
-        values={values}
-      />
+      {enableChartPreview && (
+        <ChartPreviewer
+          screenWidth={screenWidth}
+          selectedDomain={selectedDomain}
+          setZoomDomain={setZoomDomain}
+          xValues={xValues}
+          xAxisLabel={xAxisLabel}
+          xAxisField={xAxisField}
+          yAxisField={yAxisField}
+          values={values}
+        />
+      )}
     </>
   )
 }
@@ -269,6 +280,7 @@ const LineChart = ({
   xAxisLabel,
   yAxisLabel,
   values,
+  enableChartPreview,
 }: ChartProps) => {
   const { width: screenWidth } = useWindowDimensions()
   const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
@@ -360,17 +372,18 @@ const LineChart = ({
           }}
         />
       </VictoryChart>
-      <ChartPreviewer
-        screenWidth={screenWidth}
-        selectedDomain={selectedDomain}
-        setZoomDomain={setZoomDomain}
-        xValues={xValues}
-        // x={x}
-        xAxisLabel={xAxisLabel}
-        xAxisField={xAxisField}
-        yAxisField={yAxisField}
-        values={values}
-      />
+      {enableChartPreview && (
+        <ChartPreviewer
+          screenWidth={screenWidth}
+          selectedDomain={selectedDomain}
+          setZoomDomain={setZoomDomain}
+          xValues={xValues}
+          xAxisLabel={xAxisLabel}
+          xAxisField={xAxisField}
+          yAxisField={yAxisField}
+          values={values}
+        />
+      )}
     </>
   )
 }
@@ -380,8 +393,9 @@ const BarChart = ({
   yAxisField,
   xAxisLabel,
   yAxisLabel,
-  horizontal = false,
   values,
+  horizontal = false,
+  enableChartPreview,
 }: BarChartProps) => {
   const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
   const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
@@ -461,39 +475,24 @@ const BarChart = ({
           }}
         />
       </VictoryChart>
-
-      <ChartPreviewer
-        screenWidth={screenWidth}
-        selectedDomain={selectedDomain}
-        setZoomDomain={setZoomDomain}
-        xValues={xValues}
-        // x={x}
-        xAxisLabel={xAxisLabel}
-        xAxisField={xAxisField}
-        yAxisField={yAxisField}
-        values={values}
-      />
+      {enableChartPreview && (
+        <ChartPreviewer
+          screenWidth={screenWidth}
+          selectedDomain={selectedDomain}
+          setZoomDomain={setZoomDomain}
+          xValues={xValues}
+          xAxisLabel={xAxisLabel}
+          xAxisField={xAxisField}
+          yAxisField={yAxisField}
+          values={values}
+        />
+      )}
     </>
   )
 }
 
-const HorizontalBarChart = ({
-  xAxisField,
-  yAxisField,
-  xAxisLabel,
-  yAxisLabel,
-  values,
-}: ChartProps) => {
-  return (
-    <BarChart
-      xAxisField={xAxisField}
-      yAxisField={yAxisField}
-      xAxisLabel={xAxisLabel}
-      yAxisLabel={yAxisLabel}
-      values={values}
-      horizontal={true}
-    />
-  )
+const HorizontalBarChart = (props: ChartProps) => {
+  return <BarChart {...props} horizontal={true} />
 }
 
 const chartMap = {
@@ -511,7 +510,7 @@ const ChartContainer = ({
   columnMetadata,
   visualFormats,
   values,
-  title,
+  enableChartPreview,
 }: ChartContainerProps) => {
   const getChartFormat = (chartType: ChartType | null) => {
     return visualFormats.find(item =>
@@ -548,14 +547,16 @@ const ChartContainer = ({
     ) &&
     typeof chartFormat?.yField === 'string'
   ) {
-    const Chart = chartMap[chartFormat?.type]
+    const Chart = chartMap[chartFormat?.type as Partial<ChartType>]
     chart = (
       <Chart
         xAxisField={chartFormat?.xField}
         yAxisField={chartFormat?.yField}
         xAxisLabel={xAxisLabel}
         yAxisLabel={yAxisLabel}
-        values={values.slice(0, 20)}
+        values={values}
+        enableChartPreview={enableChartPreview}
+        horizontal={false}
       />
     )
   } else if (
@@ -563,7 +564,7 @@ const ChartContainer = ({
     chartFormat?.angleField &&
     chartFormat?.colorField
   ) {
-    const Chart = chartMap[chartFormat?.type]
+    const Chart = chartMap[chartFormat?.type as Partial<ChartType>]
     chart = (
       <Chart
         xAxisField={chartFormat?.angleField}
@@ -587,6 +588,7 @@ export default React.memo(ChartContainer)
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
+    paddingTop: 16,
   },
 })
 
@@ -603,12 +605,16 @@ function ChartPreviewer({
   const { width: screenWidth } = useWindowDimensions()
   return (
     <View>
-      <Text style={{ marginLeft: 24, paddingBottom: 20 , color:Colors.GREEN_MAIN }}>Drag to view specific details</Text>
+      <Text
+        style={{ marginLeft: 24, paddingBottom: 20, color: Colors.GREEN_DARK }}
+      >
+        Drag to view specific details
+      </Text>
       <VictoryChart
         width={screenWidth}
-        height={200}
+        height={190}
         scale={{
-          x: 'time',
+          x: 'linear',
         }}
         padding={{
           top: 0,
@@ -618,34 +624,25 @@ function ChartPreviewer({
         }}
         containerComponent={
           <VictoryBrushContainer
-            responsive={false}
+            responsive={true}
+            allowDraw={true}
+            defaultBrushArea={'move'}
             brushDimension="x"
             brushDomain={selectedDomain}
             onBrushDomainChange={setZoomDomain}
+            brushStyle={{
+              stroke: 'transparent',
+              fill: '#014E40',
+              fillOpacity: 0.1,
+            }}
           />
         }
       >
+        <VictoryAxis />
+        {/* <VictoryAxis /> */}
         <VictoryAxis
-          tickValues={xValues}
-          tickFormat={x => `${x}`}
-          label={xAxisLabel}
-          tickLabelComponent={
-            <VictoryLabel dx={8} dy={-8} angle={-60} textAnchor={'end'} />
-          }
-          style={{
-            axisLabel: {
-              fontSize: 16,
-              padding: 120,
-              fill: Colors.GREEN_DARK,
-            },
-            ticks: {
-              size: 4,
-            },
-            tickLabels: {
-              angle: -90,
-              alignItems: 'baseline',
-            },
-          }}
+          axisLabelComponent={<VictoryLabel />}
+          tickFormat={_ => ``}
         />
         <VictoryLine
           style={{
@@ -653,8 +650,8 @@ function ChartPreviewer({
               stroke: Colors.GREEN_LIGHT,
             },
           }}
-          labelComponent={<VictoryLabel angle={45} />}
-          x={xAxisField}
+          // labelComponent={<VictoryLabel angle={45} />}
+          // x={xAxisField}
           y={yAxisField}
           data={values}
         />
