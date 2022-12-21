@@ -18,3 +18,4 @@ export { default as WalkThroughAuthorizesContainer } from './WalkThroughAuthoriz
 export { default as CurrentAvatar } from './Avatar/CurrentAvatar'
 export { default as AvatarChanged } from './Avatar/AvatarChanged'
 export { default as DataExplorerContainer } from './Chat/DataExplorerContainer'
+export { default as WebExplorerContainer } from './Chat/WebExplorerContainer'
