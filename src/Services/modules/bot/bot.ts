@@ -421,7 +421,6 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
                 utterance,
                 status,
               }
-              // followupData = [...followupData, { type: 'ConverseData', data }]
               followupData.push({ type: 'ConverseData', data })
             }
           }

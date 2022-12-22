@@ -38,6 +38,7 @@ export type FollowupType = 'ConverseData' | 'WebURL'
 
 export interface URLFollowupData {
   id: string
+  type: string
   explorerURL: string
   thumbnailURL: string
 }

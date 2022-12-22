@@ -1,38 +1,25 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { StyleSheet } from 'react-native'
 import React from 'react'
 import { WebView } from 'react-native-webview'
-import { useAppSelector } from '@/Hooks'
-import { selectConverseData } from '@/Store/App'
-import { Colors } from '@/Theme/Variables'
+import { LoadingSpinner } from '@/Components'
 
 type WebExplorerContainerProps = {
-  navigation: any
   route: {
     params: {
-      formats: string[]
+      url: string
     }
   }
 }
 
-const Spinner = () => (
-  <View style={styles.activityContainer}>
-    <ActivityIndicator size="large" color={Colors.GREEN_MAIN} />
-  </View>
-)
-
-const WebExplorerContainer = ({
-  navigation,
-  route,
-}: WebExplorerContainerProps) => {
-  const converseData = useAppSelector(selectConverseData)
+const WebExplorerContainer = ({ route }: WebExplorerContainerProps) => {
   const { url } = route.params
-  // const message = converseData[id][0]
+
   return (
     <WebView
-      containerStyle={{ flex: 1 }}
+      containerStyle={styles.container}
       source={{ uri: url }}
       startInLoadingState={true}
-      renderLoading={Spinner}
+      renderLoading={() => <LoadingSpinner style={styles.activityContainer} />}
       scalesPageToFit
       showsHorizontalScrollIndicator={false}
     />
@@ -42,6 +29,9 @@ const WebExplorerContainer = ({
 export default WebExplorerContainer
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   activityContainer: {
     alignItems: 'center',
     justifyContent: 'center',

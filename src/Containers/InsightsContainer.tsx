@@ -161,9 +161,10 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
     data = converseData[id][0] as ConverseData
     timeAgo = calculateTimeAgo(data?.createdAt)
     title = data?.message
-  } else if (type === 'ConverseData' && urlFollowupData[id]) {
+  } else if (type === 'WebURL' && urlFollowupData[id]) {
     data = urlFollowupData[id] as URLFollowupData
-    explorerUrl = data.explorerURL
+    const { explorerURL, thumbnailURL } = data
+    explorerUrl = explorerURL.length ? explorerURL : thumbnailURL
   }
 
   const insightDataItem = insightsData.find(itm => itm.id === id)
@@ -207,8 +208,9 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
           enableChartPreview={false}
         />
       ) : type === 'WebURL' && data ? (
-        // Render thumbnail page
-        <InsightsVisualizer data={data} enableChartPreview={false} />
+        <View style={{ height: 200 }}>
+          <Text>AI Workbench</Text>
+        </View>
       ) : null}
     </View>
   )

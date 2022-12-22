@@ -102,7 +102,10 @@ export default function () {
           const data = rawFollowupData.data as URLFollowupData
           dispatch(addUrlFollowupData(data))
           setInsightsComponents(
-            updateInsightComponent(data.id, { followupLoading: false }),
+            updateInsightComponent(data.id, {
+              type: 'WebURL',
+              followupLoading: false,
+            }),
           )
         } else {
           const data = rawFollowupData.data as RawConverseData
