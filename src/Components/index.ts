@@ -5,6 +5,7 @@ export { default as IconButton } from './IconButton'
 export { default as SearchBar } from './SearchBar'
 export { default as LayoutNoInternet } from './LayoutNoInternet'
 export { default as LoadingSpinner } from './LoadingSpinner'
+export { default as WebExplorer } from './WebExplorer'
 export { default as AdaptiveCard } from './AdaptiveCard'
 export { default as ExpandButton } from './ExpandButton'
 export {

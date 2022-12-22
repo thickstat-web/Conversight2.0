@@ -15,6 +15,7 @@ import {
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
 import Icon from 'react-native-vector-icons/Ionicons'
+import WebView from 'react-native-webview'
 import {
   useTheme,
   useAppSelector,
@@ -22,7 +23,7 @@ import {
   PlayerState,
   useAudioPlayer,
 } from '@/Hooks'
-import { LoadingSpinner, InsightsVisualizer } from '@/Components'
+import { LoadingSpinner, InsightsVisualizer, WebExplorer } from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { selectConverseData, selectUrlFollowupData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
@@ -209,7 +210,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
         />
       ) : type === 'WebURL' && data ? (
         <View style={{ height: 200 }}>
-          <Text>AI Workbench</Text>
+          <WebExplorer url={explorerUrl} loaderSize={'small'} />
         </View>
       ) : null}
     </View>

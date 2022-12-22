@@ -173,7 +173,7 @@ const ApplicationNavigator = () => {
                   component={WebExplorerContainer}
                   options={{
                     headerRightContainerStyle: { paddingRight: 15 },
-                    title: 'Web Explorer',
+                    title: 'Data App Explorer',
                     headerTitleAlign: 'center',
                     headerTintColor: Colors.WHITE,
                     headerStyle: {
