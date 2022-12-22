@@ -583,15 +583,6 @@ const ChartContainer = ({
   )
 }
 
-export default React.memo(ChartContainer)
-
-const styles = StyleSheet.create({
-  container: {
-    overflow: 'hidden',
-    paddingTop: 16,
-  },
-})
-
 function ChartPreviewer({
   selectedDomain,
   setZoomDomain,
@@ -659,3 +650,12 @@ function ChartPreviewer({
     </View>
   )
 }
+
+export default React.memo(ChartContainer)
+
+const styles = StyleSheet.create({
+  container: {
+    overflow: 'hidden',
+    paddingTop: 16,
+  },
+})
