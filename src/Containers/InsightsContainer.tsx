@@ -27,7 +27,7 @@ import { Colors } from '@/Theme/Variables'
 import { selectConverseData, selectUrlFollowupData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
 import { InsightComponent, InsightData } from '@/Types/Insights'
-import { DATA_EXPLORER } from '@/Constants/screens'
+import { DATA_EXPLORER, WEB_EXPLORER } from '@/Constants/screens'
 import { navigate } from '@/Navigators/utils'
 import { properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
@@ -156,12 +156,14 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
 
   let timeAgo: string | null = null
   let title: string = ''
+  let explorerUrl: string = ''
   if (type === 'ConverseData' && converseData[id]) {
     data = converseData[id][0] as ConverseData
     timeAgo = calculateTimeAgo(data?.createdAt)
     title = data?.message
   } else if (type === 'ConverseData' && urlFollowupData[id]) {
     data = urlFollowupData[id] as URLFollowupData
+    explorerUrl = data.explorerURL
   }
 
   const insightDataItem = insightsData.find(itm => itm.id === id)
@@ -170,7 +172,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
     if (type === 'ConverseData') {
       navigate(DATA_EXPLORER, { id, title })
     } else {
-      navigate(DATA_EXPLORER, { url: 'web-explorer-url-goes-here' })
+      navigate(WEB_EXPLORER, { url: explorerUrl })
     }
   }
 
