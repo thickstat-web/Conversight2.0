@@ -101,6 +101,9 @@ export default function () {
         if (rawFollowupData.type === 'WebURL') {
           const data = rawFollowupData.data as URLFollowupData
           dispatch(addUrlFollowupData(data))
+          setInsightsComponents(
+            updateInsightComponent(data.id, { followupLoading: false }),
+          )
         } else {
           const data = rawFollowupData.data as RawConverseData
           processConverseData(data).then(storeProcessedData)
