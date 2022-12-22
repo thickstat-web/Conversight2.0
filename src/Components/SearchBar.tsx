@@ -38,7 +38,9 @@ const SearchBar = ({
         onChangeText={setSearchText}
       />
       <Pressable onPress={() => setSearchText('')}>
-        <Icon style={styles.icon} name="close" size={20} color={iconColor} />
+        {searchText && (
+          <Icon style={styles.icon} name="close" size={20} color={iconColor} />
+        )}
       </Pressable>
     </View>
   )
