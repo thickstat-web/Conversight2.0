@@ -15,7 +15,6 @@ import {
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
 import Icon from 'react-native-vector-icons/Ionicons'
-import WebView from 'react-native-webview'
 import {
   useTheme,
   useAppSelector,

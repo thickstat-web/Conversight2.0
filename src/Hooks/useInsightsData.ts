@@ -103,7 +103,7 @@ export default function () {
           dispatch(addUrlFollowupData(data))
           setInsightsComponents(
             updateInsightComponent(data.id, {
-              type: 'WebURL',
+              type: rawFollowupData.type,
               followupLoading: false,
             }),
           )
