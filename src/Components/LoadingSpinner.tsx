@@ -3,7 +3,7 @@ import { ActivityIndicator, ViewStyle } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { useTheme } from '@/Hooks'
 
-type SizeOptions = number | 'large' | 'small' | undefined
+export type SizeOptions = number | 'large' | 'small' | undefined
 
 interface SpinnerProps {
   size?: SizeOptions
