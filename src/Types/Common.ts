@@ -33,3 +33,11 @@ export interface LogoutResponse {
   status?: number
   message: string
 }
+
+export type FollowupType = 'ConverseData' | 'WebURL'
+
+export interface URLFollowupData {
+  id: string
+  explorerURL: string
+  thumbnailURL: string
+}

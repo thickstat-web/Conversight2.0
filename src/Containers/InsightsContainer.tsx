@@ -8,7 +8,6 @@ import React, {
 import {
   ActivityIndicator,
   FlatList,
-  Platform,
   Pressable,
   StyleSheet,
   TouchableOpacity,
@@ -16,10 +15,6 @@ import {
 import { View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
 import Icon from 'react-native-vector-icons/Ionicons'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import { SvgCss } from 'react-native-svg'
-import { pauseXML } from '@/Assets/Images/xml-svg/pause'
-import { playXML } from '@/Assets/Images/xml-svg/play'
 import {
   useTheme,
   useAppSelector,
@@ -29,14 +24,15 @@ import {
 } from '@/Hooks'
 import { LoadingSpinner, InsightsVisualizer } from '@/Components'
 import { Colors } from '@/Theme/Variables'
-import { selectConverseData } from '@/Store/App'
+import { selectConverseData, selectUrlFollowupData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
 import { InsightComponent, InsightData } from '@/Types/Insights'
 import { DATA_EXPLORER } from '@/Constants/screens'
 import { navigate } from '@/Navigators/utils'
-import { debounce, properCase } from '@/Utils/common'
+import { properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
 import { AudioTrack } from '@/Hooks/helper'
+import { URLFollowupData } from '@/Types/Common'
 
 const CARD_HEIGHT = 180
 
@@ -44,7 +40,7 @@ export type ViewToken = {
   item: any
   key: string
   index?: number
-  // indicated whether this item is viewable or not
+  // indicates whether this item is viewable or not
   isViewable: boolean
   section?: any
 }
@@ -53,25 +49,6 @@ export type ViewableItemsProps = {
   viewableItems: Array<ViewToken>
   changed: Array<ViewToken>
 }
-
-// const addUpdatedTracks =
-//   (
-//     viewableItems: ViewToken[],
-//     callback: (index: number) => void | Promise<void>,
-//   ) =>
-//   () => {
-//     let startIndex = 0
-//     if (viewableItems.length && viewableItems[0]?.index) {
-//       startIndex = viewableItems[0].index
-//     }
-//     viewableItems.forEach(_ => {
-//       if (_.index && _.index < startIndex) {
-//         startIndex = _.index
-//       }
-//     })
-
-//     debounce(() => callback(startIndex), 500)
-//   }
 
 const LoadingCard = () => (
   <View style={[styles.visCard, styles.loading]}>
@@ -148,6 +125,16 @@ const TagFilter = React.memo(
   },
 )
 
+function calculateTimeAgo(timestamp: number | undefined) {
+  let timeAgo = null
+  try {
+    timeAgo = formatDistance(new Date(timestamp ?? new Date()), new Date(), {
+      addSuffix: true,
+    })
+  } catch (err) {}
+  return timeAgo
+}
+
 interface CardProps {
   item: InsightComponent
   insightsData: InsightData[]
@@ -155,49 +142,44 @@ interface CardProps {
 }
 
 const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
-  const { id, followupLoading } = item
+  const { id, followupLoading, type } = item
   const converseData = useAppSelector(selectConverseData)
-  const [move, setMove] = useState(false)
+  const urlFollowupData = useAppSelector(selectUrlFollowupData)
 
   useEffect(() => {
-    if (followupLoading) {
+    if (followupLoading && type === 'ConverseData') {
       fetchFollowup([id])
     }
-  }, [followupLoading, id, fetchFollowup])
+  }, [followupLoading, id, type, fetchFollowup])
 
-  const data: ConverseData | null = converseData[id]
-    ? converseData[id][0]
-    : null
+  let data: ConverseData | URLFollowupData | null = null
+
+  let timeAgo: string | null = null
+  let title: string = ''
+  if (type === 'ConverseData' && converseData[id]) {
+    data = converseData[id][0] as ConverseData
+    timeAgo = calculateTimeAgo(data?.createdAt)
+    title = data?.message
+  } else if (type === 'ConverseData' && urlFollowupData[id]) {
+    data = urlFollowupData[id] as URLFollowupData
+  }
+
   const insightDataItem = insightsData.find(itm => itm.id === id)
 
-  let timeAgo = null
-  try {
-    timeAgo = formatDistance(
-      new Date(data?.createdAt ?? new Date()),
-      new Date(),
-      {
-        addSuffix: true,
-      },
-    )
-  } catch (err) {}
+  const handleOpenExplorer = () => {
+    if (type === 'ConverseData') {
+      navigate(DATA_EXPLORER, { id, title })
+    } else {
+      navigate(DATA_EXPLORER, { url: 'web-explorer-url-goes-here' })
+    }
+  }
 
   return (
-    <View
-      style={styles.visCard}
-      // onTouchStart={() => setMove(false)}
-      // onTouchMove={() => setMove(true)}
-      // onTouchEnd={() => {
-      //   if (Platform.OS === 'android' || !move) {
-      //     // navigate(DATA_EXPLORER, { id: data?.id, title: data?.message })
-      //   }
-      // }}
-    >
+    <View style={styles.visCard}>
       <View>
         <Pressable
           style={{ flex: 1, flexDirection: 'row' }}
-          onPress={() =>
-            navigate(DATA_EXPLORER, { id: data?.id, title: data?.message })
-          }
+          onPress={handleOpenExplorer}
         >
           <View style={{ flex: 1 }}>
             <Text style={styles.cardTitle}>
@@ -217,7 +199,13 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
       </View>
       {followupLoading ? (
         <LoadingCard />
-      ) : data ? (
+      ) : type === 'ConverseData' && data ? (
+        <InsightsVisualizer
+          data={data as ConverseData}
+          enableChartPreview={false}
+        />
+      ) : type === 'WebURL' && data ? (
+        // Render thumbnail page
         <InsightsVisualizer data={data} enableChartPreview={false} />
       ) : null}
     </View>
@@ -231,8 +219,6 @@ interface InsightComponentsProps {
   insightsComponents: InsightComponent[]
   insightsData: InsightData[]
   insightsAudioList: AudioTrack[]
-  // hasMoreFollowupComponent: boolean
-  // loadMoreFollowupComponent: () => void
   fetchFollowup: (insightComponentIds: string[]) => Promise<void>
   playserState: PlayerState
   trackIndex: number
@@ -254,17 +240,9 @@ const InsightComponents = React.memo((props: InsightComponentsProps) => {
   const {
     insightsComponents,
     insightsData,
-    // insightsAudioList,
-    // loadingInsightsAudio,
-    // hasMoreFollowupComponent,
-    // loadMoreFollowupComponent,
     fetchFollowup,
-    // playserState,
     trackIndex,
-    // play,
     pausePlayer,
-    // addAudioTracks,
-    // playTrackByIndex,
   } = props
 
   useEffect(() => {
@@ -277,37 +255,6 @@ const InsightComponents = React.memo((props: InsightComponentsProps) => {
       flatListRef.current.scrollToIndex({ index: trackIndex })
     }
   }, [trackIndex, insightsComponents])
-
-  // useEffect(() => {
-  //   const insightIds = new Set(insightsComponents.map(_ => _.id))
-  //   const filteredAudioTracks = insightsAudioList.filter(_ =>
-  //     insightIds.has(_.id),
-  //   )
-  //   const updateAudioTracks = async () => {
-  //     await addAudioTracks(filteredAudioTracks)
-  //     console.log('[InsightComponents] updateAudioTracks - audio track updated')
-  //   }
-
-  //   if (filteredAudioTracks.length) {
-  //     updateAudioTracks()
-  //   }
-  // }, [insightsComponents, insightsAudioList, addAudioTracks, play, pausePlayer])
-
-  // const viewabilityConfig = useMemo(
-  //   () => ({
-  //     minimumViewTime: 1000,
-  //     waitForInteraction: true,
-  //     // viewAreaCoveragePercentThreshold: 60,
-  //     itemVisiblePercentThreshold: 60,
-  //   }),
-  //   [],
-  // )
-
-  // const handleOnViewableItemsChanged = useCallback(
-  //   ({ viewableItems }: ViewableItemsProps) => {
-  //     debounce(addUpdatedTracks(viewableItems, playTrackByIndex), 500)
-  //   },
-  // )
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemProps) => (
@@ -393,45 +340,16 @@ const InsightsContainer = ({ navigation }) => {
   })
 
   const playButton = useCallback(() => {
-    // const isPlayable =
-    //   playerState === PlayerState.IDLE ||
-    //   playerState === PlayerState.PAUSED ||
-    //   playerState === PlayerState.STOPPED
     return (
-      <TouchableOpacity
-        style={{ marginTop: 4, marginRight: 16 }}
-        // onPress={isPlayable ? play : pause}
-      >
+      <TouchableOpacity style={{ marginTop: 4, marginRight: 16 }}>
         {loadingInsightsAudio && <ActivityIndicator color={Colors.WHITE} />}
-        {/* {loadingInsightsAudio || playerState === PlayerState.LOADING ? (
-          <ActivityIndicator color={Colors.WHITE} />
-        ) : (
-          <SvgCss
-            width="32"
-            height="32"
-            xml={isPlayable ? playXML : pauseXML}
-          />
-        )} */}
       </TouchableOpacity>
     )
   }, [loadingInsightsAudio, Colors.WHITE])
-  // }, [playerState, play, pause, loadingInsightsAudio, Colors.WHITE])
 
   useLayoutEffect(() => {
     navigation.setOptions({ headerRight: playButton })
   }, [navigation, playButton])
-
-  // useEffect(() => {
-  //   console.log('')
-  //   console.log(`[Insights] tags: ${JSON.stringify(tagWithIds)}`)
-  //   console.log(`[Insights] filteredTags: ${JSON.stringify(filteredTags)}`)
-
-  //   console.log('')
-  //   const componentIds = insightsComponents.map(_ => _.id)
-  //   console.log(`[Insights] component ids: ${JSON.stringify(componentIds)}`)
-  //   const dataIds = insightsData.map(_ => _.id)
-  //   console.log(`[Insights] insight data ids: ${JSON.stringify(dataIds)}`)
-  // })
 
   // Prepare filtered Insights Data
   let filteredInsightsComponents: Array<InsightComponent>
@@ -443,20 +361,6 @@ const InsightsContainer = ({ navigation }) => {
       uniqIds.has(item.id),
     )
   }
-
-  // const filteredAudioTracks = useMemo(() => {
-  //   const insightIds = new Set(filteredInsightsComponents.map(_ => _.id))
-  //   return insightsAudioList.filter(_ => insightIds.has(_.id))
-  // }, [filteredInsightsComponents, insightsAudioList])
-
-  // useEffect(() => {
-  //   const initPlayer = async () => {
-  //     // await addAudioTracks(filteredAudioTracks)
-  //   }
-  //   if (filteredAudioTracks.length) {
-  //     initPlayer()
-  //   }
-  // }, [filteredAudioTracks, addAudioTracks])
 
   const [focused, setFocused] = useState(true)
   useEffect(() => {

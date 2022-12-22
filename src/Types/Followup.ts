@@ -1,4 +1,6 @@
 import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
+import { RawConverseData } from './ChatMessage'
+import { FollowupType, URLFollowupData } from './Common'
 
 export interface Followup {
   dataSetID: string
@@ -64,8 +66,17 @@ export interface FollowupComponentData {
   cachedData: boolean
 }
 
+export interface URLFollowupComponentData {
+  explorerURL: string
+  thumbnailURL: string
+  type: string
+}
+
 export interface ProActiveInsightCompFollowup {
-  [key: string]: Record<string, FollowupComponentData>
+  [key: string]: Record<
+    string,
+    FollowupComponentData & URLFollowupComponentData
+  >
 }
 
 export interface Data {
@@ -77,4 +88,9 @@ export interface FollowupResponse {
   message: string
   technicalMessage: string
   data: Data
+}
+
+export interface RawFollowupData {
+  type: FollowupType
+  data: URLFollowupData | RawConverseData
 }

@@ -11,6 +11,7 @@ import {
 } from '@/Utils/chat-history-processor'
 import { RootState } from '..'
 import { ChatMessage, ConverseData, MessageType } from '@/Types/ChatMessage'
+import { URLFollowupData } from '@/Types/Common'
 
 export interface PinboardItem {
   id: string
@@ -23,6 +24,7 @@ interface AppState {
   processingChatMessages: boolean
   processingChatMessage: boolean
   converseMap: Record<string, ConverseData[]>
+  urlFollowupData: Record<string, URLFollowupData>
   chatMessages: ChatMessage[]
   chatHistoryLoaded: boolean
   // pinboardItems: PinboardItem[]
@@ -32,6 +34,7 @@ const initialState: AppState = {
   processingChatMessages: false,
   processingChatMessage: false,
   converseMap: {},
+  urlFollowupData: {},
   chatMessages: [],
   chatHistoryLoaded: false,
   // pinboardItems: [],
@@ -128,6 +131,13 @@ const appSlice = createSlice({
       //   isTextCard: !!payload.visualFormats.find(_ => _.type === 'Text'),
       // }
     },
+    addUrlFollowupData: (
+      state,
+      { payload }: PayloadAction<URLFollowupData>,
+    ) => {
+      const { id } = payload
+      state.urlFollowupData[id] = payload
+    },
   },
   extraReducers: builder => {
     /* Handles async action */
@@ -146,6 +156,8 @@ export const selectProcessingChatMessage = (state: RootState) =>
   state.appReducer.processingChatMessage
 export const selectConverseData = (state: RootState) =>
   state.appReducer.converseMap
+export const selectUrlFollowupData = (state: RootState) =>
+  state.appReducer.urlFollowupData
 // export const selectPinboardItems = (state: RootState) =>
 //   state.appReducer.pinboardItems
 
@@ -154,6 +166,7 @@ export const {
   addChatMessage,
   cleanupAppData,
   addConverseData,
+  addUrlFollowupData,
   // setPinboardItemLoading,
 } = appSlice.actions
 

@@ -24,6 +24,7 @@ export const insightComponentExtractor = ({
   id,
 }: InsightData): InsightComponent => ({
   id,
+  type: 'ConverseData',
   followupLoading: true,
   voiceLoading: true,
   voice: '',

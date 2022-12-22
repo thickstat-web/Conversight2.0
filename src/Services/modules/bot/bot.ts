@@ -1,7 +1,7 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
 import { atob } from 'react-native-quick-base64'
 import { ATHENA, MY_DASHBOARD, SHARED, getBotUrl } from '@/Config'
-import { ResponseType } from '@/Types/Common'
+import { ResponseType, URLFollowupData } from '@/Types/Common'
 import {
   ChatHistoryRequestData,
   ChatHistoryResponse,
@@ -25,7 +25,13 @@ import {
 } from '@/Types/PinnedItemsResponse'
 import { PinnedItemDataResponse } from '@/Types/PinnedItemDataResponse'
 import { InsightData, InsightsResponse } from '@/Types/Insights'
-import { FollowupRequest, FollowupResponse } from '@/Types/Followup'
+import {
+  FollowupRequest,
+  FollowupResponse,
+  FollowupComponentData,
+  RawFollowupData,
+  URLFollowupComponentData,
+} from '@/Types/Followup'
 import { buildOrderedColumns } from '@/Utils/common'
 
 export const getChatHistory = (build: EndpointBuilder<any, any, any>) => {
@@ -355,7 +361,7 @@ export const fetchInsightsData = (build: EndpointBuilder<any, any, any>) => {
 
 export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
   return build.mutation<
-    ResponseType<RawConverseData[]>,
+    ResponseType<RawFollowupData[]>,
     Partial<FollowupRequest>
   >({
     query: body => {
@@ -372,25 +378,33 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
         data: { proActiveInsightCompFollowup },
       } = response
 
-      let rawConverseData: RawConverseData[] = []
+      let followupData: RawFollowupData[] = []
       for (const datasetId in proActiveInsightCompFollowup) {
         const followupsByDataset = proActiveInsightCompFollowup[datasetId]
         for (const componentId in followupsByDataset) {
-          const followupData = followupsByDataset[componentId]
-          if (followupData) {
-            const {
-              columns = [],
-              column_metadata = {},
-              colType,
-              isColumnReorder = false,
-              createdAt = Date.now(),
-              val = 'W10=',
-              text = '',
-              utterance = '',
-              status = '',
-            } = followupData
+          const tmpData = followupsByDataset[componentId]
+          if (tmpData.type === 'url') {
+            const data = tmpData as URLFollowupComponentData
+            const urlFollowupData: URLFollowupData = {
+              ...data,
+              id: componentId,
+            }
+            followupData.push({ type: 'WebURL', data: urlFollowupData })
+          } else {
+            const coverseData = tmpData as FollowupComponentData
+            if (coverseData && coverseData.status !== 'failed') {
+              const {
+                columns = [],
+                column_metadata = {},
+                colType,
+                isColumnReorder = false,
+                createdAt = Date.now(),
+                val = 'W10=',
+                text = '',
+                utterance = '',
+                status = '',
+              } = coverseData
 
-            if (status !== 'failed') {
               const data = {
                 id: componentId,
                 columnMetadata: column_metadata,
@@ -407,7 +421,8 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
                 utterance,
                 status,
               }
-              rawConverseData = [...rawConverseData, data]
+              // followupData = [...followupData, { type: 'ConverseData', data }]
+              followupData.push({ type: 'ConverseData', data })
             }
           }
         }
@@ -415,7 +430,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
 
       return {
         success: code === '200' && message === 'success',
-        data: rawConverseData,
+        data: followupData,
       }
     },
   })

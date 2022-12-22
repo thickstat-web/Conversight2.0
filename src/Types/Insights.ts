@@ -1,5 +1,8 @@
+import { FollowupType } from './Common'
+
 export interface InsightComponent {
   id: string
+  type: FollowupType
   followupLoading: boolean
   voiceLoading: boolean
   voice: string

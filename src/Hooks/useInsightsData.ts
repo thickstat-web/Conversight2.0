@@ -15,7 +15,7 @@ import {
   // disableReadInsights,
   selectReadInsights,
 } from '@/Store/Auth'
-import { addConverseData } from '@/Store/App'
+import { addConverseData, addUrlFollowupData } from '@/Store/App'
 import {
   AudioTrack,
   insightComponentExtractor,
@@ -27,12 +27,14 @@ import {
 } from './helper'
 // import { generateBatches } from '@/Utils/common'
 import { processConverseData } from '@/Utils/chat-history-processor'
-import { ConverseData } from '@/Types/ChatMessage'
+import { ResponseType, URLFollowupData } from '@/Types/Common'
+import { RawFollowupData } from '@/Types/Followup'
+import { ConverseData, RawConverseData } from '@/Types/ChatMessage'
 import { InsightComponent, InsightData, InsightVoice } from '@/Types/Insights'
 
 export default function () {
   const dispatch = useAppDispatch()
-  const readInsights = useAppSelector(selectReadInsights)
+  // const readInsights = useAppSelector(selectReadInsights)
   const { data: datasetResp, isLoading: datasetLoading } = useGetDatasetsQuery()
   const [fetchInsightsData, { isLoading: insightsLoading }] =
     useFetchInsightsDataMutation()
@@ -92,19 +94,31 @@ export default function () {
     [dispatch],
   )
 
+  // Process and store the followup data
+  const processAndStoreFollowupData = useCallback(
+    (resp: ResponseType<RawFollowupData[]>): void => {
+      resp.data?.forEach(rawFollowupData => {
+        if (rawFollowupData.type === 'WebURL') {
+          const data = rawFollowupData.data as URLFollowupData
+          dispatch(addUrlFollowupData(data))
+        } else {
+          const data = rawFollowupData.data as RawConverseData
+          processConverseData(data).then(storeProcessedData)
+        }
+      })
+    },
+    [dispatch, storeProcessedData],
+  )
+
   // Bulk load followup data as multiple batches
   const fetchFollowup = useCallback(
     async (insightComponentIds: string[]) => {
       const followupRequest = makeFollowupRequest(insightComponentIds)
       fetchFollowupData(followupRequest)
         .unwrap()
-        .then(resp => {
-          resp.data?.forEach(rawFollowupData => {
-            processConverseData(rawFollowupData).then(storeProcessedData)
-          })
-        })
+        .then(processAndStoreFollowupData)
     },
-    [fetchFollowupData, storeProcessedData],
+    [fetchFollowupData, processAndStoreFollowupData],
   )
 
   const loadMore = useCallback(() => {
