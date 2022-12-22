@@ -8,6 +8,7 @@ import {
   AvatarChanged,
   CurrentAvatar,
   DataExplorerContainer,
+  WebExplorerContainer,
   ReadFAQ,
   RecoverComplete,
   RecoverEnterEmail,
@@ -38,6 +39,7 @@ import {
   WT_INSIGHTS,
   DATA_EXPLORER,
   DASHBOARD_SCREEN,
+  WEB_EXPLORER,
 } from '@/Constants/screens'
 import LoginNavigator from '@/Navigators/LoginNavigator'
 import DrawerNavigator from '@/Navigators/DrawerNavigator'
@@ -155,6 +157,23 @@ const ApplicationNavigator = () => {
                   options={{
                     headerRightContainerStyle: { paddingRight: 15 },
                     title: 'Explorer',
+                    headerTitleAlign: 'center',
+                    headerTintColor: Colors.WHITE,
+                    headerStyle: {
+                      backgroundColor: Colors.GREEN_MAIN,
+                    },
+                    headerBackImage: renderWhiteBackArrow,
+                    headerShown: true,
+                    headerBackTitleVisible: false,
+                    animationEnabled: true,
+                  }}
+                />
+                <Stack.Screen
+                  name={WEB_EXPLORER}
+                  component={WebExplorerContainer}
+                  options={{
+                    headerRightContainerStyle: { paddingRight: 15 },
+                    title: 'Web Explorer',
                     headerTitleAlign: 'center',
                     headerTintColor: Colors.WHITE,
                     headerStyle: {

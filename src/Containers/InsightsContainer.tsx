@@ -32,7 +32,7 @@ import { Colors } from '@/Theme/Variables'
 import { selectConverseData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
 import { InsightComponent, InsightData } from '@/Types/Insights'
-import { DATA_EXPLORER } from '@/Constants/screens'
+import { DATA_EXPLORER, WEB_EXPLORER } from '@/Constants/screens'
 import { navigate } from '@/Navigators/utils'
 import { debounce, properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
@@ -195,8 +195,10 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
       <View>
         <Pressable
           style={{ flex: 1, flexDirection: 'row' }}
-          onPress={() =>
-            navigate(DATA_EXPLORER, { id: data?.id, title: data?.message })
+          onPress={
+            () =>
+              navigate(DATA_EXPLORER, { id: data?.id, title: data?.message })
+            // navigate(WEB_EXPLORER, { url:'https://reactnative.dev/'})
           }
         >
           <View style={{ flex: 1 }}>
