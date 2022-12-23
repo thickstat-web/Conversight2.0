@@ -179,27 +179,32 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
 
   return (
     <View style={styles.visCard}>
-      <View>
-        <Pressable
-          style={{ flex: 1, flexDirection: 'row' }}
-          onPress={handleOpenExplorer}
-        >
-          <View style={{ flex: 1 }}>
-            <Text style={styles.cardTitle}>
-              {properCase(insightDataItem?.answer ?? '', true)}
-            </Text>
-            {timeAgo && (
-              <Text style={styles.timeAgo}>{properCase(timeAgo, true)}</Text>
-            )}
+      <Pressable
+        disabled={followupLoading ? true : false}
+        style={{ flex: 1, flexDirection: 'row' }}
+        onPress={handleOpenExplorer}
+      >
+        <View style={{ flex: 1 }}>
+          <Text style={styles.cardTitle}>
+            {properCase(insightDataItem?.answer ?? '', true)}
+          </Text>
+          {timeAgo && (
+            <Text style={styles.timeAgo}>{properCase(timeAgo, true)}</Text>
+          )}
+        </View>
+        {followupLoading ? (
+          <View style={{ position: 'absolute', right: 0 }}>
+            <LoadingSpinner size={'small'} />
           </View>
+        ) : (
           <Icon
             style={styles.icon}
             name="expand-outline"
             size={20}
             color={Colors.GREEN_DARK}
           />
-        </Pressable>
-      </View>
+        )}
+      </Pressable>
       {followupLoading ? (
         <LoadingCard />
       ) : type === 'ConverseData' && data ? (
