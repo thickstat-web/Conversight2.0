@@ -176,7 +176,7 @@ const AreaChart = ({
   return (
     <>
       <VictoryChart
-        domainPadding={30}
+        // domainPadding={30}
         height={400}
         width={screenWidth}
         containerComponent={
@@ -186,7 +186,7 @@ const AreaChart = ({
           //   zoomDimension="x"
           // />
           <VictoryZoomContainer
-            responsive={false}
+            responsive={true}
             zoomDimension="x"
             allowPan={true}
             allowZoom={true}
@@ -294,12 +294,12 @@ const LineChart = ({
   return (
     <>
       <VictoryChart
-        domainPadding={30}
+        // domainPadding={30}
         height={400}
         width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
-            responsive={false}
+            responsive={true}
             zoomDimension="x"
             allowPan={true}
             allowZoom={true}
@@ -404,12 +404,13 @@ const BarChart = ({
   return (
     <>
       <VictoryChart
-        domainPadding={30}
+        domainPadding={100}
+        domain={{ x: [0, 12] }}
         height={400}
         width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
-            responsive={false}
+            responsive={true}
             zoomDimension="x"
             allowZoom={true}
             allowPan={true}
@@ -453,9 +454,11 @@ const BarChart = ({
           x={xAxisField}
           y={yAxisField}
           data={values}
+          // barWidth={10}
+          barRatio={0.1}
+          domain={{ x: [0, 1] }}
           horizontal={horizontal}
           labels={({ datum }) => numeral(datum[yAxisField]).format('0,0.0a')}
-          barRatio={1}
           alignment="middle"
           labelComponent={
             <VictoryLabel dx={10} dy={5} angle={-90} textAnchor={'start'} />
