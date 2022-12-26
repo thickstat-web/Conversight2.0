@@ -110,6 +110,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
         <FlatList
           data={rows}
           // initialNumToRender={20}
+          contentContainerStyle={{ paddingBottom: 90 }}
           style={styles.tableWrapper}
           // contentContainerStyle={styles.tableWrapper}
           ListHeaderComponent={
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     // flex: 1,
     backgroundColor: '#fff',
     borderRadius: 8,
-    alignItems:'center',
+    alignItems: 'center',
     // borderWidth: 2,
     // borderColor: '#EAFAEA',
   },
