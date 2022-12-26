@@ -454,7 +454,6 @@ const BarChart = ({
           x={xAxisField}
           y={yAxisField}
           data={values}
-          // barWidth={10}
           barRatio={0.1}
           domain={{ x: [0, 1] }}
           horizontal={horizontal}
