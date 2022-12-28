@@ -112,7 +112,7 @@ const PieChart = ({
   return (
     <View>
       <VictoryPie
-        width={screenWidth - 44 * 2}
+        width={screenWidth}
         height={340}
         x={yAxisField}
         y={xAxisField}
@@ -124,7 +124,13 @@ const PieChart = ({
         theme={VictoryTheme.material}
         // labelComponent={<VictoryLabel angle={45} textAnchor={'end'} dx={15} />}
         labels={({ datum }) => {
-          return `${numeral((datum[xAxisField] * 100) / total).format('0')}%`
+          let value = numeral((datum[xAxisField] * 100) / total).format('0')
+          let numValue = parseInt(value)
+          if (numValue <= 4) {
+            return ''
+          }
+          value = numValue.toString()
+          return `${value}%`
         }}
         // labelPosition={'centroid'}
         // labelPlacement={'parallel'}
@@ -176,6 +182,7 @@ const AreaChart = ({
   return (
     <>
       <VictoryChart
+        domain={{ x: [0, 12] }}
         // domainPadding={30}
         height={400}
         width={screenWidth}
@@ -260,6 +267,7 @@ const AreaChart = ({
       </VictoryChart>
       {enableChartPreview && (
         <ChartPreviewer
+          domain={{ x: [0, 12] }}
           screenWidth={screenWidth}
           selectedDomain={selectedDomain}
           setZoomDomain={setZoomDomain}
@@ -296,6 +304,7 @@ const LineChart = ({
       <VictoryChart
         // domainPadding={30}
         height={400}
+        domain={{ x: [0, 12] }}
         width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
