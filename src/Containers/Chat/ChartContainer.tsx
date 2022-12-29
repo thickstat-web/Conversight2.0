@@ -21,6 +21,7 @@ import { Colors } from '@/Theme/Variables'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import { ChartType, VisualFormat } from '@/Types/ChatMessage'
 import { properCase } from '@/Utils/common'
+import { ScrollView } from 'react-native-gesture-handler'
 
 interface ChartProps {
   xAxisLabel: string
@@ -94,7 +95,7 @@ const PieChart = ({
   values,
 }: PieChartProps) => {
   const { Colors, Fonts } = useTheme()
-  const { width: screenWidth } = useWindowDimensions()
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   let total = 0.0
   let legendNames: LegendName[] = []
   values.forEach(item => {
@@ -102,50 +103,54 @@ const PieChart = ({
   })
   values.forEach(item => {
     const name = {
-      name: `${item[yAxisField]} (${numeral(
-        (item[xAxisField] * 100) / total,
-      ).format('0')}%)`,
+      name: `${item[yAxisField]} (${numeral(item[xAxisField] * 100).format(
+        '0',
+      )})`,
     }
     legendNames.push(name)
   })
 
   return (
     <View>
-      <VictoryPie
-        width={screenWidth}
-        height={340}
-        x={yAxisField}
-        y={xAxisField}
-        data={values}
-        labelRadius={({ innerRadius }) => innerRadius + 90}
-        colorScale={colorScale}
-        cornerRadius={2}
-        innerRadius={innerRadious}
-        theme={VictoryTheme.material}
-        // labelComponent={<VictoryLabel angle={45} textAnchor={'end'} dx={15} />}
-        labels={({ datum }) => {
-          let value = numeral((datum[xAxisField] * 100) / total).format('0')
-          let numValue = parseInt(value)
-          if (numValue <= 4) {
-            return ''
-          }
-          value = numValue.toString()
-          return `${value}%`
-        }}
-        // labelPosition={'centroid'}
-        // labelPlacement={'parallel'}
-        padding={{ top: 24, bottom: 12 }}
-      />
-      <VictoryLegend
-        x={32}
-        y={12}
-        width={screenWidth - 44 * 2}
-        colorScale={colorScale}
-        orientation="vertical"
-        symbolSpacer={10}
-        data={legendNames}
-        padding={{ top: 0, bottom: 0 }}
-      />
+      <ScrollView>
+        <VictoryPie
+          width={screenWidth}
+          height={screenHeight / 2}
+          x={yAxisField}
+          y={xAxisField}
+          data={values}
+          labelRadius={({ innerRadius }) => innerRadius + 90}
+          colorScale={colorScale}
+          cornerRadius={2}
+          innerRadius={innerRadious}
+          theme={VictoryTheme.material}
+          // labelComponent={<VictoryLabel angle={45} textAnchor={'end'} dx={15} />}
+          labels={({ datum }) => {
+            let value = numeral((datum[xAxisField] * 100) / total).format('0')
+            let numValue = parseInt(value)
+            if (numValue <= 4) {
+              return ''
+            }
+            value = numValue.toString()
+            return `${value}%`
+          }}
+          // labelPosition={'centroid'}
+          // labelPlacement={'parallel'}
+          padding={{ top: 24, bottom: 12 }}
+        />
+        <VictoryLegend
+          x={32}
+          y={12}
+          width={screenWidth}
+          height={screenHeight}
+          colorScale={colorScale}
+          orientation="vertical"
+          symbolSpacer={10}
+          rowGutter={{ top: 0, bottom: 10 }}
+          data={legendNames}
+          padding={{ top: 0, bottom: 0 }}
+        />
+      </ScrollView>
     </View>
   )
 }
