@@ -97,38 +97,65 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     />
   )
 
-  // const sortedRows = rows.map(item => Object.values(item))
+  const rowLength = rows.length
   const getItemLayout = (data: any, index: number) => ({
     length: ROW_HEIGHT,
     offset: ROW_HEIGHT * index,
     index,
   })
-
   return (
     <View style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <FlatList
-          data={rows}
-          // initialNumToRender={20}
-          contentContainerStyle={{ paddingBottom: 90 }}
-          style={styles.tableWrapper}
-          // contentContainerStyle={styles.tableWrapper}
-          ListHeaderComponent={
-            <Table>
-              <Row
-                data={headerList}
-                widthArr={widthArr}
-                style={styles.header}
-                // textStyle={styles.headerText}
-              />
-            </Table>
-          }
-          showsVerticalScrollIndicator={false}
-          getItemLayout={getItemLayout}
-          renderItem={renderItem}
-          listKey={id}
-        />
-      </ScrollView>
+      {rowLength >= 15 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={{ paddingBottom: 90 }}>
+            <FlatList
+              data={rows}
+              initialNumToRender={20}
+              removeClippedSubviews={true}
+              maxToRenderPerBatch={100}
+              updateCellsBatchingPeriod={50}
+              legacyImplementation={true}
+              style={styles.tableWrapper}
+              ListHeaderComponent={
+                <Table>
+                  <Row
+                    data={headerList}
+                    widthArr={widthArr}
+                    style={styles.header}
+                  />
+                </Table>
+              }
+              showsVerticalScrollIndicator={false}
+              getItemLayout={getItemLayout}
+              renderItem={renderItem}
+              listKey={id}
+            />
+          </View>
+        </ScrollView>
+      ) : (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <FlatList
+            data={rows}
+            initialNumToRender={20}
+            contentInset={{ top: 0, bottom: 20, left: 0, right: 0 }}
+            contentInsetAdjustmentBehavior="automatic"
+            style={styles.tableWrapper}
+            ListHeaderComponent={
+              <Table>
+                <Row
+                  data={headerList}
+                  widthArr={widthArr}
+                  style={styles.header}
+                />
+              </Table>
+            }
+            showsVerticalScrollIndicator={false}
+            getItemLayout={getItemLayout}
+            renderItem={renderItem}
+            listKey={id}
+          />
+        </ScrollView>
+      )}
     </View>
   )
 }

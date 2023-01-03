@@ -86,13 +86,11 @@ const AdaptiveCard = ({
 
       {totalRows > DEFAULT_ADAPTIVE_CARD_ROWS && (
         <View row paddingH-12 right style={styles.cardFooter}>
-          <View>
-            {!expanded && (
-              <Text style={styles.bottomCount}>
-                Showing {DEFAULT_ADAPTIVE_CARD_ROWS} of {totalRows} rows
-              </Text>
-            )}
-          </View>
+          {!expanded && (
+            <Text style={styles.bottomCount}>
+              Showing {DEFAULT_ADAPTIVE_CARD_ROWS} of {totalRows} rows
+            </Text>
+          )}
           {expandable && (
             <ExpandButton
               collapsedText={COLLAPSE}
