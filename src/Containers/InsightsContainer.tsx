@@ -181,7 +181,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
     <View style={styles.visCard}>
       <Pressable
         disabled={followupLoading ? true : false}
-        style={{ flex: 1, flexDirection: 'row' }}
+        style={{ flex: 1, flexDirection: 'row', padding: 4 }}
         onPress={handleOpenExplorer}
       >
         <View style={{ flex: 1 }}>
@@ -193,7 +193,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
           )}
         </View>
         {followupLoading ? (
-          <View style={{ position: 'absolute', right: 0 }}>
+          <View style={{ position: 'absolute', right: 8, top: 8 }}>
             <LoadingSpinner size={'small'} />
           </View>
         ) : (
@@ -213,7 +213,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
           enableChartPreview={false}
         />
       ) : type === 'WebURL' && data ? (
-        <View style={{ height: 200 }}>
+        <View style={{ height: 250 }}>
           <WebExplorer url={explorerUrl} loaderSize={'small'} />
         </View>
       ) : null}
@@ -453,6 +453,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   icon: {
+    padding: 4,
     paddingLeft: 8,
   },
   insightsContainer: {

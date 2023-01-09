@@ -61,7 +61,7 @@ export type TableOrAdaptiveCardProps = {
 }
 
 const Header = ({ title }: { title: string }) => (
-  <View paddingV-6 paddingH-16>
+  <View paddingV-8 paddingH-16>
     <Text style={styles.cardTitle}>{properCase(title, true)}</Text>
   </View>
 )

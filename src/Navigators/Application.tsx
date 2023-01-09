@@ -164,6 +164,7 @@ const ApplicationNavigator = () => {
                     },
                     headerBackImage: renderWhiteBackArrow,
                     headerShown: true,
+                    headerShadowVisible: false,
                     headerBackTitleVisible: false,
                     animationEnabled: true,
                   }}
