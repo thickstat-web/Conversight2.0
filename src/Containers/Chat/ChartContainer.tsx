@@ -213,7 +213,6 @@ const AreaChart = ({
             zoomDomain={zoomDomain}
             onZoomDomainChange={setSelectedDomain}
             events={{ onPressIn: () => {} }}
-            style={{}}
           />
         }
         style={{
