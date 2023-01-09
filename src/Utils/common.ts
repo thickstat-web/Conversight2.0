@@ -162,30 +162,30 @@ export const formatValue = (
   return data
 }
 
+export const dataFormatter = (
+  value: any,
+  metadata: { [key: string]: any },
+  formatter?: (value: string, isNumeric: boolean) => string | JSX.Element,
+) => {
+  let displayValue = `${value}`
+  let isNumeric = false
+  if (metadata?.isNumericFormat || metadata.category === 'date') {
+    isNumeric = true
+    const { prefix, roundedValue: text, suffix } = formatValue(value, metadata)
+    displayValue = `${prefix}${text} ${suffix}`.trim()
+  }
+  return formatter ? formatter(displayValue, isNumeric) : displayValue
+}
+
 export const getFormattedRowData = (
   columns: string[],
   columnMetadata: ColumnMetadata,
   row: Record<string, any>,
   formatter?: (value: string, isNumeric: boolean) => string | JSX.Element,
 ) => {
-  const dataFormatter = (column: string) => {
-    const value = row[column]
-    let displayValue = `${value}`
-    let isNumeric = false
-    let metadata = columnMetadata[column]
-    if (metadata?.isNumericFormat || metadata.category === 'date') {
-      //  console.log('the metadata values are ' + JSON.stringify(metadata))
-      isNumeric = true
-      const {
-        prefix,
-        roundedValue: text,
-        suffix,
-      } = formatValue(value, metadata)
-      displayValue = `${prefix}${text} ${suffix}`.trim()
-    }
-    return formatter ? formatter(displayValue, isNumeric) : displayValue
-  }
-  return columns.map(dataFormatter)
+  return columns.map(column =>
+    dataFormatter(row[column], columnMetadata[column], formatter),
+  )
 }
 
 type Extractor<T, P> = (item: T) => P

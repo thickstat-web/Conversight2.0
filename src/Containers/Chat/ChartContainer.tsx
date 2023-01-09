@@ -20,14 +20,16 @@ import { useTheme } from '@/Hooks'
 import { Colors } from '@/Theme/Variables'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import { ChartType, VisualFormat } from '@/Types/ChatMessage'
-import { properCase } from '@/Utils/common'
+import { dataFormatter, properCase } from '@/Utils/common'
+import { ScrollView } from 'react-native-gesture-handler'
 
 interface ChartProps {
   xAxisLabel: string
   yAxisLabel: string
   xAxisField: string
   yAxisField: string
-  values: Array<Record<string, number>>
+  columnMetadata: ColumnMetadata
+  values: Array<Record<string, any>>
   enableChartPreview: boolean
 }
 
@@ -87,6 +89,18 @@ const colorScale = [
   '#014E40',
 ]
 
+const getxAxisLabelHeight = (
+  values: Array<Record<string, any>>,
+  xAxisField: string,
+): number => {
+  let maxXLabelLength = 0
+  values.forEach(item => {
+    const fieldLen = item[xAxisField].length
+    maxXLabelLength = Math.max(isNaN(fieldLen) ? 10 : fieldLen, maxXLabelLength)
+  })
+  return maxXLabelLength * 7
+}
+
 const PieChart = ({
   xAxisField,
   yAxisField,
@@ -94,7 +108,7 @@ const PieChart = ({
   values,
 }: PieChartProps) => {
   const { Colors, Fonts } = useTheme()
-  const { width: screenWidth } = useWindowDimensions()
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions()
   let total = 0.0
   let legendNames: LegendName[] = []
   values.forEach(item => {
@@ -102,50 +116,51 @@ const PieChart = ({
   })
   values.forEach(item => {
     const name = {
-      name: `${item[yAxisField]} (${numeral(
-        (item[xAxisField] * 100) / total,
-      ).format('0')}%)`,
+      name: `${item[yAxisField]} (${numeral(item[xAxisField]).format(
+        '0,0.00',
+      )})`,
     }
     legendNames.push(name)
   })
 
   return (
     <View>
-      <VictoryPie
-        width={screenWidth}
-        height={340}
-        x={yAxisField}
-        y={xAxisField}
-        data={values}
-        labelRadius={({ innerRadius }) => innerRadius + 90}
-        colorScale={colorScale}
-        cornerRadius={2}
-        innerRadius={innerRadious}
-        theme={VictoryTheme.material}
-        // labelComponent={<VictoryLabel angle={45} textAnchor={'end'} dx={15} />}
-        labels={({ datum }) => {
-          let value = numeral((datum[xAxisField] * 100) / total).format('0')
-          let numValue = parseInt(value)
-          if (numValue <= 4) {
-            return ''
-          }
-          value = numValue.toString()
-          return `${value}%`
-        }}
-        // labelPosition={'centroid'}
-        // labelPlacement={'parallel'}
-        padding={{ top: 24, bottom: 12 }}
-      />
-      <VictoryLegend
-        x={32}
-        y={12}
-        width={screenWidth - 44 * 2}
-        colorScale={colorScale}
-        orientation="vertical"
-        symbolSpacer={10}
-        data={legendNames}
-        padding={{ top: 0, bottom: 0 }}
-      />
+      <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
+        <VictoryPie
+          width={screenWidth * 0.9}
+          height={screenHeight / 3}
+          x={yAxisField}
+          y={xAxisField}
+          data={values}
+          labelRadius={({ innerRadius }) => innerRadius + 90}
+          colorScale={colorScale}
+          cornerRadius={2}
+          innerRadius={innerRadious}
+          theme={VictoryTheme.material}
+          labels={({ datum }) => {
+            let value = numeral((datum[xAxisField] * 100) / total).format('0')
+            let numValue = parseInt(value)
+            if (numValue <= 4) {
+              return ''
+            }
+            value = numValue.toString()
+            return `${value}%`
+          }}
+          padding={{ top: 0, right: 50 }}
+        />
+        <VictoryLegend
+          x={32}
+          y={12}
+          width={screenWidth}
+          height={values.length * 30}
+          colorScale={colorScale}
+          orientation="vertical"
+          symbolSpacer={10}
+          rowGutter={{ top: 0, bottom: 10 }}
+          data={legendNames}
+          padding={{ top: 0, bottom: 0 }}
+        />
+      </ScrollView>
     </View>
   )
 }
@@ -166,6 +181,7 @@ const AreaChart = ({
   yAxisField,
   xAxisLabel,
   yAxisLabel,
+  columnMetadata,
   values,
   enableChartPreview,
 }: ChartProps) => {
@@ -179,19 +195,16 @@ const AreaChart = ({
     y: [any, any]
   }>()
   const xValues = values.map(item => item[xAxisLabel])
+  const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
+
   return (
     <>
       <VictoryChart
         domain={{ x: [0, 12] }}
-        // domainPadding={30}
-        height={400}
+        domainPadding={30}
+        height={400 + dynamicHeight}
         width={screenWidth}
         containerComponent={
-          // <VictoryZoomContainer
-          //   responsive={false}
-          //   height={380}
-          //   zoomDimension="x"
-          // />
           <VictoryZoomContainer
             responsive={true}
             zoomDimension="x"
@@ -200,40 +213,20 @@ const AreaChart = ({
             zoomDomain={zoomDomain}
             onZoomDomainChange={setSelectedDomain}
             events={{ onPressIn: () => {} }}
-            style={
-              {
-                // border: '4px solid #00ff00',
-                // backgroundColor: 'orange',
-                // padding: 0,
-                // margin: 0,
-                // borderWidth: 1,
-                // borderColor: 'red',
-              }
-            }
           />
         }
         style={{
           parent: {
             maxWidth: '100%',
             maxHeight: '100%',
-            // alignItems: 'center',
-            // border: '4px solid #00ff00',
-            // backgroundColor: 'orange',
-            // padding: 0,
-            // margin: 0,
-            // borderWidth: 4,
-            // borderColor: 'red',
           },
-          // background: {
-          //   fill: 'pink',
-          // },
         }}
-        padding={{ left: 70, top: 10, bottom: 150, right: 10 }}
+        padding={{ left: 70, top: 10, bottom: 80 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis
           axisLabelComponent={<VictoryLabel />}
           label={xAxisLabel}
-          tickFormat={x => `${x}`}
+          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
           tickLabelComponent={
             <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
           }
@@ -250,9 +243,8 @@ const AreaChart = ({
           padding={{ left: 40 }}
           tickFormat={x => numeral(x).format('0a')}
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 45 },
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 50 },
             ticks: { size: 4 },
-            // tickLabels: { angle: -60, alignItems: 'baseline' },
           }}
         />
         <VictoryArea
@@ -287,6 +279,7 @@ const LineChart = ({
   yAxisField,
   xAxisLabel,
   yAxisLabel,
+  columnMetadata,
   values,
   enableChartPreview,
 }: ChartProps) => {
@@ -295,15 +288,13 @@ const LineChart = ({
   const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
   const xValues = values.map(item => item[xAxisLabel])
 
-  // console.log(
-  //   `[LineChart] values: ${JSON.stringify(values.slice(0, 20), null, 2)}`,
-  // )
-  // console.log('--------------------\n\n')
+  const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
+
   return (
     <>
       <VictoryChart
-        // domainPadding={30}
-        height={400}
+        domainPadding={30}
+        height={400 + dynamicHeight}
         domain={{ x: [0, 12] }}
         width={screenWidth}
         containerComponent={
@@ -322,48 +313,32 @@ const LineChart = ({
           parent: {
             maxWidth: '100%',
             maxHeight: '100%',
-            // alignItems: 'center',
-            // border: '4px solid #00ff00',
-            // backgroundColor: 'orange',
-            // padding: 0,
-            // margin: 0,
-            // borderWidth: 4,
-            // borderColor: 'red',
           },
-          // background: {
-          //   fill: 'pink',
-          // },
         }}
-        padding={{ left: 70, top: 10, bottom: 150, right: 10 }}
+        padding={{ left: 70, top: 10, bottom: 80 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis
           label={xAxisLabel}
-          tickFormat={x => `${x}`}
+          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
           tickLabelComponent={
             <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
           }
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 120 },
+            axisLabel: {
+              fill: Colors.GREEN_DARK,
+              fontSize: 16,
+              padding: 30 + dynamicHeight,
+            },
             ticks: { size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
-          // tickFormat={x => {
-          //   let label = x
-          //   for (let name of months) {
-          //     const monthRegex = new RegExp(name, 'i')
-          //     if (monthRegex.test(x)) {
-          //       label = x.replace(monthRegex, name.slice(0, 3).toUpperCase())
-          //     }
-          //   }
-          //   return label.split(' ')
-          // }}
         />
         <VictoryAxis
           dependentAxis
           label={yAxisLabel}
           padding={{ left: 40 }}
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 50 },
             ticks: { size: 4 },
             // tickLabels: { angle: -60, alignItems: 'baseline' },
           }}
@@ -373,9 +348,6 @@ const LineChart = ({
           x={xAxisField}
           y={yAxisField}
           data={values}
-          // labels={({ datum }) => {
-          //   return datum.x
-          // }}
           style={{
             data: { stroke: '#00AA39', strokeWidth: 1, fill: 'transparent' },
           }}
@@ -402,6 +374,7 @@ const BarChart = ({
   yAxisField,
   xAxisLabel,
   yAxisLabel,
+  columnMetadata,
   values,
   horizontal = false,
   enableChartPreview,
@@ -410,12 +383,14 @@ const BarChart = ({
   const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
   const { width: screenWidth } = useWindowDimensions()
   const xValues = values.map(item => item[xAxisLabel])
+  const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
+
   return (
     <>
       <VictoryChart
         domainPadding={100}
         domain={{ x: [0, 12] }}
-        height={400}
+        height={400 + dynamicHeight}
         width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
@@ -428,12 +403,11 @@ const BarChart = ({
           />
         }
         style={{ parent: { maxWidth: '100%', maxHeight: '100%' } }}
-        padding={{ left: 70, top: 10, bottom: 150, right: 10 }}
+        padding={{ left: 70, top: 10, bottom: 80 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel />}
           label={xAxisLabel}
-          // axisLabelComponent={<VictoryLabel dy={-260} angle={0} />}
           tickLabelComponent={
             <VictoryLabel dx={8} dy={-8} angle={-60} textAnchor={'end'} />
           }
@@ -446,13 +420,12 @@ const BarChart = ({
             ticks: { size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
-          tickFormat={x => `${x}`}
+          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
         />
         <VictoryAxis // Y Axis Conatiner
           axisLabelComponent={<VictoryLabel />}
           dependentAxis
           label={yAxisLabel}
-          // axisLabelComponent={<VictoryLabel dy={-2} />}
           padding={{ left: 40 }}
           tickFormat={x => numeral(x).format('0.0a')}
           style={{
@@ -472,7 +445,6 @@ const BarChart = ({
             <VictoryLabel dx={10} dy={5} angle={-90} textAnchor={'start'} />
           }
           style={{
-            // labels: { fill: '#ffff00' },
             data: {
               fill: '#27DC61',
               stroke: 'black',
@@ -517,7 +489,6 @@ const chartMap = {
 
 const ChartContainer = ({
   preferredChart = null,
-  // columns,
   columnMetadata,
   visualFormats,
   values,
@@ -565,6 +536,7 @@ const ChartContainer = ({
         yAxisField={chartFormat?.yField}
         xAxisLabel={xAxisLabel}
         yAxisLabel={yAxisLabel}
+        columnMetadata={columnMetadata}
         values={values}
         enableChartPreview={enableChartPreview}
         horizontal={false}
@@ -581,6 +553,7 @@ const ChartContainer = ({
         xAxisField={chartFormat?.angleField}
         yAxisField={chartFormat?.colorField}
         xAxisLabel={xAxisLabel}
+        columnMetadata={columnMetadata}
         yAxisLabel={yAxisLabel}
         values={values}
       />
@@ -640,20 +613,14 @@ function ChartPreviewer({
           />
         }
       >
-        <VictoryAxis />
-        {/* <VictoryAxis /> */}
-        <VictoryAxis
-          axisLabelComponent={<VictoryLabel />}
-          tickFormat={_ => ``}
-        />
+        <VictoryAxis tickFormat={_ => ``} />
         <VictoryLine
+          interpolation="natural"
           style={{
             data: {
               stroke: Colors.GREEN_LIGHT,
             },
           }}
-          // labelComponent={<VictoryLabel angle={45} />}
-          // x={xAxisField}
           y={yAxisField}
           data={values}
         />
