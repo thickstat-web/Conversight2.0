@@ -105,57 +105,30 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   })
   return (
     <View style={styles.container}>
-      {rowLength >= 15 ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ paddingBottom: 90 }}>
-            <FlatList
-              data={rows}
-              initialNumToRender={20}
-              removeClippedSubviews={true}
-              maxToRenderPerBatch={100}
-              updateCellsBatchingPeriod={50}
-              legacyImplementation={true}
-              style={styles.tableWrapper}
-              ListHeaderComponent={
-                <Table>
-                  <Row
-                    data={headerList}
-                    widthArr={widthArr}
-                    style={styles.header}
-                  />
-                </Table>
-              }
-              showsVerticalScrollIndicator={false}
-              getItemLayout={getItemLayout}
-              renderItem={renderItem}
-              listKey={id}
-            />
-          </View>
-        </ScrollView>
-      ) : (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <FlatList
-            data={rows}
-            initialNumToRender={20}
-            contentInset={{ top: 0, bottom: 20, left: 0, right: 0 }}
-            contentInsetAdjustmentBehavior="automatic"
-            style={styles.tableWrapper}
-            ListHeaderComponent={
-              <Table>
-                <Row
-                  data={headerList}
-                  widthArr={widthArr}
-                  style={styles.header}
-                />
-              </Table>
-            }
-            showsVerticalScrollIndicator={false}
-            getItemLayout={getItemLayout}
-            renderItem={renderItem}
-            listKey={id}
-          />
-        </ScrollView>
-      )}
+      <View style={{ paddingBottom: rowLength >= 15 ? 90 : 0 }}>
+        <FlatList
+          data={rows}
+          initialNumToRender={20}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={100}
+          updateCellsBatchingPeriod={50}
+          legacyImplementation={true}
+          style={styles.tableWrapper}
+          ListHeaderComponent={
+            <Table>
+              <Row
+                data={headerList}
+                widthArr={widthArr}
+                style={styles.header}
+              />
+            </Table>
+          }
+          showsVerticalScrollIndicator={false}
+          getItemLayout={getItemLayout}
+          renderItem={renderItem}
+          listKey={id}
+        />
+      </View>
     </View>
   )
 }

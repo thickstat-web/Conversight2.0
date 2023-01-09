@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { StyleSheet, useWindowDimensions } from 'react-native'
+import { Platform, StyleSheet, useWindowDimensions } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
 import {
   VictoryArea,
@@ -89,6 +89,8 @@ const colorScale = [
   '#014E40',
 ]
 
+const isIOS = Platform.OS === 'ios'
+
 const getxAxisLabelHeight = (
   values: Array<Record<string, any>>,
   xAxisField: string,
@@ -96,9 +98,9 @@ const getxAxisLabelHeight = (
   let maxXLabelLength = 0
   values.forEach(item => {
     const fieldLen = item[xAxisField].length
-    maxXLabelLength = Math.max(isNaN(fieldLen) ? 10 : fieldLen, maxXLabelLength)
+    maxXLabelLength = Math.max(isNaN(fieldLen) ? 1 : fieldLen, maxXLabelLength)
   })
-  return maxXLabelLength * 7
+  return maxXLabelLength * (isIOS ? 5.8 : 7)
 }
 
 const PieChart = ({
@@ -124,44 +126,42 @@ const PieChart = ({
   })
 
   return (
-    <View>
-      <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
-        <VictoryPie
-          width={screenWidth * 0.9}
-          height={screenHeight / 3}
-          x={yAxisField}
-          y={xAxisField}
-          data={values}
-          labelRadius={({ innerRadius }) => innerRadius + 90}
-          colorScale={colorScale}
-          cornerRadius={2}
-          innerRadius={innerRadious}
-          theme={VictoryTheme.material}
-          labels={({ datum }) => {
-            let value = numeral((datum[xAxisField] * 100) / total).format('0')
-            let numValue = parseInt(value)
-            if (numValue <= 4) {
-              return ''
-            }
-            value = numValue.toString()
-            return `${value}%`
-          }}
-          padding={{ top: 0, right: 50 }}
-        />
-        <VictoryLegend
-          x={32}
-          y={12}
-          width={screenWidth}
-          height={values.length * 30}
-          colorScale={colorScale}
-          orientation="vertical"
-          symbolSpacer={10}
-          rowGutter={{ top: 0, bottom: 10 }}
-          data={legendNames}
-          padding={{ top: 0, bottom: 0 }}
-        />
-      </ScrollView>
-    </View>
+    <ScrollView>
+      <VictoryPie
+        // width={screenWidth * 0.7}
+        height={screenHeight / 3}
+        x={yAxisField}
+        y={xAxisField}
+        data={values}
+        labelRadius={90}
+        colorScale={colorScale}
+        cornerRadius={2}
+        innerRadius={innerRadious}
+        theme={VictoryTheme.material}
+        labels={({ datum }) => {
+          let value = numeral((datum[xAxisField] * 100) / total).format('0')
+          let numValue = parseInt(value)
+          if (numValue <= 4) {
+            return ''
+          }
+          value = numValue.toString()
+          return `${value}%`
+        }}
+        padding={{ top: 0, right: 0, bottom: 10, left: 0 }}
+      />
+      <VictoryLegend
+        x={32}
+        // y={12}
+        width={screenWidth}
+        // height={values.length * 30}
+        colorScale={colorScale}
+        orientation="vertical"
+        symbolSpacer={10}
+        // rowGutter={{ top: 0, bottom: 10 }}
+        data={legendNames}
+        // padding={{ top: 20, bottom: 0 }}
+      />
+    </ScrollView>
   )
 }
 
@@ -171,7 +171,7 @@ const DonutChart = ({ xAxisField, yAxisField, values }: ChartProps) => {
       xAxisField={xAxisField}
       yAxisField={yAxisField}
       values={values}
-      innerRadious={64}
+      innerRadious={60}
     />
   )
 }
@@ -202,7 +202,7 @@ const AreaChart = ({
       <VictoryChart
         domain={{ x: [0, 12] }}
         domainPadding={30}
-        height={400 + dynamicHeight}
+        height={380 + dynamicHeight}
         width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
@@ -221,17 +221,17 @@ const AreaChart = ({
             maxHeight: '100%',
           },
         }}
-        padding={{ left: 70, top: 10, bottom: 80 + dynamicHeight, right: 10 }}
+        padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis
-          axisLabelComponent={<VictoryLabel />}
           label={xAxisLabel}
+          axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
           tickLabelComponent={
             <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
           }
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 120 },
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16 },
             ticks: { size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
@@ -294,7 +294,7 @@ const LineChart = ({
     <>
       <VictoryChart
         domainPadding={30}
-        height={400 + dynamicHeight}
+        height={380 + dynamicHeight}
         domain={{ x: [0, 12] }}
         width={screenWidth}
         containerComponent={
@@ -315,11 +315,12 @@ const LineChart = ({
             maxHeight: '100%',
           },
         }}
-        padding={{ left: 70, top: 10, bottom: 80 + dynamicHeight, right: 10 }}
+        padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis
           label={xAxisLabel}
           tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
+          axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           tickLabelComponent={
             <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
           }
@@ -327,7 +328,6 @@ const LineChart = ({
             axisLabel: {
               fill: Colors.GREEN_DARK,
               fontSize: 16,
-              padding: 30 + dynamicHeight,
             },
             ticks: { size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
@@ -390,7 +390,7 @@ const BarChart = ({
       <VictoryChart
         domainPadding={100}
         domain={{ x: [0, 12] }}
-        height={400 + dynamicHeight}
+        height={380 + dynamicHeight}
         width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
@@ -403,10 +403,10 @@ const BarChart = ({
           />
         }
         style={{ parent: { maxWidth: '100%', maxHeight: '100%' } }}
-        padding={{ left: 70, top: 10, bottom: 80 + dynamicHeight, right: 10 }}
+        padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis // X Axis Container
-          axisLabelComponent={<VictoryLabel />}
+          axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           label={xAxisLabel}
           tickLabelComponent={
             <VictoryLabel dx={8} dy={-8} angle={-60} textAnchor={'end'} />
@@ -414,7 +414,6 @@ const BarChart = ({
           style={{
             axisLabel: {
               fontSize: 16,
-              padding: 120,
               fill: Colors.GREEN_DARK,
             },
             ticks: { size: 4 },
@@ -427,7 +426,7 @@ const BarChart = ({
           dependentAxis
           label={yAxisLabel}
           padding={{ left: 40 }}
-          tickFormat={x => numeral(x).format('0.0a')}
+          tickFormat={x => numeral(x).format('0a')}
           style={{
             axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
           }}
@@ -579,9 +578,13 @@ function ChartPreviewer({
 }: any) {
   const { width: screenWidth } = useWindowDimensions()
   return (
-    <View>
+    <View marginT-12>
       <Text
-        style={{ marginLeft: 24, paddingBottom: 20, color: Colors.GREEN_DARK }}
+        style={{
+          marginLeft: 26,
+          paddingBottom: 10,
+          color: Colors.GREEN_DARK,
+        }}
       >
         Drag to view specific details
       </Text>

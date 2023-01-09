@@ -174,6 +174,7 @@ const TableOrAdaptiveCard = memo(
           <ScrollView
             showsVerticalScrollIndicator={false}
             nestedScrollEnabled={true}
+            horizontal={true}
             contentContainerStyle={styles.contentContainer}
             // style={{ width: screenWidth }}
           >
