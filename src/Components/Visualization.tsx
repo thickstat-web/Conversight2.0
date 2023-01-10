@@ -7,6 +7,7 @@ import ChartContainer from '@/Containers/Chat/ChartContainer'
 import TableContainer from '@/Containers/Chat/TableContainer'
 import { ChartType, ConverseData, TextData } from '@/Types/ChatMessage'
 import { Colors } from '@/Theme/Variables'
+import { ScrollView } from 'react-native-gesture-handler'
 
 export const InsightsTextContainer = ({ data }: { data: TextData }) => {
   const { Fonts } = useTheme()
@@ -199,7 +200,11 @@ export class InsightsVisualizer extends Visualizer {
       const renderSize = 5
       const total = values.length
       content = (
-        <>
+        <ScrollView
+          horizontal={true}
+          contentContainerStyle={{ flexDirection: 'column' }}
+          showsHorizontalScrollIndicator={false}
+        >
           <TableContainer
             id={id}
             columns={columns}
@@ -213,7 +218,7 @@ export class InsightsVisualizer extends Visualizer {
               </Text>
             </View>
           )}
-        </>
+        </ScrollView>
       )
     }
     return content
@@ -267,7 +272,7 @@ export class ChatVisualizer extends Visualizer {
       const renderSize = 5
       const total = values.length
       content = (
-        <>
+        <ScrollView horizontal={true}>
           <TableContainer
             id={id}
             columns={columns}
@@ -281,7 +286,7 @@ export class ChatVisualizer extends Visualizer {
               </Text>
             </View>
           )}
-        </>
+        </ScrollView>
       )
     }
     return content
