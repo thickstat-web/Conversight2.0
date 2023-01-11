@@ -157,8 +157,10 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
   let timeAgo: string | null = null
   let title: string = ''
   let explorerUrl: string = ''
+  let isDataEmpty: boolean = false
   if (type === 'ConverseData' && converseData[id]) {
     data = converseData[id][0] as ConverseData
+    isDataEmpty = data?.visualFormats.length === 0 || data.values.length === 0
     timeAgo = calculateTimeAgo(data?.createdAt)
     title = data?.message
   } else if (type === 'WebURL' && urlFollowupData[id]) {
@@ -182,7 +184,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
       <Pressable
         disabled={followupLoading ? true : false}
         style={{ flex: 1, flexDirection: 'row', padding: 4 }}
-        onPress={handleOpenExplorer}
+        onPress={isDataEmpty ? null : handleOpenExplorer} // at 187
       >
         <View style={{ flex: 1 }}>
           <Text style={styles.cardTitle}>
@@ -197,12 +199,14 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
             <LoadingSpinner size={'small'} />
           </View>
         ) : (
-          <Icon
-            style={styles.icon}
-            name="expand-outline"
-            size={20}
-            color={Colors.GREEN_DARK}
-          />
+          !isDataEmpty && (
+            <Icon
+              style={styles.icon}
+              name="expand-outline"
+              size={20}
+              color={Colors.GREEN_DARK}
+            />
+          )
         )}
       </Pressable>
       {followupLoading ? (
