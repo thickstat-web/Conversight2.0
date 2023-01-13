@@ -200,17 +200,19 @@ export class InsightsVisualizer extends Visualizer {
       const renderSize = 5
       const total = values.length
       content = (
-        <ScrollView
-          horizontal={true}
-          contentContainerStyle={{ flexDirection: 'column' }}
-          showsHorizontalScrollIndicator={false}
-        >
-          <TableContainer
-            id={id}
-            columns={columns}
-            columnMetadata={columnMetadata}
-            values={values.slice(0, renderSize)}
-          />
+        <>
+          <ScrollView
+            horizontal={true}
+            contentContainerStyle={{ flexDirection: 'column' }}
+            showsHorizontalScrollIndicator={false}
+          >
+            <TableContainer
+              id={id}
+              columns={columns}
+              columnMetadata={columnMetadata}
+              values={values.slice(0, renderSize)}
+            />
+          </ScrollView>
           {total > renderSize && (
             <View style={styles.bottomCountWrapper}>
               <Text style={styles.bottomCount}>
@@ -218,7 +220,7 @@ export class InsightsVisualizer extends Visualizer {
               </Text>
             </View>
           )}
-        </ScrollView>
+        </>
       )
     }
     return content
@@ -272,13 +274,15 @@ export class ChatVisualizer extends Visualizer {
       const renderSize = 5
       const total = values.length
       content = (
-        <ScrollView horizontal={true}>
-          <TableContainer
-            id={id}
-            columns={columns}
-            columnMetadata={columnMetadata}
-            values={values.slice(0, renderSize)}
-          />
+        <>
+          <ScrollView horizontal={true}>
+            <TableContainer
+              id={id}
+              columns={columns}
+              columnMetadata={columnMetadata}
+              values={values.slice(0, renderSize)}
+            />
+          </ScrollView>
           {total > renderSize && (
             <View style={styles.bottomCountWrapper}>
               <Text style={styles.bottomCount}>
@@ -286,7 +290,7 @@ export class ChatVisualizer extends Visualizer {
               </Text>
             </View>
           )}
-        </ScrollView>
+        </>
       )
     }
     return content
