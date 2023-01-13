@@ -218,37 +218,43 @@ const AreaChart = ({
         height={340 + dynamicHeight}
         containerComponent={
           <VictoryZoomContainer
-            width={screenWidth * 0.95}
+            // width={screenWidth * 0.95}
             responsive={true}
             zoomDimension="x"
             allowPan={true}
             allowZoom={true}
             zoomDomain={zoomDomain}
             onZoomDomainChange={setSelectedDomain}
-            events={{ onPressIn: () => {} }}
           />
         }
-        padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
+        padding={{ left: 48, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
       >
-        <VictoryAxis
-          label={xAxisLabel}
+        <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
-          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
+          label={xAxisLabel}
           tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16 },
-            ticks: { size: 4 },
+            axisLabel: {
+              fill: Colors.GREEN_DARK,
+              fontWeight: 'bold',
+            },
+            ticks: { stroke: 'grey', size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
+          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
         />
         <VictoryAxis // Y Axis Conatiner
-          axisLabelComponent={<VictoryLabel dy={8} />}
           dependentAxis
+          axisLabelComponent={<VictoryLabel dy={-8} />}
           label={yAxisLabel}
           tickFormat={x => numeral(x).format('0a')}
-          tickLabelComponent={<VictoryLabel dx={6} textAnchor={'end'} />}
+          tickLabelComponent={<VictoryLabel dx={8} textAnchor={'end'} />}
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
+            axisLabel: {
+              fill: Colors.GREEN_DARK,
+              fontWeight: 'bold',
+            },
+            ticks: { stroke: 'grey', size: 4 },
           }}
         />
         <VictoryArea
@@ -324,35 +330,38 @@ const LineChart = ({
             allowPan={true}
             allowZoom={true}
             zoomDomain={zoomDomain}
+            // width={screenWidth * 0.95}
             onZoomDomainChange={setSelectedDomain}
-            width={screenWidth * 0.95}
-            events={{ onPressIn: () => {} }}
           />
         }
-        padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
+        padding={{ left: 48, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
       >
-        <VictoryAxis
-          label={xAxisLabel}
-          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
+        <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
+          label={xAxisLabel}
           tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
           style={{
             axisLabel: {
               fill: Colors.GREEN_DARK,
-              fontSize: 16,
+              fontWeight: 'bold',
             },
-            ticks: { size: 4 },
+            ticks: { stroke: 'grey', size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
+          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
         />
         <VictoryAxis // Y Axis Conatiner
-          axisLabelComponent={<VictoryLabel dy={8} />}
           dependentAxis
+          axisLabelComponent={<VictoryLabel dy={-8} />}
           label={yAxisLabel}
           tickFormat={x => numeral(x).format('0a')}
-          tickLabelComponent={<VictoryLabel dx={6} textAnchor={'end'} />}
+          tickLabelComponent={<VictoryLabel dx={8} textAnchor={'end'} />}
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
+            axisLabel: {
+              fill: Colors.GREEN_DARK,
+              fontWeight: 'bold',
+            },
+            ticks: { stroke: 'grey', size: 4 },
           }}
         />
         <VictoryLine
@@ -416,7 +425,7 @@ const BarChart = ({
         domain={XDOMAIN}
         domainPadding={{ y: 40 }}
         height={340 + dynamicHeight}
-        width={screenWidth}
+        // width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
             responsive={true}
@@ -427,7 +436,8 @@ const BarChart = ({
             onZoomDomainChange={setSelectedDomain}
           />
         }
-        padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
+        padding={{ left: 48, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
+        // style={{ parent: { backgroundColor: 'yellow' } }}
       >
         <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
@@ -435,22 +445,26 @@ const BarChart = ({
           tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
           style={{
             axisLabel: {
-              fontSize: 16,
               fill: Colors.GREEN_DARK,
+              fontWeight: 'bold',
             },
-            ticks: { size: 4 },
+            ticks: { stroke: 'grey', size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
           tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
         />
         <VictoryAxis // Y Axis Conatiner
-          axisLabelComponent={<VictoryLabel dy={8} />}
           dependentAxis
+          axisLabelComponent={<VictoryLabel dy={-8} />}
           label={yAxisLabel}
           tickFormat={x => numeral(x).format('0a')}
-          tickLabelComponent={<VictoryLabel dx={6} textAnchor={'end'} />}
+          tickLabelComponent={<VictoryLabel dx={8} textAnchor={'end'} />}
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
+            axisLabel: {
+              fill: Colors.GREEN_DARK,
+              fontWeight: 'bold',
+            },
+            ticks: { stroke: 'grey', size: 4 },
           }}
         />
         <VictoryBar
@@ -590,10 +604,6 @@ const ChartContainer = ({
 function ChartPreviewer({
   selectedDomain,
   setZoomDomain,
-  xValues,
-  x,
-  xAxisLabel,
-  xAxisField,
   yAxisField,
   values,
 }: any) {

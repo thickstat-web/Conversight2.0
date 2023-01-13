@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { FlatList, Platform, StyleSheet } from 'react-native'
+import { FlatList, Platform, Pressable, StyleSheet } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { useTheme, useAppSelector, usePinboardData } from '@/Hooks'
@@ -39,23 +39,20 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
 
   isDataEmpty = data?.visualFormats.length === 0 || data.values.length === 0
 
+  const handleOpenDataExplorer = () => {
+    if (Platform.OS === 'android' || !move) {
+      navigate(DATA_EXPLORER, { id: data.id, title })
+    }
+  }
+
   return (
-    <View
-      flex
+    <Pressable
       style={[styles.visCard, isTextCard && { height: CARD_HEIGHT }]}
-      onTouchStart={isDataEmpty ? null : () => setMove(false)}
-      onTouchMove={isDataEmpty ? null : () => setMove(true)}
-      onTouchEnd={
-        isDataEmpty
-          ? null
-          : () => {
-              if (Platform.OS === 'android' || !move) {
-                navigate(DATA_EXPLORER, { id: data.id, title })
-              }
-            }
-      }
+      onPress={isDataEmpty ? null : handleOpenDataExplorer}
+      // onTouchStart={isDataEmpty ? null : () => setMove(false)}
+      // onTouchMove={isDataEmpty ? null : () => setMove(true)}
+      // onTouchEnd={isDataEmpty ? null : handleOpenDataExplorer}
     >
-      <DashboardVisualizer data={componentData} enableChartPreview={false} />
       {!isDataEmpty && (
         <Icon
           style={styles.expandIcon}
@@ -64,7 +61,8 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
           color={Colors.GREEN_DARK}
         />
       )}
-    </View>
+      <DashboardVisualizer data={componentData} enableChartPreview={false} />
+    </Pressable>
   )
 })
 
@@ -79,7 +77,8 @@ const PinboardComponents = React.memo(
       chartAndTableCards.map((item: PinboardItem) => <Card item={item} />)
     return (
       <FlatList
-        style={{ padding: 6 }}
+        style={{ paddingVertical: 6 }}
+        contentContainerStyle={{ paddingBottom: 48 }}
         numColumns={2}
         columnWrapperStyle={styles.row}
         data={textCards}
@@ -125,9 +124,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   visCard: {
-    margin: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    flex: 1,
+    marginVertical: 4,
+    // paddingHorizontal: 8,
+    paddingVertical: 10,
     borderRadius: 6,
     backgroundColor: Colors.WHITE,
   },

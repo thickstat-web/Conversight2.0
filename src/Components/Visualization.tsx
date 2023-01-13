@@ -187,20 +187,22 @@ export class InsightsVisualizer extends Visualizer {
       )
     } else if (this.isAdaptiveCard()) {
       content = (
-        <AdaptiveCard
-          id={id}
-          columns={columns}
-          columnMetadata={columnMetadata}
-          row={values[0]}
-          expandable={false}
-          expandAll={false}
-        />
+        <View marginH-6>
+          <AdaptiveCard
+            id={id}
+            columns={columns}
+            columnMetadata={columnMetadata}
+            row={values[0]}
+            expandable={false}
+            expandAll={false}
+          />
+        </View>
       )
     } else if (this.isTable()) {
       const renderSize = 5
       const total = values.length
       content = (
-        <>
+        <View marginH-6>
           <ScrollView
             horizontal={true}
             contentContainerStyle={{ flexDirection: 'column' }}
@@ -220,7 +222,89 @@ export class InsightsVisualizer extends Visualizer {
               </Text>
             </View>
           )}
+        </View>
+      )
+    }
+    return content
+  }
+}
+
+export class DashboardVisualizer extends Visualizer {
+  constructor(props: VisualizerProps) {
+    super(props)
+  }
+
+  render(): React.ReactNode {
+    const {
+      id,
+      columns,
+      columnMetadata,
+      textData,
+      values,
+      message,
+      visualFormats,
+      isError,
+    } = this.props.data
+    const enableChartPreview = this.props.enableChartPreview
+
+    let content = null
+    if (this.isText()) {
+      content = (
+        <DashboardTextContainer
+          data={textData}
+          title={message}
+          isError={isError}
+        />
+      )
+    } else if (this.isChart()) {
+      content = (
+        <>
+          <Text style={styles.cardTitle}>{message}</Text>
+          <ChartContainer
+            key={id}
+            preferredChart={this.getPreferredChart()}
+            columns={columns}
+            columnMetadata={columnMetadata}
+            visualFormats={visualFormats}
+            values={values}
+            title={message}
+            enableChartPreview={enableChartPreview}
+          />
         </>
+      )
+    } else if (this.isAdaptiveCard()) {
+      content = (
+        <View marginH-6>
+          <AdaptiveCard
+            id={id}
+            columns={columns}
+            columnMetadata={columnMetadata}
+            row={values[0]}
+            expandable={false}
+            expandAll={false}
+          />
+        </View>
+      )
+    } else if (this.isTable()) {
+      const renderSize = 5
+      const total = values.length
+      content = (
+        <View marginH-6>
+          <Text style={styles.cardTitle}>{message}</Text>
+          <TableContainer
+            id={id}
+            columns={columns}
+            columnMetadata={columnMetadata}
+            values={values.slice(0, renderSize)}
+          />
+          {total > renderSize && (
+            <View style={styles.bottomCountWrapper}>
+              <Text style={styles.bottomCount}>
+                Showing {renderSize} of {total} rows
+              </Text>
+            </View>
+          )}
+        </View>
       )
     }
     return content
@@ -297,96 +381,14 @@ export class ChatVisualizer extends Visualizer {
   }
 }
 
-export class DashboardVisualizer extends Visualizer {
-  constructor(props: VisualizerProps) {
-    super(props)
-  }
-
-  render(): React.ReactNode {
-    const {
-      id,
-      columns,
-      columnMetadata,
-      textData,
-      values,
-      message,
-      visualFormats,
-      isError,
-    } = this.props.data
-    const enableChartPreview = this.props.enableChartPreview
-
-    let content = null
-    if (this.isText()) {
-      content = (
-        <DashboardTextContainer
-          data={textData}
-          title={message}
-          isError={isError}
-        />
-      )
-    } else if (this.isChart()) {
-      content = (
-        <>
-          <View marginV-4>
-            <Text style={styles.cardTitle}>{message}</Text>
-          </View>
-          <ChartContainer
-            key={id}
-            preferredChart={this.getPreferredChart()}
-            columns={columns}
-            columnMetadata={columnMetadata}
-            visualFormats={visualFormats}
-            values={values}
-            title={message}
-            enableChartPreview={enableChartPreview}
-          />
-        </>
-      )
-    } else if (this.isAdaptiveCard()) {
-      content = (
-        <AdaptiveCard
-          id={id}
-          columns={columns}
-          columnMetadata={columnMetadata}
-          row={values[0]}
-          expandable={false}
-          expandAll={false}
-        />
-      )
-    } else if (this.isTable()) {
-      const renderSize = 5
-      const total = values.length
-      content = (
-        <>
-          <View marginV-4>
-            <Text style={styles.cardTitle}>{message}</Text>
-          </View>
-          <TableContainer
-            id={id}
-            columns={columns}
-            columnMetadata={columnMetadata}
-            values={values.slice(0, renderSize)}
-          />
-          {total > renderSize && (
-            <View style={styles.bottomCountWrapper}>
-              <Text style={styles.bottomCount}>
-                Showing {renderSize} of {total} rows
-              </Text>
-            </View>
-          )}
-        </>
-      )
-    }
-    return content
-  }
-}
-
 const styles = StyleSheet.create({
   message: {
     fontSize: 14,
     lineHeight: 24,
   },
   cardTitle: {
+    marginHorizontal: 6,
+    marginBottom: 8,
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.GREEN_DARK,
@@ -394,7 +396,7 @@ const styles = StyleSheet.create({
   },
   bottomCountWrapper: {
     paddingVertical: 6,
-    paddingLeft: 2,
+    paddingLeft: 4,
   },
   bottomCount: {
     color: Colors.GREEN_MAIN,
