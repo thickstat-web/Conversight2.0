@@ -11,9 +11,9 @@ import {
   VictoryTheme,
   VictoryAxis,
   VictoryLegend,
-  VictoryContainer,
   VictoryZoomContainer,
   VictoryBrushContainer,
+  VictoryScatter,
 } from 'victory-native'
 import numeral from 'numeral'
 import { useTheme } from '@/Hooks'
@@ -214,10 +214,11 @@ const AreaChart = ({
     <>
       <VictoryChart
         domain={XDOMAIN}
-        height={380 + dynamicHeight}
-        width={screenWidth}
+        domainPadding={{ y: 40 }}
+        height={340 + dynamicHeight}
         containerComponent={
           <VictoryZoomContainer
+            width={screenWidth * 0.95}
             responsive={true}
             zoomDimension="x"
             allowPan={true}
@@ -227,46 +228,53 @@ const AreaChart = ({
             events={{ onPressIn: () => {} }}
           />
         }
-        style={{
-          parent: {
-            maxWidth: '100%',
-            maxHeight: '100%',
-          },
-        }}
         padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis
           label={xAxisLabel}
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
-          tickLabelComponent={
-            <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
-          }
+          tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
           style={{
             axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16 },
             ticks: { size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
         />
-        <VictoryAxis
-          axisLabelComponent={<VictoryLabel />}
+        <VictoryAxis // Y Axis Conatiner
+          axisLabelComponent={<VictoryLabel dy={8} />}
           dependentAxis
           label={yAxisLabel}
-          padding={{ left: 40 }}
           tickFormat={x => numeral(x).format('0a')}
+          tickLabelComponent={<VictoryLabel dx={6} textAnchor={'end'} />}
           style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 50 },
-            ticks: { size: 4 },
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
           }}
         />
         <VictoryArea
           x={xAxisField}
           y={yAxisField}
           data={formattedValues}
+          interpolation="natural"
+          labels={({ datum }) => numeral(datum[yAxisField]).format('0a')}
+          labelComponent={
+            <VictoryLabel dx={8} dy={2} angle={-90} textAnchor={'start'} />
+          }
           style={{
-            data: { fill: '#27DC61', stroke: '#00AA39', strokeWidth: 1 },
+            data: {
+              fill: Colors.NOTIFICATION_GREEN,
+              stroke: '#00AA39',
+              strokeWidth: 1,
+            },
             parent: { border: '1px solid #ccc' },
           }}
+        />
+        <VictoryScatter
+          x={xAxisField}
+          y={yAxisField}
+          data={formattedValues}
+          style={{ data: { fill: Colors.GREEN_MAIN } }}
+          size={4}
         />
       </VictoryChart>
       {enableChartPreview && (
@@ -306,9 +314,9 @@ const LineChart = ({
   return (
     <>
       <VictoryChart
-        height={380 + dynamicHeight}
+        domainPadding={{ y: 40 }}
+        height={340 + dynamicHeight}
         domain={XDOMAIN}
-        width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
             responsive={true}
@@ -317,25 +325,17 @@ const LineChart = ({
             allowZoom={true}
             zoomDomain={zoomDomain}
             onZoomDomainChange={setSelectedDomain}
-            width={screenWidth}
+            width={screenWidth * 0.95}
             events={{ onPressIn: () => {} }}
           />
         }
-        style={{
-          parent: {
-            maxWidth: '100%',
-            maxHeight: '100%',
-          },
-        }}
         padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis
           label={xAxisLabel}
           tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
-          tickLabelComponent={
-            <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
-          }
+          tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
           style={{
             axisLabel: {
               fill: Colors.GREEN_DARK,
@@ -345,24 +345,35 @@ const LineChart = ({
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
         />
-        <VictoryAxis
+        <VictoryAxis // Y Axis Conatiner
+          axisLabelComponent={<VictoryLabel dy={8} />}
           dependentAxis
           label={yAxisLabel}
-          padding={{ left: 40 }}
-          style={{
-            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 50 },
-            ticks: { size: 4 },
-            // tickLabels: { angle: -60, alignItems: 'baseline' },
-          }}
           tickFormat={x => numeral(x).format('0a')}
+          tickLabelComponent={<VictoryLabel dx={6} textAnchor={'end'} />}
+          style={{
+            axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
+          }}
         />
         <VictoryLine
           x={xAxisField}
           y={yAxisField}
           data={formattedValues}
+          interpolation="natural"
+          labels={({ datum }) => numeral(datum[yAxisField]).format('0a')}
+          labelComponent={
+            <VictoryLabel dx={8} dy={2} angle={-90} textAnchor={'start'} />
+          }
           style={{
             data: { stroke: '#00AA39', strokeWidth: 1, fill: 'transparent' },
           }}
+        />
+        <VictoryScatter
+          x={xAxisField}
+          y={yAxisField}
+          data={formattedValues}
+          style={{ data: { fill: Colors.GREEN_MAIN } }}
+          size={4}
         />
       </VictoryChart>
       {enableChartPreview && (
@@ -403,7 +414,8 @@ const BarChart = ({
     <>
       <VictoryChart
         domain={XDOMAIN}
-        height={380 + dynamicHeight}
+        domainPadding={{ y: 40 }}
+        height={340 + dynamicHeight}
         width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
@@ -415,15 +427,12 @@ const BarChart = ({
             onZoomDomainChange={setSelectedDomain}
           />
         }
-        style={{ parent: { maxWidth: '100%', maxHeight: '100%' } }}
         padding={{ left: 70, top: 10, bottom: 40 + dynamicHeight, right: 10 }}
       >
         <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           label={xAxisLabel}
-          tickLabelComponent={
-            <VictoryLabel dx={8} dy={-8} angle={-60} textAnchor={'end'} />
-          }
+          tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
           style={{
             axisLabel: {
               fontSize: 16,
@@ -435,11 +444,11 @@ const BarChart = ({
           tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
         />
         <VictoryAxis // Y Axis Conatiner
-          axisLabelComponent={<VictoryLabel />}
+          axisLabelComponent={<VictoryLabel dy={8} />}
           dependentAxis
           label={yAxisLabel}
-          padding={{ left: 40 }}
           tickFormat={x => numeral(x).format('0a')}
+          tickLabelComponent={<VictoryLabel dx={6} textAnchor={'end'} />}
           style={{
             axisLabel: { fill: Colors.GREEN_DARK, fontSize: 16, padding: 55 },
           }}
@@ -452,9 +461,8 @@ const BarChart = ({
           domain={{ x: [0, 1] }}
           horizontal={horizontal}
           labels={({ datum }) => numeral(datum[yAxisField]).format('0a')}
-          alignment="middle"
           labelComponent={
-            <VictoryLabel dx={10} dy={5} angle={-90} textAnchor={'start'} />
+            <VictoryLabel dx={2} dy={6} angle={-90} textAnchor={'start'} />
           }
           style={{
             data: {
@@ -602,6 +610,7 @@ function ChartPreviewer({
         Drag to view specific details
       </Text>
       <VictoryChart
+        domainPadding={{ y: 6 }}
         width={screenWidth}
         height={190}
         scale={{
