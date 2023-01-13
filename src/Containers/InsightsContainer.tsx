@@ -184,7 +184,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
       <Pressable
         disabled={followupLoading ? true : false}
         style={{ flex: 1, flexDirection: 'row', padding: 4 }}
-        onPress={isDataEmpty ? null : handleOpenExplorer} // at 187
+        onPress={isDataEmpty ? null : handleOpenExplorer}
       >
         <View style={{ flex: 1 }}>
           <Text style={styles.cardTitle}>

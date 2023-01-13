@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { FlatList, Platform, StyleSheet } from 'react-native'
 import { View } from 'react-native-ui-lib'
+import Icon from 'react-native-vector-icons/Ionicons'
 import { useTheme, useAppSelector, usePinboardData } from '@/Hooks'
 import { DashboardVisualizer, LoadingSpinner } from '@/Components'
 import { Colors } from '@/Theme/Variables'
@@ -34,19 +35,35 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
   }
   const componentData = { ...data, message: title }
 
+  let isDataEmpty: boolean = false
+
+  isDataEmpty = data?.visualFormats.length === 0 || data.values.length === 0
+
   return (
     <View
       flex
       style={[styles.visCard, isTextCard && { height: CARD_HEIGHT }]}
-      onTouchStart={() => setMove(false)}
-      onTouchMove={() => setMove(true)}
-      onTouchEnd={() => {
-        if (Platform.OS === 'android' || !move) {
-          navigate(DATA_EXPLORER, { id: data.id, title })
-        }
-      }}
+      onTouchStart={isDataEmpty ? null : () => setMove(false)}
+      onTouchMove={isDataEmpty ? null : () => setMove(true)}
+      onTouchEnd={
+        isDataEmpty
+          ? null
+          : () => {
+              if (Platform.OS === 'android' || !move) {
+                navigate(DATA_EXPLORER, { id: data.id, title })
+              }
+            }
+      }
     >
-      <DashboardVisualizer data={componentData} />
+      <DashboardVisualizer data={componentData} enableChartPreview={false} />
+      {!isDataEmpty && (
+        <Icon
+          style={styles.expandIcon}
+          name="expand-outline"
+          size={20}
+          color={Colors.GREEN_DARK}
+        />
+      )}
     </View>
   )
 })
@@ -62,7 +79,7 @@ const PinboardComponents = React.memo(
       chartAndTableCards.map((item: PinboardItem) => <Card item={item} />)
     return (
       <FlatList
-        style={{ margin: 8 }}
+        style={{ padding: 6 }}
         numColumns={2}
         columnWrapperStyle={styles.row}
         data={textCards}
@@ -108,8 +125,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   visCard: {
-    margin: 6,
-    padding: 12,
+    margin: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 6,
     backgroundColor: Colors.WHITE,
   },
@@ -122,6 +140,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.GREEN_DARK,
     textAlign: 'left',
+  },
+  expandIcon: {
+    position: 'absolute',
+    right: 8,
+    top: 8,
   },
 })
 

@@ -110,17 +110,22 @@ export const formatValue = (
     if (category === 'date') {
       const dateStr = `${value}`.trim()
       let formattedDateStr = ''
-      if (!(dateStr === '')) {
-        const pattern = /[0-9]{2}-[0-9]{2}-[0-9]{4}/g
+      if (dateStr !== '') {
+        const pattern =
+          /([0-9]{2}|[0-9]{1})[-/]([0-9]{2}|[0-9]{1})[-/]([0-9]{4}|[0-9]{2})/g
         const result = dateStr.match(pattern)
-        const DATE_FORMAT = replaceDateFormats(type)
+        const DATE_FORMAT = replaceDateFormats(type.toLowerCase())
         if (result?.length) {
           const [matchedDate] = result
-          const [mm, dd, yyyy] = matchedDate.split('-')
+          const [mm, dd, tmpyyyy] = matchedDate.split(/[-/]/)
+          const yyyy =
+            tmpyyyy.length === 2
+              ? `${new Date().getFullYear()}`.slice(0, 2) + tmpyyyy
+              : tmpyyyy
           formattedDateStr = moment(`${yyyy}-${mm}-${dd}`).format(DATE_FORMAT)
         } else {
           const tmpFormattedDateStr = moment(dateStr).format(DATE_FORMAT)
-          if (!(tmpFormattedDateStr === 'Invalid Date')) {
+          if (tmpFormattedDateStr !== 'Invalid date') {
             formattedDateStr = tmpFormattedDateStr
           }
         }

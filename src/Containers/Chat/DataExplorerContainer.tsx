@@ -245,7 +245,7 @@ const DataExplorerContainer = ({
               flexDirection: 'row',
               borderWidth: 1,
               borderColor: Colors.WHITE,
-              paddingHorizontal: 16,
+              paddingHorizontal: 12,
               paddingVertical: 5,
               borderRadius: 16,
               alignItems: 'center',

@@ -90,6 +90,7 @@ const colorScale = [
 ]
 
 const isIOS = Platform.OS === 'ios'
+const XDOMAIN: { x: number[] } = { x: [0, 18] }
 
 const getxAxisLabelHeight = (
   values: Array<Record<string, any>>,
@@ -97,10 +98,20 @@ const getxAxisLabelHeight = (
 ): number => {
   let maxXLabelLength = 0
   values.forEach(item => {
-    const fieldLen = item[xAxisField].length
+    const fieldLen = `${item[xAxisField]}`.length
     maxXLabelLength = Math.max(isNaN(fieldLen) ? 1 : fieldLen, maxXLabelLength)
   })
   return maxXLabelLength * (isIOS ? 5.8 : 7)
+}
+
+const getFormattedValues = (
+  values: Array<Record<string, any>>,
+  xAxisField: string,
+): Array<Record<string, any>> => {
+  return values.map(item => ({
+    ...item,
+    [xAxisField]: `${item[xAxisField]}`,
+  }))
 }
 
 const PieChart = ({
@@ -195,13 +206,14 @@ const AreaChart = ({
     y: [any, any]
   }>()
   const xValues = values.map(item => item[xAxisLabel])
+
+  const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
   return (
     <>
       <VictoryChart
-        domain={{ x: [0, 12] }}
-        domainPadding={30}
+        domain={XDOMAIN}
         height={380 + dynamicHeight}
         width={screenWidth}
         containerComponent={
@@ -226,7 +238,7 @@ const AreaChart = ({
         <VictoryAxis
           label={xAxisLabel}
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
-          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
+          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
           tickLabelComponent={
             <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
           }
@@ -250,7 +262,7 @@ const AreaChart = ({
         <VictoryArea
           x={xAxisField}
           y={yAxisField}
-          data={values}
+          data={formattedValues}
           style={{
             data: { fill: '#27DC61', stroke: '#00AA39', strokeWidth: 1 },
             parent: { border: '1px solid #ccc' },
@@ -267,7 +279,7 @@ const AreaChart = ({
           xAxisLabel={xAxisLabel}
           xAxisField={xAxisField}
           yAxisField={yAxisField}
-          values={values}
+          values={formattedValues}
         />
       )}
     </>
@@ -288,14 +300,14 @@ const LineChart = ({
   const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
   const xValues = values.map(item => item[xAxisLabel])
 
+  const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
   return (
     <>
       <VictoryChart
-        domainPadding={30}
         height={380 + dynamicHeight}
-        domain={{ x: [0, 12] }}
+        domain={XDOMAIN}
         width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
@@ -319,7 +331,7 @@ const LineChart = ({
       >
         <VictoryAxis
           label={xAxisLabel}
-          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
+          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           tickLabelComponent={
             <VictoryLabel dx={0} dy={-10} angle={-45} textAnchor="end" />
@@ -347,7 +359,7 @@ const LineChart = ({
         <VictoryLine
           x={xAxisField}
           y={yAxisField}
-          data={values}
+          data={formattedValues}
           style={{
             data: { stroke: '#00AA39', strokeWidth: 1, fill: 'transparent' },
           }}
@@ -362,7 +374,7 @@ const LineChart = ({
           xAxisLabel={xAxisLabel}
           xAxisField={xAxisField}
           yAxisField={yAxisField}
-          values={values}
+          values={formattedValues}
         />
       )}
     </>
@@ -383,13 +395,14 @@ const BarChart = ({
   const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
   const { width: screenWidth } = useWindowDimensions()
   const xValues = values.map(item => item[xAxisLabel])
+
+  const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
   return (
     <>
       <VictoryChart
-        domainPadding={100}
-        domain={{ x: [0, 12] }}
+        domain={XDOMAIN}
         height={380 + dynamicHeight}
         width={screenWidth}
         containerComponent={
@@ -419,7 +432,7 @@ const BarChart = ({
             ticks: { size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
-          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
+          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
         />
         <VictoryAxis // Y Axis Conatiner
           axisLabelComponent={<VictoryLabel />}
@@ -434,11 +447,11 @@ const BarChart = ({
         <VictoryBar
           x={xAxisField}
           y={yAxisField}
-          data={values}
+          data={formattedValues}
           barRatio={0.1}
           domain={{ x: [0, 1] }}
           horizontal={horizontal}
-          labels={({ datum }) => numeral(datum[yAxisField]).format('0,0.0a')}
+          labels={({ datum }) => numeral(datum[yAxisField]).format('0a')}
           alignment="middle"
           labelComponent={
             <VictoryLabel dx={10} dy={5} angle={-90} textAnchor={'start'} />
@@ -466,7 +479,7 @@ const BarChart = ({
           xAxisLabel={xAxisLabel}
           xAxisField={xAxisField}
           yAxisField={yAxisField}
-          values={values}
+          values={formattedValues}
         />
       )}
     </>

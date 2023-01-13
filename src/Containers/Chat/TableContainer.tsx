@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import {
-  StyleSheet,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-} from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, FlatList } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { Table, Row } from 'react-native-table-component'
 import _ from 'lodash'
@@ -140,14 +134,13 @@ const styles = StyleSheet.create({
     // flex: 1,
     backgroundColor: '#fff',
     borderRadius: 8,
-    alignItems: 'center',
+    // alignItems: 'center',
     // borderWidth: 2,
     // borderColor: '#EAFAEA',
   },
   tableWrapper: {
+    flexGrow: 0,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#EAFAEA',
   },
   header: {
     height: 42,
@@ -172,10 +165,6 @@ const styles = StyleSheet.create({
     color: '#595959',
   },
   number: { textAlign: 'right' },
-  tableBorder: {
-    // borderWidth: 1,
-    // borderColor: '#FFFFFF' /* '#C1C0B9' */,
-  },
   row: {
     height: 40,
     backgroundColor: '#FFFFFF' /* '#E7E6E1' */,
