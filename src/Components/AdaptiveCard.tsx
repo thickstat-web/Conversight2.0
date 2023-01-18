@@ -52,11 +52,15 @@ const AdaptiveCard = ({
               { backgroundColor: colIndex % 2 === 0 ? '#f0fcf4' : '' },
             ]}
           >
-            <View style={styles.titleColumn}>
-              <Text style={[{ color: Colors.GREEN_MAIN }, styles.propertyName]}>
-                {properCase(columnMetadata[col].alias)}
-              </Text>
-            </View>
+            {columnMetadata[col] && (
+              <View style={styles.titleColumn}>
+                <Text
+                  style={[{ color: Colors.GREEN_MAIN }, styles.propertyName]}
+                >
+                  {properCase(columnMetadata[col].alias)}
+                </Text>
+              </View>
+            )}
 
             <View style={styles.valueColumn}>
               <Text
