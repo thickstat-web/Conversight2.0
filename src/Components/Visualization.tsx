@@ -16,7 +16,6 @@ export const InsightsTextContainer = ({ data }: { data: TextData }) => {
   const displayValue = `${prefix}${value} ${suffix}`.trim()
   return (
     <Text
-      margin-4
       style={[Fonts.textSmall, styles.message]}
       selectable={true}
       selectionColor={Colors.GREEN_LIGHTEST}
@@ -31,15 +30,13 @@ export const TextContainer = ({ data }: { data: TextData }) => {
   const { prefix, abbrValue, suffix } = data
   const displayValue = `${prefix}${abbrValue} ${suffix}`.trim()
   return (
-    <View padding-4>
-      <Text
-        style={[Fonts.textSmall, styles.message]}
-        selectable={true}
-        selectionColor={Colors.GREEN_LIGHTEST}
-      >
-        {displayValue}
-      </Text>
-    </View>
+    <Text
+      style={[Fonts.textSmall, styles.message]}
+      selectable={true}
+      selectionColor={Colors.GREEN_LIGHTEST}
+    >
+      {displayValue}
+    </Text>
   )
 }
 
@@ -403,6 +400,8 @@ export class ChatVisualizer extends Visualizer {
 
 const styles = StyleSheet.create({
   message: {
+    padding:6,
+    paddingLeft:8,
     fontSize: 14,
     lineHeight: 24,
   },
