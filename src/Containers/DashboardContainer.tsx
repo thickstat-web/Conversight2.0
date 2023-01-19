@@ -64,14 +64,14 @@ const Card = React.memo(({ item, style }: CardProps) => {
       // onTouchMove={isDataEmpty ? null : () => setMove(true)}
       // onTouchEnd={isDataEmpty ? null : handleOpenDataExplorer}
     >
-      {!isDataEmpty && (
+      {/* {!isDataEmpty && (
         <Icon
           style={styles.expandIcon}
           name="expand-outline"
-          size={20}
+          size={14}
           color={Colors.GREEN_DARK}
         />
-      )}
+      )} */}
       <DashboardVisualizer data={componentData} enableChartPreview={false} />
     </Pressable>
   )
@@ -88,7 +88,7 @@ const PinboardComponents = React.memo(
       chartAndTableCards.map((item: PinboardItem) => <Card item={item} />)
     return (
       <FlatList
-        style={{ padding: 6 }}
+        style={{ padding: 2 }}
         contentContainerStyle={{ paddingBottom: 48 }}
         numColumns={2}
         columnWrapperStyle={styles.row}
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   visCard: {
     flex: 1,
     marginVertical: 4,
-    paddingHorizontal: 8,
+    // paddingHorizontal: 8,
     paddingVertical: 10,
     borderRadius: 6,
     backgroundColor: Colors.WHITE,

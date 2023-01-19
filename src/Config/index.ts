@@ -51,6 +51,7 @@ export const DEFAULT_PASSWORD = ''
 export const DEVICE_NAME = `${getSystemName()} v${getSystemVersion()}`
 
 export const DEFAULT_ADAPTIVE_CARD_ROWS = 5
+export const DEFAULT_TABLE_RENDER_ROWS = 5
 export const DEFAULT_DATASET_SHOW_COUNT = 6
 export const DEFAULT_DASHBOARD_SHOW_COUNT = 4
 export const NO_DATA_AVAILABLE = 'No data available'

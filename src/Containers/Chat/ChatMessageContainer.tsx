@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { FlatList, Platform, StyleSheet } from 'react-native'
+import { Dimensions, FlatList, Platform, StyleSheet } from 'react-native'
 import { View, Text, TouchableOpacity } from 'react-native-ui-lib'
 import { Image } from 'react-native-ui-lib/src/components/image'
 import { useAppSelector, useTheme } from '@/Hooks'
@@ -15,6 +15,8 @@ interface UserMessageContainerProps {
   message: string
   onPress: (text: string) => void
 }
+
+const { width: screenWidth } = Dimensions.get('screen')
 
 const UserMessageContainer = React.memo(
   ({ message, onPress }: UserMessageContainerProps) => {
@@ -233,6 +235,7 @@ const styles = StyleSheet.create({
     // marginVertical: 4,
     // paddingVertical:8,
     marginRight: 8,
+    width: screenWidth * 0.83,
   },
   athenaIcon: {
     justifyContent: 'flex-end',
