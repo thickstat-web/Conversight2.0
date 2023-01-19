@@ -2,6 +2,7 @@ import React from 'react'
 import { StyleSheet } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
 import { useTheme } from '@/Hooks'
+import { NO_DATA_AVAILABLE } from '@/Config'
 import { AdaptiveCard } from '@/Components'
 import ChartContainer from '@/Containers/Chat/ChartContainer'
 import TableContainer from '@/Containers/Chat/TableContainer'
@@ -46,22 +47,32 @@ export const DashboardTextContainer = ({
   data,
   title,
   isError,
+  values,
 }: {
   data: TextData
   title: string
   isError: boolean
+  values: Array<Record<string, any>>
 }) => {
   const { Colors, Fonts } = useTheme()
   const { prefix, abbrValue, suffix } = data
   return (
     <View>
-      <Text margin-4 style={[Fonts.textSmall, styles.message]}>
-        <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>{prefix}</Text>
-        <Text style={{ color: Colors.DARK, fontSize: 18, fontWeight: 'bold' }}>
-          {abbrValue}
+      {values.length >= 1 && (
+        <Text margin-4 style={[Fonts.textSmall, styles.message]}>
+          <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>
+            {prefix}
+          </Text>
+          <Text
+            style={{ color: Colors.DARK, fontSize: 16, fontWeight: 'bold' }}
+          >
+            {abbrValue}
+          </Text>
+          <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>
+            {suffix}
+          </Text>
         </Text>
-        <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>{suffix}</Text>
-      </Text>
+      )}
       <View>
         <Text
           style={{ fontSize: 16, color: 'rgba(0, 68, 56, 0.6)' }}
@@ -69,6 +80,7 @@ export const DashboardTextContainer = ({
         >
           {isError ? '' : title}
         </Text>
+        {values.length == 0 && <Text>{NO_DATA_AVAILABLE}</Text>}
       </View>
     </View>
   )
@@ -254,6 +266,7 @@ export class DashboardVisualizer extends Visualizer {
           data={textData}
           title={message}
           isError={isError}
+          values={values}
         />
       )
     } else if (this.isChart()) {
@@ -275,6 +288,7 @@ export class DashboardVisualizer extends Visualizer {
     } else if (this.isAdaptiveCard()) {
       content = (
         <View marginH-6>
+          <Text style={styles.cardTitle}>{message}</Text>
           <AdaptiveCard
             id={id}
             columns={columns}

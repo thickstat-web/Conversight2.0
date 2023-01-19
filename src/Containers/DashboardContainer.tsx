@@ -1,5 +1,11 @@
 import React, { useState } from 'react'
-import { FlatList, Platform, Pressable, StyleSheet } from 'react-native'
+import {
+  FlatList,
+  Platform,
+  Pressable,
+  StyleSheet,
+  ViewStyle,
+} from 'react-native'
 import { View } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { useTheme, useAppSelector, usePinboardData } from '@/Hooks'
@@ -20,7 +26,12 @@ const LoadingCard = () => (
   </View>
 )
 
-const Card = React.memo(({ item }: { item: PinboardItem }) => {
+type CardProps = {
+  item: PinboardItem
+  style: ViewStyle
+}
+
+const Card = React.memo(({ item, style }: CardProps) => {
   const { id, title, loading, isTextCard } = item
   const converseData = useAppSelector(selectConverseData)
   const [move, setMove] = useState(false)
@@ -47,7 +58,7 @@ const Card = React.memo(({ item }: { item: PinboardItem }) => {
 
   return (
     <Pressable
-      style={[styles.visCard, isTextCard && { height: CARD_HEIGHT }]}
+      style={[styles.visCard, isTextCard && { height: CARD_HEIGHT }, style]}
       onPress={isDataEmpty ? null : handleOpenDataExplorer}
       // onTouchStart={isDataEmpty ? null : () => setMove(false)}
       // onTouchMove={isDataEmpty ? null : () => setMove(true)}
@@ -71,13 +82,13 @@ const PinboardComponents = React.memo(
     const textCards = pinboardComponents.filter(_ => _.isTextCard)
     const chartAndTableCards = pinboardComponents.filter(_ => !_.isTextCard)
     const renderItem = ({ item }: { item: PinboardItem }) => (
-      <Card item={item} />
+      <Card item={item} style={{ marginHorizontal: 4 }} />
     )
     const ChartAndTableCards = () =>
       chartAndTableCards.map((item: PinboardItem) => <Card item={item} />)
     return (
       <FlatList
-        style={{ paddingVertical: 6 }}
+        style={{ padding: 6 }}
         contentContainerStyle={{ paddingBottom: 48 }}
         numColumns={2}
         columnWrapperStyle={styles.row}
@@ -126,7 +137,7 @@ const styles = StyleSheet.create({
   visCard: {
     flex: 1,
     marginVertical: 4,
-    // paddingHorizontal: 8,
+    paddingHorizontal: 8,
     paddingVertical: 10,
     borderRadius: 6,
     backgroundColor: Colors.WHITE,

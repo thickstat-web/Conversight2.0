@@ -174,9 +174,9 @@ export const dataFormatter = (
 ) => {
   let displayValue = `${value}`
   let isNumeric = false
-  if (metadata?.isNumericFormat || metadata.category === 'date') {
+  if (metadata?.isNumericFormat || metadata?.category === 'date') {
     isNumeric = true
-    const { prefix, roundedValue: text, suffix } = formatValue(value, metadata)
+    const { prefix, value: text, suffix } = formatValue(value, metadata)
     displayValue = `${prefix}${text} ${suffix}`.trim()
   }
   return formatter ? formatter(displayValue, isNumeric) : displayValue
