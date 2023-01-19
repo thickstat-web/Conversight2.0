@@ -21,6 +21,7 @@ import {
   REQUEST_DEMO,
   CHANGE_ORGANIZATION,
   WT_INSIGHTS,
+  LAUNCHPAD_SCREEN,
 } from '@/Constants/screens'
 import BottomTabNavigator from './BottomTabNavigator'
 import { useTheme, useAppDispatch, useAuth, useOrganization } from '@/Hooks'
@@ -33,6 +34,7 @@ import MoreIcon from '@/Assets/Images/iconsSVG/more.svg'
 import SettingsIcon from '@/Assets/Images/iconsSVG/settings.svg'
 import InsightsIcon from '@/Assets/Images/drawer/insights.svg'
 import DashboardIcon from '@/Assets/Images/drawer/dashboard.svg'
+import Icon from 'react-native-vector-icons/Ionicons'
 import WalkThroughIcon from '@/Assets/Images/drawer/walkthrough.svg'
 import RequestDemoIcon from '@/Assets/Images/drawer/demo.svg'
 import FaqIcon from '@/Assets/Images/drawer/faq.svg'
@@ -131,7 +133,23 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
             </Text>
           </TouchableOpacity>
           <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
+          {/* <TouchableOpacity
+            onPress={() => handleRedirect(LAUNCHPAD_SCREEN)}
+            style={styles.screenLink}
+          >
+            <Icon name={'grid'} size={28} color={Colors.GREEN_MAIN} />
+            <Text
+              style={[styles.linkText, { color: Colors.GREEN_DARK }]}
+              marginL-25
+            >
+              Launchpad
+            </Text>
+          </TouchableOpacity>
 
+          <View marginV-15 height={1} backgroundColor={Colors.GRAY} /> */}
+          {/* to view and access Launchpad in DrawerNavigator please uncommand the
+          above codes. */}
+          
           {/* <TouchableOpacity
             onPress={() => handleRedirect(WALK_THROUGH_AUTHORIZED)}
             style={styles.screenLink}
@@ -145,7 +163,6 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
             </Text>
           </TouchableOpacity>
           <View marginV-15 height={1} backgroundColor={Colors.GRAY} />  */}
-
           <TouchableOpacity
             onPress={() => handleRedirect(REQUEST_DEMO)}
             style={styles.screenLink}
@@ -159,7 +176,6 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
             </Text>
           </TouchableOpacity>
           <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
-
           {/* <TouchableOpacity
             onPress={() => handleRedirect(READ_FAQ)}
             style={styles.screenLink}

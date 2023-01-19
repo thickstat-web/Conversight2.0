@@ -51,7 +51,8 @@ const Card = React.memo(({ item, style }: CardProps) => {
   isDataEmpty = data?.visualFormats.length === 0 || data.values.length === 0
 
   const handleOpenDataExplorer = () => {
-    if (Platform.OS === 'android' || !move) {
+    // if (Platform.OS === 'android' || !move)
+     {
       navigate(DATA_EXPLORER, { id: data.id, title })
     }
   }
