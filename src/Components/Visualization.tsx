@@ -205,7 +205,7 @@ export class InsightsVisualizer extends Visualizer {
         <View marginH-6>
           <ScrollView
             horizontal={true}
-            contentContainerStyle={{ flexDirection: 'column' }}
+            contentContainerStyle={styles.columnDirection}
             showsHorizontalScrollIndicator={false}
           >
             <TableContainer
@@ -291,12 +291,18 @@ export class DashboardVisualizer extends Visualizer {
       content = (
         <View marginH-6>
           <Text style={styles.cardTitle}>{message}</Text>
-          <TableContainer
-            id={id}
-            columns={columns}
-            columnMetadata={columnMetadata}
-            values={values.slice(0, renderSize)}
-          />
+          <ScrollView
+            horizontal={true}
+            contentContainerStyle={styles.columnDirection}
+            showsHorizontalScrollIndicator={false}
+          >
+            <TableContainer
+              id={id}
+              columns={columns}
+              columnMetadata={columnMetadata}
+              values={values.slice(0, renderSize)}
+            />
+          </ScrollView>
           {total > renderSize && (
             <View style={styles.bottomCountWrapper}>
               <Text style={styles.bottomCount}>
@@ -393,6 +399,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.GREEN_DARK,
     textAlign: 'left',
+  },
+  columnDirection: {
+    flexDirection: 'column',
   },
   bottomCountWrapper: {
     paddingVertical: 6,

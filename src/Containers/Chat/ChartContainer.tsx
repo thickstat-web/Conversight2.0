@@ -241,7 +241,7 @@ const AreaChart = ({
             ticks: { stroke: 'grey', size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
-          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
+          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
         />
         <VictoryAxis // Y Axis Conatiner
           dependentAxis
@@ -348,7 +348,7 @@ const LineChart = ({
             ticks: { stroke: 'grey', size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
-          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
+          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
         />
         <VictoryAxis // Y Axis Conatiner
           dependentAxis
@@ -451,7 +451,7 @@ const BarChart = ({
             ticks: { stroke: 'grey', size: 4 },
             tickLabels: { angle: -90, alignItems: 'baseline' },
           }}
-          tickFormat={x => `${dataFormatter(x, columnMetadata[xAxisField])}`}
+          tickFormat={x => dataFormatter(x, columnMetadata[xAxisField])}
         />
         <VictoryAxis // Y Axis Conatiner
           dependentAxis
