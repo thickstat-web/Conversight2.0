@@ -65,7 +65,11 @@ export const DashboardTextContainer = ({
   let calculateValues=values?.length>=1
   return (
     <View style={{ alignItems: 'center' }}>
+<<<<<<< HEAD
       {calculateValues&& (
+=======
+      {values.length >= 1 && (
+>>>>>>> 3107786 (piechart legent view issue fixed , cards aligned center in dashboard , table aligned dynamically if it have one or two columns , expand icon removed from dashboard , expand and collapse align issue fixed , padding adjusted for dashboards to view y axis)
         <Text margin-4 style={[Fonts.textSmall, styles.message]}>
           <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>
             {prefix}
@@ -92,8 +96,22 @@ export const DashboardTextContainer = ({
             </Text>
         </Text>
 
+<<<<<<< HEAD
         {calculateValues&& (
           <Text style={styles.TextStyle}>{NO_DATA_AVAILABLE}</Text>
+=======
+        {values.length == 0 && (
+          <Text
+            style={{
+              padding: 12,
+              textAlign: 'center',
+              fontSize: 16,
+              color: Colors.GREEN_DARK,
+            }}
+          >
+            {NO_DATA_AVAILABLE}
+          </Text>
+>>>>>>> 3107786 (piechart legent view issue fixed , cards aligned center in dashboard , table aligned dynamically if it have one or two columns , expand icon removed from dashboard , expand and collapse align issue fixed , padding adjusted for dashboards to view y axis)
         )}
       </View>
     </View>
