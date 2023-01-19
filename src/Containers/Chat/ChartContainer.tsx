@@ -164,7 +164,7 @@ const PieChart = ({
         x={32}
         // y={12}
         width={screenWidth}
-        height={values.length * (isIOS ? 28 : 25)}
+        height={values.length * (isIOS ? 28 : 28)}
         colorScale={colorScale}
         orientation="vertical"
         symbolSpacer={10}
@@ -232,7 +232,7 @@ const AreaChart = ({
         <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           label={xAxisLabel}
-          tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
+          tickLabelComponent={<VictoryLabel dx={8} dy={-8} textAnchor="end" />}
           style={{
             axisLabel: {
               fill: Colors.GREEN_DARK,
@@ -339,7 +339,7 @@ const LineChart = ({
         <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           label={xAxisLabel}
-          tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
+          tickLabelComponent={<VictoryLabel dx={8} dy={-8} textAnchor="end" />}
           style={{
             axisLabel: {
               fill: Colors.GREEN_DARK,
@@ -442,7 +442,7 @@ const BarChart = ({
         <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
           label={xAxisLabel}
-          tickLabelComponent={<VictoryLabel dx={8} dy={0} textAnchor="end" />}
+          tickLabelComponent={<VictoryLabel dx={8} dy={-8} textAnchor="end" />}
           style={{
             axisLabel: {
               fill: Colors.GREEN_DARK,
