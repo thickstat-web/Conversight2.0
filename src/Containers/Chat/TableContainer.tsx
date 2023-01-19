@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, FlatList } from 'react-native'
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+} from 'react-native'
 import { View } from 'react-native-ui-lib'
 import { Table, Row } from 'react-native-table-component'
 import _ from 'lodash'
@@ -26,12 +32,13 @@ const textdataFormatter = (value: string, isNumeric: boolean) => (
     {value}
   </Text>
 )
+const { width: screenWidth } = Dimensions.get('screen')
 
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   //console.log("The Table Values Are "+values.length)
   const columnWidth = columns.length <= 2 ? 160 : 120
   const ROW_HEIGHT = 40
-  const widthArr = new Array(columns.length).fill(columnWidth)
+  let widthArr = new Array(columns.length).fill(columnWidth)
   const { Layout, Colors, Common, Fonts } = useTheme()
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
@@ -97,6 +104,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     offset: ROW_HEIGHT * index,
     index,
   })
+  const headerListLength = headerList.length
   return (
     <View style={styles.container}>
       <View style={{ paddingBottom: rowLength >= 15 ? 90 : 0 }}>
@@ -112,7 +120,9 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
             <Table>
               <Row
                 data={headerList}
-                widthArr={widthArr}
+                {...((headerListLength == 2 &&
+                  (widthArr = [screenWidth / 2.1, screenWidth / 2.1])) ||
+                  (headerListLength == 1 && (widthArr = [screenWidth * 0.96])))}
                 style={styles.header}
               />
             </Table>

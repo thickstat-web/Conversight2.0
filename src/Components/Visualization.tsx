@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native'
 import { Text, View } from 'react-native-ui-lib'
 import { useTheme } from '@/Hooks'
 import { NO_DATA_AVAILABLE } from '@/Config'
+import { DEFAULT_TABLE_RENDER_ROWS } from '@/Config'
 import { AdaptiveCard } from '@/Components'
 import ChartContainer from '@/Containers/Chat/ChartContainer'
 import TableContainer from '@/Containers/Chat/TableContainer'
@@ -16,7 +17,6 @@ export const InsightsTextContainer = ({ data }: { data: TextData }) => {
   const displayValue = `${prefix}${value} ${suffix}`.trim()
   return (
     <Text
-      margin-4
       style={[Fonts.textSmall, styles.message]}
       selectable={true}
       selectionColor={Colors.GREEN_LIGHTEST}
@@ -31,15 +31,13 @@ export const TextContainer = ({ data }: { data: TextData }) => {
   const { prefix, abbrValue, suffix } = data
   const displayValue = `${prefix}${abbrValue} ${suffix}`.trim()
   return (
-    <View padding-4>
-      <Text
-        style={[Fonts.textSmall, styles.message]}
-        selectable={true}
-        selectionColor={Colors.GREEN_LIGHTEST}
-      >
-        {displayValue}
-      </Text>
-    </View>
+    <Text
+      style={[Fonts.textSmall, styles.message]}
+      selectable={true}
+      selectionColor={Colors.GREEN_LIGHTEST}
+    >
+      {displayValue}
+    </Text>
   )
 }
 
@@ -57,7 +55,7 @@ export const DashboardTextContainer = ({
   const { Colors, Fonts } = useTheme()
   const { prefix, abbrValue, suffix } = data
   return (
-    <View>
+    <View style={{ alignItems: 'center' }}>
       {values.length >= 1 && (
         <Text margin-4 style={[Fonts.textSmall, styles.message]}>
           <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>
@@ -73,14 +71,27 @@ export const DashboardTextContainer = ({
           </Text>
         </Text>
       )}
-      <View>
+
+      <View paddingH-12>
         <Text
-          style={{ fontSize: 16, color: 'rgba(0, 68, 56, 0.6)' }}
+          style={{ fontSize: 16, color: Colors.GREEN_DARK }}
           numberOfLines={1}
         >
           {isError ? '' : title}
         </Text>
-        {values.length == 0 && <Text>{NO_DATA_AVAILABLE}</Text>}
+
+        {values.length == 0 && (
+          <Text
+            style={{
+              padding: 12,
+              textAlign: 'center',
+              fontSize: 16,
+              color: Colors.GREEN_DARK,
+            }}
+          >
+            {NO_DATA_AVAILABLE}
+          </Text>
+        )}
       </View>
     </View>
   )
@@ -211,7 +222,6 @@ export class InsightsVisualizer extends Visualizer {
         </View>
       )
     } else if (this.isTable()) {
-      const renderSize = 5
       const total = values.length
       content = (
         <View marginH-6>
@@ -224,13 +234,13 @@ export class InsightsVisualizer extends Visualizer {
               id={id}
               columns={columns}
               columnMetadata={columnMetadata}
-              values={values.slice(0, renderSize)}
+              values={values.slice(0, DEFAULT_TABLE_RENDER_ROWS)}
             />
           </ScrollView>
-          {total > renderSize && (
+          {total > DEFAULT_TABLE_RENDER_ROWS && (
             <View style={styles.bottomCountWrapper}>
               <Text style={styles.bottomCount}>
-                Showing {renderSize} of {total} rows
+                Showing {DEFAULT_TABLE_RENDER_ROWS} of {total} rows
               </Text>
             </View>
           )}
@@ -300,7 +310,6 @@ export class DashboardVisualizer extends Visualizer {
         </View>
       )
     } else if (this.isTable()) {
-      const renderSize = 5
       const total = values.length
       content = (
         <View marginH-6>
@@ -314,13 +323,13 @@ export class DashboardVisualizer extends Visualizer {
               id={id}
               columns={columns}
               columnMetadata={columnMetadata}
-              values={values.slice(0, renderSize)}
+              values={values.slice(0, DEFAULT_TABLE_RENDER_ROWS)}
             />
           </ScrollView>
-          {total > renderSize && (
+          {total > DEFAULT_TABLE_RENDER_ROWS && (
             <View style={styles.bottomCountWrapper}>
               <Text style={styles.bottomCount}>
-                Showing {renderSize} of {total} rows
+                Showing {DEFAULT_TABLE_RENDER_ROWS} of {total} rows
               </Text>
             </View>
           )}
@@ -375,7 +384,6 @@ export class ChatVisualizer extends Visualizer {
         />
       )
     } else if (this.isTable()) {
-      const renderSize = 5
       const total = values.length
       content = (
         <>
@@ -384,13 +392,13 @@ export class ChatVisualizer extends Visualizer {
               id={id}
               columns={columns}
               columnMetadata={columnMetadata}
-              values={values.slice(0, renderSize)}
+              values={values.slice(0, DEFAULT_TABLE_RENDER_ROWS)}
             />
           </ScrollView>
-          {total > renderSize && (
+          {total > DEFAULT_TABLE_RENDER_ROWS && (
             <View style={styles.bottomCountWrapper}>
               <Text style={styles.bottomCount}>
-                Showing {renderSize} of {total} rows
+                Showing {DEFAULT_TABLE_RENDER_ROWS} of {total} rows
               </Text>
             </View>
           )}
@@ -403,8 +411,10 @@ export class ChatVisualizer extends Visualizer {
 
 const styles = StyleSheet.create({
   message: {
+    padding: 6,
     fontSize: 14,
     lineHeight: 24,
+    textAlign: 'center',
   },
   cardTitle: {
     marginHorizontal: 6,
