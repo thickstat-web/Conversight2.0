@@ -264,7 +264,7 @@ const ApplicationNavigator = () => {
                     headerShown: true,
                   }}
                 />
-                <Stack.Screen
+                {/* <Stack.Screen
                   name={LAUNCHPAD_SCREEN}
                   component={LaunchpadContainer}
                   options={{
@@ -280,7 +280,7 @@ const ApplicationNavigator = () => {
                     headerBackTitleVisible: false,
                     animationEnabled: true,
                   }}
-                />
+                /> */}
 
                 <Stack.Screen
                   name={REQUEST_DEMO}
