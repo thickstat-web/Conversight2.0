@@ -77,18 +77,23 @@ const replaceDateFormats = function (str: string) {
   else return str
 }
 
+const makeDefaultFormattedData = (value: any): TextData => {
+  const isNumber = !isNaN(value)
+  const numObj = numeral(value)
+  return {
+    prefix: '',
+    value: isNumber ? numObj.format('0,0') : value,
+    roundedValue: isNumber ? numObj.format('0,0') : value,
+    abbrValue: isNumber ? numObj.format('0.00a') : value,
+    suffix: '',
+  }
+}
+
 export const formatValue = (
   value: any,
   metadata: ColumnMetadata | null,
 ): TextData => {
-  let data: TextData = {
-    prefix: '',
-    value: isNaN(value) ? value : numeral(value).format('0,0'),
-    roundedValue: isNaN(value) ? value : numeral(value).format('0,0'),
-    abbrValue: isNaN(value) ? value : numeral(value).format('0.00a'),
-    suffix: '',
-  }
-
+  let data: TextData = makeDefaultFormattedData(value)
   if (metadata) {
     const {
       type,
@@ -139,11 +144,7 @@ export const formatValue = (
       abbrValue = value
     } else if (type === 'currency') {
       const currency = unit ? unit : ''
-      // if (currency === '$') {
       prefix = currency
-      // } else {
-      //   suffix = currency
-      // }
       formattedValue = numeral(value).format(`0,0${precisionFormat}`)
       roundedValue = numeral(value).format('0,0')
       abbrValue = numeral(value).format('0.00a')
