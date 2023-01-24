@@ -66,10 +66,14 @@ export const DashboardTextContainer = ({
   return (
     <View style={{ alignItems: 'center' }}>
 <<<<<<< HEAD
+<<<<<<< HEAD
       {calculateValues&& (
 =======
       {values.length >= 1 && (
 >>>>>>> 3107786 (piechart legent view issue fixed , cards aligned center in dashboard , table aligned dynamically if it have one or two columns , expand icon removed from dashboard , expand and collapse align issue fixed , padding adjusted for dashboards to view y axis)
+=======
+      {calculateValues&& (
+>>>>>>> 4696463 (horizontal scroll issue fixed and white screen issue fixed in my dashboard.)
         <Text margin-4 style={[Fonts.textSmall, styles.message]}>
           <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>
             {prefix}
@@ -97,6 +101,7 @@ export const DashboardTextContainer = ({
         </Text>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         {calculateValues&& (
           <Text style={styles.TextStyle}>{NO_DATA_AVAILABLE}</Text>
 =======
@@ -112,6 +117,10 @@ export const DashboardTextContainer = ({
             {NO_DATA_AVAILABLE}
           </Text>
 >>>>>>> 3107786 (piechart legent view issue fixed , cards aligned center in dashboard , table aligned dynamically if it have one or two columns , expand icon removed from dashboard , expand and collapse align issue fixed , padding adjusted for dashboards to view y axis)
+=======
+        {calculateValues&& (
+          <Text style={styles.TextStyle}>{NO_DATA_AVAILABLE}</Text>
+>>>>>>> 4696463 (horizontal scroll issue fixed and white screen issue fixed in my dashboard.)
         )}
       </View>
     </View>
