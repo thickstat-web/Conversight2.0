@@ -40,6 +40,7 @@ import {
   DATA_EXPLORER,
   DASHBOARD_SCREEN,
   WEB_EXPLORER,
+  LAUNCHPAD_SCREEN,
 } from '@/Constants/screens'
 import LoginNavigator from '@/Navigators/LoginNavigator'
 import DrawerNavigator from '@/Navigators/DrawerNavigator'
@@ -59,6 +60,7 @@ import { setModalSearchOpen } from '@/Store/Faq'
 import InsightsWT from '@/Containers/WalkThrough/InsightsWT'
 import DemoRequested from '@/Containers/DemoRequested'
 import DashboardContainer from '@/Containers/DashboardContainer'
+import LaunchpadContainer from '@/Containers/LaunchpadContainer'
 
 const Stack = createStackNavigator()
 
@@ -260,6 +262,23 @@ const ApplicationNavigator = () => {
                     headerTitleAlign: 'center',
                     headerBackImage: renderBackArrow,
                     headerShown: true,
+                  }}
+                />
+                <Stack.Screen
+                  name={LAUNCHPAD_SCREEN}
+                  component={LaunchpadContainer}
+                  options={{
+                    title: 'Lauchpad',
+                    headerTitleAlign: 'center',
+                    headerTransparent: false,
+                    headerBackImage: renderWhiteBackArrow,
+                    headerTintColor: Colors.WHITE,
+                    headerStyle: {
+                      backgroundColor: Colors.GREEN_MAIN,
+                    },
+                    headerShown: true,
+                    headerBackTitleVisible: false,
+                    animationEnabled: true,
                   }}
                 />
 

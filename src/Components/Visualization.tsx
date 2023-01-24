@@ -7,7 +7,12 @@ import { DEFAULT_TABLE_RENDER_ROWS } from '@/Config'
 import { AdaptiveCard } from '@/Components'
 import ChartContainer from '@/Containers/Chat/ChartContainer'
 import TableContainer from '@/Containers/Chat/TableContainer'
-import { ChartType, ConverseData, TextData } from '@/Types/ChatMessage'
+import {
+  ChartType,
+  ConverseData,
+  RawConverseData,
+  TextData,
+} from '@/Types/ChatMessage'
 import { Colors } from '@/Theme/Variables'
 import { ScrollView } from 'react-native-gesture-handler'
 
@@ -46,17 +51,21 @@ export const DashboardTextContainer = ({
   title,
   isError,
   values,
+  item,
 }: {
   data: TextData
   title: string
   isError: boolean
   values: Array<Record<string, any>>
+  item: RawConverseData
 }) => {
   const { Colors, Fonts } = useTheme()
   const { prefix, abbrValue, suffix } = data
+
+  let calculateValues=values?.length>=1
   return (
     <View style={{ alignItems: 'center' }}>
-      {values.length >= 1 && (
+      {calculateValues&& (
         <Text margin-4 style={[Fonts.textSmall, styles.message]}>
           <Text style={{ color: Colors.GREEN_MAIN, fontSize: 16 }}>
             {prefix}
@@ -77,20 +86,14 @@ export const DashboardTextContainer = ({
           style={{ fontSize: 16, color: Colors.GREEN_DARK }}
           numberOfLines={1}
         >
-          {isError ? '' : title}
+            <Text style={styles.TextStyle}>
+          {title}
+              {(isError && item?.text)}
+            </Text>
         </Text>
 
-        {values.length == 0 && (
-          <Text
-            style={{
-              padding: 12,
-              textAlign: 'center',
-              fontSize: 16,
-              color: Colors.GREEN_DARK,
-            }}
-          >
-            {NO_DATA_AVAILABLE}
-          </Text>
+        {calculateValues&& (
+          <Text style={styles.TextStyle}>{NO_DATA_AVAILABLE}</Text>
         )}
       </View>
     </View>
@@ -277,7 +280,7 @@ export class DashboardVisualizer extends Visualizer {
           title={message}
           isError={isError}
           values={values}
-        />
+        /> 
       )
     } else if (this.isChart()) {
       content = (
@@ -433,5 +436,10 @@ const styles = StyleSheet.create({
   },
   bottomCount: {
     color: Colors.GREEN_MAIN,
+  },
+  TextStyle: {
+    padding: 12,
+    textAlign: 'center',
+    color: Colors.GREEN_DARK,
   },
 })
