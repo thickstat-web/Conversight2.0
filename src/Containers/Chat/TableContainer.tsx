@@ -28,15 +28,20 @@ interface ItemProps {
 }
 
 const textdataFormatter = (value: string, isNumeric: boolean) => (
-  <Text style={[styles.cell, isNumeric && styles.number]}>{value}</Text>
+  <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
+    {value}
+  </Text>
 )
 const { width: screenWidth } = Dimensions.get('screen')
 
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
-  const columnWidth = columns.length <= 2 ? 160 : 120
-  const calculateValueLength = values.length * 0.28
-  const ROW_HEIGHT = 40 + calculateValueLength
-  let widthArr = new Array(columns.length).fill(columnWidth)
+  const calculateColumnWidth = (columns: string[]): number[] => {
+    return columns.map(name =>
+      name.match(/desc|remark|comment|note|detail/gi)?.length ? 400 : 120,
+    )
+  }
+  const ROW_HEIGHT = 40
+  let widthArr = calculateColumnWidth(columns)
   const { Layout, Colors, Common, Fonts } = useTheme()
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
