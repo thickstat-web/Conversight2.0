@@ -28,16 +28,14 @@ interface ItemProps {
 }
 
 const textdataFormatter = (value: string, isNumeric: boolean) => (
-  <Text numberOfLines={1} style={[styles.cell, isNumeric && styles.number]}>
-    {value}
-  </Text>
+  <Text style={[styles.cell, isNumeric && styles.number]}>{value}</Text>
 )
 const { width: screenWidth } = Dimensions.get('screen')
 
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
-  //console.log("The Table Values Are "+values.length)
   const columnWidth = columns.length <= 2 ? 160 : 120
-  const ROW_HEIGHT = 40
+  const calculateValueLength = values.length * 0.28
+  const ROW_HEIGHT = 40 + calculateValueLength
   let widthArr = new Array(columns.length).fill(columnWidth)
   const { Layout, Colors, Common, Fonts } = useTheme()
   const [direction, setDirection] = useState<string | null>(null)
@@ -110,6 +108,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       <View style={{ paddingBottom: rowLength >= 15 ? 90 : 0 }}>
         <FlatList
           data={rows}
+          stickyHeaderIndices={[0]}
           initialNumToRender={20}
           removeClippedSubviews={true}
           maxToRenderPerBatch={100}
