@@ -110,6 +110,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       <View style={{ paddingBottom: rowLength >= 15 ? 90 : 0 }}>
         <FlatList
           data={rows}
+          stickyHeaderIndices={[0]}
           initialNumToRender={20}
           removeClippedSubviews={true}
           maxToRenderPerBatch={100}
