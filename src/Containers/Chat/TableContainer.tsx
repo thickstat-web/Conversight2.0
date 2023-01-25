@@ -34,12 +34,19 @@ const textdataFormatter = (value: string, isNumeric: boolean) => (
 )
 const { width: screenWidth } = Dimensions.get('screen')
 
+/**
+ * Calculate column width and increase the those columns of type 'desc|remark|comment|note|detail'
+ *
+ * @param columns column names
+ * @returns calculated column width
+ */
+const calculateColumnWidth = (columns: string[]): number[] => {
+  return columns.map(name =>
+    name.match(/desc|remark|comment|note|detail/gi)?.length ? 400 : 120,
+  )
+}
+
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
-  const calculateColumnWidth = (columns: string[]): number[] => {
-    return columns.map(name =>
-      name.match(/desc|remark|comment|note|detail/gi)?.length ? 400 : 120,
-    )
-  }
   const ROW_HEIGHT = 40
   let widthArr = calculateColumnWidth(columns)
   const { Layout, Colors, Common, Fonts } = useTheme()
