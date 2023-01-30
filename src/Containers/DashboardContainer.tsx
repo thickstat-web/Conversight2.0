@@ -1,11 +1,5 @@
 import React, { useState } from 'react'
-import {
-  FlatList,
-  Platform,
-  Pressable,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native'
+import { FlatList, Pressable, StyleSheet, ViewStyle } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { useTheme, useAppSelector, usePinboardData } from '@/Hooks'
@@ -51,10 +45,7 @@ const Card = React.memo(({ item, style }: CardProps) => {
   isDataEmpty = data?.visualFormats.length === 0 || data.values.length === 0
 
   const handleOpenDataExplorer = () => {
-    // if (Platform.OS === 'android' || !move)
-     {
-      navigate(DATA_EXPLORER, { id: data.id, title })
-    }
+    navigate(DATA_EXPLORER, { id: data.id, title })
   }
 
   return (
