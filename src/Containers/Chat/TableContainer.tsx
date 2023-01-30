@@ -6,14 +6,14 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native'
-import { View } from 'react-native-ui-lib'
 import { Table, Row } from 'react-native-table-component'
 import _ from 'lodash'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 import { properCase, getFormattedRowData } from '@/Utils/common'
-import { useTheme } from '@/Hooks'
+
+const ROW_HEIGHT = 40
 
 interface TableProps {
   id: string
@@ -54,9 +54,14 @@ const calculateColumnWidth = (columns: string[]): number[] => {
   )
 }
 
+const getItemLayout = (data: any, index: number) => ({
+  length: ROW_HEIGHT,
+  offset: ROW_HEIGHT * index,
+  index,
+})
+
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
-  const ROW_HEIGHT = 40
-  let widthArr = calculateColumnWidth(columns)
+  const widthArr = calculateColumnWidth(columns)
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
   const [rows, setRows] = useState(values)
@@ -75,7 +80,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     setRows(sortedData)
   }
 
-  const headerList = columns.map(column => {
+  const renderedHeader = columns.map(column => {
     const columnLabel =
       columnMetadata && columnMetadata[column]
         ? columnMetadata[column].alias
@@ -112,12 +117,6 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     />
   )
 
-  const getItemLayout = (data: any, index: number) => ({
-    length: ROW_HEIGHT,
-    offset: ROW_HEIGHT * index,
-    index,
-  })
-
   return (
     <FlatList
       style={styles.tableWrapper}
@@ -131,7 +130,11 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       // legacyImplementation={true}
       ListHeaderComponent={
         <Table>
-          <Row data={headerList} widthArr={widthArr} style={styles.header} />
+          <Row
+            data={renderedHeader}
+            widthArr={widthArr}
+            style={styles.header}
+          />
         </Table>
       }
       showsVerticalScrollIndicator={false}
