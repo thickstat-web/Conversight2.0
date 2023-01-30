@@ -41,8 +41,16 @@ const { width: screenWidth } = Dimensions.get('screen')
  * @returns calculated column width
  */
 const calculateColumnWidth = (columns: string[]): number[] => {
+  let defaultWidth: number = 120
+  if (columns.length === 1) {
+    defaultWidth = screenWidth * 0.96
+  } else if (columns.length === 2) {
+    defaultWidth = screenWidth / 2.1
+  }
   return columns.map(name =>
-    name.match(/desc|remark|comment|note|detail/gi)?.length ? 400 : 120,
+    name.match(/desc|remark|comment|note|detail/gi)?.length
+      ? 400
+      : defaultWidth,
   )
 }
 
@@ -131,9 +139,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
             <Table>
               <Row
                 data={headerList}
-                {...((headerListLength == 2 &&
-                  (widthArr = [screenWidth / 2.1, screenWidth / 2.1])) ||
-                  (headerListLength == 1 && (widthArr = [screenWidth * 0.96])))}
+                widthArr={widthArr}
                 style={styles.header}
               />
             </Table>
