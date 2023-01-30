@@ -57,10 +57,11 @@ const calculateColumnWidth = (columns: string[]): number[] => {
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const ROW_HEIGHT = 40
   let widthArr = calculateColumnWidth(columns)
-  const { Layout, Colors, Common, Fonts } = useTheme()
   const [direction, setDirection] = useState<string | null>(null)
   const [selectedColumn, setSelectedColumn] = useState<string | null>(null)
   const [rows, setRows] = useState(values)
+  const rowLength = rows.length
+  const paddingBottom = rowLength >= 15 ? 150 : 0
 
   useEffect(() => {
     setRows(values)
@@ -111,7 +112,6 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     />
   )
 
-  const rowLength = rows.length
   const getItemLayout = (data: any, index: number) => ({
     length: ROW_HEIGHT,
     offset: ROW_HEIGHT * index,
@@ -121,7 +121,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   return (
     <FlatList
       style={styles.tableWrapper}
-      contentContainerStyle={{ paddingBottom: rowLength >= 15 ? 150 : 0 }}
+      contentContainerStyle={{ paddingBottom }}
       data={rows}
       stickyHeaderIndices={[0]}
       initialNumToRender={25}
@@ -146,7 +146,7 @@ export default React.memo(TableContainer)
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     // alignItems: 'center',
     // borderWidth: 2,
