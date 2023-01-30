@@ -92,6 +92,7 @@ const TableOrAdaptiveCard = memo(
     //console.log(JSON.stringify(filteredValues, null, 2))
     return (
       <View
+        flex
         style={{
           backgroundColor: Colors.WHITE,
           paddingHorizontal: 8,
@@ -152,23 +153,17 @@ const TableOrAdaptiveCard = memo(
             paddingBottom: 5,
           }}
         >
-          {
-            <SearchBar
-              searchText={searchText}
-              setSearchText={setSearchText}
-              placeholderText={'Search values...'}
-              selectionColor={Colors.GREEN_LIGHT}
-              placeholderTextColor={Colors.DARK}
-              cursorColor={Colors.GREEN_LIGHT}
-              textColor={Colors.TEXT_BLACK}
-              iconColor={Colors.DARK}
-              style={{
-                marginHorizontal: 2,
-                backgroundColor: '#EAFAEA',
-                borderColor: 'green',
-              }}
-            />
-          }
+          <SearchBar
+            searchText={searchText}
+            setSearchText={setSearchText}
+            placeholderText={'Search values...'}
+            selectionColor={Colors.GREEN_LIGHT}
+            placeholderTextColor={Colors.DARK}
+            cursorColor={Colors.GREEN_LIGHT}
+            textColor={Colors.TEXT_BLACK}
+            iconColor={Colors.DARK}
+            style={styles.searchbar}
+          />
         </View>
         {table ? (
           <ScrollView
@@ -197,18 +192,13 @@ const TableOrAdaptiveCard = memo(
                 />
               </View>
             )}
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              nestedScrollEnabled={true}
-            >
-              <AdaptiveCardListContainer
-                id={id}
-                columns={columns}
-                columnMetadata={columnMetadata}
-                values={filteredValues}
-                expandAll={expandedAll}
-              />
-            </ScrollView>
+            <AdaptiveCardListContainer
+              id={id}
+              columns={columns}
+              columnMetadata={columnMetadata}
+              values={filteredValues}
+              expandAll={expandedAll}
+            />
           </>
         )}
       </View>
@@ -527,6 +517,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 6,
     paddingHorizontal: 16,
+  },
+  searchbar: {
+    marginHorizontal: 2,
+    backgroundColor: '#EAFAEA',
+    borderColor: 'green',
   },
   expandall: {
     flexDirection: 'column',

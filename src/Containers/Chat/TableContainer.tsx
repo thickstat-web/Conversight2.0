@@ -79,11 +79,6 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       columnMetadata && columnMetadata[column]
         ? columnMetadata[column].alias
         : column
-    // console.log("columnLabel values are "+columnLabel)
-    // console.log("columnLabel column values are "+columnMetadata[column])
-    // console.log("column label column values are "+JSON.stringify(columnMetadata[column]))
-    // console.log("column alias values are "+columnMetadata[column].alias)
-    // console.log("column meta data is "+JSON.stringify(columnMetadata));
     return (
       <TouchableOpacity
         style={styles.headerLabel}
@@ -122,35 +117,28 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     offset: ROW_HEIGHT * index,
     index,
   })
-  const headerListLength = headerList.length
+
   return (
-    <View style={styles.container}>
-      <View style={{ paddingBottom: rowLength >= 15 ? 90 : 0 }}>
-        <FlatList
-          data={rows}
-          stickyHeaderIndices={[0]}
-          initialNumToRender={20}
-          removeClippedSubviews={true}
-          maxToRenderPerBatch={100}
-          updateCellsBatchingPeriod={50}
-          legacyImplementation={true}
-          style={styles.tableWrapper}
-          ListHeaderComponent={
-            <Table>
-              <Row
-                data={headerList}
-                widthArr={widthArr}
-                style={styles.header}
-              />
-            </Table>
-          }
-          showsVerticalScrollIndicator={false}
-          getItemLayout={getItemLayout}
-          renderItem={renderItem}
-          listKey={id}
-        />
-      </View>
-    </View>
+    <FlatList
+      style={styles.tableWrapper}
+      contentContainerStyle={{ paddingBottom: rowLength >= 15 ? 150 : 0 }}
+      data={rows}
+      stickyHeaderIndices={[0]}
+      initialNumToRender={25}
+      maxToRenderPerBatch={250}
+      updateCellsBatchingPeriod={20}
+      removeClippedSubviews={true}
+      // legacyImplementation={true}
+      ListHeaderComponent={
+        <Table>
+          <Row data={headerList} widthArr={widthArr} style={styles.header} />
+        </Table>
+      }
+      showsVerticalScrollIndicator={false}
+      getItemLayout={getItemLayout}
+      renderItem={renderItem}
+      listKey={id}
+    />
   )
 }
 
@@ -158,7 +146,6 @@ export default React.memo(TableContainer)
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
     backgroundColor: '#fff',
     borderRadius: 8,
     // alignItems: 'center',

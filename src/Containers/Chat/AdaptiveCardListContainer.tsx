@@ -46,31 +46,23 @@ function AdaptiveCardListContainer({
   expandAll,
 }: AdaptiveCardListContainerProps) {
   return (
-    <View key={id} style={styles.container}>
-      <FlatList
-        data={values}
-        contentContainerStyle={{ flex: 1 }}
-        renderItem={renderAdaptiveCardItem(columns, columnMetadata, expandAll)}
-        initialNumToRender={25}
-        keyExtractor={keyExtractor}
-        listKey={id}
-        ItemSeparatorComponent={Separator}
-        style={{ paddingBottom: 200 }}
-      />
-    </View>
+    <FlatList
+      contentContainerStyle={styles.containerStyle}
+      data={values}
+      renderItem={renderAdaptiveCardItem(columns, columnMetadata, expandAll)}
+      showsVerticalScrollIndicator={false}
+      initialNumToRender={25}
+      maxToRenderPerBatch={25}
+      removeClippedSubviews={true}
+      keyExtractor={keyExtractor}
+      listKey={id}
+      ItemSeparatorComponent={Separator}
+    />
   )
 }
 
 export default React.memo(AdaptiveCardListContainer)
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  cell: {
-    marginHorizontal: 6,
-    color: '#595959',
-  },
-  number: { textAlign: 'right' },
+  containerStyle: { paddingBottom: 150 },
 })
