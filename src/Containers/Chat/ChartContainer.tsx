@@ -227,7 +227,7 @@ const AreaChart = ({
             onZoomDomainChange={setSelectedDomain}
           />
         }
-        padding={{ left: 48, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
+        padding={{ left: 58, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
       >
         <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
@@ -245,7 +245,7 @@ const AreaChart = ({
         />
         <VictoryAxis // Y Axis Conatiner
           dependentAxis
-          axisLabelComponent={<VictoryLabel dy={-8} />}
+          axisLabelComponent={<VictoryLabel dy={-16} />}
           label={yAxisLabel}
           tickFormat={x => numeral(x).format('0a')}
           tickLabelComponent={<VictoryLabel dx={8} textAnchor={'end'} />}
@@ -334,7 +334,7 @@ const LineChart = ({
             onZoomDomainChange={setSelectedDomain}
           />
         }
-        padding={{ left: 48, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
+        padding={{ left: 58, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
       >
         <VictoryAxis // X Axis Container
           axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
@@ -352,7 +352,7 @@ const LineChart = ({
         />
         <VictoryAxis // Y Axis Conatiner
           dependentAxis
-          axisLabelComponent={<VictoryLabel dy={-8} />}
+          axisLabelComponent={<VictoryLabel dy={-16} />}
           label={yAxisLabel}
           tickFormat={x => numeral(x).format('0a')}
           tickLabelComponent={<VictoryLabel dx={8} textAnchor={'end'} />}
@@ -436,7 +436,7 @@ const BarChart = ({
             onZoomDomainChange={setSelectedDomain}
           />
         }
-        padding={{ left: 48, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
+        padding={{ left: 58, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
         // style={{ parent: { backgroundColor: 'yellow' } }}
       >
         <VictoryAxis // X Axis Container
@@ -455,7 +455,7 @@ const BarChart = ({
         />
         <VictoryAxis // Y Axis Conatiner
           dependentAxis
-          axisLabelComponent={<VictoryLabel dy={-8} />}
+          axisLabelComponent={<VictoryLabel dy={-16} />}
           label={yAxisLabel}
           tickFormat={x => numeral(x).format('0a')}
           tickLabelComponent={<VictoryLabel dx={8} textAnchor={'end'} />}
