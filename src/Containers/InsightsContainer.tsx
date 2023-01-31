@@ -93,7 +93,7 @@ const TagFilter = React.memo(
       const tagsCount = tag === VIEW_ALL ? count : tagWithIndexes[tag].length
 
       return (
-        <Pressable
+        <TouchableOpacity
           onPress={toggleTagSelection}
           style={[styles.filterTag, selected && styles.selectedTagWrapper]}
         >
@@ -101,7 +101,7 @@ const TagFilter = React.memo(
             {properCase(tag)}
             <Text style={styles.tagText}> ({tagsCount})</Text>
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       )
     }
 
@@ -181,10 +181,10 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
 
   return (
     <View style={styles.visCard}>
-      <Pressable
+      <TouchableOpacity
         disabled={followupLoading ? true : false}
         style={{ flex: 1, flexDirection: 'row', paddingHorizontal: 8 }}
-        onPress={isDataEmpty ? null : handleOpenExplorer}
+        onPress={isDataEmpty ? undefined : handleOpenExplorer}
       >
         <View style={{ flex: 1 }}>
           <Text style={styles.cardTitle}>
@@ -208,7 +208,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
             />
           )
         )}
-      </Pressable>
+      </TouchableOpacity>
       {followupLoading ? (
         <LoadingCard />
       ) : type === 'ConverseData' && data ? (
