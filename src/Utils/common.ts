@@ -3,9 +3,9 @@ import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import { TextData } from '@/Types/ChatMessage'
 import moment from 'moment'
 
-export const cleanseColumn = (str: string) => {
+export const cleanseColumn = (str: string, replaceChar: string = '_') => {
   if (str) {
-    str = str.replace(/[. \- %()#&>]/g, '_')
+    str = str.replace(/[. \- %()#&>_]/g, replaceChar)
     const rex = new RegExp('^[0-9]')
     str = rex.test(str) ? `_${str}` : str
   }
@@ -50,7 +50,7 @@ export const properCase = (text: string, onlyFirstChar = false) => {
       result = text.charAt(0).toUpperCase() + text.slice(1)
     } else {
       result = text.replace(/\w\S*/g, str => {
-        return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase()
+        return str.charAt(0).toUpperCase() + str.substring(1).toLowerCase()
       })
     }
   } catch (error) {

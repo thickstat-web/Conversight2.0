@@ -11,7 +11,7 @@ import _ from 'lodash'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { properCase, getFormattedRowData } from '@/Utils/common'
+import { cleanseColumn, getFormattedRowData } from '@/Utils/common'
 
 const ROW_HEIGHT = 40
 
@@ -80,18 +80,23 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     setRows(sortedData)
   }
 
-  const renderedHeader = columns.map(column => {
-    const columnLabel =
-      columnMetadata && columnMetadata[column]
+  const getColumnDisplayName = (column: string) => {
+    const columnName =
+      columnMetadata && columnMetadata[column] && columnMetadata[column].alias
         ? columnMetadata[column].alias
-        : column
+        : cleanseColumn(column, ' ')
+    return columnName.toUpperCase()
+  }
+
+  const renderedHeader = columns.map(column => {
+    const columnName = getColumnDisplayName(column)
     return (
       <TouchableOpacity
         style={styles.headerLabel}
         onPress={() => sortTable(column)}
       >
         <Text style={styles.headerText}>
-          {properCase(columnLabel) + ' '}
+          {columnName + ' '}
           {selectedColumn === column &&
             (direction === 'desc' ? <DownArrow /> : <UpArrow />)}
         </Text>

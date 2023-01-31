@@ -130,8 +130,10 @@ const normalizeConverseData = (
   const valueArr = JSON.parse(decoded)
 
   // Cleanse column names
-  const cleansedColumns = columns.map(cleanseColumn)
-  const cleansedOrderedColumns = orderedColumns.map(cleanseColumn)
+  const cleansedColumns = columns.map(column => cleanseColumn(column))
+  const cleansedOrderedColumns = orderedColumns.map(column =>
+    cleanseColumn(column),
+  )
 
   // Cleanse and find numberic columns from metadata
   const col_meta: MetaData = {}
