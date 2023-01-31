@@ -1,7 +1,7 @@
 import numeral from 'numeral'
+import moment from 'moment'
 import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import { TextData } from '@/Types/ChatMessage'
-import moment from 'moment'
 
 export const cleanseColumn = (str: string, replaceChar: string = '_') => {
   if (str) {
@@ -61,7 +61,7 @@ export const properCase = (text: string, onlyFirstChar = false) => {
 }
 
 const replaceDateFormats = function (str: string) {
-  if (str)
+  if (str) {
     return (
       str
         .toLowerCase()
@@ -74,7 +74,9 @@ const replaceDateFormats = function (str: string) {
         .replace('%m', 'mm')
         .replace('%s', 'ss')
     )
-  else return str
+  } else {
+    return str
+  }
 }
 
 const makeDefaultFormattedData = (value: any): TextData => {
@@ -271,4 +273,15 @@ export const buildOrderedColumns = (
   const dim = colType?.dim ?? []
   const metrics = colType?.metrics ?? []
   return isColumnReorder ? ([] as string[]).concat(date, dim, metrics) : columns
+}
+
+export const getDisplayName = (
+  column: string,
+  columnMetadata: ColumnMetadata,
+) => {
+  const columnName =
+    columnMetadata && columnMetadata[column] && columnMetadata[column].alias
+      ? columnMetadata[column].alias
+      : cleanseColumn(column, ' ')
+  return columnName.trim()
 }

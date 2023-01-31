@@ -5,7 +5,7 @@ import { COLLAPSE, DEFAULT_ADAPTIVE_CARD_ROWS, EXPAND } from '@/Config'
 import { useTheme } from '@/Hooks'
 import { Colors } from '@/Theme/Variables'
 import { ExpandButton } from '@/Components'
-import { getFormattedRowData, properCase } from '@/Utils/common'
+import { getDisplayName, getFormattedRowData } from '@/Utils/common'
 import { ColumnMetadata } from '@/Types/ChatHistory'
 
 export interface AdaptiveCardProps {
@@ -43,24 +43,21 @@ const AdaptiveCard = ({
     return columns
       .slice(0, expanded ? totalRows : DEFAULT_ADAPTIVE_CARD_ROWS)
       .map((col, colIndex) => {
+        const columnName = getDisplayName(col, columnMetadata).toUpperCase()
         const val = formattedValues[colIndex]
         return (
           <View
-            key={colIndex}
+            key={`${id}-${colIndex}`}
             style={[
               styles.adaptiveCardItem,
               { backgroundColor: colIndex % 2 === 0 ? '#f0fcf4' : '' },
             ]}
           >
-            {columnMetadata[col] && (
-              <View style={styles.titleColumn}>
-                <Text
-                  style={[{ color: Colors.GREEN_MAIN }, styles.propertyName]}
-                >
-                  {properCase(columnMetadata[col].alias)}
-                </Text>
-              </View>
-            )}
+            <View style={styles.titleColumn}>
+              <Text style={[{ color: Colors.GREEN_MAIN }, styles.propertyName]}>
+                {columnName}
+              </Text>
+            </View>
 
             <View style={styles.valueColumn}>
               <Text
@@ -81,6 +78,7 @@ const AdaptiveCard = ({
     columns,
     expanded,
     formattedValues,
+    id,
     totalRows,
   ])
 
@@ -147,9 +145,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   propertyName: {
+    fontSize: 13,
     fontWeight: '500',
   },
   propertyValue: {
+    fontSize: 13,
     color: '#595959',
   },
   bottomCount: {

@@ -11,7 +11,7 @@ import _ from 'lodash'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import UpArrow from '@/Assets/Images/drawer/up-arrow.svg'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { cleanseColumn, getFormattedRowData } from '@/Utils/common'
+import { getDisplayName, getFormattedRowData } from '@/Utils/common'
 
 const ROW_HEIGHT = 40
 
@@ -60,6 +60,9 @@ const getItemLayout = (data: any, index: number) => ({
   index,
 })
 
+const SortArrow = ({ direction }: { direction: string | null }) =>
+  direction === 'asc' ? <UpArrow /> : <DownArrow />
+
 function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const widthArr = calculateColumnWidth(columns)
   const [direction, setDirection] = useState<string | null>(null)
@@ -80,29 +83,26 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     setRows(sortedData)
   }
 
-  const getColumnDisplayName = (column: string) => {
-    const columnName =
-      columnMetadata && columnMetadata[column] && columnMetadata[column].alias
-        ? columnMetadata[column].alias
-        : cleanseColumn(column, ' ')
-    return columnName.toUpperCase()
-  }
-
-  const renderedHeader = columns.map(column => {
-    const columnName = getColumnDisplayName(column)
-    return (
-      <TouchableOpacity
-        style={styles.headerLabel}
-        onPress={() => sortTable(column)}
-      >
-        <Text style={styles.headerText}>
-          {columnName + ' '}
-          {selectedColumn === column &&
-            (direction === 'desc' ? <DownArrow /> : <UpArrow />)}
-        </Text>
-      </TouchableOpacity>
-    )
-  })
+  const getRendredHeader = () =>
+    columns.map(column => {
+      const columnName = getDisplayName(column, columnMetadata).toUpperCase()
+      return (
+        <TouchableOpacity
+          style={styles.headerLabel}
+          onPress={() => sortTable(column)}
+        >
+          <Text
+            style={[
+              styles.headerText,
+              selectedColumn === column && { paddingRight: 2 },
+            ]}
+          >
+            {columnName}
+          </Text>
+          {selectedColumn === column && <SortArrow direction={direction} />}
+        </TouchableOpacity>
+      )
+    })
 
   const renderItem = ({ item: row, index }: ItemProps) => (
     <Row
@@ -129,14 +129,14 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       data={rows}
       stickyHeaderIndices={[0]}
       initialNumToRender={25}
-      maxToRenderPerBatch={250}
+      // maxToRenderPerBatch={250}
       updateCellsBatchingPeriod={20}
       removeClippedSubviews={true}
       // legacyImplementation={true}
       ListHeaderComponent={
         <Table>
           <Row
-            data={renderedHeader}
+            data={getRendredHeader()}
             widthArr={widthArr}
             style={styles.header}
           />
@@ -174,15 +174,18 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerText: {
     // fontFamily: 'Montserrat-Regular',
+    fontSize: 13,
     textAlign: 'center',
     color: '#4d4d4d',
   },
   cell: {
+    fontSize: 13,
     marginHorizontal: 6,
     color: '#595959',
   },

@@ -1,6 +1,5 @@
 import React, { memo, useLayoutEffect, useState } from 'react'
 import {
-  FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
@@ -9,7 +8,7 @@ import {
 } from 'react-native'
 import { ActionSheet, Text, TouchableOpacity, View } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
-import { AdaptiveCard, Button, ExpandButton, SearchBar } from '@/Components'
+import { AdaptiveCard, ExpandButton, SearchBar } from '@/Components'
 import { useAppSelector, useTheme } from '@/Hooks'
 import { properCase } from '@/Utils/common'
 import { selectConverseData } from '@/Store/App'
@@ -158,10 +157,10 @@ const TableOrAdaptiveCard = memo(
             setSearchText={setSearchText}
             placeholderText={'Search values...'}
             selectionColor={Colors.GREEN_LIGHT}
-            placeholderTextColor={Colors.DARK}
+            placeholderTextColor={Colors.GREEN_MAIN}
             cursorColor={Colors.GREEN_LIGHT}
             textColor={Colors.TEXT_BLACK}
-            iconColor={Colors.DARK}
+            iconColor={Colors.GREEN_MAIN}
             style={styles.searchbar}
           />
         </View>
@@ -521,7 +520,7 @@ const styles = StyleSheet.create({
   searchbar: {
     marginHorizontal: 2,
     backgroundColor: '#EAFAEA',
-    borderColor: 'green',
+    borderColor: Colors.GREEN_MAIN,
   },
   expandall: {
     flexDirection: 'column',
