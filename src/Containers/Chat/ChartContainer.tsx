@@ -90,8 +90,7 @@ const colorScale = [
 ]
 
 const isIOS = Platform.OS === 'ios'
-const XDOMAIN: { x: number[] } = { x: [0, 18] }
-
+const defaultXvalues = 18
 const getxAxisLabelHeight = (
   values: Array<Record<string, any>>,
   xAxisField: string,
@@ -210,6 +209,9 @@ const AreaChart = ({
   const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
+  const calculateXvalues = values.length
+  const calXval = calculateXvalues >= 18 ? defaultXvalues : calculateXvalues
+  const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
   return (
     <>
       <VictoryChart
@@ -317,6 +319,9 @@ const LineChart = ({
   const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
+  const calculateXvalues = values.length
+  const calXval = calculateXvalues >= 18 ? defaultXvalues : calculateXvalues
+  const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
   return (
     <>
       <VictoryChart
@@ -419,6 +424,9 @@ const BarChart = ({
   const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
+  const calculateXvalues = values.length
+  const calXval = calculateXvalues >= 18 ? defaultXvalues : calculateXvalues
+  const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
   return (
     <>
       <VictoryChart
