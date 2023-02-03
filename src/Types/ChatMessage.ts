@@ -66,6 +66,23 @@ export interface ConverseData {
   visualFormats: VisualFormat[]
 }
 
+export interface Clarification {
+  title: string
+  suggestions: string[]
+}
+
+export enum AthenaResponseType {
+  CONVERSE,
+  CLARIFICATION,
+  ATHENA_ERROR,
+}
+
+export interface AthenaResponse {
+  type: AthenaResponseType
+  error?: string
+  data?: Clarification | RawConverseData
+}
+
 // /* Athena Failure Message format */
 // export interface AthenaFailureMessage extends BaseMessage {
 //   isFailed: boolean

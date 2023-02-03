@@ -23,7 +23,7 @@ export interface SendChatMessage {
 }
 
 // ---- Send Chat Response - Start ----
-export interface AdditionalData2 { }
+export interface AdditionalData2 {}
 
 export interface I102 {
   additional_data: AdditionalData2
@@ -38,7 +38,7 @@ export interface I102 {
   unit: string
 }
 
-export interface AdditionalData3 { }
+export interface AdditionalData3 {}
 
 export interface By {
   additional_data: AdditionalData3
@@ -76,7 +76,7 @@ export interface Spend {
   unit: string
 }
 
-export interface AdditionalData5 { }
+export interface AdditionalData5 {}
 
 export interface Top {
   additional_data: AdditionalData5
@@ -154,7 +154,7 @@ export interface POITEMTotalcost {
   unit: string
 }
 
-export interface Entities { }
+export interface Entities {}
 
 export interface AdditionalData8 {
   is_update: boolean
@@ -180,7 +180,7 @@ export interface ColumnMetadata {
   po_remittoname: PoRemittoname
 }
 
-export interface DrillDown { }
+export interface DrillDown {}
 
 export interface TimeTaken {
   checkCache: number
@@ -192,12 +192,19 @@ export interface TimeTaken {
   totalProcess: number
 }
 
+export interface Clarify {
+  info: string
+  tags: any
+  text: string
+}
+
 export interface Data {
   additional_data: AdditionalData
   backendSqlForm: string
   cacheKey: string
   cachedData: boolean
   chart: boolean
+  clarify: Clarify[]
   code: string
   colType: ColType
   column_metadata: ColumnMetadata
@@ -231,6 +238,7 @@ export interface Data {
 }
 
 export interface Response {
+  text?: string
   data: Data
 }
 
