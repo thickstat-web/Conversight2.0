@@ -202,8 +202,8 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
           !isDataEmpty && (
             <Icon
               style={styles.icon}
-              name="expand-outline"
-              size={20}
+              name="search-circle-sharp"
+              size={24}
               color={Colors.GREEN_DARK}
             />
           )
@@ -459,6 +459,7 @@ const styles = StyleSheet.create({
   },
   icon: {
     padding: 4,
+    paddingTop: 2,
     paddingLeft: 8,
   },
   insightsContainer: {
