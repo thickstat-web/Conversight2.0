@@ -210,7 +210,8 @@ const AreaChart = ({
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
   const calculateXvalues = values.length
-  const calXval = calculateXvalues >= 18 ? defaultXvalues : calculateXvalues
+  const calXval =
+    calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
   return (
     <>
@@ -320,7 +321,8 @@ const LineChart = ({
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
   const calculateXvalues = values.length
-  const calXval = calculateXvalues >= 18 ? defaultXvalues : calculateXvalues
+  const calXval =
+    calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
   return (
     <>
@@ -425,7 +427,8 @@ const BarChart = ({
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
 
   const calculateXvalues = values.length
-  const calXval = calculateXvalues >= 18 ? defaultXvalues : calculateXvalues
+  const calXval =
+    calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
   return (
     <>
