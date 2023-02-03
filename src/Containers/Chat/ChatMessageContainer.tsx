@@ -45,7 +45,11 @@ const UserMessageContainer = React.memo(
   },
 )
 
-export const FailureMessageContainer = ({ message }: { message: string }) => {
+export const FailureMessageContainer = ({
+  message,
+}: {
+  message: ConverseData
+}) => {
   const { Colors, Fonts } = useTheme()
   return (
     <View style={styles.athenaMessageContainer}>
@@ -146,7 +150,7 @@ const renderItem =
         <AthenaMessageContainer key={id} message={message as ConverseData} />
       )
     } else {
-      component = <FailureMessageContainer message={NO_DATA_AVAILABLE} />
+      component = <FailureMessageContainer message={message as ConverseData} />
     }
     return component
   }

@@ -12,18 +12,18 @@ interface Props {
 }
 
 const LayoutNoInternet = ({ children }: Props) => {
-  // const [connected, setConnected] = React.useState(true)
+  const [connected, setConnected] = React.useState(true)
   const { Colors } = useTheme()
   const { isConnected } = useNetInfo()
 
-  // useEffect(() => {
-  //   const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-  //     console.log(`[NoInternerConnection] isConnected: ${state.isConnected}`)
-  //     setConnected(state.isConnected)
-  //   })
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+      // console.log(`[NoInternerConnection] isConnected: ${state.isConnected}`)
+      setConnected(state.isConnected)
+    })
 
-  //   return () => unsubscribe()
-  // }, [])
+    return () => unsubscribe()
+  }, [])
 
   return (
     <>

@@ -4,7 +4,7 @@ import React, {
   useImperativeHandle,
   ForwardRefRenderFunction,
 } from 'react'
-import { Pressable, StyleSheet, TextInput } from 'react-native'
+import { Pressable, StyleSheet, Text, TextInput } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { useSendChatMessageMutation } from '@/Services/modules/ingress'
@@ -21,10 +21,16 @@ import {
   makeUserMessage,
 } from '@/Utils/chat-history-processor'
 import DatasetChooser from './DatasetChooser'
+import DidYouMean from './DidYouMean'
 import FAQPicker from './FAQPicker'
 import SendButton from './SendButton'
 import { NO_DATA_AVAILABLE } from '@/Config'
-import { RawConverseData } from '@/Types/ChatMessage'
+import {
+  AthenaResponse,
+  AthenaResponseType,
+  Clarification,
+  RawConverseData,
+} from '@/Types/ChatMessage'
 import { ResponseType } from '@/Types/Common'
 
 export declare type RefProps = {
@@ -45,6 +51,8 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
   const selectedDatasetId = useAppSelector(selectDatasetId)
   const processingChatMessage = useAppSelector(selectProcessingChatMessage)
   const [sendChatMessage, { isLoading }] = useSendChatMessageMutation()
+  const [didYouMeanTitle, setDidYouMeanTitle] = useState('')
+  const [suggestions, setSuggestions] = useState<string[]>([])
 
   const setUtterance = (text: string) => {
     setQuery(text)
@@ -75,18 +83,28 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     }
   }
 
-  const buildFailureMessage = (resp: ResponseType<RawConverseData>) => {
-    return resp.data?.status === 'failed' && resp.data?.text
-      ? resp.data?.text
-      : NO_DATA_AVAILABLE
+  const buildFailureMessage = (resp: ResponseType<AthenaResponse>) => {
+    let errorMessage = NO_DATA_AVAILABLE
+    const { data } = resp
+    if (data?.type === AthenaResponseType.ATHENA_ERROR && !!data?.error) {
+      errorMessage = data?.error
+    }
+    return errorMessage
   }
 
   const sendAndTransformResponse = async (utterance: string) => {
     if (selectedDatasetId && utterance.length) {
       const reqData = makeSendRequestData(selectedDatasetId, utterance)
       const resp = await sendChatMessage(reqData).unwrap()
-      if (resp.success && resp.data) {
-        dispatch(processAndAddChatMessage(resp.data))
+      if (resp.success && resp?.data?.data) {
+        if (resp?.data.type === AthenaResponseType.CLARIFICATION) {
+          const clarificationData = resp.data.data as Clarification
+          const { title, suggestions } = clarificationData
+          setDidYouMeanTitle(title)
+          setSuggestions(suggestions)
+        } else {
+          dispatch(processAndAddChatMessage(resp.data.data as RawConverseData))
+        }
       } else {
         const failureMessage = buildFailureMessage(resp)
         const message = makeAthenaFailureMessage(failureMessage)
@@ -115,40 +133,54 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     sendMessage(faq)
   }
 
+  const handleDidYouMeanAction = (utterance: string) => {
+    sendMessage(utterance)
+    setSuggestions([])
+  }
+
   return (
-    <View
-      style={[
-        styles.chatboxWrapper,
-        {
-          backgroundColor: Colors.WHITE,
-        },
-      ]}
-    >
-      <DatasetChooser onSelect={onDatasetChange} />
-      <TextInput
-        placeholderTextColor={Colors.GRAY_DARK}
-        placeholder={'Ask Athena...'}
-        onChangeText={setQuery}
-        onSubmitEditing={handleSendMessage}
-        value={query}
-        style={styles.textInput}
-      />
-      {query && (
-        <Pressable
-          style={styles.cleanButtonContainer}
-          onPress={() => setQuery('')}
-        >
-          <Icon name={'close-circle'} size={26} color={Colors.GREEN_MAIN} />
-        </Pressable>
-      )}
-      <FAQPicker onSelect={handleSelectedFaq} />
-      <View style={{ paddingRight: 8 }}>
-        <SendButton
-          loading={isLoading || processingChatMessage}
-          query={query}
-          setQuery={setQuery}
-          onPress={handleSendMessage}
+    <View>
+      {suggestions.length > 0 && (
+        <DidYouMean
+          title={didYouMeanTitle}
+          handleSendMessage={handleDidYouMeanAction}
+          list={suggestions}
         />
+      )}
+      <View
+        style={[
+          styles.chatboxWrapper,
+          {
+            backgroundColor: Colors.WHITE,
+          },
+        ]}
+      >
+        <DatasetChooser onSelect={onDatasetChange} />
+        <TextInput
+          placeholderTextColor={Colors.GRAY_DARK}
+          placeholder={'Ask Athena...'}
+          onChangeText={setQuery}
+          onSubmitEditing={handleSendMessage}
+          value={query}
+          style={styles.textInput}
+        />
+        {query && (
+          <Pressable
+            style={styles.cleanButtonContainer}
+            onPress={() => setQuery('')}
+          >
+            <Icon name={'close-circle'} size={26} color={Colors.GREEN_MAIN} />
+          </Pressable>
+        )}
+        <FAQPicker onSelect={handleSelectedFaq} />
+        <View style={{ paddingRight: 8 }}>
+          <SendButton
+            loading={isLoading || processingChatMessage}
+            query={query}
+            setQuery={setQuery}
+            onPress={handleSendMessage}
+          />
+        </View>
       </View>
     </View>
   )
