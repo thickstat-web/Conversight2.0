@@ -126,6 +126,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     if (query.trim().length) {
       sendMessage(query.trim())
       setQuery('')
+      setSuggestions([])
     }
   }
 
