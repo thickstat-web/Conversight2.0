@@ -224,8 +224,9 @@ export default React.memo(ChatMessageContainer)
 const styles = StyleSheet.create({
   userMessageWrapper: {
     marginRight: 8,
-    marginVertical: 8,
-    padding: 16,
+    marginTop: 6,
+    marginBottom: 4,
+    padding: 10,
     borderRadius: 16,
     borderBottomRightRadius: 0,
     borderWidth: 1,
@@ -238,7 +239,9 @@ const styles = StyleSheet.create({
     // justifyContent: 'flex-start',
     // marginVertical: 4,
     // paddingVertical:8,
+    marginTop: 4,
     marginRight: 8,
+    marginBottom: 4,
     width: screenWidth * 0.83,
   },
   athenaIcon: {
