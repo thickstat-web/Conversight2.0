@@ -1,18 +1,20 @@
-import { Engine } from 'json-rules-engine'
-import { atob } from 'react-native-quick-base64'
-import chartRules from '@/Config/chart-rules.json'
-import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import {
   ChatMessage,
+  Clarification,
   ConverseData,
   MessageType,
   RawConverseData,
   TextData,
   VisualFormat,
 } from '@/Types/ChatMessage'
-import { Decision } from '@/Types/ChartRules'
-import { NO_DATA_AVAILABLE } from '@/Config'
+import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import { cleanseColumn, formatValue } from '@/Utils/common'
+
+import { Decision } from '@/Types/ChartRules'
+import { Engine } from 'json-rules-engine'
+import { NO_DATA_AVAILABLE } from '@/Config'
+import { atob } from 'react-native-quick-base64'
+import chartRules from '@/Config/chart-rules.json'
 
 interface Fact {
   dimCount: number
@@ -53,7 +55,7 @@ const makeConverseData = (
   item: RawConverseData,
   visualFormats: VisualFormat[],
 ): ConverseData => {
-  const { createdAt, id, text = '', utterance } = item
+  const { createdAt, followupQuestions, id, text = '', utterance } = item
 
   let formattedValue: TextData = formatValue('', null)
   if (!Array.isArray(values) || values.length === 0) {
@@ -74,6 +76,7 @@ const makeConverseData = (
     columnMetadata,
     columns,
     createdAt,
+    followupQuestions,
     id,
     isError: false,
     message: utterance,
@@ -103,6 +106,14 @@ export const makeAthenaFailureMessage = (message: string): ChatMessage => {
 export const makeAthenaMessage = (message: ConverseData): ChatMessage => ({
   id: message.id,
   type: MessageType.ATHENA,
+  message,
+})
+
+export const makeAthenaDidYouMeanMessage = (
+  message: Clarification,
+): ChatMessage => ({
+  id: message.id,
+  type: MessageType.ATHENA_DID_YOU_MEAN,
   message,
 })
 

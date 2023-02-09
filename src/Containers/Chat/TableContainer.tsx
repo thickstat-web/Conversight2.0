@@ -83,7 +83,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
     setRows(sortedData)
   }
 
-  const getRendredHeader = () =>
+  const getRenderedHeader = () =>
     columns.map(column => {
       const columnName = getDisplayName(column, columnMetadata).toUpperCase()
       return (
@@ -136,7 +136,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
       ListHeaderComponent={
         <Table>
           <Row
-            data={getRendredHeader()}
+            data={getRenderedHeader()}
             widthArr={widthArr}
             style={styles.header}
           />

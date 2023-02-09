@@ -1,18 +1,19 @@
-import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
-import { getIngressUrl } from '@/Config'
-import { ResponseType } from '@/Types/Common'
-import {
-  Data,
-  SendChatMessage,
-  SendChatMessageResponse,
-} from '@/Types/SendChatMessage'
 import {
   AthenaResponse,
   AthenaResponseType,
   Clarification,
   RawConverseData,
 } from '@/Types/ChatMessage'
+import {
+  Data,
+  SendChatMessage,
+  SendChatMessageResponse,
+} from '@/Types/SendChatMessage'
+
+import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
+import { ResponseType } from '@/Types/Common'
 import { buildOrderedColumns } from '@/Utils/common'
+import { getIngressUrl } from '@/Config'
 
 const makeConverseData = (data: Data) => {
   const {
@@ -23,7 +24,7 @@ const makeConverseData = (data: Data) => {
     val,
     id,
     isColumnReorder,
-    // processedUtterance,
+    followup_questions,
     text,
     utterance,
     status,
@@ -35,6 +36,7 @@ const makeConverseData = (data: Data) => {
     columnMetadata: column_metadata,
     colType,
     createdAt,
+    followupQuestions: followup_questions,
     base64Data: val,
     id,
     text,
@@ -45,9 +47,10 @@ const makeConverseData = (data: Data) => {
 }
 
 const makeClarificationData = (data: Data) => {
-  const { clarify, text } = data
+  const { id, clarify, text } = data
 
   const clarification: Clarification = {
+    id,
     title: text,
     suggestions: clarify.map(item => item.text),
   }

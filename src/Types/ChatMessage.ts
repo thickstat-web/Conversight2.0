@@ -7,6 +7,7 @@ export interface RawConverseData {
   colType: ColType
   columnMetadata: ColumnMetadata
   columns: string[]
+  followupQuestions: string[]
   base64Data: string
   orderedColumns: string[]
   text: string
@@ -42,6 +43,7 @@ export enum MessageType {
   USER,
   ATHENA,
   ATHENA_ERROR,
+  ATHENA_DID_YOU_MEAN,
 }
 
 export interface TextData {
@@ -57,6 +59,7 @@ export interface ConverseData {
   columnMetadata: ColumnMetadata
   columns: string[]
   createdAt: number
+  followupQuestions: string[]
   id: string
   isError: boolean
   message: string
@@ -67,6 +70,7 @@ export interface ConverseData {
 }
 
 export interface Clarification {
+  id: string
   title: string
   suggestions: string[]
 }
@@ -110,5 +114,5 @@ export interface AthenaResponse {
 export interface ChatMessage {
   id: string
   type: MessageType
-  message: string | ConverseData
+  message: string | ConverseData | Clarification
 }

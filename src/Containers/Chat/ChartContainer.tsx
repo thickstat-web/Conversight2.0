@@ -1,27 +1,28 @@
-import React, { useState } from 'react'
+import { ChartType, VisualFormat } from '@/Types/ChatMessage'
 import { Platform, StyleSheet, useWindowDimensions } from 'react-native'
+import React, { useState } from 'react'
 import { Text, View } from 'react-native-ui-lib'
 import {
   VictoryArea,
-  VictoryPie,
+  VictoryAxis,
   VictoryBar,
-  VictoryLine,
+  VictoryBrushContainer,
   VictoryChart,
   VictoryLabel,
-  VictoryTheme,
-  VictoryAxis,
   VictoryLegend,
-  VictoryZoomContainer,
-  VictoryBrushContainer,
+  VictoryLine,
+  VictoryPie,
   VictoryScatter,
+  VictoryTheme,
+  VictoryZoomContainer,
 } from 'victory-native'
-import numeral from 'numeral'
-import { useTheme } from '@/Hooks'
+import { dataFormatter, properCase } from '@/Utils/common'
+
 import { Colors } from '@/Theme/Variables'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { ChartType, VisualFormat } from '@/Types/ChatMessage'
-import { dataFormatter, properCase } from '@/Utils/common'
 import { ScrollView } from 'react-native-gesture-handler'
+import numeral from 'numeral'
+import { useTheme } from '@/Hooks'
 
 interface ChartProps {
   xAxisLabel: string
@@ -546,9 +547,11 @@ const ChartContainer = ({
   }
 
   const chartFormat = getChartFormat(preferredChart)
-  const xAxisLabel = chartFormat?.xField
-    ? properCase(columnMetadata[chartFormat?.xField].alias)
-    : ''
+  let xAxisLabel = chartFormat?.xField
+  if (xAxisLabel && columnMetadata[xAxisLabel]) {
+    const metadata = columnMetadata[xAxisLabel]
+    xAxisLabel = properCase(metadata.alias)
+  }
 
   let yAxisLabel = ''
   if (chartFormat?.yField) {
