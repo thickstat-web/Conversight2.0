@@ -1,27 +1,29 @@
-import React, { useState } from 'react'
+import { ChartType, VisualFormat } from '@/Types/ChatMessage'
 import { Platform, StyleSheet, useWindowDimensions } from 'react-native'
+import React, { useState } from 'react'
 import { Text, View } from 'react-native-ui-lib'
+import { Button } from '@/Components'
 import {
   VictoryArea,
-  VictoryPie,
+  VictoryAxis,
   VictoryBar,
-  VictoryLine,
+  VictoryBrushContainer,
   VictoryChart,
   VictoryLabel,
-  VictoryTheme,
-  VictoryAxis,
   VictoryLegend,
-  VictoryZoomContainer,
-  VictoryBrushContainer,
+  VictoryLine,
+  VictoryPie,
   VictoryScatter,
+  VictoryTheme,
+  VictoryZoomContainer,
 } from 'victory-native'
-import numeral from 'numeral'
-import { useTheme } from '@/Hooks'
+import { dataFormatter, properCase } from '@/Utils/common'
+
 import { Colors } from '@/Theme/Variables'
 import { ColumnMetadata } from '@/Types/ChatHistory'
-import { ChartType, VisualFormat } from '@/Types/ChatMessage'
-import { dataFormatter, properCase } from '@/Utils/common'
 import { ScrollView } from 'react-native-gesture-handler'
+import numeral from 'numeral'
+import { useTheme } from '@/Hooks'
 
 interface ChartProps {
   xAxisLabel: string
@@ -31,6 +33,7 @@ interface ChartProps {
   columnMetadata: ColumnMetadata
   values: Array<Record<string, any>>
   enableChartPreview: boolean
+  enableResetButton: boolean
 }
 
 interface PieChartProps extends ChartProps {
@@ -49,6 +52,7 @@ interface ChartContainerProps {
   visualFormats: VisualFormat[]
   values: Array<Record<string, any>>
   enableChartPreview: boolean
+  enableResetButton: boolean
 }
 
 interface LegendName {
@@ -194,6 +198,7 @@ const AreaChart = ({
   columnMetadata,
   values,
   enableChartPreview,
+  enableResetButton,
 }: ChartProps) => {
   const { width: screenWidth } = useWindowDimensions()
   const [selectedDomain, setSelectedDomain] = useState<{
@@ -213,6 +218,11 @@ const AreaChart = ({
   const calXval =
     calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
+
+  const resetHandle = () => {
+    setZoomDomain(selectedDomain)
+  }
+
   return (
     <>
       <VictoryChart
@@ -299,6 +309,7 @@ const AreaChart = ({
           values={formattedValues}
         />
       )}
+      {enableResetButton && <Button label="reset" onPress={resetHandle} />}
     </>
   )
 }
@@ -311,6 +322,7 @@ const LineChart = ({
   columnMetadata,
   values,
   enableChartPreview,
+  enableResetButton,
 }: ChartProps) => {
   const { width: screenWidth } = useWindowDimensions()
   const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
@@ -324,6 +336,11 @@ const LineChart = ({
   const calXval =
     calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
+
+  const resetHandle = () => {
+    setZoomDomain(selectedDomain)
+  }
+
   return (
     <>
       <VictoryChart
@@ -404,6 +421,7 @@ const LineChart = ({
           values={formattedValues}
         />
       )}
+      {enableResetButton && <Button label="reset" onPress={resetHandle} />}
     </>
   )
 }
@@ -417,6 +435,7 @@ const BarChart = ({
   values,
   horizontal = false,
   enableChartPreview,
+  enableResetButton,
 }: BarChartProps) => {
   const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
   const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
@@ -430,6 +449,11 @@ const BarChart = ({
   const calXval =
     calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
+
+  const resetHandle = () => {
+    setZoomDomain(selectedDomain)
+  }
+
   return (
     <>
       <VictoryChart
@@ -515,6 +539,7 @@ const BarChart = ({
           values={formattedValues}
         />
       )}
+      {enableResetButton && <Button label="reset" onPress={resetHandle} />}
     </>
   )
 }
@@ -538,6 +563,7 @@ const ChartContainer = ({
   visualFormats,
   values,
   enableChartPreview,
+  enableResetButton,
 }: ChartContainerProps) => {
   const getChartFormat = (chartType: ChartType | null) => {
     return visualFormats.find(item =>
@@ -546,9 +572,11 @@ const ChartContainer = ({
   }
 
   const chartFormat = getChartFormat(preferredChart)
-  const xAxisLabel = chartFormat?.xField
-    ? properCase(columnMetadata[chartFormat?.xField].alias)
-    : ''
+  let xAxisLabel = chartFormat?.xField
+  if (xAxisLabel && columnMetadata[xAxisLabel]) {
+    const metadata = columnMetadata[xAxisLabel]
+    xAxisLabel = properCase(metadata.alias)
+  }
 
   let yAxisLabel = ''
   if (chartFormat?.yField) {
@@ -584,6 +612,7 @@ const ChartContainer = ({
         columnMetadata={columnMetadata}
         values={values}
         enableChartPreview={enableChartPreview}
+        enableResetButton={enableResetButton}
         horizontal={false}
       />
     )

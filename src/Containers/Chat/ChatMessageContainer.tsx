@@ -1,15 +1,34 @@
-import React, { useRef, useState } from 'react'
-import { Dimensions, FlatList, Platform, StyleSheet } from 'react-native'
-import { View, Text, TouchableOpacity } from 'react-native-ui-lib'
-import { Image } from 'react-native-ui-lib/src/components/image'
-import { useAppSelector, useTheme } from '@/Hooks'
-import { selectChatMessages, selectProcessingChatMessages } from '@/Store/App'
-import { ChatMessage, ConverseData, MessageType } from '@/Types/ChatMessage'
+import {
+  AthenaResponse,
+  ChatMessage,
+  ConverseData,
+  MessageType,
+} from '@/Types/ChatMessage'
 import { ChatVisualizer, LoadingSpinner } from '@/Components'
-import { NO_DATA_AVAILABLE } from '@/Config'
-import { DATA_EXPLORER } from '@/Constants/screens'
-import { navigate } from '@/Navigators/utils'
+import {
+  Dimensions,
+  FlatList,
+  Platform,
+  Pressable,
+  StyleSheet,
+} from 'react-native'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Text, TouchableOpacity, View } from 'react-native-ui-lib'
+import {
+  addChatMessage,
+  selectChatMessages,
+  selectProcessingChatMessages,
+} from '@/Store/App'
+import { useAppSelector, useTheme } from '@/Hooks'
+
 import AthenaIcon from '@/Assets/Images/iconsSVG/athena.svg'
+import { Clarification } from '@/Types/ChatMessage'
+import { DATA_EXPLORER } from '@/Constants/screens'
+import FollowUpQuestions from './FollowUpQuestions'
+import { Image } from 'react-native-ui-lib/src/components/image'
+import { ResponseType } from '@/Types/Common'
+import { makeUserMessage } from '@/Utils/chat-history-processor'
+import { navigate } from '@/Navigators/utils'
 
 interface UserMessageContainerProps {
   message: string
@@ -54,7 +73,11 @@ export const FailureMessageContainer = ({
   return (
     <View style={styles.athenaMessageContainer}>
       <View style={styles.athenaIcon}>
-        <Image source={AthenaIcon} forwardedRef={undefined} modifiers={{}} />
+        <Image
+          source={AthenaIcon}
+          forwardedRef={undefined}
+          modifiers={undefined}
+        />
       </View>
       <View flex left>
         <View
@@ -66,6 +89,68 @@ export const FailureMessageContainer = ({
           <Text margin-8 marginV-12 style={[Fonts.textSmall, styles.message]}>
             {message}
           </Text>
+        </View>
+      </View>
+    </View>
+  )
+}
+
+type DidYouMeanProps = {
+  sendMessage: (utterance: string) => void
+  resp: ResponseType<AthenaResponse>
+  message: Clarification
+}
+
+const AthenaDidYouMeanContainer = ({
+  message,
+  sendMessage: sendMessage,
+}: DidYouMeanProps) => {
+  const { Colors } = useTheme()
+
+  const renderedItems = message.suggestions.map((item, index) => (
+    <Pressable
+      key={index}
+      style={[
+        styles.athenaDidYouMean,
+        {
+          borderColor: Colors.GREEN_LIGHT,
+          backgroundColor: Colors.GREEN_LIGHTEST,
+        },
+      ]}
+      onPress={() => sendMessage(item)}
+    >
+      <Text style={{ color: Colors.GREEN_MAIN }}>{item}</Text>
+    </Pressable>
+  ))
+
+  return (
+    <View style={styles.athenaMessageContainer}>
+      <View style={styles.athenaIcon}>
+        <Image source={AthenaIcon} />
+      </View>
+      <View>
+        <View
+          style={[
+            styles.athenaMessageWrapper,
+            { backgroundColor: Colors.WHITE },
+          ]}
+        >
+          <View style={styles.athenaDidYouMeanContainer}>
+            <Text
+              style={[
+                styles.athenaDidYouMeanText,
+                {
+                  color: Colors.GREEN_DARK,
+                },
+              ]}
+            >
+              {message.title}
+            </Text>
+            <Text style={{ color: Colors.GREEN_DARK }}>
+              Tab from the below item(s),
+            </Text>
+          </View>
+          <View style={styles.didYouMeanRenderedItems}>{renderedItems}</View>
         </View>
       </View>
     </View>
@@ -120,7 +205,11 @@ const AthenaMessageContainer = React.memo(
             }
           }}
         >
-          <ChatVisualizer data={message} />
+          <ChatVisualizer
+            data={message}
+            enableChartPreview={false}
+            enableResetButton={false}
+          />
         </View>
       </View>
     )
@@ -130,10 +219,14 @@ const AthenaMessageContainer = React.memo(
 interface ChatMessageContainerProps {
   isLoading: boolean
   onTapMessage: (text: string) => void
+  onTapDidYouMean: (text: string) => void
 }
 
 const renderItem =
-  (onTapMessage: (text: string) => void) =>
+  (
+    onTapMessage: (text: string) => void,
+    onTapDidYouMean: (text: string) => void,
+  ) =>
   ({ item }: { item: ChatMessage }) => {
     const { id, type, message } = item
     let component = null
@@ -149,6 +242,15 @@ const renderItem =
       component = (
         <AthenaMessageContainer key={id} message={message as ConverseData} />
       )
+    } else if (type === MessageType.ATHENA_DID_YOU_MEAN) {
+      component = (
+        <AthenaDidYouMeanContainer
+          key={id}
+          message={message as Clarification}
+          sendMessage={onTapDidYouMean}
+          resp={undefined}
+        />
+      )
     } else {
       component = <FailureMessageContainer message={message as ConverseData} />
     }
@@ -158,6 +260,7 @@ const renderItem =
 const ChatMessageContainer = ({
   isLoading,
   onTapMessage,
+  onTapDidYouMean,
 }: ChatMessageContainerProps) => {
   const { Colors, Fonts } = useTheme()
   const messageListRef = useRef<FlatList<ChatMessage[]>>()
@@ -169,8 +272,7 @@ const ChatMessageContainer = ({
   const scrollToEnd =
     (animated: boolean = true) =>
     () =>
-      messageListRef?.current?.scrollToEnd({ animated })
-
+      setTimeout(() => messageListRef?.current?.scrollToEnd({ animated }), 800)
   const NoHistory = (
     <View
       flex
@@ -210,7 +312,7 @@ const ChatMessageContainer = ({
           onLayout={scrollToEnd(false)}
           onContentSizeChange={scrollToEnd()}
           keyExtractor={keyExtractor}
-          renderItem={renderItem(onTapMessage)}
+          renderItem={renderItem(onTapMessage, onTapDidYouMean)}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={NoHistory}
         />
@@ -224,8 +326,9 @@ export default React.memo(ChatMessageContainer)
 const styles = StyleSheet.create({
   userMessageWrapper: {
     marginRight: 8,
-    marginVertical: 8,
-    padding: 16,
+    marginTop: 6,
+    marginBottom: 4,
+    padding: 10,
     borderRadius: 16,
     borderBottomRightRadius: 0,
     borderWidth: 1,
@@ -238,7 +341,9 @@ const styles = StyleSheet.create({
     // justifyContent: 'flex-start',
     // marginVertical: 4,
     // paddingVertical:8,
+    marginTop: 4,
     marginRight: 8,
+    marginBottom: 4,
     width: screenWidth * 0.83,
   },
   athenaIcon: {
@@ -252,7 +357,7 @@ const styles = StyleSheet.create({
   athenaMessageWrapper: {
     // flex: 1,
     // overflow: 'scroll',
-    paddingHorizontal: 8,
+    paddingHorizontal: 2,
     borderRadius: 16,
     borderBottomLeftRadius: 0,
   },
@@ -263,4 +368,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 24,
   },
+  athenaDidYouMean: {
+    borderWidth: 1,
+    marginVertical: 4,
+    marginHorizontal: 8,
+    padding: 5,
+    borderRadius: 25,
+    paddingHorizontal: 10,
+  },
+  athenaDidYouMeanContainer: { alignItems: 'center', height: 40, marginTop: 8 },
+  athenaDidYouMeanText: { fontSize: 18, fontWeight: 'bold' },
+  didYouMeanRenderedItems: { marginTop: 10, marginBottom: 10 },
 })

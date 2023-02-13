@@ -1,15 +1,16 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import ChatBox, { RefProps } from './ChatBox'
 import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native'
-import { View } from 'react-native-ui-lib'
-import { useTranslation } from 'react-i18next'
-import { useHeaderHeight } from '@react-navigation/elements'
-import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
-import { selectDatasetId } from '@/Store/Auth'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { processAndSetChatHistory, selectChatHistoryLoaded } from '@/Store/App'
-import { useGetChatHistoryMutation } from '@/Services/modules/bot'
+import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
+
 import { ChatHistoryRequestData } from '@/Types/ChatHistory'
 import ChatMessageContainer from './ChatMessageContainer'
-import ChatBox, { RefProps } from './ChatBox'
+import { View } from 'react-native-ui-lib'
+import { selectDatasetId } from '@/Store/Auth'
+import { useGetChatHistoryMutation } from '@/Services/modules/bot'
+import { useHeaderHeight } from '@react-navigation/elements'
+import { useTranslation } from 'react-i18next'
 
 const AthenaChatContainer = () => {
   const { t } = useTranslation()
@@ -61,9 +62,17 @@ const AthenaChatContainer = () => {
     chatboxRef?.current?.setUtterance(text)
   }
 
+  const sendChatMessage = (text: string) => {
+    chatboxRef?.current?.sendMessage(text)
+  }
+
   return (
     <View flex style={{ backgroundColor: Colors.GRAY }}>
-      <ChatMessageContainer isLoading={isLoading} onTapMessage={setChatText} />
+      <ChatMessageContainer
+        isLoading={isLoading}
+        onTapMessage={setChatText}
+        onTapDidYouMean={sendChatMessage}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={headerHeight}

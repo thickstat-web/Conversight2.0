@@ -1,40 +1,50 @@
-import React, {
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  ForwardRefRenderFunction,
-} from 'react'
-import { Pressable, StyleSheet, Text, TextInput } from 'react-native'
-import { View } from 'react-native-ui-lib'
-import Icon from 'react-native-vector-icons/Ionicons'
-import { useSendChatMessageMutation } from '@/Services/modules/ingress'
-import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
-import {
-  processAndAddChatMessage,
-  addChatMessage,
-  selectProcessingChatMessage,
-} from '@/Store/App'
-import { selectDatasetId } from '@/Store/Auth'
-import { SendChatMessage } from '@/Types/SendChatMessage'
-import {
-  makeAthenaFailureMessage,
-  makeUserMessage,
-} from '@/Utils/chat-history-processor'
-import DatasetChooser from './DatasetChooser'
-import DidYouMean from './DidYouMean'
-import FAQPicker from './FAQPicker'
-import SendButton from './SendButton'
-import { NO_DATA_AVAILABLE } from '@/Config'
 import {
   AthenaResponse,
   AthenaResponseType,
   Clarification,
   RawConverseData,
 } from '@/Types/ChatMessage'
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  useWindowDimensions,
+} from 'react-native'
+import React, {
+  ForwardRefRenderFunction,
+  forwardRef,
+  useImperativeHandle,
+  useState,
+} from 'react'
+import {
+  addChatMessage,
+  processAndAddChatMessage,
+  selectProcessingChatMessage,
+} from '@/Store/App'
+import {
+  makeAthenaDidYouMeanMessage,
+  makeAthenaFailureMessage,
+  makeUserMessage,
+} from '@/Utils/chat-history-processor'
+import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
+
+import DatasetChooser from './DatasetChooser'
+import DidYouMean from './DidYouMean'
+import FAQPicker from './FAQPicker'
+import FollowUpQuestions from './FollowUpQuestions'
+import Icon from 'react-native-vector-icons/Ionicons'
+import { NO_DATA_AVAILABLE } from '@/Config'
 import { ResponseType } from '@/Types/Common'
+import SendButton from './SendButton'
+import { SendChatMessage } from '@/Types/SendChatMessage'
+import { View } from 'react-native-ui-lib'
+import { selectDatasetId } from '@/Store/Auth'
+import { useSendChatMessageMutation } from '@/Services/modules/ingress'
 
 export declare type RefProps = {
   setUtterance: (text: string) => void
+  sendMessage: (text: string) => void
 }
 
 interface ChatBoxOptions {
@@ -53,12 +63,15 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
   const [sendChatMessage, { isLoading }] = useSendChatMessageMutation()
   const [didYouMeanTitle, setDidYouMeanTitle] = useState('')
   const [suggestions, setSuggestions] = useState<string[]>([])
+  const [followUpQuestionsList, setFollowUpQuestionsList] = useState<string[]>(
+    [],
+  )
 
   const setUtterance = (text: string) => {
     setQuery(text)
   }
 
-  useImperativeHandle(ref, () => ({ setUtterance }))
+  useImperativeHandle(ref, () => ({ setUtterance, sendMessage }))
 
   const makeSendRequestData = (
     datasetId: string,
@@ -99,10 +112,12 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
       if (resp.success && resp?.data?.data) {
         if (resp?.data.type === AthenaResponseType.CLARIFICATION) {
           const clarificationData = resp.data.data as Clarification
-          const { title, suggestions } = clarificationData
-          setDidYouMeanTitle(title)
-          setSuggestions(suggestions)
+          const message = makeAthenaDidYouMeanMessage(clarificationData)
+          dispatch(addChatMessage(message))
         } else {
+          const rawConverseData = resp.data.data as RawConverseData
+          const { followupQuestions } = rawConverseData
+          setFollowUpQuestionsList(followupQuestions)
           dispatch(processAndAddChatMessage(resp.data.data as RawConverseData))
         }
       } else {
@@ -126,25 +141,36 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     if (query.trim().length) {
       sendMessage(query.trim())
       setQuery('')
+      setSuggestions([])
+      setFollowUpQuestionsList([])
     }
   }
 
   const handleSelectedFaq = (faq: string) => {
     sendMessage(faq)
   }
-
   const handleDidYouMeanAction = (utterance: string) => {
     sendMessage(utterance)
     setSuggestions([])
   }
 
+  const handleFollowUpQuestions = (utterance: string) => {
+    sendMessage(utterance)
+    setFollowUpQuestionsList([])
+  }
   return (
     <View>
+      {followUpQuestionsList?.length > 0 && (
+        <FollowUpQuestions
+          suggestionList={followUpQuestionsList}
+          handleSendMessage={handleFollowUpQuestions}
+        />
+      )}
       {suggestions.length > 0 && (
         <DidYouMean
           title={didYouMeanTitle}
           handleSendMessage={handleDidYouMeanAction}
-          list={suggestions}
+          suggestion={suggestions}
         />
       )}
       <View
