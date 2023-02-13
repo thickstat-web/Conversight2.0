@@ -64,7 +64,11 @@ const Card = React.memo(({ item, style }: CardProps) => {
           color={Colors.GREEN_DARK}
         />
       )} */}
-      <DashboardVisualizer data={componentData} enableChartPreview={false} />
+      <DashboardVisualizer
+        data={componentData}
+        enableChartPreview={false}
+        enableResetButton={false}
+      />
     </Pressable>
   )
 })

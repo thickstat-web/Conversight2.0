@@ -350,6 +350,7 @@ const DataExplorerContainer = ({
               values={values}
               title={title}
               enableChartPreview={true}
+              enableResetButton={true}
             />
           </ScrollView>
         </View>

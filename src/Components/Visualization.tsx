@@ -103,6 +103,7 @@ export const DashboardTextContainer = ({
 interface VisualizerProps {
   data: ConverseData
   enableChartPreview: boolean
+  enableResetButton: boolean
 }
 
 class Visualizer extends React.PureComponent<VisualizerProps> {
@@ -194,6 +195,7 @@ export class InsightsVisualizer extends Visualizer {
       visualFormats,
     } = this.props.data
     const enableChartPreview = this.props.enableChartPreview
+    const enableResetButton = this.props.enableResetButton
 
     let content = null
     if (this.isText()) {
@@ -209,6 +211,7 @@ export class InsightsVisualizer extends Visualizer {
           values={values}
           title={message}
           enableChartPreview={enableChartPreview}
+          enableResetButton={enableResetButton}
         />
       )
     } else if (this.isAdaptiveCard()) {
@@ -271,6 +274,7 @@ export class DashboardVisualizer extends Visualizer {
       isError,
     } = this.props.data
     const enableChartPreview = this.props.enableChartPreview
+    const enableResetButton = this.props.enableResetButton
 
     let content = null
     if (this.isText()) {
@@ -295,6 +299,7 @@ export class DashboardVisualizer extends Visualizer {
             values={values}
             title={message}
             enableChartPreview={enableChartPreview}
+            enableResetButton={enableResetButton}
           />
         </>
       )
@@ -373,6 +378,7 @@ export class ChatVisualizer extends Visualizer {
           values={values}
           title={message}
           enableChartPreview={false}
+          enableResetButton={false}
         />
       )
     } else if (this.isAdaptiveCard()) {
