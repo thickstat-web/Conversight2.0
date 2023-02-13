@@ -215,6 +215,7 @@ const Card = React.memo(({ item, insightsData, fetchFollowup }: CardProps) => {
         <InsightsVisualizer
           data={data as ConverseData}
           enableChartPreview={false}
+          enableResetButton={false}
         />
       ) : type === 'WebURL' && data ? (
         <View style={{ height: 250, marginHorizontal: 4 }}>

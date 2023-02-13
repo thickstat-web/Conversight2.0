@@ -157,10 +157,6 @@ const AthenaDidYouMeanContainer = ({
   )
 }
 
-let data: ConverseData | null = null
-let isDataEmpty: boolean = false
-isDataEmpty = data?.visualFormats?.length === 0 || data?.values?.length === 0
-
 const AthenaMessageContainer = React.memo(
   ({ message }: { message: ConverseData }) => {
     const { Colors } = useTheme()
@@ -202,15 +198,18 @@ const AthenaMessageContainer = React.memo(
           onTouchMove={() => setMove(true)}
           onTouchEnd={() => {
             if (Platform.OS === 'android' || !move) {
-              isDataEmpty &&
-                navigate(DATA_EXPLORER, {
-                  id: message.id,
-                  title: message.message,
-                })
+              navigate(DATA_EXPLORER, {
+                id: message.id,
+                title: message.message,
+              })
             }
           }}
         >
-          <ChatVisualizer data={message} enableChartPreview={false} />
+          <ChatVisualizer
+            data={message}
+            enableChartPreview={false}
+            enableResetButton={false}
+          />
         </View>
       </View>
     )
