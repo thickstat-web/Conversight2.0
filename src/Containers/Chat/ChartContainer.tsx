@@ -213,7 +213,9 @@ const AreaChart = ({
 
   const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
-
+  const staticHeight = 170
+  const heightAdjust =
+    dynamicHeight >= staticHeight ? staticHeight : dynamicHeight
   const calculateXvalues = values.length
   const calXval =
     calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
@@ -228,7 +230,7 @@ const AreaChart = ({
       <VictoryChart
         domain={XDOMAIN}
         domainPadding={{ y: 40 }}
-        height={340 + dynamicHeight}
+        height={340 + heightAdjust}
         containerComponent={
           <VictoryZoomContainer
             // width={screenWidth * 0.95}
@@ -240,10 +242,10 @@ const AreaChart = ({
             onZoomDomainChange={setSelectedDomain}
           />
         }
-        padding={{ left: 58, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
+        padding={{ left: 58, top: 4, bottom: 40 + heightAdjust, right: 12 }}
       >
         <VictoryAxis // X Axis Container
-          axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
+          axisLabelComponent={<VictoryLabel dy={heightAdjust} />}
           label={xAxisLabel}
           tickLabelComponent={<VictoryLabel dx={8} dy={-8} textAnchor="end" />}
           style={{
@@ -328,9 +330,11 @@ const LineChart = ({
   const [selectedDomain, setSelectedDomain] = useState<{ x: any; y: any }>()
   const [zoomDomain, setZoomDomain] = useState<{ x: any; y: any }>()
   const xValues = values.map(item => item[xAxisLabel])
-
   const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
+  const staticHeight = 170
+  const heightAdjust =
+    dynamicHeight >= staticHeight ? staticHeight : dynamicHeight
 
   const calculateXvalues = values.length
   const calXval =
@@ -345,7 +349,7 @@ const LineChart = ({
     <>
       <VictoryChart
         domainPadding={{ y: 40 }}
-        height={340 + dynamicHeight}
+        height={340 + heightAdjust}
         domain={XDOMAIN}
         containerComponent={
           <VictoryZoomContainer
@@ -358,10 +362,10 @@ const LineChart = ({
             onZoomDomainChange={setSelectedDomain}
           />
         }
-        padding={{ left: 58, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
+        padding={{ left: 58, top: 4, bottom: 40 + heightAdjust, right: 12 }}
       >
         <VictoryAxis // X Axis Container
-          axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
+          axisLabelComponent={<VictoryLabel dy={heightAdjust} />}
           label={xAxisLabel}
           tickLabelComponent={<VictoryLabel dx={8} dy={-8} textAnchor="end" />}
           style={{
@@ -444,7 +448,9 @@ const BarChart = ({
 
   const formattedValues = getFormattedValues(values, xAxisField)
   const dynamicHeight = getxAxisLabelHeight(values, xAxisField)
-
+  const staticHeight = 170
+  const heightAdjust =
+    dynamicHeight >= staticHeight ? staticHeight : dynamicHeight
   const calculateXvalues = values.length
   const calXval =
     calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
@@ -459,7 +465,7 @@ const BarChart = ({
       <VictoryChart
         domain={XDOMAIN}
         domainPadding={{ y: 40 }}
-        height={340 + dynamicHeight}
+        height={340 + heightAdjust}
         // width={screenWidth}
         containerComponent={
           <VictoryZoomContainer
@@ -471,11 +477,11 @@ const BarChart = ({
             onZoomDomainChange={setSelectedDomain}
           />
         }
-        padding={{ left: 58, top: 4, bottom: 40 + dynamicHeight, right: 12 }}
+        padding={{ left: 58, top: 4, bottom: 40 + heightAdjust, right: 12 }}
         // style={{ parent: { backgroundColor: 'yellow' } }}
       >
         <VictoryAxis // X Axis Container
-          axisLabelComponent={<VictoryLabel dy={dynamicHeight} />}
+          axisLabelComponent={<VictoryLabel dy={heightAdjust} />}
           label={xAxisLabel}
           tickLabelComponent={<VictoryLabel dx={8} dy={-8} textAnchor="end" />}
           style={{
@@ -662,7 +668,7 @@ function ChartPreviewer({
       <VictoryChart
         domainPadding={{ y: 6 }}
         width={screenWidth}
-        height={190}
+        height={60}
         scale={{
           x: 'linear',
         }}
@@ -670,7 +676,7 @@ function ChartPreviewer({
           top: 0,
           left: 30,
           right: 30,
-          bottom: 150,
+          bottom: 10,
         }}
         containerComponent={
           <VictoryBrushContainer
