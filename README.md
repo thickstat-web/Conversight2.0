@@ -89,3 +89,13 @@ adb shell am start -n com.conversight/.MainActivity
 # When more than one device/emulator
 adb -s 62bb86d4 shell am start -n com.conversight/.MainActivity
 ```
+
+##### Sharing builds for Testing
+
+[Distribute iOS build via Diawi](https://www.diawi.com/)
+
+##### Release check lists
+
+- Make sure appropriate environments (i.e STAGING / PRODUCTION) is set in src/Config/index.ts
+- Android: Update next release version (both versionCode & versionName) in android/app/build.gradle
+- iOS: Update the version details (CURRENT_PROJECT_VERSION & MARKETING_VERSION) in ios/ConverSight.xcodeproj/project.pbxproj
