@@ -39,6 +39,7 @@ import WalkThroughIcon from '@/Assets/Images/drawer/walkthrough.svg'
 import RequestDemoIcon from '@/Assets/Images/drawer/demo.svg'
 import FaqIcon from '@/Assets/Images/drawer/faq.svg'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
+import TrackPlayer from 'react-native-track-player'
 
 interface Props {
   state: DrawerNavigationState<ParamListBase>
@@ -65,6 +66,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
     await logout()
     dispatch(cleanupAuthData())
     dispatch(cleanupAppData())
+    TrackPlayer.pause()
   }
 
   return (
@@ -149,7 +151,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
           <View marginV-15 height={1} backgroundColor={Colors.GRAY} /> */}
           {/* to view and access Launchpad in DrawerNavigator please uncommand the
           above codes. */}
-          
+
           {/* <TouchableOpacity
             onPress={() => handleRedirect(WALK_THROUGH_AUTHORIZED)}
             style={styles.screenLink}
