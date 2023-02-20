@@ -3,6 +3,7 @@ import { Platform, StyleSheet, useWindowDimensions } from 'react-native'
 import React, { useState } from 'react'
 import { Text, View } from 'react-native-ui-lib'
 import { Button } from '@/Components'
+import { RESET_PREVIEWER } from '@/Config'
 import {
   VictoryArea,
   VictoryAxis,
@@ -311,7 +312,9 @@ const AreaChart = ({
           values={formattedValues}
         />
       )}
-      {enableResetButton && <Button label="reset" onPress={resetHandle} />}
+      {enableResetButton && (
+        <Button label={RESET_PREVIEWER} onPress={resetHandle} />
+      )}
     </>
   )
 }
@@ -425,7 +428,9 @@ const LineChart = ({
           values={formattedValues}
         />
       )}
-      {enableResetButton && <Button label="reset" onPress={resetHandle} />}
+      {enableResetButton && (
+        <Button label={RESET_PREVIEWER} onPress={resetHandle} />
+      )}
     </>
   )
 }
@@ -545,7 +550,9 @@ const BarChart = ({
           values={formattedValues}
         />
       )}
-      {enableResetButton && <Button label="reset" onPress={resetHandle} />}
+      {enableResetButton && (
+        <Button label={RESET_PREVIEWER} onPress={resetHandle} />
+      )}
     </>
   )
 }
@@ -656,21 +663,13 @@ function ChartPreviewer({
   const { width: screenWidth } = useWindowDimensions()
   return (
     <View marginT-12>
-      <Text
-        style={{
-          marginLeft: 26,
-          paddingBottom: 10,
-          color: Colors.GREEN_DARK,
-        }}
-      >
-        Drag to view specific details
-      </Text>
       <VictoryChart
         domainPadding={{ y: 6 }}
         width={screenWidth}
         height={60}
         scale={{
           x: 'linear',
+          y: 'linear',
         }}
         padding={{
           top: 0,
@@ -706,6 +705,17 @@ function ChartPreviewer({
           data={values}
         />
       </VictoryChart>
+      <Text
+        style={{
+          marginLeft: 26,
+          paddingBottom: 10,
+          color: Colors.GREEN_DARK,
+          textAlign: 'center',
+          letterSpacing: 1,
+        }}
+      >
+        (Drag to highlight a region of chart)
+      </Text>
     </View>
   )
 }
