@@ -1,6 +1,6 @@
 import { ChartType, VisualFormat } from '@/Types/ChatMessage'
 import { Platform, StyleSheet, useWindowDimensions } from 'react-native'
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import { Text, View } from 'react-native-ui-lib'
 import { Button } from '@/Components'
 import { RESET_PREVIEWER } from '@/Config'
