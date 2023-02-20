@@ -99,3 +99,7 @@ adb -s 62bb86d4 shell am start -n com.conversight/.MainActivity
 - Make sure appropriate environments (i.e STAGING / PRODUCTION) is set in src/Config/index.ts
 - Android: Update next release version (both versionCode & versionName) in android/app/build.gradle
 - iOS: Update the version details (CURRENT_PROJECT_VERSION & MARKETING_VERSION) in ios/ConverSight.xcodeproj/project.pbxproj
+
+##### Publishing Builds
+
+[Google Play Console - ConverSight app](https://play.google.com/console/developers/7293141804927298640/app/4975504996913031249/publishing)
