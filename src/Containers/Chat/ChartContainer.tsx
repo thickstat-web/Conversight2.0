@@ -344,9 +344,9 @@ const LineChart = ({
     calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
 
-  const resetHandle = useCallback(() => {
-    setZoomDomain(XDOMAIN)
-  }, [XDOMAIN])
+  const resetHandle = () => {
+    setZoomDomain(selectedDomain)
+  }
 
   return (
     <>
