@@ -118,7 +118,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
           const rawConverseData = resp.data.data as RawConverseData
           const { followupQuestions } = rawConverseData
           setFollowUpQuestionsList(followupQuestions)
-          dispatch(processAndAddChatMessage(resp.data.data as RawConverseData))
+          dispatch(processAndAddChatMessage(rawConverseData))
         }
       } else {
         const failureMessage = buildFailureMessage(resp)

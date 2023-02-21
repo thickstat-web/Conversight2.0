@@ -1,5 +1,9 @@
-import { useEffect } from 'react';
-import { selectAllOrganizations, selectSignInOrg, setSelectedOrg } from '@/Store/Auth'
+import { useCallback, useEffect } from 'react'
+import {
+  selectAllOrganizations,
+  selectSignInOrg,
+  setSelectedOrg,
+} from '@/Store/Auth'
 import { useAppDispatch, useAppSelector } from '.'
 import { getOrgByOrgId } from '@/Utils/array'
 import { setCustomHosts, setDefaultHosts } from '@/Config'
@@ -9,21 +13,24 @@ export default function () {
   const signInOrg = useAppSelector(selectSignInOrg)
   const organizations = useAppSelector(selectAllOrganizations)
 
-  const setSignInOrgId = (orgId: string) => {
-    const org = getOrgByOrgId(organizations, orgId)
-    if (org) {
-      if (signInOrg?.orgId !== org.orgId) {
-        dispatch(setSelectedOrg(org))
+  const setSignInOrgId = useCallback(
+    (orgId: string) => {
+      const org = getOrgByOrgId(organizations, orgId)
+      if (org) {
+        if (signInOrg?.orgId !== org.orgId) {
+          dispatch(setSelectedOrg(org))
+        }
+        if (org.apiConfig) {
+          const { apiServerHost, botServerHost, ingressServerHost } =
+            org.apiConfig
+          setCustomHosts(apiServerHost, botServerHost, ingressServerHost)
+        } else {
+          setDefaultHosts()
+        }
       }
-      if (org.apiConfig) {
-        const { apiServerHost, botServerHost, ingressServerHost } =
-          org.apiConfig
-        setCustomHosts(apiServerHost, botServerHost, ingressServerHost)
-      } else {
-        setDefaultHosts()
-      }
-    }
-  }
+    },
+    [dispatch, organizations, signInOrg?.orgId],
+  )
 
   const isSingleOrg = organizations.length === 1
   useEffect(() => {

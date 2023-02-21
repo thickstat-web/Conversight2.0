@@ -273,6 +273,7 @@ const ChatMessageContainer = ({
     (animated: boolean = true) =>
     () =>
       setTimeout(() => messageListRef?.current?.scrollToEnd({ animated }), 800)
+
   const NoHistory = (
     <View
       flex
