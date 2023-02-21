@@ -150,6 +150,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
   const handleSelectedFaq = (faq: string) => {
     sendMessage(faq)
   }
+
   const handleDidYouMeanAction = (utterance: string) => {
     sendMessage(utterance)
     setSuggestions([])
