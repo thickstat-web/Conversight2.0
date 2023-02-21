@@ -1,6 +1,6 @@
 import { ChartType, VisualFormat } from '@/Types/ChatMessage'
 import { Platform, StyleSheet, useWindowDimensions } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Text, View } from 'react-native-ui-lib'
 import { Button } from '@/Components'
 import { RESET_PREVIEWER } from '@/Config'
@@ -344,9 +344,18 @@ const LineChart = ({
     calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
 
+  const smallXDOMAIN = XDOMAIN <= { x: [0.5, 10] }
+
   const resetHandle = () => {
-    setZoomDomain(selectedDomain)
+    setZoomDomain(XDOMAIN)
+    setSelectedDomain(zoomDomain)
   }
+
+  useEffect(() => {
+   
+    
+  }, [third])
+  
 
   return (
     <>
