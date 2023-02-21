@@ -339,7 +339,7 @@ const LineChart = ({
   const heightAdjust =
     dynamicHeight >= staticHeight ? staticHeight : dynamicHeight
 
-  const calculateXvalues = values.lengths
+  const calculateXvalues = values.length
   const calXval =
     calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
   const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
