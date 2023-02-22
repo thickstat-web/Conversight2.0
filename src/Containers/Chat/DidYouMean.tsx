@@ -6,12 +6,12 @@ import AthenaIcon from '@/Assets/Images/iconsSVG/athena.svg'
 
 type DidYouMeanProps = {
   title: string
-  list: string[]
   handleSendMessage: (utterance: string) => void
+  suggestion: string[]
 }
 
-function DidYouMean({ title, list, handleSendMessage }: DidYouMeanProps) {
-  const renderedItems = list.map((item, index) => (
+function DidYouMean({ title, suggestion, handleSendMessage }: DidYouMeanProps) {
+  const renderedItems = suggestion.map((item, index) => (
     <View key={index} style={styles.suggestionList}>
       <Text
         style={styles.suggestionTextStyle}
