@@ -221,7 +221,6 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
 
 export default forwardRef(ChatBox)
 
-const BUTTON_SIZE = 40
 const styles = StyleSheet.create({
   chatboxWrapper: {
     flexDirection: 'row',
