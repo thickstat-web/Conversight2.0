@@ -16,6 +16,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useState,
+  useEffect,
 } from 'react'
 import {
   addChatMessage,
@@ -149,6 +150,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
   const handleSelectedFaq = (faq: string) => {
     sendMessage(faq)
   }
+
   const handleDidYouMeanAction = (utterance: string) => {
     sendMessage(utterance)
     setSuggestions([])
@@ -158,6 +160,11 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
     sendMessage(utterance)
     setFollowUpQuestionsList([])
   }
+
+  useEffect(() => {
+    setFollowUpQuestionsList([])
+  }, [selectedDatasetId])
+
   return (
     <View>
       {followUpQuestionsList?.length > 0 && (
