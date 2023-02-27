@@ -1,6 +1,6 @@
 # ConverSight2.0
 
-##### Run app
+##### Running app
 
 ```
 git clone https://devops.conversight.ai/frontend/mobile/conversight2.0.git
@@ -90,16 +90,26 @@ adb shell am start -n com.conversight/.MainActivity
 adb -s 62bb86d4 shell am start -n com.conversight/.MainActivity
 ```
 
-##### Sharing builds for Testing
-
-[Distribute iOS build via Diawi](https://www.diawi.com/)
-
 ##### Release check lists
 
 - Make sure appropriate environments (i.e STAGING / PRODUCTION) is set in src/Config/index.ts
 - Android: Update next release version (both versionCode & versionName) in android/app/build.gradle
 - iOS: Update the version details (CURRENT_PROJECT_VERSION & MARKETING_VERSION) in ios/ConverSight.xcodeproj/project.pbxproj
 
+##### Push Notification
+
+[Firebase Console](https://console.firebase.google.com/project/athena-174317/settings/general/android:com.conversight)
+
+##### Apple Developer
+
+[Apple Developer Console - For Certificates, Identifiers & Profiles](https://developer.apple.com/account/)
+
+##### Sharing builds for Testing
+
+[Distribute iOS build via Diawi](https://www.diawi.com/)
+
 ##### Publishing Builds
 
-[Google Play Console - ConverSight app](https://play.google.com/console/developers/7293141804927298640/app/4975504996913031249/publishing)
+[Apple Developer - For Adding Device, Certificate and Profiles](https://developer.apple.com/account/)  
+[Apple Store Connect - ConverSight App](https://appstoreconnect.apple.com/apps/1439733726/appstore/ios/version/deliverable)  
+[Google Play Console - ConverSight App](https://play.google.com/console/developers/7293141804927298640/app/4975504996913031249/tracks/production)
