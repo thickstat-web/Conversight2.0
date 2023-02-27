@@ -121,10 +121,17 @@ export interface TagMetadata {
   vendors: Vendors
 }
 
+export interface ReRequest {
+  question: string
+}
+
+export type SubType = 'clarify' | 're-request'
+
 export interface AdditionalData {
   followup_questions: string[]
+  reRequest: ReRequest
   question_tag: string
-  sub_type: string
+  sub_type: SubType
   tag_metadata: TagMetadata
   tags: any[][]
 }
@@ -240,6 +247,7 @@ export interface Data {
 export interface Response {
   text?: string
   data: Data
+  additional_data?: AdditionalData
 }
 
 export interface SendChatMessageResponse {

@@ -4,6 +4,7 @@ import {
   ConverseData,
   MessageType,
   RawConverseData,
+  Rerequest,
   TextData,
   VisualFormat,
 } from '@/Types/ChatMessage'
@@ -114,6 +115,14 @@ export const makeAthenaDidYouMeanMessage = (
 ): ChatMessage => ({
   id: message.id,
   type: MessageType.ATHENA_DID_YOU_MEAN,
+  message,
+})
+
+export const makeAthenaReRequestMessage = (
+  message: Rerequest,
+): ChatMessage => ({
+  id: message.id,
+  type: MessageType.ATHENA_REREQUEST,
   message,
 })
 

@@ -3,6 +3,7 @@ import {
   ChatMessage,
   ConverseData,
   MessageType,
+  Rerequest,
 } from '@/Types/ChatMessage'
 import { ChatVisualizer, LoadingSpinner } from '@/Components'
 import {
@@ -23,6 +24,7 @@ import { useAppSelector, useTheme } from '@/Hooks'
 
 import AthenaIcon from '@/Assets/Images/iconsSVG/athena.svg'
 import { Clarification } from '@/Types/ChatMessage'
+import { ReRequest } from '@/Types/SendChatMessage'
 import { DATA_EXPLORER } from '@/Constants/screens'
 import FollowUpQuestions from './FollowUpQuestions'
 import { Image } from 'react-native-ui-lib/src/components/image'
@@ -97,7 +99,6 @@ export const FailureMessageContainer = ({
 
 type DidYouMeanProps = {
   sendMessage: (utterance: string) => void
-  resp: ResponseType<AthenaResponse>
   message: Clarification
 }
 
@@ -147,13 +148,58 @@ const AthenaDidYouMeanContainer = ({
               {message.title}
             </Text>
             <Text style={{ color: Colors.GREEN_DARK }}>
-              Tab from the below item(s),
+              Tap from the below item(s),
             </Text>
           </View>
           <View style={styles.didYouMeanRenderedItems}>{renderedItems}</View>
         </View>
       </View>
     </View>
+  )
+}
+
+type AthenaReRequestProps = {
+  message: ReRequest
+}
+const AthenaReRequestContainer = ({ message }: AthenaReRequestProps) => {
+  const { Colors } = useTheme()
+  return (
+    <>
+      <View style={styles.athenaMessageContainer}>
+        <View style={styles.athenaIcon}>
+          <Image source={AthenaIcon} />
+        </View>
+        <View>
+          <View
+            style={[
+              styles.athenaMessageWrapper,
+              { backgroundColor: Colors.WHITE },
+            ]}
+          >
+            <View style={styles.athenaDidYouMeanContainer}>
+              <Text
+                style={{
+                  color: Colors.GREEN_DARK,
+                  fontWeight: 'bold',
+                }}
+              >
+                Did You Mean ?
+              </Text>
+              <Text
+                style={[
+                  {
+                    color: Colors.GREEN_DARK,
+                  },
+                ]}
+              >
+                {message}
+              </Text>
+            </View>
+            <View style={styles.didYouMeanRenderedItems}></View>
+          </View>
+        </View>
+      </View>
+    </>
   )
 }
 
@@ -248,8 +294,11 @@ const renderItem =
           key={id}
           message={message as Clarification}
           sendMessage={onTapDidYouMean}
-          resp={undefined}
         />
+      )
+    } else if (type === MessageType.ATHENA_REREQUEST) {
+      component = (
+        <AthenaReRequestContainer key={id} message={message as Rerequest} />
       )
     } else {
       component = <FailureMessageContainer message={message as ConverseData} />
@@ -378,6 +427,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   athenaDidYouMeanContainer: { alignItems: 'center', height: 40, marginTop: 8 },
-  athenaDidYouMeanText: { fontSize: 18, fontWeight: 'bold' },
+  athenaDidYouMeanText: { fontWeight: 'bold' },
   didYouMeanRenderedItems: { marginTop: 10, marginBottom: 10 },
 })

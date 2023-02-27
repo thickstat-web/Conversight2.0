@@ -42,8 +42,9 @@ export interface VisualFormat {
 export enum MessageType {
   USER,
   ATHENA,
-  ATHENA_ERROR,
   ATHENA_DID_YOU_MEAN,
+  ATHENA_REREQUEST,
+  ATHENA_ERROR,
 }
 
 export interface TextData {
@@ -75,16 +76,23 @@ export interface Clarification {
   suggestions: string[]
 }
 
+export interface Rerequest {
+  id: string
+  title: string
+  question: string
+}
+
 export enum AthenaResponseType {
   CONVERSE,
   CLARIFICATION,
+  REREQUEST,
   ATHENA_ERROR,
 }
 
 export interface AthenaResponse {
   type: AthenaResponseType
   error?: string
-  data?: Clarification | RawConverseData
+  data?: Clarification | RawConverseData | Rerequest
 }
 
 // /* Athena Failure Message format */
@@ -114,5 +122,5 @@ export interface AthenaResponse {
 export interface ChatMessage {
   id: string
   type: MessageType
-  message: string | ConverseData | Clarification
+  message: string | ConverseData | Clarification | Rerequest
 }
