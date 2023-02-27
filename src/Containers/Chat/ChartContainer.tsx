@@ -312,9 +312,9 @@ const AreaChart = ({
           values={formattedValues}
         />
       )}
-      {enableResetButton && (
+      {/* {enableResetButton && (
         <Button label={RESET_PREVIEWER} onPress={resetHandle} />
-      )}
+      )} */}
     </>
   )
 }
@@ -428,9 +428,9 @@ const LineChart = ({
           values={formattedValues}
         />
       )}
-      {enableResetButton && (
+      {/* {enableResetButton && (
         <Button label={RESET_PREVIEWER} onPress={resetHandle} />
-      )}
+      )} */}
     </>
   )
 }
@@ -550,9 +550,9 @@ const BarChart = ({
           values={formattedValues}
         />
       )}
-      {enableResetButton && (
+      {/* {enableResetButton && (
         <Button label={RESET_PREVIEWER} onPress={resetHandle} />
-      )}
+      )} */}
     </>
   )
 }
@@ -661,11 +661,18 @@ function ChartPreviewer({
   values,
 }: any) {
   const { width: screenWidth } = useWindowDimensions()
+
+  const calculateXvalues = values.length
+  const calXval =
+    calculateXvalues >= defaultXvalues ? defaultXvalues : calculateXvalues
+  const XDOMAIN: { x: number[] } = { x: [0.5, calXval] }
+
   return (
     <View marginT-12>
       <VictoryChart
+        domain={XDOMAIN}
         domainPadding={{ y: 6 }}
-        width={screenWidth}
+        width={screenWidth * 0.8}
         height={60}
         scale={{
           x: 'linear',
@@ -673,9 +680,9 @@ function ChartPreviewer({
         }}
         padding={{
           top: 0,
-          left: 30,
-          right: 30,
-          bottom: 10,
+          left: 0,
+          right: 0,
+          bottom: 0,
         }}
         containerComponent={
           <VictoryBrushContainer

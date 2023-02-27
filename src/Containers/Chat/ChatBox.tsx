@@ -3,6 +3,7 @@ import {
   AthenaResponseType,
   Clarification,
   RawConverseData,
+  Rerequest,
 } from '@/Types/ChatMessage'
 import {
   Pressable,
@@ -26,6 +27,7 @@ import {
 import {
   makeAthenaDidYouMeanMessage,
   makeAthenaFailureMessage,
+  makeAthenaReRequestMessage,
   makeUserMessage,
 } from '@/Utils/chat-history-processor'
 import { useAppDispatch, useAppSelector, useTheme } from '@/Hooks'
@@ -111,7 +113,11 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
       const reqData = makeSendRequestData(selectedDatasetId, utterance)
       const resp = await sendChatMessage(reqData).unwrap()
       if (resp.success && resp?.data?.data) {
-        if (resp?.data.type === AthenaResponseType.CLARIFICATION) {
+        if (resp?.data.type === AthenaResponseType.REREQUEST) {
+          const reRequestData = resp?.data.data as Rerequest
+          const message = makeAthenaReRequestMessage(reRequestData)
+          dispatch(addChatMessage(message))
+        } else if (resp?.data.type === AthenaResponseType.CLARIFICATION) {
           const clarificationData = resp.data.data as Clarification
           const message = makeAthenaDidYouMeanMessage(clarificationData)
           dispatch(addChatMessage(message))
