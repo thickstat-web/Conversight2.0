@@ -163,6 +163,11 @@ type AthenaReRequestProps = {
 }
 const AthenaReRequestContainer = ({ message }: AthenaReRequestProps) => {
   const { Colors } = useTheme()
+
+  const questionText = JSON.stringify(message.question)
+
+  const formattedQuestionText = questionText.replace(/"/g, '')
+
   return (
     <View style={styles.athenaMessageContainer}>
       <View style={styles.athenaIcon}>
@@ -187,7 +192,7 @@ const AthenaReRequestContainer = ({ message }: AthenaReRequestProps) => {
               },
             ]}
           >
-            {message}
+            {formattedQuestionText}
           </Text>
         </View>
       </View>
