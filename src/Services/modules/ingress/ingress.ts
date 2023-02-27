@@ -93,16 +93,11 @@ export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
         switch (status) {
           case 'ok':
             result = makeConverseData(data)
-            console.log('from ok block')
             break
           case 'clarification':
-            console.log('clarification is worked')
             if (additionalData?.sub_type === 'clarify') {
-              console.log('clarify worked')
-
               result = makeClarificationData(data)
             } else if (additionalData?.sub_type === 're-request') {
-              console.log('re-request worked')
               const {
                 reRequest: { question },
               } = additionalData
