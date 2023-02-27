@@ -164,42 +164,34 @@ type AthenaReRequestProps = {
 const AthenaReRequestContainer = ({ message }: AthenaReRequestProps) => {
   const { Colors } = useTheme()
   return (
-    <>
-      <View style={styles.athenaMessageContainer}>
-        <View style={styles.athenaIcon}>
-          <Image source={AthenaIcon} />
-        </View>
-        <View>
-          <View
+    <View style={styles.athenaMessageContainer}>
+      <View style={styles.athenaIcon}>
+        <Image source={AthenaIcon} />
+      </View>
+      <View
+        style={[styles.athenaMessageWrapper, { backgroundColor: Colors.WHITE }]}
+      >
+        <View style={styles.athenaDidYouMeanContainer}>
+          <Text
+            style={{
+              color: Colors.GREEN_DARK,
+              fontWeight: 'bold',
+            }}
+          >
+            Did You Mean ?
+          </Text>
+          <Text
             style={[
-              styles.athenaMessageWrapper,
-              { backgroundColor: Colors.WHITE },
+              {
+                color: Colors.GREEN_DARK,
+              },
             ]}
           >
-            <View style={styles.athenaDidYouMeanContainer}>
-              <Text
-                style={{
-                  color: Colors.GREEN_DARK,
-                  fontWeight: 'bold',
-                }}
-              >
-                Did You Mean ?
-              </Text>
-              <Text
-                style={[
-                  {
-                    color: Colors.GREEN_DARK,
-                  },
-                ]}
-              >
-                {message}
-              </Text>
-            </View>
-            <View style={styles.didYouMeanRenderedItems}></View>
-          </View>
+            {message}
+          </Text>
         </View>
       </View>
-    </>
+    </View>
   )
 }
 
