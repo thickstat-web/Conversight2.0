@@ -164,9 +164,10 @@ type AthenaReRequestProps = {
 const AthenaReRequestContainer = ({ message }: AthenaReRequestProps) => {
   const { Colors } = useTheme()
 
+  const questionTitle = JSON.stringify(message.title)
   const questionText = JSON.stringify(message.question)
-
   const formattedQuestionText = questionText.replace(/"/g, '')
+  const formattedQuestionTitle = questionTitle.replace(/"/g, '')
 
   return (
     <View style={styles.athenaMessageContainer}>
@@ -183,10 +184,11 @@ const AthenaReRequestContainer = ({ message }: AthenaReRequestProps) => {
               fontWeight: 'bold',
             }}
           >
-            Did You Mean ?
+            {formattedQuestionTitle}
           </Text>
           <Text
             style={[
+              { paddingHorizontal: 10 },
               {
                 color: Colors.GREEN_DARK,
               },
@@ -205,6 +207,7 @@ const AthenaMessageContainer = React.memo(
     const { Colors } = useTheme()
     const [move, setMove] = useState(false)
 
+    const isDataEmpty = message.visualFormats.length === 0
     return (
       <View style={styles.athenaMessageContainer}>
         <View style={styles.athenaIcon}>
@@ -241,10 +244,11 @@ const AthenaMessageContainer = React.memo(
           onTouchMove={() => setMove(true)}
           onTouchEnd={() => {
             if (Platform.OS === 'android' || !move) {
-              navigate(DATA_EXPLORER, {
-                id: message.id,
-                title: message.message,
-              })
+              !isDataEmpty &&
+                navigate(DATA_EXPLORER, {
+                  id: message.id,
+                  title: message.message,
+                })
             }
           }}
         >
