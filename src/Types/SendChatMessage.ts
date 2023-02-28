@@ -122,6 +122,7 @@ export interface TagMetadata {
 }
 
 export interface ReRequest {
+  title: string
   question: string
 }
 
