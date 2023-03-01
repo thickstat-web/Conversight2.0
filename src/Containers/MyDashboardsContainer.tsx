@@ -227,7 +227,6 @@ const MyDashboardsContainer = ({ navigation }) => {
   const [searchText, setSearchText] = useState('')
 
   const pinboards = useMemo(() => data?.data ?? [], [data?.data])
-  // console.log('pinboards is ' + JSON.stringify(pinboards))
   const showSearchBox = pinboards.length >= DEFAULT_DASHBOARD_SHOW_COUNT
 
   // Group list of pinbord indexes by tag
