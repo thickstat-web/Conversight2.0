@@ -31,6 +31,8 @@ import { Image } from 'react-native-ui-lib/src/components/image'
 import { ResponseType } from '@/Types/Common'
 import { makeUserMessage } from '@/Utils/chat-history-processor'
 import { navigate } from '@/Navigators/utils'
+import { selectDatasetId } from '@/Store/Auth'
+import { useGetDatasetsQuery } from '@/Services/modules/chat'
 
 interface UserMessageContainerProps {
   message: string
@@ -313,11 +315,22 @@ const ChatMessageContainer = ({
   onTapDidYouMean,
 }: ChatMessageContainerProps) => {
   const { Colors, Fonts } = useTheme()
+  const { data } = useGetDatasetsQuery()
+  const dataSets = data?.data || []
   const messageListRef = useRef<FlatList<ChatMessage[]>>()
   const chatMessagesProcessing = useAppSelector(selectProcessingChatMessages)
   const messages = useAppSelector(selectChatMessages)
+  const selectedDatasetId = useAppSelector(selectDatasetId)
 
   const keyExtractor = (item: ChatMessage) => item.id
+
+  const filteredDatasetName = dataSets.filter(val => {
+    return val.dataSetID === selectedDatasetId
+  })
+
+  const activeDatasetName = filteredDatasetName.map(val => {
+    return val.datasetName
+  })
 
   const scrollToEnd =
     (animated: boolean = true) =>
@@ -351,9 +364,18 @@ const ChatMessageContainer = ({
       </Text>
     </View>
   )
-
   return (
     <View flex>
+      <View
+        style={{
+          backgroundColor: Colors.GREEN_LIGHTEST,
+          paddingHorizontal: 6,
+        }}
+      >
+        <Text
+          style={{ color: Colors.GREEN_DARK }}
+        >{`Athena Conversation - ${activeDatasetName}`}</Text>
+      </View>
       {chatMessagesProcessing || isLoading ? (
         <LoadingSpinner />
       ) : (
