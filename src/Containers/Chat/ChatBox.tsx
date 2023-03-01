@@ -118,7 +118,7 @@ const ChatBox: ForwardRefRenderFunction<RefProps, ChatBoxOptions> = (
           const message = makeAthenaReRequestMessage(reRequestData)
           dispatch(addChatMessage(message))
           const question = message.message.question
-          sendMessage(question)
+          sendAndTransformResponse(question)
         } else if (resp?.data.type === AthenaResponseType.CLARIFICATION) {
           const clarificationData = resp.data.data as Clarification
           const message = makeAthenaDidYouMeanMessage(clarificationData)
