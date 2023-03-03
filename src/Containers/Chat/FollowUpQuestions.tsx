@@ -26,7 +26,8 @@ function FollowUpQuestions({
   ))
 
   return (
-    <View style={styles.followUpQuestions}>
+    // <View style={styles.followUpQuestions}>
+    <View>
       <View
         style={{
           alignItems: 'center',
