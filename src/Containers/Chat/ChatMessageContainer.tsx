@@ -33,6 +33,7 @@ import { makeUserMessage } from '@/Utils/chat-history-processor'
 import { navigate } from '@/Navigators/utils'
 import { selectDatasetId } from '@/Store/Auth'
 import { useGetDatasetsQuery } from '@/Services/modules/chat'
+import moment from 'moment'
 
 interface UserMessageContainerProps {
   message: string
@@ -332,6 +333,12 @@ const ChatMessageContainer = ({
     return val.datasetName
   })
 
+  const datasetRefreshedTime = filteredDatasetName.map(val => {
+    return val.republishCompletedTime
+  })
+
+  const relativeTime = moment(new Date(datasetRefreshedTime)).fromNow()
+
   const scrollToEnd =
     (animated: boolean = true) =>
     () =>
@@ -375,6 +382,9 @@ const ChatMessageContainer = ({
         <Text
           style={{ color: Colors.GREEN_DARK }}
         >{`Athena Conversation - ${activeDatasetName}`}</Text>
+        <Text
+          style={{ color: Colors.GREEN_MAIN }}
+        >{`Updated ${relativeTime}`}</Text>
       </View>
       {chatMessagesProcessing || isLoading ? (
         <LoadingSpinner />
