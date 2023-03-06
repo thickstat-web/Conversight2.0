@@ -26,7 +26,8 @@ function FollowUpQuestions({
   ))
 
   return (
-    <View style={styles.followUpQuestions}>
+    // <View style={styles.followUpQuestions}>
+    <View>
       <View
         style={{
           alignItems: 'center',
@@ -35,16 +36,18 @@ function FollowUpQuestions({
         <Text style={{ color: Colors.GREEN_MAIN, fontWeight: 'bold' }}>
           Are you interested in,
         </Text>
-        <ScrollView
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ alignItems: 'center' }}
-        >
+        <View style={{ flexDirection: 'row' }}>
           <View style={styles.athenaIcon}>
             <Image source={AthenaIcon} />
           </View>
-          {renderedItems}
-        </ScrollView>
+          <ScrollView
+            horizontal={true}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ alignItems: 'center' }}
+          >
+            {renderedItems}
+          </ScrollView>
+        </View>
       </View>
     </View>
   )
