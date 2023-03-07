@@ -22,7 +22,12 @@ import {
   PlayerState,
   useAudioPlayer,
 } from '@/Hooks'
-import { LoadingSpinner, InsightsVisualizer, WebExplorer } from '@/Components'
+import {
+  LoadingSpinner,
+  InsightsVisualizer,
+  WebExplorer,
+  LayoutNoInternet,
+} from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { selectConverseData, selectUrlFollowupData } from '@/Store/App'
 import { ConverseData } from '@/Types/ChatMessage'
@@ -33,6 +38,7 @@ import { properCase } from '@/Utils/common'
 import { VIEW_ALL } from '@/Config'
 import { AudioTrack } from '@/Hooks/helper'
 import { URLFollowupData } from '@/Types/Common'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 const CARD_HEIGHT = 180
 
@@ -104,22 +110,29 @@ const TagFilter = React.memo(
         </TouchableOpacity>
       )
     }
-
+    const { isConnected } = useNetInfo()
     return (
-      <View
-        paddingT-8
-        paddingB-8
-        paddingH-16
-        style={{ backgroundColor: Colors.WHITE }}
-      >
-        <FlatList
-          data={allTags}
-          showsHorizontalScrollIndicator={false}
-          horizontal
-          extraData={tagWithIndexes}
-          keyExtractor={tag => tag}
-          renderItem={renderTag}
-        />
+      <View>
+        {!isConnected && (
+          <View style={{ height: 30 }}>
+            <LayoutNoInternet />
+          </View>
+        )}
+        <View
+          paddingT-8
+          paddingB-8
+          paddingH-16
+          style={{ backgroundColor: Colors.WHITE }}
+        >
+          <FlatList
+            data={allTags}
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            extraData={tagWithIndexes}
+            keyExtractor={tag => tag}
+            renderItem={renderTag}
+          />
+        </View>
       </View>
     )
   },

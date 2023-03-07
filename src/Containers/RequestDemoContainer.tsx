@@ -11,11 +11,12 @@ import {
 } from 'react-native'
 import { useForm, Controller, FieldValues } from 'react-hook-form'
 import { ReqDemoForm } from '@/Types/Forms'
-import { Button } from '@/Components'
+import { Button, LayoutNoInternet } from '@/Components'
 import { NavigationProp, ParamListBase } from '@react-navigation/native'
 import { DEMO_REQUESTED } from '@/Constants/screens'
 import InputError from '@/Components/InputError'
 import { EMAIL_REGEX } from '@/Constants/utils'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 interface Props {
   navigation: NavigationProp<ParamListBase>
@@ -54,7 +55,7 @@ const RequestDemoContainer = ({ navigation }: Props) => {
   const errorPhone = errors.phone
     ? { borderColor: Colors.DARK_BLUE, color: Colors.DARK_BLUE }
     : {}
-
+  const { isConnected } = useNetInfo()
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -62,143 +63,153 @@ const RequestDemoContainer = ({ navigation }: Props) => {
       keyboardVerticalOffset={100}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView>
-        <View style={{ ...Layout.colCenter, flex: 1, paddingVertical: 70 }}>
-          <View style={{ height: screenHeight / 6 }}>
-            <ReqIcon />
-          </View>
-          <View style={{ height: screenHeight / 6 }}>
-            {/* <Text center marginV-10 style={{ ...Fonts.titleSmall, fontSize: 24 }}>Request a Demo</Text> */}
-            <Text
-              center
-              marginH-40
-              style={[Fonts.textSmall, { lineHeight: 24 }]}
-            >
-              If you would like a demo of ConverSight, please fill in this form
-              and one of our representatives will be in touch with you soon.
-            </Text>
-          </View>
-          <View flex-4>
-            {errors.name?.message && (
-              <InputError errorText={errors.name?.message} />
-            )}
-
-            <Controller
-              control={control}
-              rules={{
-                required: 'Name is required',
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  placeholderTextColor={Colors.GREEN_DARK}
-                  onBlur={onBlur}
-                  value={value}
-                  onChangeText={onChange}
-                  style={{
-                    ...Common.textInput,
-                    ...errorName,
-                    marginVertical: 5,
-                  }}
-                  placeholder="Your name"
-                />
-              )}
-              name={'name'}
-            />
-
-            {errors.organization?.message && (
-              <InputError errorText={errors.organization?.message} />
-            )}
-
-            <Controller
-              control={control}
-              rules={{
-                required: 'Organization is required',
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  placeholderTextColor={Colors.GREEN_DARK}
-                  onBlur={onBlur}
-                  value={value}
-                  onChangeText={onChange}
-                  style={{
-                    ...Common.textInput,
-                    ...errorOrg,
-                    marginVertical: 5,
-                  }}
-                  placeholder="Your Organization"
-                />
-              )}
-              name="organization"
-            />
-
-            {errors.email?.message && (
-              <InputError errorText={errors.email?.message} />
-            )}
-
-            <Controller
-              control={control}
-              rules={{
-                required: 'Email is required',
-                pattern: {
-                  value: EMAIL_REGEX,
-                  message: 'Invalid email address',
-                },
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  keyboardType="email-address"
-                  placeholderTextColor={Colors.GREEN_DARK}
-                  onBlur={onBlur}
-                  value={value}
-                  onChangeText={onChange}
-                  style={{
-                    ...Common.textInput,
-                    ...errorEmail,
-                    marginVertical: 5,
-                  }}
-                  placeholder="Your Email"
-                />
-              )}
-              name={'email'}
-            />
-
-            {errors.phone?.message && (
-              <InputError errorText={errors.phone?.message} />
-            )}
-
-            <Controller
-              control={control}
-              rules={{
-                required: 'Phone is required',
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  placeholderTextColor={Colors.GREEN_DARK}
-                  keyboardType="phone-pad"
-                  onBlur={onBlur}
-                  value={value}
-                  onChangeText={onChange}
-                  style={{
-                    ...Common.textInput,
-                    ...errorPhone,
-                    marginVertical: 5,
-                    marginBottom: 10,
-                  }}
-                  placeholder="Your Phone Number"
-                />
-              )}
-              name={'phone'}
-            />
-
-            <Button
-              block
-              dark
-              label="Request a Demo"
-              onPress={handleSubmit(onSubmit)}
-            />
-          </View>
+      <>
+        <View>
+          {!isConnected && (
+            <View style={{ height: 30 }}>
+              <LayoutNoInternet />
+            </View>
+          )}
         </View>
-      </ScrollView>
+        <ScrollView>
+          <View style={{ ...Layout.colCenter, flex: 1, paddingVertical: 70 }}>
+            <View style={{ height: screenHeight / 6 }}>
+              <ReqIcon />
+            </View>
+            <View style={{ height: screenHeight / 6 }}>
+              {/* <Text center marginV-10 style={{ ...Fonts.titleSmall, fontSize: 24 }}>Request a Demo</Text> */}
+              <Text
+                center
+                marginH-40
+                style={[Fonts.textSmall, { lineHeight: 24 }]}
+              >
+                If you would like a demo of ConverSight, please fill in this
+                form and one of our representatives will be in touch with you
+                soon.
+              </Text>
+            </View>
+            <View flex-4>
+              {errors.name?.message && (
+                <InputError errorText={errors.name?.message} />
+              )}
+
+              <Controller
+                control={control}
+                rules={{
+                  required: 'Name is required',
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    placeholderTextColor={Colors.GREEN_DARK}
+                    onBlur={onBlur}
+                    value={value}
+                    onChangeText={onChange}
+                    style={{
+                      ...Common.textInput,
+                      ...errorName,
+                      marginVertical: 5,
+                    }}
+                    placeholder="Your name"
+                  />
+                )}
+                name={'name'}
+              />
+
+              {errors.organization?.message && (
+                <InputError errorText={errors.organization?.message} />
+              )}
+
+              <Controller
+                control={control}
+                rules={{
+                  required: 'Organization is required',
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    placeholderTextColor={Colors.GREEN_DARK}
+                    onBlur={onBlur}
+                    value={value}
+                    onChangeText={onChange}
+                    style={{
+                      ...Common.textInput,
+                      ...errorOrg,
+                      marginVertical: 5,
+                    }}
+                    placeholder="Your Organization"
+                  />
+                )}
+                name="organization"
+              />
+
+              {errors.email?.message && (
+                <InputError errorText={errors.email?.message} />
+              )}
+
+              <Controller
+                control={control}
+                rules={{
+                  required: 'Email is required',
+                  pattern: {
+                    value: EMAIL_REGEX,
+                    message: 'Invalid email address',
+                  },
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    keyboardType="email-address"
+                    placeholderTextColor={Colors.GREEN_DARK}
+                    onBlur={onBlur}
+                    value={value}
+                    onChangeText={onChange}
+                    style={{
+                      ...Common.textInput,
+                      ...errorEmail,
+                      marginVertical: 5,
+                    }}
+                    placeholder="Your Email"
+                  />
+                )}
+                name={'email'}
+              />
+
+              {errors.phone?.message && (
+                <InputError errorText={errors.phone?.message} />
+              )}
+
+              <Controller
+                control={control}
+                rules={{
+                  required: 'Phone is required',
+                }}
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    placeholderTextColor={Colors.GREEN_DARK}
+                    keyboardType="phone-pad"
+                    onBlur={onBlur}
+                    value={value}
+                    onChangeText={onChange}
+                    style={{
+                      ...Common.textInput,
+                      ...errorPhone,
+                      marginVertical: 5,
+                      marginBottom: 10,
+                    }}
+                    placeholder="Your Phone Number"
+                  />
+                )}
+                name={'phone'}
+              />
+
+              <Button
+                block
+                dark
+                label="Request a Demo"
+                onPress={handleSubmit(onSubmit)}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </>
     </KeyboardAvoidingView>
   )
 }
