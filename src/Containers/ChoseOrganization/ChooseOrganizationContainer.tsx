@@ -26,7 +26,7 @@ import {
 import { ScrollView } from 'react-native-gesture-handler'
 import { useHeaderHeight } from '@react-navigation/elements'
 import { useTheme, useAppDispatch, useOrganization } from '@/Hooks'
-import { Brand } from '@/Components'
+import { Brand, LayoutNoInternet } from '@/Components'
 import { setPassword } from '@/Store/Auth'
 import PickerIcon from '@/Assets/Images/iconsSVG/pickerIcon.svg'
 import SelectedOptionIcon from '@/Assets/Images/iconsSVG/selectedOptionArrow.svg'
@@ -210,35 +210,37 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   }
 
   return (
-    <ScrollView
-      keyboardShouldPersistTaps={'always'}
-      showsVerticalScrollIndicator={false}
-    >
-      <View marginB-25>
-        <View center>
-          <Brand height={290} width={'60%'} />
+    <LayoutNoInternet>
+      <ScrollView
+        keyboardShouldPersistTaps={'always'}
+        showsVerticalScrollIndicator={false}
+      >
+        <View marginB-25>
+          <View center>
+            <Brand height={290} width={'60%'} />
+          </View>
+          <View center>
+            <Picker
+              mode={Picker.modes.SINGLE}
+              value={signInOrg?.orgId}
+              migrateTextField
+              migrate
+              onPress={showModal}
+              onChange={handleSelectOrg}
+              renderPicker={renderCustomPicker}
+              renderCustomModal={renderCustomPickerModal}
+              renderItem={renderCustomPickerItem}
+            />
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              keyboardVerticalOffset={headerHeight}
+            >
+              <OrgPassword navigation={navigation} />
+            </KeyboardAvoidingView>
+          </View>
         </View>
-        <View center>
-          <Picker
-            mode={Picker.modes.SINGLE}
-            value={signInOrg?.orgId}
-            migrateTextField
-            migrate
-            onPress={showModal}
-            onChange={handleSelectOrg}
-            renderPicker={renderCustomPicker}
-            renderCustomModal={renderCustomPickerModal}
-            renderItem={renderCustomPickerItem}
-          />
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={headerHeight}
-          >
-            <OrgPassword navigation={navigation} />
-          </KeyboardAvoidingView>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </LayoutNoInternet>
   )
 }
 

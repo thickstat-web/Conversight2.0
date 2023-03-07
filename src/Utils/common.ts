@@ -285,3 +285,28 @@ export const getDisplayName = (
       : cleanseColumn(column, ' ')
   return columnName.trim()
 }
+
+export function getDatasetInfo(
+  dataSets: any[],
+  selectedDatasetId: string | null,
+  moment: typeof import('moment'),
+) {
+  const filteredDatasetName = dataSets.filter(val => {
+    return val.dataSetID === selectedDatasetId
+  })
+
+  const activeDatasetName = filteredDatasetName.map(val => {
+    return val.datasetName
+  })
+
+  const datasetRefreshedTime = filteredDatasetName.map(val => {
+    return val.republishCompletedTime
+  })
+
+  const relativeTime = moment(new Date(datasetRefreshedTime)).fromNow()
+
+  return {
+    activeDatasetName: activeDatasetName[0],
+    relativeTime: relativeTime,
+  }
+}

@@ -5,7 +5,7 @@ import {
   MessageType,
   Rerequest,
 } from '@/Types/ChatMessage'
-import { ChatVisualizer, LoadingSpinner } from '@/Components'
+import { ChatVisualizer, LayoutNoInternet, LoadingSpinner } from '@/Components'
 import {
   Dimensions,
   FlatList,
@@ -34,6 +34,8 @@ import { navigate } from '@/Navigators/utils'
 import { selectDatasetId } from '@/Store/Auth'
 import { useGetDatasetsQuery } from '@/Services/modules/chat'
 import moment from 'moment'
+import { getDatasetInfo } from '@/Utils/common'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 interface UserMessageContainerProps {
   message: string
@@ -325,19 +327,7 @@ const ChatMessageContainer = ({
 
   const keyExtractor = (item: ChatMessage) => item.id
 
-  const filteredDatasetName = dataSets.filter(val => {
-    return val.dataSetID === selectedDatasetId
-  })
-
-  const activeDatasetName = filteredDatasetName.map(val => {
-    return val.datasetName
-  })
-
-  const datasetRefreshedTime = filteredDatasetName.map(val => {
-    return val.republishCompletedTime
-  })
-
-  const relativeTime = moment(new Date(datasetRefreshedTime)).fromNow()
+  const datasetInfo = getDatasetInfo(dataSets, selectedDatasetId, moment)
 
   const scrollToEnd =
     (animated: boolean = true) =>
@@ -371,8 +361,16 @@ const ChatMessageContainer = ({
       </Text>
     </View>
   )
+  const { isConnected } = useNetInfo()
   return (
     <View flex>
+      <View>
+        {!isConnected && (
+          <View style={{ height: 30 }}>
+            <LayoutNoInternet />
+          </View>
+        )}
+      </View>
       <View
         style={{
           backgroundColor: Colors.GREEN_LIGHTEST,
@@ -380,11 +378,11 @@ const ChatMessageContainer = ({
         }}
       >
         <Text
-          style={{ color: Colors.GREEN_DARK }}
-        >{`Athena Conversation - ${activeDatasetName}`}</Text>
+          style={{ color: Colors.GREEN_DARK, fontWeight: 'bold' }}
+        >{`Athena Conversation - ${datasetInfo.activeDatasetName}`}</Text>
         <Text
           style={{ color: Colors.GREEN_MAIN }}
-        >{`Updated ${relativeTime}`}</Text>
+        >{`Updated ${datasetInfo.relativeTime}`}</Text>
       </View>
       {chatMessagesProcessing || isLoading ? (
         <LoadingSpinner />

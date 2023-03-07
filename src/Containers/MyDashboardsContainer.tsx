@@ -3,7 +3,7 @@ import { FlatList, Pressable, SectionList, StyleSheet } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
 import { useTheme } from '@/Hooks'
-import { LoadingSpinner, SearchBar } from '@/Components'
+import { LayoutNoInternet, LoadingSpinner, SearchBar } from '@/Components'
 import { useFetchPinboardsQuery } from '@/Services/modules/bot'
 import { Pinboard } from '@/Types/Pinboard'
 import { Colors } from '@/Theme/Variables'
@@ -16,6 +16,7 @@ import {
   SHARED,
   VIEW_ALL,
 } from '@/Config'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 interface TagProps {
   tag: string
@@ -182,21 +183,30 @@ const TagFilter = React.memo(
       )
     }
 
+    const { isConnected } = useNetInfo()
+
     return (
-      <View
-        paddingT-8
-        paddingB-8
-        paddingH-16
-        style={{ backgroundColor: Colors.WHITE }}
-      >
-        <FlatList
-          data={allTags}
-          showsHorizontalScrollIndicator={false}
-          horizontal
-          extraData={tagWithIndexes}
-          keyExtractor={tag => tag}
-          renderItem={renderTag}
-        />
+      <View>
+        {!isConnected && (
+          <View style={{ height: 30 }}>
+            <LayoutNoInternet />
+          </View>
+        )}
+        <View
+          paddingT-8
+          paddingB-8
+          paddingH-16
+          style={{ backgroundColor: Colors.WHITE }}
+        >
+          <FlatList
+            data={allTags}
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            extraData={tagWithIndexes}
+            keyExtractor={tag => tag}
+            renderItem={renderTag}
+          />
+        </View>
       </View>
     )
   },
