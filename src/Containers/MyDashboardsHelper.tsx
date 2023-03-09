@@ -6,6 +6,8 @@ import { useTheme } from '@/Hooks'
 import { DateValue, Filter, FilterValue } from '@/Types/Pinboard'
 import { properCase } from '@/Utils/common'
 import { Colors } from '@/Theme/Variables'
+import { LayoutNoInternet } from '@/Components'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 export type DasboardFilter = {
   type: string
@@ -113,21 +115,30 @@ export const DashboardFilters = ({ filters }: DashboardFiltersProps) => {
       </View>
     )
   }
-
+  const { isConnected } = useNetInfo()
   return (
-    <View
-      paddingT-8
-      paddingB-8
-      paddingH-16
-      style={{ backgroundColor: Colors.WHITE }}
-    >
-      <FlatList
-        data={filters}
-        showsHorizontalScrollIndicator={false}
-        horizontal
-        keyExtractor={item => `${item.columnId}-${item.columnName}`}
-        renderItem={renderFilter}
-      />
+    <View>
+      <View>
+        {!isConnected && (
+          <View style={{ height: 30 }}>
+            <LayoutNoInternet />
+          </View>
+        )}
+      </View>
+      <View
+        paddingT-8
+        paddingB-8
+        paddingH-16
+        style={{ backgroundColor: Colors.WHITE }}
+      >
+        <FlatList
+          data={filters}
+          showsHorizontalScrollIndicator={false}
+          horizontal
+          keyExtractor={item => `${item.columnId}-${item.columnName}`}
+          renderItem={renderFilter}
+        />
+      </View>
     </View>
   )
 }
