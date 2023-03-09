@@ -457,7 +457,11 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 10,
   },
-  athenaDidYouMeanContainer: { alignItems: 'center', height: 40, marginTop: 8 },
+  athenaDidYouMeanContainer: {
+    alignItems: 'center',
+    marginTop: 8,
+    paddingBottom: 4,
+  },
   athenaDidYouMeanText: { fontWeight: 'bold' },
   didYouMeanRenderedItems: { marginTop: 10, marginBottom: 10 },
 })
