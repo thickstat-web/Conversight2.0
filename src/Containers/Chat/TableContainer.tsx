@@ -86,6 +86,10 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
   const getRenderedHeader = () =>
     columns.map(column => {
       const columnName = getDisplayName(column, columnMetadata).toUpperCase()
+      const maxTextLength = 20
+      const columnNameAdjust =
+        columnName.slice(0, maxTextLength) +
+        (columnName.length > maxTextLength ? '...' : '')
       return (
         <TouchableOpacity
           style={styles.headerLabel}
@@ -97,7 +101,7 @@ function TableContainer({ id, columns, columnMetadata, values }: TableProps) {
               selectedColumn === column && { paddingRight: 2 },
             ]}
           >
-            {columnName}
+            {columnNameAdjust}
           </Text>
           {selectedColumn === column && <SortArrow direction={direction} />}
         </TouchableOpacity>
@@ -182,7 +186,8 @@ const styles = StyleSheet.create({
     // fontFamily: 'Montserrat-Regular',
     fontSize: 13,
     textAlign: 'center',
-    color: '#4d4d4d',
+    color: '#FFFFFF',
+    fontWeight: '500',
   },
   cell: {
     fontSize: 13,
