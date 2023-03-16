@@ -371,19 +371,21 @@ const ChatMessageContainer = ({
           </View>
         )}
       </View>
-      <View
-        style={{
-          backgroundColor: Colors.GREEN_LIGHTEST,
-          paddingHorizontal: 6,
-        }}
-      >
-        <Text
-          style={{ color: Colors.GREEN_DARK, fontWeight: 'bold' }}
-        >{`Athena Conversation - ${datasetInfo.activeDatasetName}`}</Text>
-        <Text
-          style={{ color: Colors.GREEN_MAIN }}
-        >{`Updated ${datasetInfo.relativeTime}`}</Text>
-      </View>
+      {datasetInfo.activeDatasetName && (
+        <View
+          style={{
+            backgroundColor: Colors.GREEN_LIGHTEST,
+            paddingHorizontal: 6,
+          }}
+        >
+          <Text
+            style={{ color: Colors.GREEN_DARK, fontWeight: 'bold' }}
+          >{`Athena Conversation - ${datasetInfo.activeDatasetName}`}</Text>
+          <Text
+            style={{ color: Colors.GREEN_MAIN }}
+          >{`Updated ${datasetInfo.relativeTime}`}</Text>
+        </View>
+      )}
       {chatMessagesProcessing || isLoading ? (
         <LoadingSpinner />
       ) : (
