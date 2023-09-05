@@ -1,0 +1,14 @@
+stages:
+  - test
+
+before_script:
+  - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+
+code_coverage:
+   stage: test
+   image: thickstatdevops/code-converage:v0.1
+   services:
+     - docker:dind
+   script:
+     - npm install # Install all dependencies
+     - npm test # Test
