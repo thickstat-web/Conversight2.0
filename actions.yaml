@@ -1,0 +1,195 @@
+name: Continous Integration and Deployment
+
+on:
+  push:
+    # branches:
+    #   - master
+    tags:
+      - "v*"
+      - "release-*"
+
+jobs:
+  release-staging:
+    name: Release to Staging
+    if: startsWith(gitea.ref, 'refs/tags/release-')
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+
+    steps:
+
+      - name: Gcloud version Check
+        run: |
+          node -v
+          npm -v
+
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Registry
+        run: |
+          echo "${{ vars.DOCKER_PASSWORD }}" | docker login ${{ vars.CONTAINER_HOST }} -u ${{ vars.DOCKER_USERNAME }} --password-stdin
+
+      - name: Workdir checks
+        run: |
+          pwd
+          ls -la
+          echo "REPO URL : ${{ gitea.repository }}"
+          echo "REPO REF : ${{ gitea.ref }}"                    
+
+      - name: Extract and store tag name
+        id: extract_tag
+        run: |
+          echo "The full ref is ${{ gitea.ref }}"
+          if [[ ${{ gitea.ref }} == refs/tags/* ]]; then
+            TAG_NAME="${{ gitea.ref }}"
+            TAG_NAME="${TAG_NAME#refs/tags/}"
+            echo "TAG_NAME=$TAG_NAME" >> $GITEA_ENV
+            echo "::set-output name=tag_name::$TAG_NAME"
+            echo "Tag name stored in environment: $TAG_NAME"
+          else
+            echo "No tag ref found"
+          fi                    
+
+      - name: Store Release Details
+        id: extract_repo
+        run: |
+          echo "The tag name is $TAG_NAME"
+          CONTAINER_HOST=$(echo "${{ vars.CONTAINER_HOST }}" | tr '[:upper:]' '[:lower:]')
+          REPOSITORY=$(echo "${{ gitea.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "CONTAINER_HOST=${CONTAINER_HOST}" >> $GITEA_ENV
+          echo "REPOSITORY=${REPOSITORY}" >> $GITEA_ENV
+          echo "::set-output name=container_host::$CONTAINER_HOST"
+          echo "::set-output name=repository::$REPOSITORY"          
+
+      - name: Docker login to CS Docker HUB
+        run: |
+          echo "Docker login initiated"
+          echo "${{ vars.DOCKERHUB_PASSWORD }}" | docker login -u ${{ vars.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Docker Build
+        run: |
+          echo "Docker Build Started"
+          echo "REPO NAME: $CONTAINER_HOST/$REPOSITORY:$TAG_NAME"
+          docker build --no-cache -t $CONTAINER_HOST/$REPOSITORY:$TAG_NAME .                         
+
+      - name: Push Docker Image
+        run: |
+          echo "Docker push to Registry Started"
+          echo "REPO NAME: $CONTAINER_HOST/$REPOSITORY:$TAG_NAME"
+          docker push $CONTAINER_HOST/$REPOSITORY:$TAG_NAME          
+
+    outputs:
+      tag_name: ${{ steps.extract_tag.outputs.tag_name }}
+      container_host: ${{ steps.extract_repo.outputs.container_host }}
+      repository: ${{ steps.extract_repo.outputs.repository }}
+
+  deploy-staging:
+    name: deploy to Staging
+    if: startsWith(gitea.ref, 'refs/tags/release-')
+    needs: release-staging
+    container:
+      image: google/cloud-sdk:latest
+
+    steps:
+
+      - name: Gcloud version check
+        run: |
+          gcloud version
+          echo "${{ vars.GCLOUD_SERVICE_ACCOUNT_KEY_CS_STAG }}"                    
+
+      - name: Kubernetes Activate account
+        run: |
+          echo "Writing service account key to service-account.json"
+          echo ${{ vars.GCLOUD_SERVICE_ACCOUNT_KEY_CS_STAG }} | base64 --decode > service-account.json
+          gcloud auth activate-service-account --key-file=service-account.json
+          gcloud config set project ${{ vars.GCP_PROJECT_ID_CS_STAGING }}
+          gcloud config list                
+
+
+      - name: kubernetes Deployment
+        run: |
+          export GCP_CS_STAGING_CLUSTER_NAME="${{ vars.GCP_CS_STAGING_CLUSTER_NAME }}" 
+          export GCP_CS_STAGING_CLUSTER_ZONE="${{ vars.GCP_CS_STAGING_CLUSTER_ZONE }}"
+          export GCP_PROJECT_ID_CS_STAGING="${{ vars.GCP_PROJECT_ID_CS_STAGING }}"
+          gcloud container clusters get-credentials $GCP_CS_STAGING_CLUSTER_NAME --zone $GCP_CS_STAGING_CLUSTER_ZONE --project $GCP_PROJECT_ID_CS_STAGING
+          kubectl config current-context
+          kubectl get deployment/${{ vars.DEPLOYMENT_NAME }} -n ${{ vars.CS_STAG_NAMESPACE }}
+          echo ${{ needs.release-staging.outputs.container_host }}/${{ needs.release-staging.outputs.repository }}:${{ needs.release-staging.outputs.tag_name }}
+          kubectl set image deployment/${{ vars.DEPLOYMENT_NAME }} \
+            ${{ vars.DEPLOYMENT_NAME }}=${{ needs.release-staging.outputs.container_host }}/${{ needs.release-staging.outputs.repository }}:${{ needs.release-staging.outputs.tag_name }} \
+            -n ${{ vars.CS_STAG_NAMESPACE }}
+          kubectl get deployment/${{ vars.DEPLOYMENT_NAME }} -n ${{ vars.CS_STAG_NAMESPACE }}
+  
+  
+
+  release-production:
+    name: Release to Production
+    if: startsWith(gitea.ref, 'refs/tags/v')
+
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+
+    steps:
+
+      - name: node version Check
+        run: |
+          node -v
+          npm -v                                
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Registry
+        run: |
+          echo "${{ vars.DOCKER_PASSWORD }}" | docker login ${{ vars.CONTAINER_HOST }} -u ${{ vars.DOCKER_USERNAME }} --password-stdin
+
+      - name: Workdir checks
+        run: |
+          pwd
+          ls -la
+          echo "REPO URL : ${{ gitea.repository }}"
+          echo "REPO REF : ${{ gitea.ref }}"                    
+
+      - name: Extract and store tag name
+        id: extract_tag
+        run: |
+          echo "The full ref is ${{ gitea.ref }}"
+          if [[ ${{ gitea.ref }} == refs/tags/* ]]; then
+            TAG_NAME="${{ gitea.ref }}"
+            TAG_NAME="${TAG_NAME#refs/tags/}"
+            echo "TAG_NAME=$TAG_NAME" >> $GITEA_ENV
+            echo "Tag name stored in environment: $TAG_NAME"
+          else
+            echo "No tag ref found"
+          fi
+
+      - name: Store Release Details
+        id: extract_repo
+        run: |
+          echo "The tag name is $TAG_NAME"
+          CONTAINER_HOST=$(echo "${{ vars.CONTAINER_HOST }}" | tr '[:upper:]' '[:lower:]')
+          REPOSITORY=$(echo "${{ gitea.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "CONTAINER_HOST=${CONTAINER_HOST}" >> $GITEA_ENV
+          echo "REPOSITORY=${REPOSITORY}" >> $GITEA_ENV
+          echo "::set-output name=container_host::$CONTAINER_HOST"
+          echo "::set-output name=repository::$REPOSITORY"      
+
+      - name: Display Release Details
+        run: echo "The tag name is $TAG_NAME"
+
+      - name: Build and Tag Docker Image
+        run: |
+          docker build --no-cache -t $CONTAINER_HOST/$REPOSITORY:$TAG_NAME .                              
+
+      - name: Push Docker Image
+        run: |
+          docker push $CONTAINER_HOST/$REPOSITORY:$TAG_NAME
