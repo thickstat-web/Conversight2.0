@@ -33,7 +33,6 @@
     "@react-navigation/native": "^6.1.1",
     "@react-navigation/stack": "^6.3.10",
     "@reduxjs/toolkit": "^1.8.6",
-    "casdoor-react-native-sdk": "^1.1.1",
     "date-fns": "^2.29.3",
     "eslint-plugin-react-hooks": "^5.0.0-next-4fcc9184a-20230217",
     "i18next": "^22.0.5",
