@@ -66,7 +66,6 @@ export default function CasdoorContainer({ route }: any) {
         const token = match ? match[1] : null;
 
         if (token) {
-          console.log('Extracted Token:', token);
           await AsyncStorage.setItem('authToken', token);
           const authData = {
             authentication: 'success',
