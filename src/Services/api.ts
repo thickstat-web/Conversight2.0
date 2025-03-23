@@ -9,6 +9,7 @@ import {
 import { isStringExists } from '@/Utils/common'
 import { RootState } from '@/Store'
 import { logRequestResponse } from './logging'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const csApiBaseQuery = fetchBaseQuery({ baseUrl: 'https://' })
 const botAPIBaseQuery = fetchBaseQuery({ baseUrl: 'https://' })
@@ -32,7 +33,7 @@ const buildBaseQueryWithInterceptor = (baseQuery: BaseQuery) => {
 
     // Inject auth token i.e ?token=<token>
     const state = api.getState() as RootState
-    const token = state.authReducer.authData?.token
+    const token = state.authReducer.authData?.token || await AsyncStorage.getItem('authToken');
     const urlEnd = typeof args === 'string' ? args : args.url
     if (token && !isStringExists(urlEnd, 'token=')) {
       const joinChar = isStringExists(urlEnd, '?') ? '&' : '?'

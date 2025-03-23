@@ -34,6 +34,7 @@ import NotSelectedOptionIcon from '@/Assets/Images/iconsSVG/notSelectedOptionArr
 import NewLabel from '@/Assets/Images/iconsSVG/newLabel.svg'
 import OrgPassword from './OrgPassword'
 import { Org } from '@/Types/VerifyEmailResponse'
+import { ENTER_CASDOOR_SCREEN } from '@/Constants/screens'
 
 interface Props {
   navigation: any
@@ -80,9 +81,13 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const hideModal = () => setOpenModal(false)
 
   const handleSelectOrg = (orgId: string) => {
+    const redirectURL = organizations?.filter((item) => item.orgId === orgId)[0]
     setSignInOrgId(orgId)
     dispatch(setPassword(''))
     hideModal()
+    if (redirectURL?.isCasdoorOrg) {
+      navigation.navigate(ENTER_CASDOOR_SCREEN, { redirectURL: redirectURL?.domain[0]?.domainURL })
+    }
   }
 
   const renderCustomPickerModal = ({

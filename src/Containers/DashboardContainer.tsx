@@ -102,7 +102,7 @@ type RouteParams = {
   appliedFilters: Filter[]
 }
 
-const DashboardContainer = ({ navigation, route }) => {
+const DashboardContainer = ({ route }:any) => {
   const { pinboardId, appliedFilters } = route.params as RouteParams
   const { Colors } = useTheme()
   const { isLoading, pinboardComponents } = usePinboardData(pinboardId)

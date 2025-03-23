@@ -26,6 +26,7 @@ export interface OrgData {
   name: string
   accessList: string[]
   apiConfig: ApiConfig
+  isCasdoorOrg: boolean
 }
 
 type ResponseCode = 200 | 401

@@ -86,11 +86,8 @@ const ChangeOrganizationContainer = ({ navigation }: Props) => {
     dispatch(setTempOrg(current))
     hideModal()
   }
-  const handleRedirect = () => {
-    navigation.navigate(CHANGE_ORGANIZATION_PASSWORD)
-  }
 
-  const renderItem = (value, itemProps, label) => {
+  const renderItem = (value: string, itemProps: { isSelected: any }, label: React.Key | null | undefined) => {
     const { isSelected } = itemProps
     const currentOrg = getOrgByOrgId(organizations, value)
     return (

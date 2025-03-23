@@ -40,6 +40,8 @@ const StartupContainer = () => {
       ])
 
       // Set first dataset as default for chat
+
+
       const datasets = datasetsResp.data
       if (datasets && datasets?.length) {
         dispatch(setSelectedDatasetId(datasets[0].dataSetID))

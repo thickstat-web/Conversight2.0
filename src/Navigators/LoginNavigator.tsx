@@ -12,6 +12,7 @@ import {
   RECOVER_COMPLETED,
   REQUEST_DEMO,
   DEMO_REQUESTED,
+  ENTER_CASDOOR_SCREEN,
 } from '@/Constants/screens'
 import {
   LandingContainer,
@@ -19,6 +20,7 @@ import {
   EnterEmailContainer,
   WalkThroughContainer,
   RequestDemoContainer,
+  CasdoorContainer,
 } from '@/Containers'
 import RecoverEnterEmail from '@/Containers/RecoverEnterEmail'
 import RecoverEnterPassword from '@/Containers/RecoverEnterPassword'
@@ -51,6 +53,16 @@ const LoginNavigator = () => {
       <Stack.Screen
         name={ENTER_EMAIL_SCREEN}
         component={EnterEmailContainer}
+        options={{
+          title: 'Login',
+          headerTitleAlign: 'center',
+          headerBackTitleVisible: false,
+          headerTintColor: Colors.DARK,
+        }}
+      />
+       <Stack.Screen
+        name={ENTER_CASDOOR_SCREEN}
+        component={CasdoorContainer}
         options={{
           title: 'Login',
           headerTitleAlign: 'center',

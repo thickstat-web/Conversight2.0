@@ -17,11 +17,13 @@ import { csApi, botApi, ingressApi } from '@/Services/api'
 import * as modules from '@/Services/modules'
 import theme from './Theme'
 import authReducer from './Auth'
+import hostReducer from './HostURL'
 import appReducer from './App'
 import settingsReducer from './Settings'
 import faqReducer from './Faq'
 import {
   AUTH_REDUCER,
+  HOST_REDUCER,
   THEME_REDUCER,
   APP_REDUCER,
   SETTING_REDUCER,
@@ -31,6 +33,7 @@ import {
 const reducers = combineReducers({
   theme,
   authReducer,
+  hostReducer,
   appReducer,
   settingsReducer,
   faqReducer,
@@ -46,7 +49,7 @@ const reducers = combineReducers({
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: [THEME_REDUCER, AUTH_REDUCER],
+  whitelist: [THEME_REDUCER, AUTH_REDUCER, HOST_REDUCER],
   blackList: [APP_REDUCER, SETTING_REDUCER, FAQ_REDUCER],
 }
 
