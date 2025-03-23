@@ -59,7 +59,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
   const { Fonts, Colors, Layout } = useTheme()
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
-  const { signInOrg, isSingleOrg } = useOrganization()
+  const { signInOrg } = useOrganization()
   const { authData } = useAuth()
   const [logout, { isLoading }] = useLazyLogoutQuery()
   const { width: windowWidth } = Dimensions.get('window')
@@ -135,7 +135,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
               style={[styles.linkText, { color: Colors.GREEN_DARK }]}
               marginL-25
             >
-              Storyboard
+              Dashboard
             </Text>
           </TouchableOpacity>
           <View marginV-15 height={1} backgroundColor={Colors.GRAY} />
