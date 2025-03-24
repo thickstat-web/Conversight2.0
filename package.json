@@ -37,6 +37,7 @@
     "eslint-plugin-react-hooks": "^5.0.0-next-4fcc9184a-20230217",
     "i18next": "^22.0.5",
     "json-rules-engine": "^6.1.2",
+    "jwt-decode": "^4.0.0",
     "license-checker": "^25.0.1",
     "moment": "^2.29.4",
     "numeral": "^2.0.6",

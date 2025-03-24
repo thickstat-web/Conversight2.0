@@ -1,10 +1,8 @@
-import jwtDecode from 'jwt-decode';
-
+import { jwtDecode } from "jwt-decode";
 interface DecodedToken {
     exp: number;
     [key: string]: any;
 }
-
 
 export const validateJWT = (jwt: string): boolean => {
     try {

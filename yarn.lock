@@ -1910,13 +1910,6 @@
   dependencies:
     merge-options "^3.0.4"
 
-"@react-native-async-storage/async-storage@^1.19.3":
-  version "1.24.0"
-  resolved "https://registry.yarnpkg.com/@react-native-async-storage/async-storage/-/async-storage-1.24.0.tgz#888efbc62a26f7d9464b32f4d3027b7f2771999b"
-  integrity sha512-W4/vbwUOYOjco0x3toB8QCr7EjIP6nE9G7o8PMguvvjYT5Awg09lyV4enACRx4s++PPulBiBSjL0KTFx2u0Z/g==
-  dependencies:
-    merge-options "^3.0.4"
-
 "@react-native-community/cli-clean@^9.2.1":
   version "9.2.1"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-clean/-/cli-clean-9.2.1.tgz#198c5dd39c432efb5374582073065ff75d67d018"
@@ -3468,15 +3461,6 @@ capture-exit@^2.0.0:
   dependencies:
     rsvp "^4.8.4"
 
-casdoor-react-native-sdk@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/casdoor-react-native-sdk/-/casdoor-react-native-sdk-1.1.1.tgz#d364306177a83eaa8a215c064ab893f1f2549268"
-  integrity sha512-y307asYBfUOKWawHGT+KFQ4mMNEM51VVO0WhCYOAUpSjGZwcfXJ4o2iJbJtR6A2ypyJHv5Aw63TWwiomcY7RmQ==
-  dependencies:
-    "@react-native-async-storage/async-storage" "^1.19.3"
-    jwt-decode "^3.1.2"
-    pkce-challenge "3.1.0"
-
 chalk@^2.0.0, chalk@^2.4.1:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
@@ -3813,11 +3797,6 @@ cross-spawn@^7.0.0, cross-spawn@^7.0.2:
     path-key "^3.1.0"
     shebang-command "^2.0.0"
     which "^2.0.1"
-
-crypto-js@^4.1.1:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.2.0.tgz#4d931639ecdfd12ff80e8186dba6af2c2e856631"
-  integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
 
 css-select@^4.1.3:
   version "4.3.0"
@@ -6416,10 +6395,10 @@ jsonpath-plus@^5.0.7:
     array-includes "^3.1.5"
     object.assign "^4.1.3"
 
-jwt-decode@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-3.1.2.tgz#3fb319f3675a2df0c2895c8f5e9fa4b67b04ed59"
-  integrity sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==
+jwt-decode@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/jwt-decode/-/jwt-decode-4.0.0.tgz#2270352425fd413785b2faf11f6e755c5151bd4b"
+  integrity sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==
 
 kind-of@^3.0.2, kind-of@^3.0.3, kind-of@^3.2.0:
   version "3.2.2"
@@ -7621,13 +7600,6 @@ pirates@^4.0.1, pirates@^4.0.5:
   version "4.0.5"
   resolved "https://registry.yarnpkg.com/pirates/-/pirates-4.0.5.tgz#feec352ea5c3268fb23a37c702ab1699f35a5f3b"
   integrity sha512-8V9+HQPupnaXMA23c5hvl69zXvTwTzyAYasnkb0Tts4XvO4CliqONMOnvlq26rkhLC3nWDFBJf73LU1e1VZLaQ==
-
-pkce-challenge@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/pkce-challenge/-/pkce-challenge-3.1.0.tgz#c974ee934e62c501f09da817964e75db201ee8bf"
-  integrity sha512-bQ/0XPZZ7eX+cdAkd61uYWpfMhakH3NeteUF1R8GNa+LMqX8QFAkbCLqq+AYAns1/ueACBu/BMWhrlKGrdvGZg==
-  dependencies:
-    crypto-js "^4.1.1"
 
 pkg-dir@^3.0.0:
   version "3.0.0"
