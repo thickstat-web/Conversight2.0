@@ -2,9 +2,9 @@ import { getSystemName, getSystemVersion } from 'react-native-device-info'
 
 const env = {
   STAGING: {
-    CS_API_HOST: 'api.staging.conversight.ai',
-    BOT_API_HOST: 'bot.staging.conversight.ai',
-    INGRESS_API_HOST: 'ingress.staging.conversight.ai',
+    CS_API_HOST: 'api-gcp.staging.conversight.ai',
+    BOT_API_HOST: 'bot-gcp.staging.conversight.ai',
+    INGRESS_API_HOST: 'ingress-gcp.staging.conversight.ai',
   },
   PRODUCTION: {
     CS_API_HOST: 'api.conversight.ai',

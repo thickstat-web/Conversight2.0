@@ -685,7 +685,7 @@ SPEC CHECKSUMS:
   React-logger: 1623c216abaa88974afce404dc8f479406bbc3a0
   react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
   react-native-netinfo: 2517ad504b3d303e90d7a431b0fcaef76d207983
-  react-native-quick-base64: e657e9197e61b60a9dec49807843052b830da254
+  react-native-quick-base64: b69e4aa9a7a1d07c1f662cfc9978dbbcf9d52e2d
   react-native-safe-area-context: 99b24a0c5acd0d5dcac2b1a7f18c49ea317be99a
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   react-native-track-player: 0c26d981b5097910486cbbeb6d8f5352d41be069
