@@ -2,9 +2,9 @@ import { getSystemName, getSystemVersion } from 'react-native-device-info'
 
 const env = {
   STAGING: {
-    CS_API_HOST: 'api.staging.conversight.ai',
-    BOT_API_HOST: 'bot.staging.conversight.ai',
-    INGRESS_API_HOST: 'ingress.staging.conversight.ai',
+    CS_API_HOST: 'api-gcp.staging.conversight.ai',
+    BOT_API_HOST: 'bot-gcp.staging.conversight.ai',
+    INGRESS_API_HOST: 'ingress-gcp.staging.conversight.ai',
   },
   PRODUCTION: {
     CS_API_HOST: 'api.conversight.ai',
@@ -18,7 +18,7 @@ const env = {
  */
 export const { CS_API_HOST, BOT_API_HOST, INGRESS_API_HOST } = __DEV__
   ? env.STAGING
-  : env.PRODUCTION
+  : env.STAGING
 
 export const Config = {
   CS_API_HOST,
@@ -55,7 +55,7 @@ export const DEFAULT_TABLE_RENDER_ROWS = 5
 export const DEFAULT_DATASET_SHOW_COUNT = 6
 export const DEFAULT_DASHBOARD_SHOW_COUNT = 4
 export const NO_DATA_AVAILABLE = 'No data available'
-export const MY_DASHBOARD = 'my dashboard'
+export const MY_DASHBOARD = 'my storyboard'
 export const ATHENA = 'athena'
 export const SHARED = 'shared'
 export const VIEW_ALL = 'view all'

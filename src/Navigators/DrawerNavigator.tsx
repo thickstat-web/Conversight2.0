@@ -40,6 +40,8 @@ import RequestDemoIcon from '@/Assets/Images/drawer/demo.svg'
 import FaqIcon from '@/Assets/Images/drawer/faq.svg'
 import DownArrow from '@/Assets/Images/drawer/down-arrow.svg'
 import TrackPlayer from 'react-native-track-player'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { cleanupHostData } from '@/Store/HostURL'
 
 interface Props {
   state: DrawerNavigationState<ParamListBase>
@@ -57,7 +59,7 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
   const { Fonts, Colors, Layout } = useTheme()
   const { t } = useTranslation()
   const dispatch = useAppDispatch()
-  const { signInOrg, isSingleOrg } = useOrganization()
+  const { signInOrg } = useOrganization()
   const { authData } = useAuth()
   const [logout, { isLoading }] = useLazyLogoutQuery()
   const { width: windowWidth } = Dimensions.get('window')
@@ -66,6 +68,8 @@ const DrawerView = ({ handleRedirect }: DrawerViewProps) => {
     await logout()
     dispatch(cleanupAuthData())
     dispatch(cleanupAppData())
+    dispatch(cleanupHostData())
+    await AsyncStorage.clear();
     TrackPlayer.pause()
   }
 

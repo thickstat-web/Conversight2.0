@@ -74,7 +74,7 @@ const BottomTabNavigator = ({ navigation }: Props) => {
         name={t('bottomTabs.dashboard')}
         component={MyDashboardsContainer}
         options={{
-          title: 'My Dashboards',
+          title: 'My Storyboards',
           headerTintColor: Colors.WHITE,
           headerStyle: {
             backgroundColor: Colors.GREEN_MAIN,
