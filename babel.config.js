@@ -1,5 +1,5 @@
 const presets = ['module:metro-react-native-babel-preset']
-const plugins = [] // 'transform-remove-console'
+const plugins = ['transform-remove-console'] // 'transform-remove-console'
 
 plugins.push([
   'module-resolver',
