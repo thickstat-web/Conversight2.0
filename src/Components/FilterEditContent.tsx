@@ -11,7 +11,7 @@ import {
   Loader,
 } from 'react-native-ui-lib';
 import { format, parseISO } from 'date-fns';
-import Icon from 'react-native-vector-icons/Ionicons'; // For icons like CloseCircleFilled, PlusCircle
+import Icon from 'react-native-vector-icons/Ionicons';
 import isArray from 'lodash/isArray';
 import orderBy from 'lodash/orderBy';
 import toNumber from 'lodash/toNumber';
@@ -55,7 +55,7 @@ const FilterEditContent: React.FC<Props> = (props) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [loadFailed, setLoadFailed] = useState<boolean>(false);
   const [operatorValue, setOperatorValue] = useState<string>('');
-  const [inputValue, setInputValue] = useState<string[]>([]); // Always an array
+  const [inputValue, setInputValue] = useState<string[]>([]); 
   const [dateValues, setDateValues] = useState<any[]>([{ dateValueFrom: null, dateValueTo: null }]);
   const [inputValueNumber, setInputValueNumber] = useState<number | string | null>(null);
   const [inputValueNumberTo, setInputValueNumberTo] = useState<number | string | null>(null);
@@ -70,7 +70,6 @@ const FilterEditContent: React.FC<Props> = (props) => {
   const [converseResponse, { data, error, isLoading }] = useConverseResponseMutation();
 
 
-  // Global filter handling
   const onNameChange = (text: string) => {
     setNewGlobalFilterName(text);
   };
