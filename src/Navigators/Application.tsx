@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { StatusBar } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { createStackNavigator } from '@react-navigation/stack'
 import { NavigationContainer } from '@react-navigation/native'
-import { useAppDispatch, useAuth, useTheme } from '@/Hooks'
+import { useAppDispatch, useAppSelector, useAuth, useTheme } from '@/Hooks'
 import {
   AvatarChanged,
   CurrentAvatar,
@@ -60,6 +60,11 @@ import InsightsWT from '@/Containers/WalkThrough/InsightsWT'
 import DemoRequested from '@/Containers/DemoRequested'
 import DashboardContainer from '@/Containers/DashboardContainer'
 import { validateJWT } from '@/Utils/validations/jwtValidation'
+import { useGetSettingsMutation } from '@/Services/modules/settings'
+import { GET_SETTING_QUERY } from '@/Constants/api'
+import { selectProfile, setProfileSettings } from '@/Store/Settings'
+import { kbnetApiSlice } from '@/Services/modules/kbnet'
+import { mergeDatasetConfigResponses } from '@/Utils/common'
 
 const Stack = createStackNavigator()
 
@@ -81,9 +86,47 @@ const SearchButton = () => {
 // @refresh reset
 const ApplicationNavigator = () => {
   const { isSignedIn } = useAuth()
-  const { Colors, darkMode, NavigationTheme } = useTheme()
+  const { Colors, NavigationTheme } = useTheme()
+  const dispatch = useAppDispatch()
+  const [getSettings] = useGetSettingsMutation()
+  const user = useAppSelector(selectProfile)
 
   let screens;
+
+  const fetchProfileSettings = useCallback(async () => {
+    const { success, data } = await getSettings({
+      query: GET_SETTING_QUERY,
+    }).unwrap()
+    if (success) {
+      dispatch(setProfileSettings(data))
+    }
+  }, [dispatch, getSettings])
+
+
+  const fetchData = async () => {
+    try {
+      const [defaultConfig, defaultData, operators] = await Promise.all([
+        dispatch(kbnetApiSlice.endpoints.defaultConfig.initiate('')).unwrap(),
+        dispatch(kbnetApiSlice.endpoints.defaultData.initiate('')).unwrap(),
+        dispatch(kbnetApiSlice.endpoints.operators.initiate('')).unwrap(),
+      ]);
+      mergeDatasetConfigResponses(defaultConfig, defaultData, operators);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
+  
+
+
+  useEffect(() => {
+    if (isSignedIn?.isCasdoorOrg && isSignedIn?.token && validateJWT(isSignedIn.token) || !isSignedIn?.isCasdoorOrg) {
+      fetchData()
+      if (!user?.fName) {
+        fetchProfileSettings()
+      }
+    }
+  }, [fetchProfileSettings, user])
+
 
 
 

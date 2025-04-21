@@ -53,6 +53,7 @@ export interface PinnedItem {
 export interface PinnedItemRequest {
   pinboardId: string
   dataId: string | string[]
+  retainFilters: any[]
 }
 
 export interface RawPinnedItemData {

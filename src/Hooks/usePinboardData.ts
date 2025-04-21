@@ -8,8 +8,16 @@ import {
 import { ConverseData } from '@/Types/ChatMessage'
 import { PinnedItemRequest } from '@/Types/Pinboard'
 import { processConverseData } from '@/Utils/chat-history-processor'
+import { setComponentsDatasetIds } from '@/Store/Storyboard'
+import { compact, map, uniq } from 'lodash'
 
-export default function (pinboardId: string) {
+export default function ({
+  retainFilters,
+  pinboardId,
+}: {
+  retainFilters: any
+  pinboardId: string
+}) {
   const [pinboardComponents, setPinboardComponents] = useState<PinboardItem[]>(
     [],
   )
@@ -17,16 +25,19 @@ export default function (pinboardId: string) {
   const [fetchPinnedItemData] = useFetchPinnedItemDataMutation()
   const { data, isLoading, isSuccess } = useFetchPinnedItemsQuery(pinboardId)
   const pinboardData = useMemo(() => data?.data || [], [data?.data])
+  const componentsDatasetIds = uniq(compact(map(pinboardData, 'datasetId')));
+  dispatch(setComponentsDatasetIds({ pinBoardID: pinboardId, componentsDatasetIds: componentsDatasetIds }));
 
   const getPinnedItemData = useCallback(
     (dataId: string) => {
       const reqData: PinnedItemRequest = {
         pinboardId,
         dataId,
+        retainFilters
       }
       return fetchPinnedItemData(reqData).unwrap()
     },
-    [fetchPinnedItemData, pinboardId],
+    [fetchPinnedItemData, pinboardId , retainFilters],
   )
 
   useEffect(() => {

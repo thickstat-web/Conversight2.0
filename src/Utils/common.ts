@@ -2,6 +2,8 @@ import numeral from 'numeral'
 import moment from 'moment'
 import { ColType, ColumnMetadata } from '@/Types/ChatHistory'
 import { TextData } from '@/Types/ChatMessage'
+import { uniq, find, map } from 'lodash';
+import { setLocalStore } from './asyncStorage';
 
 export const cleanseColumn = (str: string, replaceChar: string = '_') => {
   if (str) {
@@ -310,3 +312,107 @@ export function getDatasetInfo(
     relativeTime: relativeTime,
   }
 }
+
+
+// utils/mergeDatasetConfig.ts
+
+
+export const mergeDatasetConfigResponses = (defaultConfig: any, datasetData: any, operators: any) => {
+  // Merge data from first two endpoints
+  const mergedData = {
+    ...datasetData.data,
+    ...defaultConfig,
+  };
+
+  // Transform category structure
+  if (mergedData.category) {
+    mergedData.category = mergedData.category.map((item: any) => {
+      const newItem = { ...item, children: item.type };
+      delete newItem.type;
+
+      newItem.children = newItem.children.map((type: any) => {
+        const newType = { ...type, children: type.unit };
+        newType.children = uniq(newType.children).map((value: any) => ({
+          id: value,
+          name: value,
+        }));
+        delete newType.unit;
+        return newType;
+      });
+
+      return newItem;
+    });
+  }
+
+  // Add operators
+  const mergedConfig = {
+    ...mergedData,
+    operators: {
+      ...operators,
+      form: operators.form || [{ id: 'in', name: 'in' }],
+      'calculated metric': operators['calculated metric'] || operators.metrics || [{ id: 'is', name: 'is' }],
+      'calculated dimension': operators['calculated dimension'] || operators.dimensions || [{ id: 'is', name: 'is' }],
+      'calculated date': operators['calculated date'] || operators.date || [{ id: 'is', name: 'is' }],
+      'Smart Column': operators['Smart Column'] || [{ id: 'is', name: 'is' }],
+    },
+  };
+  setLocalStore('conversight.dataset.config', mergedConfig);
+
+  // Get metric types for numeric format
+  const types = find(mergedConfig.category, { id: 'metrics' });
+  const formatCheck = types ? map(types.children, 'id') : [];
+
+  setLocalStore('conversight.dataset.config.dimensionMetricType', formatCheck)
+
+  return {
+    config: mergedConfig,
+    dimensionMetricTypes: formatCheck,
+  };
+};
+
+
+export const UUID = () => {
+  // Public Domain/MIT
+  let d = new Date().getTime(); // Timestamp
+  let d2 = (typeof performance !== 'undefined' && performance.now && performance.now() * 1000) || 0; // Time in microseconds since page-load or 0 if unsupported
+  const id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    let r = Math.random() * 16; // random number between 0 and 16
+    if (d > 0) {
+      // Use timestamp until depleted
+      r = (d + r) % 16 | 0;
+      d = Math.floor(d / 16);
+    } else {
+      // Use microseconds since page-load if supported
+      r = (d2 + r) % 16 | 0;
+      d2 = Math.floor(d2 / 16);
+    }
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+  return 'cs-' + id;
+};
+
+
+export const FilterByActiveDatasets = (datasetList: Array<any>, activeFailed?: boolean) => {
+  if (activeFailed) {
+    return (
+      datasetList?.filter((data: any) => {
+        return (
+          (data.access) &&
+          ((data.status === 'Active' && !!(data.flow_status === '' || data.flow_status === 'Active')) ||
+            data.status === 'Failed' ||
+            data.status === 'FailedDependency')
+        );
+      }) || []
+    );
+  } else {
+    return (
+      datasetList?.filter((data: any) => {
+        return (
+          (data.access) &&
+          data.status === 'Active' &&
+          !!(data.flow_status === '' || data.flow_status === 'Active')
+        );
+      }) || []
+    );
+  }
+};
