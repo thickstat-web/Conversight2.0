@@ -136,7 +136,6 @@ export const fetchConverseData = (build: EndpointBuilder<any, any, any>) => {
     }),
 
     transformResponse: (response: any) => {
-      console.log('redux response is ',response)
       return {
         data: JSON.parse(atob(response?.instructions[0]?.data?.response?.converse?.response?.data?.val)) , 
       };

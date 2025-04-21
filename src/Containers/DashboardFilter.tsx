@@ -85,24 +85,20 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(({
         dispatch(kbnetApiSlice.endpoints.subjectAreas.initiate(selectedDataset)),
       ]);
     } catch (error) {
-      console.error('Failed to fetch data:', error);
       setFailedFetchData(true);
     } finally {
       setLoading(false);
     }
   };
 
-  console.log('story board is ', storyboard)
 
 
   useEffect(() => {
     fetchData()
   }, [pinboardID, selectedDataset])
 
-  // Generate retain filters for API
   const generateRetainFilters = (isSaveOrUpdated?: boolean) => {
 
-    console.log('retain filter called')
     const retainFilters: any[] = [
       {
         category: 'dateFilter',
@@ -234,19 +230,9 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(({
       kbnet[selectedDataset]?.tableMetadata) {
       setLoading(false);
       setFailedFetchData(false);
-    } else {
-      // Only set failed if we've actually tried to load and it's not loading anymore
-      const timer = setTimeout(() => {
-        if (loading) {
-          setFailedFetchData(true);
-          setLoading(false);
-        }
-      }, 10000); // 10 second timeout
-      return () => clearTimeout(timer);
-    }
+    } 
   }, [selectedDataset, kbnet]);
 
-  // Render filter items when metadata is loaded
   const renderFilterItems = () => {
     if (kbnet) {
       if (kbnet[selectedDataset]?.metadata &&
@@ -362,7 +348,6 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(({
     );
   };
 
-  // Add filter item
   const addFilterItem = (id: any, values: any) => {
     if (id) {
       const items = [...filterItemsRef.current];
@@ -621,7 +606,6 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(({
 });
 
 const styles = StyleSheet.create({
-
   container: {
     height:'75%',
     borderBottomWidth: 1,

@@ -11,7 +11,6 @@ import {
 import { Text, Colors, Checkbox, Button } from 'react-native-ui-lib';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-// Make sure these colors match your theme
 const THEME_COLORS = {
   primary: Colors.GREEN_MAIN,
   secondary: Colors.GREEN_DARK,

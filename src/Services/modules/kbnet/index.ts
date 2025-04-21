@@ -1,4 +1,3 @@
-// kbnetApiSlice.ts
 import { csApi } from '../../api';
 import {
     fetchDatasetMetadata,
@@ -26,7 +25,7 @@ export const kbnetApiSlice = csApi.injectEndpoints({
         defaultData: fetchDefaultData(build),
         operators: fetchOperators(build)
     }),
-    overrideExisting: false,
+    overrideExisting: true,
 });
 
 export const {

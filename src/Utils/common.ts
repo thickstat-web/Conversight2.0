@@ -314,8 +314,6 @@ export function getDatasetInfo(
 }
 
 
-// utils/mergeDatasetConfig.ts
-
 
 export const mergeDatasetConfigResponses = (defaultConfig: any, datasetData: any, operators: any) => {
   // Merge data from first two endpoints
@@ -372,17 +370,14 @@ export const mergeDatasetConfigResponses = (defaultConfig: any, datasetData: any
 
 
 export const UUID = () => {
-  // Public Domain/MIT
-  let d = new Date().getTime(); // Timestamp
+  let d = new Date().getTime();
   let d2 = (typeof performance !== 'undefined' && performance.now && performance.now() * 1000) || 0; // Time in microseconds since page-load or 0 if unsupported
   const id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    let r = Math.random() * 16; // random number between 0 and 16
+    let r = Math.random() * 16; 
     if (d > 0) {
-      // Use timestamp until depleted
       r = (d + r) % 16 | 0;
       d = Math.floor(d / 16);
     } else {
-      // Use microseconds since page-load if supported
       r = (d2 + r) % 16 | 0;
       d2 = Math.floor(d2 / 16);
     }
@@ -415,4 +410,11 @@ export const FilterByActiveDatasets = (datasetList: Array<any>, activeFailed?: b
       }) || []
     );
   }
+};
+
+
+export const toTitleCase = (str: string, keepUnderscore = false) => {
+  if (!str) return '';
+  return str.replace(/_/g, keepUnderscore ? '_' : ' ')
+    .replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
 };

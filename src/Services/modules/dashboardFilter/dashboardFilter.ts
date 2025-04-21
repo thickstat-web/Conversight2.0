@@ -1,8 +1,6 @@
-// features/api/dashboardFiltersApi.ts
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions';
 import { getAPIUrl, getBotUrl } from '@/Config';
 import { ResponseType } from '@/Types/Common';
-// import { Pinboard, RetainFilter } from '@/Types/Pinboard';
 import { Pinboard } from '@/Types/Pinboard';
 
 export const fetchDashboardFilters = (build: EndpointBuilder<any, any, any>) => {
