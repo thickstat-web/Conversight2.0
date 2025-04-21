@@ -71,9 +71,6 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(({
     'calculated dimension': Colors.GRAY,
   };
 
-  console.log('selected dataset is ', selectedDataset)
-
-
   const fetchData = async () => {
     setLoading(true);
     try {
