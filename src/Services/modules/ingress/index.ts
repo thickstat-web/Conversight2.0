@@ -9,4 +9,4 @@ export const ingressApiSlice = ingressApi.injectEndpoints({
   overrideExisting: false,
 })
 
-export const { useSendChatMessageMutation } = ingressApiSlice
+export const { useSendChatMessageMutation , useConverseResponseMutation } = ingressApiSlice

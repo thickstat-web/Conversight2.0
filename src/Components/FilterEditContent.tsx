@@ -22,6 +22,7 @@ import { selectProfile } from '@/Store/Settings';
 import { UUID } from '@/Utils/common';
 import { useConverseResponseMutation } from '@/Services/modules/ingress';
 import CustomSelect from './CustomSelect';
+import ColumnInfo from './ColumnInfo';
 
 
 
@@ -55,7 +56,7 @@ const FilterEditContent: React.FC<Props> = (props) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [loadFailed, setLoadFailed] = useState<boolean>(false);
   const [operatorValue, setOperatorValue] = useState<string>('');
-  const [inputValue, setInputValue] = useState<string[]>([]); 
+  const [inputValue, setInputValue] = useState<string[]>([]);
   const [dateValues, setDateValues] = useState<any[]>([{ dateValueFrom: null, dateValueTo: null }]);
   const [inputValueNumber, setInputValueNumber] = useState<number | string | null>(null);
   const [inputValueNumberTo, setInputValueNumberTo] = useState<number | string | null>(null);
@@ -598,7 +599,7 @@ const FilterEditContent: React.FC<Props> = (props) => {
               ? inputValue?.[0]?.split('@@')[1]?.trim()
               : inputValue
           }
-          onChangeText={(text) => {
+          onChangeText={(text: string | any[]) => {
             setInputValue([text]);
             setBtnLabel(text.length ? `${operatorValue} ${text}` : 'All');
           }}
@@ -833,6 +834,7 @@ const FilterEditContent: React.FC<Props> = (props) => {
             size="small"
             onPress={filterEditHandler}
             style={styles.editButton}
+            labelStyle={{ color: Colors.GREEN_MAIN }} 
           />
           <Modal
             visible={editOpen}
@@ -870,8 +872,6 @@ const FilterEditContent: React.FC<Props> = (props) => {
 };
 
 const styles = StyleSheet.create({
-
-
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -885,7 +885,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   editButton: {
-    backgroundColor: Colors.GREEN_MAIN,
+    backgroundColor: Colors.green20,
   },
   modalContainer: {
     paddingTop: 50,
