@@ -1,5 +1,5 @@
 import React from 'react'
-import { FlatList, StyleSheet, Text } from 'react-native'
+import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native'
 import { View } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { useTheme } from '@/Hooks'
@@ -42,8 +42,8 @@ const filterMapper = (filter: Filter) => {
         value === 'between'
           ? `between ${dateFrom} - ${dateTo}`
           : Array.isArray(value)
-          ? 'All Dates'
-          : value,
+            ? 'All Dates'
+            : value,
     }
   } else if (filter.category === 'date') {
     const { category, column, resolvedColumn, operator, dateValues, value } =
@@ -89,9 +89,10 @@ export const buildDashboardFilters = (
 
 type DashboardFiltersProps = {
   filters: DasboardFilter[]
+  toggleFilterModal: any
 }
 
-export const DashboardFilters = ({ filters }: DashboardFiltersProps) => {
+export const DashboardFilters = ({ filters, toggleFilterModal }: DashboardFiltersProps,) => {
   const { Fonts } = useTheme()
 
   const renderFilter = ({ item: filter }: { item: DasboardFilter }) => {
@@ -125,20 +126,29 @@ export const DashboardFilters = ({ filters }: DashboardFiltersProps) => {
           </View>
         )}
       </View>
-      <View
-        paddingT-8
-        paddingB-8
-        paddingH-16
-        style={{ backgroundColor: Colors.WHITE }}
-      >
-        <FlatList
-          data={filters}
-          showsHorizontalScrollIndicator={false}
-          horizontal
-          keyExtractor={item => `${item.columnId}-${item.columnName}`}
-          renderItem={renderFilter}
-        />
+      <View style={{display:'flex',flexDirection:'row'}}>
+        <View
+          paddingT-8
+          paddingB-8
+          paddingH-16
+          style={{ backgroundColor: Colors.WHITE }}
+        >
+          <FlatList
+            data={filters}
+            showsHorizontalScrollIndicator={false}
+            horizontal
+            keyExtractor={item => `${item.columnId}-${item.columnName}`}
+            renderItem={renderFilter}
+          />
+        </View>
+        <View style={styles.filterContainer}>
+          <TouchableOpacity style={styles.filterButton} onPress={toggleFilterModal}>
+            <Text style={styles.filterButtonText}>Filters</Text>
+            <Icon name="filter" size={20} color={Colors.WHITE} style={styles.filterIcon} />
+          </TouchableOpacity>
+        </View>
       </View>
+
     </View>
   )
 }
@@ -149,9 +159,36 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.GREEN_MAIN,
     borderRadius: 25,
   },
+  filterContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignItems: 'flex-end',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: Colors.GREEN_DARK,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  filterButtonText: {
+    color: Colors.WHITE,
+    fontSize: 14,
+    fontWeight: '600',
+    marginRight: 6,
+  },
+  filterIcon: {
+    marginLeft: 4,
+  },
   filter: {
     alignItems: 'center',
-    backgroundColor: Colors.GREEN_LIGHTEST,
     paddingRight: 10,
     paddingVertical: 6,
     borderRadius: 16,

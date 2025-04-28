@@ -4,6 +4,7 @@ import { AUTH_REDUCER } from '@/Constants/redux'
 import { AuthData } from '@/Types/SignInResponse'
 import { Org, OrgData } from '@/Types/VerifyEmailResponse'
 import { RootState } from '..'
+import { Dataset } from '@/Types/DataSet'
 
 interface AuthState {
   email: string
@@ -16,11 +17,13 @@ interface AuthState {
   selectedOrg: Org
   tempOrg: Org
   readInsights: boolean
+  dataset: Dataset[]
 }
 
 const initialState: AuthState = {
   email: '',
   fcmToken: null,
+  dataset: [],
   password: DEFAULT_PASSWORD,
   organizations: [],
   signInOrg: null,
@@ -43,6 +46,9 @@ const authSlice = createSlice({
     },
     setAllOrganizations: (state, { payload }) => {
       state.organizations = [...payload]
+    },
+    setDataset: (state, { payload }) => {
+      state.dataset = payload
     },
     setSelectedOrg: (state, { payload }) => {
       state.signInOrg = { ...payload }
@@ -92,6 +98,7 @@ export const selectTempOrg = (state: RootState) => state.authReducer.tempOrg
 
 export const selectPassword = (state: RootState) => state.authReducer.password
 export const selectReadInsights = (state: RootState) => state.authReducer.readInsights
+export const getDatasets = (state: RootState) => state.authReducer.dataset
 
 export const {
   setSignInEmail,
@@ -101,6 +108,7 @@ export const {
   setAuthData,
   setSelectedDatasetId,
   cleanupAuthData,
+  setDataset,
   setTempOrg,
   setPassword,
   enableReadInsights,

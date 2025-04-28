@@ -15,6 +15,8 @@ import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions
 import { ResponseType } from '@/Types/Common'
 import { buildOrderedColumns } from '@/Utils/common'
 import { getIngressUrl } from '@/Config'
+import { setConverseResponse } from '@/Store/Converse'
+import { atob } from 'react-native-quick-base64'
 
 const makeConverseData = (data: Data): AthenaResponse => {
   const {
@@ -121,3 +123,33 @@ export const sendChatMessage = (build: EndpointBuilder<any, any, any>) => {
     },
   )
 }
+
+export const fetchConverseData = (build: EndpointBuilder<any, any, any>) => {
+  return build.mutation<
+    { data: any },
+    Partial<SendChatMessage>
+  >({
+    query: (body) => ({
+      url: `${getIngressUrl()}/converse/v2`,
+      method: 'POST',
+      body,
+    }),
+
+    transformResponse: (response: any) => {
+      return {
+        data: JSON.parse(atob(response?.instructions[0]?.data?.response?.converse?.response?.data?.val)) , 
+      };
+    },
+
+    async onQueryStarted(converseId, { dispatch, queryFulfilled }) {
+      try {
+        const { data } = await queryFulfilled;
+        const converseId = 'default';
+        dispatch(setConverseResponse({ converseId, response: data.data }));
+      } catch (err) {
+      }
+    },
+  });
+};
+
+

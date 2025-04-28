@@ -21,6 +21,10 @@ import hostReducer from './HostURL'
 import appReducer from './App'
 import settingsReducer from './Settings'
 import faqReducer from './Faq'
+import userReducer from './User'
+import kbnetReducer from './Kbnet'
+import storyboardReducer from './Storyboard'
+import converseReducer from './Converse'
 import {
   AUTH_REDUCER,
   HOST_REDUCER,
@@ -28,15 +32,23 @@ import {
   APP_REDUCER,
   SETTING_REDUCER,
   FAQ_REDUCER,
+  USER_REDUCER,
+  KBNET_REDUCER,
+  STORYBOARD_REDUCER,
+  CONVERSE_REDUCER
 } from '@/Constants/redux'
 
 const reducers = combineReducers({
   theme,
   authReducer,
   hostReducer,
+  kbnetReducer,
   appReducer,
   settingsReducer,
   faqReducer,
+  userReducer,
+  storyboardReducer,
+  converseReducer,
   ...Object.values(modules).reduce(
     (acc, module) => ({
       ...acc,
@@ -50,7 +62,7 @@ const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
   whitelist: [THEME_REDUCER, AUTH_REDUCER, HOST_REDUCER],
-  blackList: [APP_REDUCER, SETTING_REDUCER, FAQ_REDUCER],
+  blackList: [APP_REDUCER, SETTING_REDUCER, FAQ_REDUCER, USER_REDUCER, KBNET_REDUCER, STORYBOARD_REDUCER, CONVERSE_REDUCER],
 }
 
 const persistedReducer = persistReducer(persistConfig, reducers)

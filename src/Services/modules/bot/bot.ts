@@ -230,12 +230,15 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
     Partial<PinnedItemRequest>
   >({
     query: data => {
-      const { pinboardId, dataId } = data
+      const { pinboardId, dataId, retainFilters } = data
       const dataID = Array.isArray(dataId) ? dataId : [dataId]
       return {
         url: `${getBotUrl()}/pinboard/component/data?pinBoardID=${pinboardId}`,
         method: 'POST',
-        body: { dataID },
+        body: {
+          dataID,
+          retainFilters: retainFilters ?? [],
+        },
       }
     },
     transformResponse: (
@@ -295,7 +298,7 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
           if (status !== 'failed') {
             rawData = {
               id: ID,
-              columnMetadata: JSON.parse(data.colMetadata),
+              columnMetadata: JSON.parse(data?.colMetadata),
               columns,
               orderedColumns,
               colType,

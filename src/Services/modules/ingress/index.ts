@@ -1,11 +1,12 @@
 import { ingressApi } from '../../api'
-import { sendChatMessage } from './ingress'
+import { fetchConverseData, sendChatMessage } from './ingress'
 
 export const ingressApiSlice = ingressApi.injectEndpoints({
   endpoints: build => ({
     sendChatMessage: sendChatMessage(build),
+    converseResponse: fetchConverseData(build)
   }),
   overrideExisting: false,
 })
 
-export const { useSendChatMessageMutation } = ingressApiSlice
+export const { useSendChatMessageMutation , useConverseResponseMutation } = ingressApiSlice

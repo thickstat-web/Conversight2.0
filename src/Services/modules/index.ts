@@ -1,6 +1,7 @@
 export { authApi } from './auth'
 export { chatApi } from './chat'
 export { botApiSlice } from './bot'
+export { kbnetApiSlice } from './kbnet'
 export { ingressApiSlice } from './ingress'
 export { settingsApi } from './settings'
 export { faqAPI } from './FAQ'

@@ -14,6 +14,7 @@ import {
   // enableReadInsights,
   // disableReadInsights,
   selectReadInsights,
+  setDataset,
 } from '@/Store/Auth'
 import { addConverseData, addUrlFollowupData } from '@/Store/App'
 import {
@@ -31,6 +32,7 @@ import { ResponseType, URLFollowupData } from '@/Types/Common'
 import { RawFollowupData } from '@/Types/Followup'
 import { ConverseData, RawConverseData } from '@/Types/ChatMessage'
 import { InsightComponent, InsightData, InsightVoice } from '@/Types/Insights'
+import { setComponentsDatasetIds } from '@/Store/Storyboard'
 
 export default function () {
   const dispatch = useAppDispatch()
@@ -55,8 +57,10 @@ export default function () {
   useEffect(() => {
     // Initiate loading insights data for the entire datasets
     const datasets = datasetResp?.data || []
+    dispatch(setDataset(datasets))
     if (!datasetLoading && datasets.length) {
       const datasetIds = datasets.map(item => item.dataSetID)
+      setComponentsDatasetIds(datasetIds)
       fetchInsightsData(datasetIds)
         .unwrap()
         .then(async insightsDataResp => {

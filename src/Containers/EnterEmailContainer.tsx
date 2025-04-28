@@ -28,7 +28,7 @@ interface Props {
 
 const EnterEmailContainer = ({ navigation }: Props) => {
   const { t } = useTranslation()
-  const { Common, Gutters, Layout, Fonts } = useTheme()
+  const { Common, Fonts } = useTheme()
   const headerHeight = useHeaderHeight()
   const dispatch = useAppDispatch()
   const [email, setEmail] = useState(DEFAULT_EMAIL)
