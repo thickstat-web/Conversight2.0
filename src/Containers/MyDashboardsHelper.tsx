@@ -42,8 +42,8 @@ const filterMapper = (filter: Filter) => {
         value === 'between'
           ? `between ${dateFrom} - ${dateTo}`
           : Array.isArray(value)
-            ? 'All Dates'
-            : value,
+          ? 'All Dates'
+          : value,
     }
   } else if (filter.category === 'date') {
     const { category, column, resolvedColumn, operator, dateValues, value } =
@@ -92,7 +92,10 @@ type DashboardFiltersProps = {
   toggleFilterModal: any
 }
 
-export const DashboardFilters = ({ filters, toggleFilterModal }: DashboardFiltersProps,) => {
+export const DashboardFilters = ({
+  filters,
+  toggleFilterModal,
+}: DashboardFiltersProps) => {
   const { Fonts } = useTheme()
 
   const renderFilter = ({ item: filter }: { item: DasboardFilter }) => {
@@ -126,7 +129,7 @@ export const DashboardFilters = ({ filters, toggleFilterModal }: DashboardFilter
           </View>
         )}
       </View>
-      <View style={{display:'flex',flexDirection:'row'}}>
+      <View style={{ display: 'flex', flexDirection: 'row' }}>
         <View
           paddingT-8
           paddingB-8
@@ -142,13 +145,20 @@ export const DashboardFilters = ({ filters, toggleFilterModal }: DashboardFilter
           />
         </View>
         <View style={styles.filterContainer}>
-          <TouchableOpacity style={styles.filterButton} onPress={toggleFilterModal}>
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={toggleFilterModal}
+          >
             <Text style={styles.filterButtonText}>Filters</Text>
-            <Icon name="filter" size={20} color={Colors.WHITE} style={styles.filterIcon} />
+            <Icon
+              name="filter"
+              size={20}
+              color={Colors.WHITE}
+              style={styles.filterIcon}
+            />
           </TouchableOpacity>
         </View>
       </View>
-
     </View>
   )
 }
@@ -163,6 +173,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     alignItems: 'flex-end',
+    backgroundColor: Colors.WHITE,
   },
   filterButton: {
     flexDirection: 'row',
