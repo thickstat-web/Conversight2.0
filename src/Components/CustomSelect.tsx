@@ -145,7 +145,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <Text
           style={[
             styles.itemLabel,
-            isSelected && { color: THEME.selectedText, fontWeight: '600' },
+            isSelected && { color: Colors.green1, fontWeight: '600' },
           ]}
         >
           {item.label}
