@@ -137,10 +137,45 @@ export const fetchConverseData = (build: EndpointBuilder<any, any, any>) => {
 
     transformResponse: (response: any) => {
       return {
-        data: JSON.parse(atob(response?.instructions[0]?.data?.response?.converse?.response?.data?.val)) , 
+        data: JSON.parse(atob(response?.instructions[0]?.data?.response?.converse?.response?.data?.val)),
       };
     },
 
+    async onQueryStarted(converseId, { dispatch, queryFulfilled }) {
+      try {
+        const { data } = await queryFulfilled;
+        const converseId = 'default';
+        dispatch(setConverseResponse({ converseId, response: data.data }));
+      } catch (err) {
+      }
+    },
+  });
+};
+
+
+
+export const fetchConverseDataV2 = (build: EndpointBuilder<any, any, any>) => {
+  return build.mutation<
+    { data: any },
+    Partial<SendChatMessage>
+  >({
+    query: (body) => (
+
+      console.log('request body is ', body),
+      {
+
+
+
+        url: `${getIngressUrl()}/converse/athena${body?.responseType === 'api' ? `?response=${body.responseType}` : ''}`,
+        method: 'POST',
+        body,
+      }),
+
+    transformResponse: (response: any) => {
+      return {
+        data: JSON.parse(atob(response?.instructions[0]?.data?.response?.converse?.response?.data?.val)),
+      };
+    },
     async onQueryStarted(converseId, { dispatch, queryFulfilled }) {
       try {
         const { data } = await queryFulfilled;

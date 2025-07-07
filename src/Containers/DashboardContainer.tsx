@@ -1,8 +1,20 @@
 import React, { useRef, useState } from 'react'
-import { FlatList, Pressable, StyleSheet, Modal, ViewStyle, TouchableOpacity } from 'react-native'
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Modal,
+  ViewStyle,
+  TouchableOpacity,
+} from 'react-native'
 import { View, Text, Button } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
-import { useTheme, useAppSelector, usePinboardData, useAppDispatch } from '@/Hooks'
+import {
+  useTheme,
+  useAppSelector,
+  usePinboardData,
+  useAppDispatch,
+} from '@/Hooks'
 import { DashboardVisualizer, LoadingSpinner } from '@/Components'
 import { Colors } from '@/Theme/Variables'
 import { PinboardItem, selectConverseData } from '@/Store/App'
@@ -70,7 +82,9 @@ const PinboardComponents = React.memo(
       <Card item={item} style={{ marginHorizontal: 4 }} />
     )
     const ChartAndTableCards = () =>
-      chartAndTableCards.map((item: PinboardItem) => <Card key={item.id} item={item} style={{ marginHorizontal: 4 }} />)
+      chartAndTableCards.map((item: PinboardItem) => (
+        <Card key={item.id} item={item} style={{ marginHorizontal: 4 }} />
+      ))
     return (
       <FlatList
         style={{ padding: 2 }}
@@ -92,44 +106,54 @@ type RouteParams = {
 }
 
 const DashboardContainer = ({ route }: any) => {
-  const { pinboardId, appliedFilters } = route.params as RouteParams;
-  const { Colors } = useTheme();
-  const filters = buildDashboardFilters(appliedFilters);
-  const [crossRetainFilter, setCrossRetainFilter] = useState([]);
-  const retainFiltersRef = useRef<any>(null);
-  const { data } = useFetchPinboardsQuery();
-  const [payload, setPayload] = useState<{ retainFilters?: any; pinboardId?: string }>({
+  const { pinboardId, appliedFilters } = route.params as RouteParams
+  console.log('applied filters is ',appliedFilters)
+  const { Colors } = useTheme()
+  const filters = buildDashboardFilters(appliedFilters)
+  const [crossRetainFilter, setCrossRetainFilter] = useState([])
+  const retainFiltersRef = useRef<any>(null)
+  const { data } = useFetchPinboardsQuery()
+  const [payload, setPayload] = useState<{
+    retainFilters?: any
+    pinboardId?: string
+  }>({
     pinboardId,
-  });
+  })
 
-  const { isLoading, pinboardComponents } = usePinboardData(payload);
+  const { isLoading, pinboardComponents } = usePinboardData(payload)
 
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false)
 
+  const handleFilterChange = (filter: any) => {
+    const retainFilters = retainFiltersRef.current?.getRetainFilters()
+    setPayload(prev => ({
+      ...prev,
+      retainFilters,
+      pinboardId,
+    }))
+  }
 
-  const runReport = async () => {
+  const runReport = async (retainFilters: any) => {
     try {
-      const retainFilters = retainFiltersRef.current?.getRetainFilters();
-      const pinComponents = data?.data?.find((item) => item?.id === pinboardId);
+      // const retainFilters = retainFiltersRef.current?.getRetainFilters()
+      const pinComponents = data?.data?.find(item => item?.id === pinboardId)
       if (!pinComponents) {
-        console.warn('No pin components found for pinboardID:', pinboardId);
-        return;
+        console.warn('No pin components found for pinboardID:', pinboardId)
+        return
       }
       setPayload({
         retainFilters,
         pinboardId,
-      });
+      })
     } catch (error) {
-      console.error('Error in runReport:', error);
+      console.error('Error in runReport:', error)
     }
-  };
+  }
 
-  const toggleFilterModal = () => {
-    retainFiltersRef.current?.getRetainFilters();
-    setModalVisible(!modalVisible);
-    runReport();
-  };
-
+  const toggleFilterModal = (retainFilters: any) => {
+    setModalVisible(!modalVisible)
+    runReport(retainFilters)
+  }
 
   return (
     <View flex style={{ backgroundColor: Colors.WHITE_SMOKE }}>
@@ -137,8 +161,14 @@ const DashboardContainer = ({ route }: any) => {
         <LoadingSpinner />
       ) : (
         <>
-          {filters.length > 0 && <DashboardFilters filters={filters} toggleFilterModal={toggleFilterModal} />}
-          <Modal
+          <DashboardFilters
+            filters={filters}
+            toggleFilterModal={toggleFilterModal}
+            data={pinboardComponents || []}
+            onFilterChange={handleFilterChange}
+          />
+
+          {/* <Modal
             animationType="slide"
             transparent={true}
             visible={modalVisible}
@@ -149,7 +179,7 @@ const DashboardContainer = ({ route }: any) => {
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Filter Options</Text>
                   <TouchableOpacity onPress={toggleFilterModal}>
-                    <Icon name="close" size={24} color={Colors.GREEN_DARK} />
+                    <Icon name="close" size={26} color={Colors.GREEN_DARK} />
                   </TouchableOpacity>
                 </View>
 
@@ -175,14 +205,14 @@ const DashboardContainer = ({ route }: any) => {
                 </View>
               </View>
             </View>
-          </Modal>
+          </Modal> */}
 
           <PinboardComponents pinboardComponents={pinboardComponents} />
         </>
       )}
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   icon: {

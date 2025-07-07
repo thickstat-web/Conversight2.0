@@ -36,6 +36,10 @@ export const Colors: ThemeColors = {
   GRAY_DARK: '#9A9A9A',
   DARK: '#004438',
   TEXT_BLACK: '#595959',
+  // Toggle Switch Colors
+  TOGGLE_TRACK_OFF: '#E0E0E0',
+  TOGGLE_TRACK_ON: '#00AA39',
+  TOGGLE_THUMB: '#FFFFFF',
 }
 
 export const NavigationColors: Partial<ThemeNavigationColors> = {

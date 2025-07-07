@@ -17,8 +17,8 @@ const env = {
  * Sets the target environment based on the build type (Debug or Release Build)
  */
 export const { CS_API_HOST, BOT_API_HOST, INGRESS_API_HOST } = __DEV__
-  ? env.STAGING
-  : env.STAGING
+  ? env.PRODUCTION
+  : env.PRODUCTION
 
 export const Config = {
   CS_API_HOST,
@@ -54,7 +54,7 @@ export const DEFAULT_ADAPTIVE_CARD_ROWS = 5
 export const DEFAULT_TABLE_RENDER_ROWS = 5
 export const DEFAULT_DATASET_SHOW_COUNT = 6
 export const DEFAULT_DASHBOARD_SHOW_COUNT = 4
-export const NO_DATA_AVAILABLE = 'No data available'
+export const NO_DATA_AVAILABLE = 'There is no data available'
 export const MY_DASHBOARD = 'my storyboard'
 export const ATHENA = 'athena'
 export const SHARED = 'shared'
