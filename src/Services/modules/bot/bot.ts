@@ -117,7 +117,7 @@ function buildAppliedFilters(item: Created | Shared): Filter[] {
   })
 }
 
-const buildPinboard = (item: Created | Shared, shared: boolean): Pinboard => {
+export const buildPinboard = (item: Created | Shared, shared: boolean): Pinboard => {
   const tags = Array.isArray(item.tags) ? item.tags : []
   tags.push(
     shared

@@ -1,7 +1,7 @@
 export const reportPeriodsValues = [
     {
       name: 'All Dates',
-      value: 'all',
+      value: 'all dates',
       text: 'All Dates',
     },
     {

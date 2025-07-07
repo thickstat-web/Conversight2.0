@@ -3,9 +3,24 @@ import { View, StyleSheet } from 'react-native';
 import { Colors } from 'react-native-ui-lib';
 import FilterEditContent from './FilterEditContent';
 
-const Filter: React.FC<any> = ({ columnItem, removeItemFn, addFilterItem, setLoading }) => {
-  const [item, setItem] = useState<any>({});
+interface FilterProps {
+  columnItem: any;
+  removeItemFn: () => void;
+  addFilterItem: (id: string, values: any) => void;
+  setLoading: (loading: boolean) => void;
+  compactMode?: boolean;
+  onFilterChange?: (filter: any) => void;
+}
 
+const Filter: React.FC<FilterProps> = ({ 
+  columnItem, 
+  removeItemFn, 
+  addFilterItem, 
+  setLoading,
+  compactMode,
+  onFilterChange 
+}) => {
+  const [item, setItem] = useState<any>({});
 
   useEffect(() => {
     setItem({ ...columnItem });
@@ -24,12 +39,29 @@ const Filter: React.FC<any> = ({ columnItem, removeItemFn, addFilterItem, setLoa
       dateValues: params.dateValues,
       globalFilter: params.globalFilter,
     });
+
+    // Call onFilterChange with the updated filter
+    if (onFilterChange) {
+      onFilterChange({
+        column: item.processedID,
+        value: params.inputValue,
+        operator: params.operatorValue,
+        dateRange: params.dateValues
+      });
+    }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <FilterEditContent columnItem={columnItem} onClose={removeItemFn} FilterItemSelectedValues={FilterItemSelectedValues} setLoading={setLoading} />
+        <FilterEditContent 
+          columnItem={columnItem} 
+          onClose={removeItemFn} 
+          FilterItemSelectedValues={FilterItemSelectedValues} 
+          setLoading={setLoading}
+          compactMode={compactMode}
+          setColumnData={() => {}}
+        />
       </View>
     </View>
   );

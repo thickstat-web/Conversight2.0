@@ -148,6 +148,7 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(
       ]
 
       filterItemsRef.current.forEach((fItem: any) => {
+        
         const innerItem: any = {
           category: fItem.category || '',
           data_set: fItem.data_set || '',
@@ -836,6 +837,11 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(
       )
     }
 
+    const handleDone = () => {
+      const retainFilters = generateRetainFilters()
+      closeFn()
+    }
+
     return (
       <Animated.View
         style={[
@@ -987,7 +993,7 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(
                 <View style={styles.customDateRangeContainer}>
                   <Checkbox
                     value={dateFilter === 'between'}
-                    onValueChange={value => {
+                    onValueChange={(value: any) => {
                       setDateFilter(value ? 'between' : 'all')
                     }}
                     color={Colors.GREEN_MAIN}

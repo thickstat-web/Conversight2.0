@@ -107,6 +107,7 @@ type RouteParams = {
 
 const DashboardContainer = ({ route }: any) => {
   const { pinboardId, appliedFilters } = route.params as RouteParams
+  console.log('applied filters is ',appliedFilters)
   const { Colors } = useTheme()
   const filters = buildDashboardFilters(appliedFilters)
   const [crossRetainFilter, setCrossRetainFilter] = useState([])
@@ -123,9 +124,18 @@ const DashboardContainer = ({ route }: any) => {
 
   const [modalVisible, setModalVisible] = useState(false)
 
-  const runReport = async () => {
+  const handleFilterChange = (filter: any) => {
+    const retainFilters = retainFiltersRef.current?.getRetainFilters()
+    setPayload(prev => ({
+      ...prev,
+      retainFilters,
+      pinboardId,
+    }))
+  }
+
+  const runReport = async (retainFilters: any) => {
     try {
-      const retainFilters = retainFiltersRef.current?.getRetainFilters()
+      // const retainFilters = retainFiltersRef.current?.getRetainFilters()
       const pinComponents = data?.data?.find(item => item?.id === pinboardId)
       if (!pinComponents) {
         console.warn('No pin components found for pinboardID:', pinboardId)
@@ -140,10 +150,9 @@ const DashboardContainer = ({ route }: any) => {
     }
   }
 
-  const toggleFilterModal = () => {
-    retainFiltersRef.current?.getRetainFilters()
+  const toggleFilterModal = (retainFilters: any) => {
     setModalVisible(!modalVisible)
-    runReport()
+    runReport(retainFilters)
   }
 
   return (
@@ -152,13 +161,14 @@ const DashboardContainer = ({ route }: any) => {
         <LoadingSpinner />
       ) : (
         <>
-          {filters.length > 0 && (
-            <DashboardFilters
-              filters={filters}
-              toggleFilterModal={toggleFilterModal}
-            />
-          )}
-          <Modal
+          <DashboardFilters
+            filters={filters}
+            toggleFilterModal={toggleFilterModal}
+            data={pinboardComponents || []}
+            onFilterChange={handleFilterChange}
+          />
+
+          {/* <Modal
             animationType="slide"
             transparent={true}
             visible={modalVisible}
@@ -195,7 +205,7 @@ const DashboardContainer = ({ route }: any) => {
                 </View>
               </View>
             </View>
-          </Modal>
+          </Modal> */}
 
           <PinboardComponents pinboardComponents={pinboardComponents} />
         </>

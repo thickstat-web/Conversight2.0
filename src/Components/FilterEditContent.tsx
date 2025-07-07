@@ -1,24 +1,16 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
-  Switch,
-} from 'react-native'
+import { View, Text, StyleSheet, Modal, TouchableOpacity, ScrollView, Switch, Platform, ActivityIndicator, TextInput } from 'react-native'
 import {
   Button,
   Picker,
   TextField,
   Checkbox,
-  DateTimePicker,
   Colors,
-  Typography as UILTypography,
-  Loader,
+  Typography as UILTypography
 } from 'react-native-ui-lib'
-import { format, parseISO } from 'date-fns'
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { format, parseISO, isSameDay, isAfter, isBefore } from 'date-fns'
+// Remove Ionicons import as we'll use react-native-ui-lib Icons instead
 import Icon from 'react-native-vector-icons/Ionicons'
 import isArray from 'lodash/isArray'
 import orderBy from 'lodash/orderBy'
@@ -30,10 +22,14 @@ import {
 } from '@/Constants/reportPeriodsValues'
 import { useAppSelector } from '@/Hooks'
 import { selectProfile } from '@/Store/Settings'
-import { UUID } from '@/Utils/common'
-import { useConverseResponseMutation } from '@/Services/modules/ingress'
+import { constructUtterance, GenerateSemantics, UUID } from '@/Utils/common'
+import { useConverseResponseMutation, useConverseResponseV2Mutation } from '@/Services/modules/ingress'
 import CustomSelect from './CustomSelect'
 import ColumnInfo from './ColumnInfo'
+import { getKbnetData } from '@/Store/Kbnet'
+import { getDatasets } from '@/Store/Auth'
+import FilterModal from '@/Components/FilterModal'
+import MobileFilterModal from '@/Components/MobileFilterModal'
 
 interface guidedRuleType {
   hideDateFilter?: boolean
@@ -45,29 +41,42 @@ interface guidedRuleType {
 }
 
 interface Props {
-  onClose: (value?: any) => void
   columnItem: any
+  onClose: (value?: any) => void
+  onSubmit?: (value: any) => void
   FilterItemSelectedValues: (value: any) => void
-  inputLeftValue?: string
-  inputRightValue?: string
-  isTop?: boolean
+  setColumnData: any
+  customTitle?: string
   isSharedStoryBoard?: boolean
   guidedRule?: guidedRuleType
   setLoading: any
+  categories?: string[]
+  filters?: any
+  subjectId?: string
+  threadId?: string
+  lastChatId?: string
+  inputLeftValue?: string
+  inputRightValue?: string
+  isTop?: boolean
+  compactMode?: boolean
 }
 
-const FilterEditContent: React.FC<Props> = props => {
+const FilterEditContent: React.FC<Props> = (props) => {
   const user = useAppSelector(selectProfile)
   const [editOpen, setEditOpen] = useState<boolean>(false)
   const [btnLabel, setBtnLabel] = useState<string>('All')
   let [select2Options, setSelect2Options] = useState<any[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [loadFailed, setLoadFailed] = useState<boolean>(false)
-  const [operatorValue, setOperatorValue] = useState<string>('')
-  const [inputValue, setInputValue] = useState<string[]>([])
+  const [showStartDatePicker, setShowStartDatePicker] = useState<boolean>(false)
+  const [showEndDatePicker, setShowEndDatePicker] = useState<boolean>(false)
+  const [currentEditingDateIndex, setCurrentEditingDateIndex] = useState<number>(0)
+  const [tempSelectedDate, setTempSelectedDate] = useState<Date | null>(null)
   const [dateValues, setDateValues] = useState<any[]>([
     { dateValueFrom: null, dateValueTo: null },
   ])
+  const [operatorValue, setOperatorValue] = useState<string>('')
+  const [inputValue, setInputValue] = useState<string>("")
   const [inputValueNumber, setInputValueNumber] = useState<
     number | string | null
   >(null)
@@ -84,10 +93,15 @@ const FilterEditContent: React.FC<Props> = props => {
   const [aggregationValues, setAggregationValues] = useState<any>({})
   const [converseResponse, { data, error, isLoading }] =
     useConverseResponseMutation()
-
+  const [converseResponseV2] = useConverseResponseV2Mutation()
   const onNameChange = (text: string) => {
     setNewGlobalFilterName(text)
   }
+  const kbnet = useAppSelector(getKbnetData)
+  const dataset = useAppSelector(getDatasets)
+
+  const [filterModalVisible, setFilterModalVisible] = useState(false)
+  const [uniqueValues, setUniqueValues] = useState<string[]>([])
 
   const addItem = () => {
     if (newGlobalFilterName) {
@@ -115,13 +129,13 @@ const FilterEditContent: React.FC<Props> = props => {
   }, [user])
 
   useEffect(() => {
-    props?.setLoading(true)
+    setLoading(true)
     const loadConfig = async () => {
       const configData =
         (await getLocalStore('conversight.dataset.config')) || {}
       setOperators(configData?.operators)
       setAggregationValues(configData?.aggregationValues)
-      props?.setLoading(false)
+      setLoading(false)
     }
     loadConfig()
   }, [])
@@ -155,8 +169,8 @@ const FilterEditContent: React.FC<Props> = props => {
       let operator = props?.columnItem?.operator
       let value = isArray(props?.columnItem?.value)
         ? props?.columnItem?.value.map(
-            (valueItem: any) => valueItem.id + '@@' + valueItem.name,
-          )
+          (valueItem: any) => valueItem.id + '@@' + valueItem.name,
+        )
         : props?.columnItem?.value
 
       if (
@@ -179,11 +193,11 @@ const FilterEditContent: React.FC<Props> = props => {
 
       const dateValuesArray = props?.columnItem?.dateValues?.length
         ? props?.columnItem?.dateValues.map((data: any) => ({
-            dateValueFrom: data.dateValueFrom
-              ? parseISO(data.dateValueFrom)
-              : null,
-            dateValueTo: data.dateValueTo ? parseISO(data.dateValueTo) : null,
-          }))
+          dateValueFrom: data.dateValueFrom
+            ? parseISO(data.dateValueFrom)
+            : null,
+          dateValueTo: data.dateValueTo ? parseISO(data.dateValueTo) : null,
+        }))
         : [{ dateValueFrom: null, dateValueTo: null }]
 
       setDateValues(dateValuesArray)
@@ -193,18 +207,17 @@ const FilterEditContent: React.FC<Props> = props => {
       const valueTemplate = props?.columnItem?.dateValues?.length
         ? constructDateValuesText(dateValuesArray)
         : value?.[0]?.includes('@@')
-        ? value
+          ? value
             ?.map((valueItem: any) => valueItem?.split?.('@@')?.[1])
             ?.join?.(', ')
-        : value?.join?.(', ') || value
+          : value?.join?.(', ') || value
 
       setBtnLabel(
-        `${
-          valueTemplate?.length && valueTemplate !== 'all'
-            ? props?.columnItem?.dateValues?.length
-              ? valueTemplate
-              : operator + ' ' + valueTemplate
-            : 'All'
+        `${valueTemplate?.length && valueTemplate !== 'all'
+          ? props?.columnItem?.dateValues?.length
+            ? valueTemplate
+            : operator + ' ' + valueTemplate
+          : 'All'
         }`,
       )
       setIsSingleValue(props?.columnItem?.isSingleValue)
@@ -214,11 +227,11 @@ const FilterEditContent: React.FC<Props> = props => {
       setDateValues(
         props?.columnItem?.editedContent?.dateValues?.length
           ? props?.columnItem?.editedContent?.dateValues.map((data: any) => ({
-              dateValueFrom: data.dateValueFrom
-                ? parseISO(data.dateValueFrom)
-                : null,
-              dateValueTo: data.dateValueTo ? parseISO(data.dateValueTo) : null,
-            }))
+            dateValueFrom: data.dateValueFrom
+              ? parseISO(data.dateValueFrom)
+              : null,
+            dateValueTo: data.dateValueTo ? parseISO(data.dateValueTo) : null,
+          }))
           : [{ dateValueFrom: null, dateValueTo: null }],
       )
       setBtnLabel(props?.columnItem?.editedContent?.btnLabel)
@@ -255,63 +268,110 @@ const FilterEditContent: React.FC<Props> = props => {
     let text = 'between '
     dateValuesInfo.forEach((item: any, index: number) => {
       if (item.dateValueFrom && item.dateValueTo) {
-        text += `${
-          item.dateValueFrom ? format(item.dateValueFrom, 'MM/dd/yyyy') : ''
-        } ${
-          item.dateValueTo
+        text += `${item.dateValueFrom ? format(item.dateValueFrom, 'MM/dd/yyyy') : ''
+          } ${item.dateValueTo
             ? ' and ' + format(item.dateValueTo, 'MM/dd/yyyy')
             : ''
-        }${index + 1 === dateValuesInfo.length ? '' : ' Vs '}`
+          }${index + 1 === dateValuesInfo.length ? '' : ' Vs '}`
       }
     })
     return text.trim()
   }
 
   const askAthena = async (UUID: string) => {
-    props?.setLoading(true)
-
-    const requestPayload: any = {
-      session: {
-        message: {
-          text: props.columnItem.processedID,
-          displayUtterance: '',
-          domain: '',
-          dataSet: props.columnItem.data_set,
-          filter: [],
-          qtype: 'addfilter',
-          context: '',
-        },
-        options: {
-          transform: true,
-          freeForm: false,
-          mode: '',
-          channel: 'chat',
-          source: 'mobile',
-          record: false,
-          timezone: new Date().getTimezoneOffset().toString(),
-          responseType: 'instruction',
-        },
-      },
-    }
-
-    const response: any = await converseResponse(requestPayload).unwrap()
-    if (response) {
-      props?.setLoading(false)
-      const firstItem = response?.data[0]
-      if (firstItem) {
-        delete firstItem.__id
-        const ojbKey = Object.keys(firstItem)[0]
-        const ojbKey2 = Object.keys(firstItem)[1]
-        setSelect2Options(
-          response.data.map((item: any) => ({
-            id: item[ojbKey],
-            name: item[ojbKey2] || item[ojbKey],
-            tooltip: ojbKey2,
-          })),
-        )
-      }
-    }
+    // Set component's local loading state to true before the API call
     setLoading(true)
+
+    if (dataset?.find((item) => item?._key === props.columnItem.data_set)?.mode === 'v2' &&
+      dataset?.find((item) => item?._key === props.columnItem.data_set)?.athena_threads) {
+
+
+      const { output, meta } = GenerateSemantics([props?.columnItem], [], kbnet[props?.columnItem?.data_set]?.metadata?.data);
+
+      const utterance = constructUtterance([props?.columnItem])
+
+
+
+
+      const requestV2Payload: any = {
+        source: 'web',
+        timezone: new Date().getTimezoneOffset().toString(),
+        sessionId: '',
+        topicId: 'default',
+        instructions: [
+          {
+            command: 'execute',
+            type: output ? '_LF' : '_NL',
+            input: {
+              question: utterance,
+              datasetId: props.columnItem.data_set,
+              requestId: UUID,
+              semantics: output || null,
+              metadata: meta || null,
+              filters: props?.filters || null,
+            },
+            ctx: {
+              subjectId: props?.subjectId,
+              threadID: props?.threadId,
+              lastChatId: props?.lastChatId,
+            },
+          },
+        ],
+      }
+
+
+    }
+
+
+
+    try {
+      const requestPayload: any = {
+        session: {
+          message: {
+            text: props.columnItem.processedID,
+            displayUtterance: '',
+            domain: '',
+            dataSet: props.columnItem.data_set,
+            filter: [],
+            qtype: 'addfilter',
+            context: '',
+          },
+          options: {
+            transform: true,
+            freeForm: false,
+            mode: '',
+            channel: 'chat',
+            source: 'mobile',
+            record: false,
+            timezone: new Date().getTimezoneOffset().toString(),
+            responseType: 'instruction',
+          },
+        },
+      }
+
+      const response: any = await converseResponse(requestPayload).unwrap()
+      // console.log('response v2 is ', responseV2)
+      if (response) {
+        const firstItem = response?.data[0]
+        if (firstItem) {
+          delete firstItem.__id
+          const ojbKey = Object.keys(firstItem)[0]
+          const ojbKey2 = Object.keys(firstItem)[1]
+          setSelect2Options(
+            response.data.map((item: any) => ({
+              id: item[ojbKey],
+              name: item[ojbKey2] || item[ojbKey],
+              tooltip: ojbKey2,
+            })),
+          )
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching options:', error)
+      setLoadFailed(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const setDateFilterValues = () => {
@@ -366,42 +426,44 @@ const FilterEditContent: React.FC<Props> = props => {
         <View style={styles.dateRangeRow}>
           <View style={styles.datePickerContainer}>
             <Text style={styles.datePickerLabel}>From</Text>
-            <DateTimePicker
-              mode="date"
-              placeholder="Start date"
-              value={p.dateValueFrom}
-              onChange={(date: Date) => {
-                const dataVal = [...dateValues]
-                dataVal[index].dateValueFrom = date
-                setDateValues(dataVal)
-                setBtnLabel(constructDateValuesText(dataVal))
+            <TouchableOpacity
+              style={styles.customDatePicker}
+              onPress={() => {
+                // Store current editing date index and toggle start date picker
+                setCurrentEditingDateIndex(index);
+                setShowStartDatePicker(true);
+                // Make sure end date picker is closed
+                setShowEndDatePicker(false);
               }}
-              dateFormat="MM/dd/yyyy"
-              containerStyle={styles.datePicker}
-              style={styles.datePickerInput}
-            />
+            >
+              <Text style={styles.dateText}>
+                {p.dateValueFrom ? format(p.dateValueFrom, 'MM/dd/yyyy') : 'Select start date'}
+              </Text>
+              <Icon name="calendar-outline" size={18} color={Colors.GREEN_DARK} />
+            </TouchableOpacity>
           </View>
           <View style={styles.datePickerContainer}>
             <Text style={styles.datePickerLabel}>To</Text>
-            <DateTimePicker
-              mode="date"
-              placeholder="End date"
-              value={p.dateValueTo}
-              onChange={(date: Date) => {
-                const dataVal = [...dateValues]
-                dataVal[index].dateValueTo = date
-                setDateValues(dataVal)
-                setBtnLabel(constructDateValuesText(dataVal))
+            <TouchableOpacity
+              style={styles.customDatePicker}
+              onPress={() => {
+                // Store current editing date index and toggle end date picker
+                setCurrentEditingDateIndex(index);
+                setShowEndDatePicker(true);
+                // Make sure start date picker is closed
+                setShowStartDatePicker(false);
               }}
-              dateFormat="MM/dd/yyyy"
-              containerStyle={styles.datePicker}
-              style={styles.datePickerInput}
-            />
+            >
+              <Text style={styles.dateText}>
+                {p.dateValueTo ? format(p.dateValueTo, 'MM/dd/yyyy') : 'Select end date'}
+              </Text>
+              <Icon name="calendar-outline" size={18} color={Colors.GREEN_DARK} />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
     ))
-  }, [dateValues])
+  }, [dateValues, showStartDatePicker, showEndDatePicker, currentEditingDateIndex])
 
   const SelectOptionMemo = useMemo(() => {
     const checkDataType = !toNumber(select2Options[0]?.name)
@@ -423,7 +485,7 @@ const FilterEditContent: React.FC<Props> = props => {
           link
           onPress={() => {
             setBtnLabel('All')
-            setInputValue(undefined)
+            setInputValue("")
           }}
           style={styles.clearButton}
           labelStyle={styles.clearButtonLabel}
@@ -486,9 +548,8 @@ const FilterEditContent: React.FC<Props> = props => {
           setOperatorValue(value)
           setBtnLabel(
             value === 'between'
-              ? `between ${inputValueNumber || ''} ${
-                  inputValueNumberTo ? ' and ' + inputValueNumberTo : ''
-                }`
+              ? `between ${inputValueNumber || ''} ${inputValueNumberTo ? ' and ' + inputValueNumberTo : ''
+              }`
               : `${value + ' ' + inputValueNumber}`,
           )
         }}
@@ -510,8 +571,7 @@ const FilterEditContent: React.FC<Props> = props => {
         onChangeText={(text: React.SetStateAction<string | number | null>) => {
           setInputValueNumber(text)
           setBtnLabel(
-            `${operatorValue} ${text} ${
-              inputValueNumberTo ? ' and ' + inputValueNumberTo : ''
+            `${operatorValue} ${text} ${inputValueNumberTo ? ' and ' + inputValueNumberTo : ''
             }`,
           )
         }}
@@ -528,10 +588,9 @@ const FilterEditContent: React.FC<Props> = props => {
           ) => {
             setInputValueNumberTo(text)
             setBtnLabel(
-              `${
-                inputValueNumber
-                  ? `${operatorValue} ${inputValueNumber} and ${text}`
-                  : operatorValue
+              `${inputValueNumber
+                ? `${operatorValue} ${inputValueNumber} and ${text}`
+                : operatorValue
               }`,
             )
           }}
@@ -544,7 +603,7 @@ const FilterEditContent: React.FC<Props> = props => {
   )
 
   const flagContent = loading ? (
-    <Loader message="Applying Security..." />
+    <ActivityIndicator />
   ) : loadFailed ? (
     <ErrorMsg />
   ) : (
@@ -555,7 +614,7 @@ const FilterEditContent: React.FC<Props> = props => {
         onPress={() => {
           setBtnLabel('All')
           setOperatorValue('')
-          setInputValue([])
+          setInputValue("")
         }}
         style={styles.clearButton}
         labelStyle={styles.clearButtonLabel}
@@ -572,7 +631,7 @@ const FilterEditContent: React.FC<Props> = props => {
         placeholder="Select Operator"
         value={operatorValue || operators?.dimensions?.[0]?.id}
         onChange={(value: any) => {
-          setInputValue([])
+          setInputValue("")
           setOperatorValue(value)
           setBtnLabel(value.length ? `${value} All` : 'All')
         }}
@@ -624,7 +683,7 @@ const FilterEditContent: React.FC<Props> = props => {
           link
           onPress={() => {
             setBtnLabel('All')
-            setInputValue(undefined)
+            setInputValue("")
           }}
           style={styles.clearButton}
           labelStyle={styles.clearButtonLabel}
@@ -659,7 +718,7 @@ const FilterEditContent: React.FC<Props> = props => {
       </Picker>
     </View>
   ) : loading ? (
-    <Loader message="Applying Security..." />
+    <ActivityIndicator />
   ) : loadFailed ? (
     <ErrorMsg />
   ) : (
@@ -673,7 +732,7 @@ const FilterEditContent: React.FC<Props> = props => {
           onPress={() => {
             setBtnLabel('All')
             setOperatorValue('')
-            setInputValue([])
+            setInputValue("")
           }}
           style={styles.clearButton}
           labelStyle={styles.clearButtonLabel}
@@ -705,12 +764,13 @@ const FilterEditContent: React.FC<Props> = props => {
               : [])
           }
           onChange={(value: string[]) => {
-            setInputValue([])
+            setInputValue("")
             setOperatorValue(value[0])
             setBtnLabel(value[0]?.length ? `${value[0]} All` : 'All')
           }}
           placeholder="Select Operator"
           style={styles.selectorStyle}
+          loading={loading}
         />
       </View>
       <View style={styles.selectorCard}>
@@ -760,23 +820,21 @@ const FilterEditContent: React.FC<Props> = props => {
             dropdownStyle={styles.dropdownStyle}
             selectedItemStyle={styles.selectedItem}
             searchInputStyle={styles.searchInput}
+            loading={loading}
           />
         ) : (
           <TextField
             placeholder="Enter filter value"
             value={
-              inputValue?.[0]?.includes('@@')
-                ? inputValue?.[0]?.split('@@')[1]?.trim()
+              typeof inputValue === 'string' && inputValue.includes('@@')
+                ? inputValue.replace('@@', '')
                 : inputValue
             }
-            onChangeText={(text: string | any[]) => {
-              setInputValue([text])
-              setBtnLabel(text.length ? `${operatorValue} ${text}` : 'All')
+            onChangeText={(text: string) => {
+              setInputValue(text)
             }}
             style={styles.textInput}
-            underlineColor={Colors.green1}
-            focusOnLayout={true}
-            placeholderTextColor={Colors.grey30}
+            placeholderTextColor={Colors.PLACEHOLDER}
           />
         )}
       </View>
@@ -792,7 +850,7 @@ const FilterEditContent: React.FC<Props> = props => {
           link
           onPress={() => {
             setBtnLabel('All')
-            setInputValue(undefined)
+            setInputValue("")
           }}
           style={styles.clearButton}
           labelStyle={styles.clearButtonLabel}
@@ -826,6 +884,7 @@ const FilterEditContent: React.FC<Props> = props => {
         }}
         placeholder="Select"
         style={styles.selectorStyle}
+        loading={loading}
       />
     </View>
   ) : (
@@ -854,7 +913,7 @@ const FilterEditContent: React.FC<Props> = props => {
         />
       </View>
       <View style={styles.selectorCard1}>
-        <Text style={styles.sectionTitle}>Select Period</Text>
+        <Text style={styles.periodTitle}>Select Period</Text>
         <CustomSelect
           mode="SINGLE"
           options={reportPeriodsValues.map((p: any) => ({
@@ -864,7 +923,7 @@ const FilterEditContent: React.FC<Props> = props => {
           value={inputValue ? [inputValue] : [reportPeriodsValues[0].value]}
           onChange={(value: string[]) => {
             const selectedValue = value[0]
-            setInputValue(selectedValue)
+            setInputValue(selectedValue as string)
             setOperatorValue(selectedValue !== 'between' ? 'is' : 'between')
             setBtnLabel(
               selectedValue === 'between'
@@ -874,11 +933,7 @@ const FilterEditContent: React.FC<Props> = props => {
           }}
           placeholder="Select Period"
           style={styles.selectorStyle}
-          checkboxColor={Colors.GREEN_DARK}
-          buttonStyle={styles.customSelectButton}
-          dropdownStyle={styles.dropdownStyle}
-          selectedItemStyle={styles.selectedItem}
-          searchInputStyle={styles.searchInput}
+          loading={loading}
         />
 
         {operatorValue === 'between' && renderDateCustomContent}
@@ -918,7 +973,7 @@ const FilterEditContent: React.FC<Props> = props => {
         )}
       />
 
-      <Text style={styles.sectionTitle}>Select Period</Text>
+      <Text style={styles.periodTitle}>Select Period</Text>
       <CustomSelect
         mode="SINGLE"
         options={reportPeriodsValues.map((p: any) => ({
@@ -928,7 +983,7 @@ const FilterEditContent: React.FC<Props> = props => {
         value={inputValue ? [inputValue] : [reportPeriodsValues[0].value]}
         onChange={(value: string[]) => {
           const selectedValue = value[0]
-          setInputValue(selectedValue)
+          setInputValue(selectedValue as string)
           setOperatorValue(selectedValue !== 'between' ? 'all' : 'between')
           setBtnLabel(
             selectedValue === 'between'
@@ -937,12 +992,8 @@ const FilterEditContent: React.FC<Props> = props => {
           )
         }}
         placeholder="Select Period"
-        style={styles.selectorStyle}
-        checkboxColor={Colors.GREEN_DARK}
-        buttonStyle={styles.customSelectButton}
-        dropdownStyle={styles.dropdownStyle}
-        selectedItemStyle={styles.selectedItem}
-        searchInputStyle={styles.searchInput}
+        style={styles.periodSelectorStyle}
+        loading={loading}
       />
 
       {operatorValue === 'between' && renderDateCustomContent}
@@ -989,31 +1040,28 @@ const FilterEditContent: React.FC<Props> = props => {
         )}
       />
 
-      <Text style={styles.sectionTitle}>Select Period</Text>
+      <Text style={styles.periodTitle}>Select Period</Text>
       <CustomSelect
         mode="SINGLE"
         options={byPeriodFilterValues.map((p: any) => ({
           value: p.value,
           label: p.text,
         }))}
-        value={inputValue ? [inputValue] : [byPeriodFilterValues[0].value]}
+        value={inputValue || byPeriodFilterValues[0].value}
         onChange={(value: string[]) => {
-          const selectedValue = value[0]
-          setInputValue(selectedValue)
-          setOperatorValue(selectedValue !== 'between' ? 'all' : 'between')
-          setBtnLabel(
-            selectedValue === 'between'
-              ? constructDateValuesText(dateValues)
-              : `${selectedValue !== 'all' ? '' + selectedValue : 'All'}`,
-          )
+          if (value && value.length > 0) {
+            const selectedValue = value[0];
+            setInputValue(selectedValue);
+            setOperatorValue(selectedValue !== 'between' ? 'all' : 'between');
+            setBtnLabel(
+              selectedValue === 'between'
+                ? constructDateValuesText(dateValues)
+                : `${selectedValue !== 'all' ? '' + selectedValue : 'All'}`,
+            );
+          }
         }}
         placeholder="Select Period"
-        style={styles.selectorStyle}
-        checkboxColor={Colors.GREEN_DARK}
-        buttonStyle={styles.customSelectButton}
-        dropdownStyle={styles.dropdownStyle}
-        selectedItemStyle={styles.selectedItem}
-        searchInputStyle={styles.searchInput}
+        style={styles.periodSelectorStyle}
       />
     </View>
   )
@@ -1068,166 +1116,647 @@ const FilterEditContent: React.FC<Props> = props => {
     return true
   }
 
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={filterEditHandler}>
-        <Text style={styles.label}>
-          {props.columnItem?.vocabulary?.[0] ||
-            props.columnItem?.label ||
-            props.columnItem?.processedID}
-        </Text>
-      </TouchableOpacity>
-      {props.columnItem.is_editable &&
-        isGuidedRuleVerify(
-          props?.columnItem.category.toLowerCase(),
-          props?.guidedRule,
-        ) && (
-          <View style={styles.editWrapper}>
-            <Button
-              label={btnLabel}
-              size="small"
-              onPress={filterEditHandler}
-              style={styles.editButton}
-              labelStyle={{ color: Colors.GREEN_MAIN }}
-            />
-            <Modal
-              visible={editOpen}
-              animationType="slide"
-              transparent={false}
-              onRequestClose={() => setEditOpen(false)}
+  const renderImprovedDatePicker = () => {
+    // Get current date for validation
+    const today = new Date();
+    
+    // Check if we have the current index set and if a date picker is showing
+    const hasValidIndex = currentEditingDateIndex >= 0 && currentEditingDateIndex < dateValues.length;
+    const isDatePickerShowing = showStartDatePicker || showEndDatePicker;
+    
+    // If we don't have a valid index, hide the picker
+    if (!hasValidIndex && isDatePickerShowing) {
+      setShowStartDatePicker(false);
+      setShowEndDatePicker(false);
+      return null;
+    }
+    
+    if (!isDatePickerShowing) {
+      return null;
+    }
+
+    // Initialize with current month or the selected date's month if it exists
+    const [currentMonth, setCurrentMonth] = useState(() => {
+      if (hasValidIndex) {
+        if (showStartDatePicker && dateValues[currentEditingDateIndex].dateValueFrom) {
+          return new Date(dateValues[currentEditingDateIndex].dateValueFrom);
+        } else if (showEndDatePicker && dateValues[currentEditingDateIndex].dateValueTo) {
+          return new Date(dateValues[currentEditingDateIndex].dateValueTo);
+        }
+      }
+      return new Date();
+    });
+
+    // Generate calendar days for the current month
+    const generateCalendarDays = () => {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      
+      // Get first day of month and total days
+      const firstDayOfMonth = new Date(year, month, 1);
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+      const daysInMonth = lastDayOfMonth.getDate();
+      
+      // Calculate days from previous month to show
+      const firstDayOfWeek = firstDayOfMonth.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // Generate array of day objects
+      const days = [];
+      
+      // Add days from previous month if needed
+      const prevMonthLastDay = new Date(year, month, 0).getDate();
+      for (let i = 0; i < firstDayOfWeek; i++) {
+        const dayNum = prevMonthLastDay - firstDayOfWeek + i + 1;
+        days.push({
+          day: dayNum,
+          date: new Date(year, month - 1, dayNum),
+          inCurrentMonth: false
+        });
+      }
+      
+      // Add days from current month
+      for (let i = 1; i <= daysInMonth; i++) {
+        days.push({
+          day: i,
+          date: new Date(year, month, i),
+          inCurrentMonth: true
+        });
+      }
+      
+      // Add days from next month if needed to fill out the grid
+      const totalCells = Math.ceil((firstDayOfWeek + daysInMonth) / 7) * 7;
+      const remainingDays = totalCells - (firstDayOfWeek + daysInMonth);
+      for (let i = 1; i <= remainingDays; i++) {
+        days.push({
+          day: i,
+          date: new Date(year, month + 1, i),
+          inCurrentMonth: false
+        });
+      }
+      
+      return days;
+    };
+
+    const calendarDays = generateCalendarDays();
+    
+    // Navigation between months
+    const goToPreviousMonth = () => {
+      const newMonth = new Date(currentMonth);
+      newMonth.setMonth(newMonth.getMonth() - 1);
+      setCurrentMonth(newMonth);
+    };
+    
+    const goToNextMonth = () => {
+      const newMonth = new Date(currentMonth);
+      newMonth.setMonth(newMonth.getMonth() + 1);
+      setCurrentMonth(newMonth);
+    };
+
+    // Format the current month for display
+    const formatMonthYear = (date: Date) => {
+      return format(date, 'MMMM yyyy');
+    }
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={!!props.columnItem}
+        onRequestClose={() => props.onClose()}
+      >
+        <View 
+          style={styles.bottomSheetContent} 
+          onStartShouldSetResponder={() => true}
+        >
+          {/* Bottom Sheet Handle */}
+          <View style={styles.bottomSheetHandle} />
+            
+          {/* Calendar Header */}
+          <View style={styles.calendarHeader}>
+            <Text style={styles.calendarTitle}>
+              {showStartDatePicker ? 'Select Start Date' : 'Select End Date'}
+            </Text>
+            <TouchableOpacity 
+              onPress={() => {
+                setShowStartDatePicker(false);
+                setShowEndDatePicker(false);
+              }}
+              style={styles.closeButton}
             >
-              <View style={styles.modalContainer}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>
-                    {props.columnItem?.vocabulary?.[0] ||
-                      props.columnItem?.label ||
-                      props.columnItem?.processedID}
-                  </Text>
-                  <Button
-                    iconSource={() => (
-                      <Icon name="close" size={24} color={Colors.GREEN_DARK} />
-                    )}
-                    size="small"
-                    onPress={() => setEditOpen(false)}
-                    style={styles.closeButton}
-                  />
-                </View>
-
-                <ScrollView
-                  style={styles.modalContent}
-                  contentContainerStyle={styles.modalContentContainer}
-                >
-                  {renderEditContent}
-
-                  {!props?.isSharedStoryBoard && (
-                    <View style={styles.globalFilterCard}>
-                      <Text style={styles.sectionTitle}>
-                        Save as Global Filter
-                      </Text>
-                      <View style={styles.globalFilterToggle}>
-                        <Switch
-                          value={globalFilter.enabled}
-                          onValueChange={value =>
-                            setGlobalFilter({ ...globalFilter, enabled: value })
-                          }
-                          trackColor={{
-                            false: Colors.GREY,
-                            true: Colors.GREEN_DARK,
-                          }}
-                          thumbColor={Colors.WHITE}
-                        />
-                        <Text style={styles.toggleLabel}>
-                          Enable Global Filter
-                        </Text>
-                      </View>
-
-                      {globalFilter.enabled && (
-                        <View style={styles.globalFilterInput}>
-                          <TextField
-                            placeholder="Filter name"
-                            value={newGlobalFilterName}
-                            onChangeText={onNameChange}
-                            style={styles.textInput1}
-                            underlineColor={Colors.green1}
-                            focusOnLayout={true}
-                          />
-                          <Button
-                            label="Add"
-                            size="small"
-                            onPress={addItem}
-                            style={styles.addButton}
-                            backgroundColor={Colors.green5}
-                          />
-                        </View>
-                      )}
-                    </View>
-                  )}
-                </ScrollView>
-
-                <View style={styles.modalFooter}>
-                  <Button
-                    label="Apply Filters"
-                    size="medium"
-                    onPress={() => setEditOpen(false)}
-                    backgroundColor={Colors.green5}
-                    style={styles.applyButton}
-                  />
-                </View>
-              </View>
-            </Modal>
+              <Icon name="close-outline" size={24} color={Colors.GRAY_DARK} />
+            </TouchableOpacity>
           </View>
-        )}
+              <TouchableOpacity 
+                onPress={() => {
+                  setShowStartDatePicker(false);
+                  setShowEndDatePicker(false);
+                }}
+                style={styles.closeButton}
+              >
+                <Icon name="close-outline" size={24} color={Colors.GRAY_DARK} />
+              </TouchableOpacity>
+            </View>
+        
+        {/* Custom Calendar Date Picker */}
+        <View style={styles.calendarPickerContainer}>
+          {/* Month and Year Selector */}
+          <View style={styles.monthYearSelector}>
+            <TouchableOpacity
+              onPress={() => {
+                const currentDate = tempSelectedDate || 
+                  (showStartDatePicker ? 
+                    dateValues[currentEditingDateIndex]?.dateValueFrom : 
+                    dateValues[currentEditingDateIndex]?.dateValueTo) || 
+                  new Date();
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() - 1);
+                setTempSelectedDate(newDate);
+              }}
+            >
+              <Icon name="chevron-back" size={24} color={Colors.GREEN_DARK} />
+            </TouchableOpacity>
+            
+            <Text style={styles.monthYearText}>
+              {format(tempSelectedDate || 
+                (showStartDatePicker ? 
+                  dateValues[currentEditingDateIndex]?.dateValueFrom || new Date() : 
+                  dateValues[currentEditingDateIndex]?.dateValueTo || new Date()), 
+                'MMMM yyyy')}
+            </Text>
+            
+            <TouchableOpacity
+              onPress={() => {
+                const currentDate = tempSelectedDate || 
+                  (showStartDatePicker ? 
+                    dateValues[currentEditingDateIndex]?.dateValueFrom : 
+                    dateValues[currentEditingDateIndex]?.dateValueTo) || 
+                  new Date();
+                const newDate = new Date(currentDate);
+                newDate.setMonth(newDate.getMonth() + 1);
+                setTempSelectedDate(newDate);
+              }}
+            >
+              <Icon name="chevron-forward" size={24} color={Colors.GREEN_DARK} />
+            </TouchableOpacity>
+          </View>
+          
+          {/* Calendar Days */}
+          <View style={styles.daysContainer}>
+            {/* Day Headers */}
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+              <Text key={day} style={styles.dayHeader}>{day}</Text>
+            ))}
+            
+            {/* Calendar Cells */}
+            {generateCalendarDays().map((day, index) => {
+              const isCurrentDate = showStartDatePicker ? 
+                (dateValues[currentEditingDateIndex]?.dateValueFrom && 
+                  day.date.getDate() === dateValues[currentEditingDateIndex].dateValueFrom.getDate() &&
+                  day.date.getMonth() === dateValues[currentEditingDateIndex].dateValueFrom.getMonth() &&
+                  day.date.getFullYear() === dateValues[currentEditingDateIndex].dateValueFrom.getFullYear()) :
+                (dateValues[currentEditingDateIndex]?.dateValueTo &&
+                  day.date.getDate() === dateValues[currentEditingDateIndex].dateValueTo.getDate() &&
+                  day.date.getMonth() === dateValues[currentEditingDateIndex].dateValueTo.getMonth() &&
+                  day.date.getFullYear() === dateValues[currentEditingDateIndex].dateValueTo.getFullYear());
+                  
+              const isFutureDate = day.date > today;
+              
+              const isValidEndDate = showEndDatePicker ? 
+                dateValues[currentEditingDateIndex]?.dateValueFrom && 
+                day.date >= dateValues[currentEditingDateIndex].dateValueFrom : true;
+              
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.dayButton,
+                    !day.inCurrentMonth && styles.dayButtonDisabled,
+                    (!isValidEndDate || isFutureDate) && styles.dayButtonDisabled,
+                    isCurrentDate && styles.dayButtonSelected,
+                  ]}
+                  onPress={() => {
+                    if (day.inCurrentMonth && (isValidEndDate || showStartDatePicker) && !isFutureDate) {
+                      const dataVal = [...dateValues];
+                      
+                      if (showStartDatePicker) {
+                        dataVal[currentEditingDateIndex].dateValueFrom = new Date(day.date);
+                        // If end date is before new start date, clear it
+                        if (dataVal[currentEditingDateIndex].dateValueTo && 
+                            dataVal[currentEditingDateIndex].dateValueTo < day.date) {
+                          dataVal[currentEditingDateIndex].dateValueTo = null;
+                        }
+                      } else {
+                        dataVal[currentEditingDateIndex].dateValueTo = new Date(day.date);
+                      }
+                      
+                      setDateValues(dataVal);
+                      setBtnLabel(constructDateValuesText(dataVal));
+                      
+                      // Close picker after selection
+                      if (showStartDatePicker) {
+                        setShowStartDatePicker(false);
+                        // If no end date is set, auto-open end date picker
+                        if (!dataVal[currentEditingDateIndex].dateValueTo) {
+                          setShowEndDatePicker(true);
+                        }
+                      } else {
+                        setShowEndDatePicker(false);
+                      }
+                      
+                      setTempSelectedDate(null);
+                    }
+                  }}
+                  disabled={!day.inCurrentMonth || (!isValidEndDate && showEndDatePicker) || isFutureDate}
+                >
+                  <Text style={[
+                    styles.dayButtonText,
+                    (!day.inCurrentMonth || (!isValidEndDate && showEndDatePicker) || isFutureDate) && styles.dayButtonTextDisabled,
+                    isCurrentDate && styles.dayButtonTextSelected,
+                  ]}>
+                    {day.day}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+        
+        <TouchableOpacity 
+          style={styles.dateConfirmButton}
+          onPress={() => {
+            setShowStartDatePicker(false);
+            setShowEndDatePicker(false);
+            setTempSelectedDate(null);
+          }}
+        >
+          <Text style={styles.dateConfirmButtonText}>Done</Text>
+        </TouchableOpacity>
+      </Modal>
+    );
+  }}
+
+// Proper navigation section for the calendar
+const renderCalendarNavigation = (showStartDatePicker: boolean, dateValues: any[], currentEditingDateIndex: number, tempSelectedDate: Date | null, setTempSelectedDate: (date: Date) => void) => {
+  return (
+    <View style={styles.monthNavigationContainer}>
+      <TouchableOpacity
+        style={styles.monthNavigationButton}
+        onPress={() => {
+          const currentDate = (tempSelectedDate || 
+            (showStartDatePicker ? 
+              dateValues[currentEditingDateIndex]?.dateValueFrom : 
+              dateValues[currentEditingDateIndex]?.dateValueTo) || 
+            new Date());
+          const newDate = new Date(currentDate);
+          newDate.setMonth(newDate.getMonth() - 1);
+          setTempSelectedDate(newDate);
+        }}
+      >
+        <Icon name="chevron-back" size={24} color={Colors.GREEN_DARK} />
+      </TouchableOpacity>
+      
+      <Text style={styles.monthYearText}>
+        {format(tempSelectedDate || 
+          (showStartDatePicker ? 
+            dateValues[currentEditingDateIndex]?.dateValueFrom || new Date() : 
+            dateValues[currentEditingDateIndex]?.dateValueTo || new Date()), 
+          'MMMM yyyy')}
+      </Text>
+
+      <TouchableOpacity
+        style={styles.monthNavigationButton}
+        onPress={() => {
+          const currentDate = (tempSelectedDate || 
+            (showStartDatePicker ? 
+              dateValues[currentEditingDateIndex]?.dateValueFrom : 
+              dateValues[currentEditingDateIndex]?.dateValueTo) || 
+            new Date());
+          const newDate = new Date(currentDate);
+          newDate.setMonth(newDate.getMonth() + 1);
+          setTempSelectedDate(newDate);
+        }}
+      >
+        <Icon name="chevron-forward" size={24} color={Colors.GREEN_DARK} />
+      </TouchableOpacity>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: Colors.WHITE,
-    borderBottomWidth: 1,
-    borderColor: Colors.GREEN_LIGHT,
+    backgroundColor: 'rgba(0,0,0,0.5)'
+  },
+  modalContent: {
+    width: '90%',
+    height: '70%',
+    maxHeight: 600,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20
+  },
+  inlineDatePickerTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: 
+  },
+  // Period filter styles
+  periodTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: Colors.blue50
+  },
+  periodSelectorStyle: {
+    height: 40,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.blue30
+  },
+  periodSelectButton: {
+    backgroundColor: Colors.blue10,
+    borderRadius: 6,
+    paddingVertical: 8
+  },
+  periodDropdownStyle: {
+    borderColor: Colors.blue30,
+    backgroundColor: Colors.blue5
+  },
+  periodSelectedItem: {
+    backgroundColor: Colors.blue20
+  },
+  periodSearchInput: {
+    borderColor: Colors.blue30
+  },
+  // Dataset filter styles
+  datasetTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: Colors.green5
+  },
+  datasetSelectorStyle: {
+    height: 40,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.green30
+  },
+  datasetSelectButton: {
+    backgroundColor: Colors.green10,
+    borderRadius: 6,
+    paddingVertical: 8
+  },
+  datasetDropdownStyle: {
+    borderColor: Colors.green30,
+    backgroundColor: Colors.green5
+  },
+  datasetSelectedItem: {
+    backgroundColor: Colors.green20
+  },
+  datasetSearchInput: {
+    borderColor: Colors.green30
+  },
+  // Column filter styles
+  columnTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: Colors.red30
+  },
+  columnSelectorStyle: {
+    height: 40,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Colors.red20
+  },
+  columnSelectButton: {
+    backgroundColor: Colors.red10,
+    borderRadius: 6,
+    paddingVertical: 8
+  },
+  columnDropdownStyle: {
+    borderColor: Colors.red20,
+    backgroundColor: Colors.red5
+  },
+  columnSelectedItem: {
+    backgroundColor: Colors.red10
+  },
+  columnSearchInput: {
+    borderColor: Colors.red20
+  },
+  // Calendar styles for date picker
+  bottomSheetContent: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    padding: 16,
+    marginTop: 50
+  },
+  bottomSheetHandle: {
+    width: 40,
+    height: 5,
+    backgroundColor: Colors.GRAY_LIGHT,
+    alignSelf: 'center',
+    borderRadius: 3,
+    marginBottom: 16
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16
+  },
+  calendarTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.GREEN_DARK
+  },
+  closeButton: {
+    padding: 5
+  },
+  calendarPickerContainer: {
+    padding: 10
+  },
+  monthYearSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16
+  },
+  daysContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around'
+  },
+  dayHeader: {
+    width: '14.28%',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: Colors.GRAY_DARK
+  },
+  dayButtonDisabled: {
+    opacity: 0.4
+  },
+  clearButton: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  clearButtonLabel: {
+    color: Colors.GREEN_DARK,
+    marginRight: 5
+  },
+  clearIcon: {
+    marginLeft: 5
   },
   dateRangeCard: {
-    backgroundColor: Colors.WHITE,
-    borderRadius: 12,
-    padding: 16,
     marginBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.grey40,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    padding: 12,
+    backgroundColor: Colors.LIGHT_GRAY,
+    borderRadius: 8
   },
   dateRangeHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 12
   },
   dateRangeTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: Colors.GREEN_DARK,
+    fontWeight: 'bold',
+    color: Colors.GREEN_DARK
   },
   removeIconButton: {
-    padding: 4,
+    padding: 5
   },
   dateRangeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginBottom: 10
   },
   datePickerContainer: {
-    flex: 1,
-    marginHorizontal: 4,
+    marginBottom: 12
   },
   datePickerLabel: {
-    fontSize: 14,
-    color: Colors.grey30,
+    marginBottom: 6,
+    color: Colors.GREEN_DARK,
+    fontWeight: '500'
+  },
+  customDatePicker: {
+    borderWidth: 1,
+    borderColor: Colors.GREEN_LIGHT,
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: Colors.WHITE
+  },
+  dateText: {
+    color: Colors.GREEN_DARK
+  },
+  pickerInnerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  pickerText: {
+    flex: 1,
+    color: Colors.DARK_TEXT
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.DARK_TEXT
+  },
+  dimensionsContainer: {
+    marginBottom: 20
+  },
+  selectorStyle: {
+    marginBottom: 15
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: Colors.GRAY_LIGHT,
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 15
+  },
+  dropdownStyle: {
+    borderWidth: 1,
+    borderColor: Colors.GRAY_LIGHT,
+    borderRadius: 8
+  },
+  selectedItem: {
+    backgroundColor: Colors.LIGHT_GRAY
+  },
+  addButton: {
+    backgroundColor: Colors.GREEN_DARK,
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    marginTop: 10
+  },
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  monthNavigationButton: {
+    padding: 5,
+  },
+  monthYearText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.GREEN_DARK,
+  },
+  weekdayHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  weekdayHeaderText: {
+    width: '14.28%',
+    textAlign: 'center',
+    fontSize: 12,
+    color: Colors.GRAY_DARK,
+  },
+  calendarGridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  dayButton: {
+    width: '14.28%',
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 4,
+  },
+  dayButtonSelected: {
+    backgroundColor: Colors.PRIMARY,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    overflow: 'hidden',
+  },
+  dayButtonInRange: {
+    backgroundColor: Colors.LIGHT_PRIMARY,
+  },
+  dayButtonText: {
+    fontSize: 14,
+    color: Colors.BLACK,
+  },
+  dayButtonTextDisabled: {
+    color: Colors.LIGHT_GRAYX,
+  },
+  dayButtonTextSelected: {
+    color: Colors.WHITE,
+    fontWeight: '600',
   },
   datePicker: {
     flex: 1,
@@ -1309,83 +1838,83 @@ const styles = StyleSheet.create({
     height: 48,
     marginBottom: 15,
   },
-  pickerInnerContainer: {
+  calendarHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    marginBottom: 16,
   },
-  pickerText: {
+  calendarTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
     color: Colors.GREEN_DARK,
   },
-  textInput: {
-    borderWidth: 1,
-    borderColor: Colors.GREEN_LIGHT,
+  closeButton: {
+    padding: 4,
+  },
+  calendarPickerContainer: {
+    marginVertical: 10,
+  },
+  monthYearSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  dateConfirmButton: {
+    backgroundColor: Colors.PRIMARY,
     borderRadius: 8,
     padding: 12,
-    backgroundColor: Colors.WHITE,
-    color: Colors.GREEN_DARK,
-    marginBottom: 1,
-  },
-  textInput1: {
-    borderWidth: 1,
-    borderColor: Colors.black,
-    borderRadius: 8,
-    padding: 5,
-    width: '70%',
-    backgroundColor: Colors.WHITE,
-    color: Colors.green1,
-    marginTop: 25,
-    marginBottom: 0,
-  },
-  addButton: {
-    marginBottom: 10,
-    borderRadius: 8,
-    height: 38,
-    marginLeft: 10,
-  },
-  errorContainer: {
     alignItems: 'center',
-    padding: 20,
+    marginTop: 12,
   },
-  errorText: {
-    color: Colors.RED,
-    marginVertical: 10,
-    textAlign: 'center',
+  dateConfirmButtonText: {
+    color: Colors.WHITE,
+    fontWeight: 'bold',
+    fontSize: 16,
   },
-  selectorStyle: {
-    backgroundColor: Colors.WHITE,
-    borderColor: Colors.GREEN_LIGHT,
-    borderRadius: 8,
+  monthNavigationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 15,
   },
+  errorContainer: {
+    backgroundColor: Colors.LIGHT_ERROR,
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: Colors.ERROR,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
   errorSubText: {
-    ...UILTypography.text90,
-    color: Colors.grey20,
-    marginBottom: 10,
-    textAlign: 'center',
+    color: Colors.ERROR,
+    fontSize: 14,
   },
-  clearButton: {
-    alignSelf: 'flex-end',
-    marginBottom: 10,
-    paddingVertical: 5,
-  },
-  clearButtonLabel: {
-    color: Colors.red1,
-    fontWeight: '500',
-  },
-  clearIcon: {
-    marginRight: 5,
-    color: Colors.red1,
-  },
-  dimensionsContainer: {
+  fixedDatePickerContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.WHITE,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  sectionHeader: {
+  inlineDatePickerHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -1440,7 +1969,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   toggleSwitch: {
-    transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }],
+    transform: [{ scaleX: 0.5 }, { scaleY: 0.5 }],
     marginLeft: 10,
     marginTop: 1,
   },

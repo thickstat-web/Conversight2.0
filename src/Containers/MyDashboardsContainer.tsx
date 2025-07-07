@@ -1,13 +1,14 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import { FlatList, Pressable, SectionList, StyleSheet } from 'react-native'
 import { TouchableOpacity, View, Text } from 'react-native-ui-lib'
 import { formatDistance } from 'date-fns'
-import { useTheme } from '@/Hooks'
+import { useAppDispatch, useTheme } from '@/Hooks'
 import { LayoutNoInternet, LoadingSpinner, SearchBar } from '@/Components'
 import { useFetchPinboardsQuery } from '@/Services/modules/bot'
 import { Pinboard } from '@/Types/Pinboard'
 import { Colors } from '@/Theme/Variables'
-import { properCase } from '@/Utils/common'
+import { mergeDatasetConfigResponses, properCase } from '@/Utils/common'
 import { DASHBOARD_SCREEN } from '@/Constants/screens'
 import {
   ATHENA,
@@ -17,6 +18,7 @@ import {
   VIEW_ALL,
 } from '@/Config'
 import { useNetInfo } from '@react-native-community/netinfo'
+import { kbnetApiSlice } from '@/Services/modules/kbnet'
 
 interface TagProps {
   tag: string
@@ -88,7 +90,7 @@ const PinboardCard = React.memo(
       timeAgo = formatDistance(new Date(updatedAt ?? new Date()), new Date(), {
         addSuffix: true,
       })
-    } catch (err) {}
+    } catch (err) { }
 
     return (
       <TouchableOpacity
@@ -214,9 +216,9 @@ const TagFilter = React.memo(
 
 const renderItem =
   (onTapItem: (text: Pinboard) => void) =>
-  ({ item, index }: { item: Pinboard; index: number }) => {
-    return <PinboardCard pinboard={item} onTapItem={onTapItem} />
-  }
+    ({ item, index }: { item: Pinboard; index: number }) => {
+      return <PinboardCard pinboard={item} onTapItem={onTapItem} />
+    }
 
 const filterDashboardsBySearchText = (
   dashboards: Pinboard[],
@@ -230,14 +232,52 @@ const filterDashboardsBySearchText = (
     : dashboards
 }
 
-const MyDashboardsContainer = ({ navigation }) => {
+const MyDashboardsContainer = ({ navigation, route }) => {
+  const navigationRef = useNavigation()
+  const currentRoute = useRoute()
+  const [currentPinboardId, setCurrentPinboardId] = useState<string | null>(null)
   const { Colors, Fonts } = useTheme()
-  const { data, isLoading } = useFetchPinboardsQuery()
+  const { data, isLoading, refetch } = useFetchPinboardsQuery()
   const [filteredTags, setFilteredTags] = useState<string[]>([])
   const [searchText, setSearchText] = useState('')
-
+  const dispatch = useAppDispatch()
   const pinboards = useMemo(() => data?.data ?? [], [data?.data])
   const showSearchBox = pinboards.length >= DEFAULT_DASHBOARD_SHOW_COUNT
+
+  // Update appliedFilters when pinboards data changes
+  useEffect(() => {
+    if (currentPinboardId && currentRoute.name === DASHBOARD_SCREEN) {
+      const currentPinboard = pinboards.find(p => p.id === currentPinboardId)
+      if (currentPinboard) {
+        navigation.setParams({
+          appliedFilters: Array.isArray(currentPinboard.appliedFilters)
+            ? currentPinboard.appliedFilters
+            : []
+        })
+      }
+    }
+  }, [pinboards, currentPinboardId, currentRoute.name, navigation])
+
+
+  const fetchData = async () => {
+    try {
+      const [defaultConfig, defaultData, operators] = await Promise.all([
+        dispatch(kbnetApiSlice.endpoints.defaultConfig.initiate('')).unwrap(),
+        dispatch(kbnetApiSlice.endpoints.defaultData.initiate('')).unwrap(),
+        dispatch(kbnetApiSlice.endpoints.operators.initiate('')).unwrap(),
+      ]);
+      console.log('defaultConfig is ', defaultConfig)
+      console.log('defaultData is ', defaultData)
+      console.log('operators is ', operators)
+      mergeDatasetConfigResponses(defaultConfig, defaultData, operators);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   // Group list of pinbord indexes by tag
   const tagWithIndexes: Record<string, number[]> = useMemo(() => {
@@ -277,11 +317,11 @@ const MyDashboardsContainer = ({ navigation }) => {
 
   const onTapItem = useCallback(
     (item: Pinboard) => {
-      const { id, appliedFilters } = item
-      // console.log(`[DashboardContainer] open dashboard: ${name}`)
+      const { id, appliedFilters = [] } = item
+      setCurrentPinboardId(id)
       navigation.navigate(DASHBOARD_SCREEN, {
         pinboardId: id,
-        appliedFilters,
+        appliedFilters: Array.isArray(appliedFilters) ? appliedFilters : [],
       })
     },
     [navigation],

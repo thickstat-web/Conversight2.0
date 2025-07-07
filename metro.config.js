@@ -24,6 +24,11 @@ module.exports = async () => {
     resolver: {
       sourceExts: ['jsx', 'js', 'ts', 'tsx', 'json', 'svg', 'png', 'gif', 'jpg'],
       assetExts: assetExts.filter(ext => ext !== 'svg'),
+      // Add module resolution for DatePickerIOS
+      extraNodeModules: {
+        // This redirects DatePickerIOS imports to our mock file
+        'react-native/Libraries/Components/DatePicker/DatePickerIOS': require.resolve('./src/Utils/DatePickerIOSMock.js'),
+      },
     },
   }
 }

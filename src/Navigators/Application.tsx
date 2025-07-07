@@ -214,7 +214,7 @@ const ApplicationNavigator = () => {
           component={DashboardContainer}
           options={{
             headerRightContainerStyle: { paddingRight: 15 },
-            title: 'Dashboard',
+            title: 'Storyboard',
             headerTitleAlign: 'center',
             headerTintColor: Colors.WHITE,
             headerStyle: {

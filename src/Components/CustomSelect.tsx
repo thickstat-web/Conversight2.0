@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   View,
   TextInput,
@@ -6,25 +6,12 @@ import {
   StyleSheet,
   FlatList,
   Keyboard,
+  Animated,
+  Easing,
 } from 'react-native'
-import { Text, Colors, Button } from 'react-native-ui-lib'
+import { Text, Button } from 'react-native-ui-lib'
 import Icon from 'react-native-vector-icons/Ionicons'
-
-const THEME = {
-  primary: Colors.GREEN_MAIN,
-  primaryLight: Colors.GREEN_LIGHT,
-  secondary: Colors.GREEN_DARK,
-  background: Colors.WHITE,
-  text: Colors.green1,
-  placeholder: Colors.GRAY_DARK,
-  border: Colors.GREEN_LIGHT,
-  divider: Colors.GREEN_LIGHT,
-  icon: Colors.GREEN_MAIN,
-  button: Colors.GREEN_MAIN,
-  buttonText: Colors.WHITE,
-  selected: Colors.GREEN_LIGHT,
-  selectedText: Colors.GREEN_DARK,
-}
+import { useTheme } from '@/Hooks'
 
 interface Option {
   label: string
@@ -39,6 +26,7 @@ interface CustomSelectProps {
   placeholder?: string
   placeholderTextColor?: string
   style?: any
+  loading?: boolean
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -47,11 +35,53 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   value,
   onChange,
   placeholder = 'Select items...',
-  placeholderTextColor = THEME.placeholder,
+  placeholderTextColor,
   style,
+  loading,
 }) => {
+  const { Colors } = useTheme()
+
+  const THEME = {
+    primary: Colors.GREEN_MAIN,
+    primaryLight: Colors.GREEN_LIGHT,
+    secondary: Colors.GREEN_DARK,
+    background: Colors.WHITE,
+    text: Colors.TEXT_DEFAULT,
+    placeholder: Colors.GRAY_DARK,
+    border: Colors.GREEN_LIGHT,
+    divider: Colors.GREEN_LIGHT,
+    icon: Colors.GREEN_MAIN,
+    button: Colors.GREEN_MAIN,
+    buttonText: Colors.WHITE,
+    selected: Colors.GRAY_LIGHT,
+    selectedText: Colors.GREEN_DARK,
+  }
+
+  const effectivePlaceholderTextColor = placeholderTextColor || THEME.placeholder
+
   const [visible, setVisible] = useState(false)
   const [searchText, setSearchText] = useState('')
+  const spinValue = useMemo(() => new Animated.Value(0), [])
+
+  useEffect(() => {
+    if (loading) {
+      Animated.loop(
+        Animated.timing(spinValue, {
+          toValue: 1,
+          duration: 1500,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      ).start()
+    } else {
+      spinValue.setValue(0)
+    }
+  }, [loading, spinValue])
+
+  const spin = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  })
 
   const isMulti = mode === 'MULTI'
 
@@ -96,12 +126,12 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     return (
       <TouchableOpacity
         onPress={() => handleToggle(item)}
-        style={[
+        style={[  
           styles.itemContainer,
           isSelected && {
-            backgroundColor: THEME.selected,
+            backgroundColor: Colors.GRAY_LIGHT,
             borderLeftWidth: 3,
-            borderLeftColor: THEME.primary,
+            borderLeftColor: Colors.GREEN_DARK,
           },
         ]}
         activeOpacity={0.7}
@@ -118,7 +148,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               ]}
             >
               {isSelected && (
-                <Icon name="checkmark" size={16} color={Colors.white} />
+                <Icon name="checkmark" size={16} color={THEME.primary} />
               )}
             </View>
           ) : (
@@ -133,7 +163,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                   <View
                     style={[
                       styles.radioInner,
-                      { backgroundColor: Colors.green5 },
+                      { backgroundColor: THEME.primary },
                     ]}
                   />
                 )}
@@ -145,10 +175,10 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <Text
           style={[
             styles.itemLabel,
-            isSelected && { color: Colors.green1, fontWeight: '600' },
+             { color: THEME.selectedText, fontWeight: '600' },
           ]}
         >
-          {item.label}
+          {item.label.trim()}
         </Text>
 
         {isSelected && !isMulti && (
@@ -157,6 +187,153 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       </TouchableOpacity>
     )
   }
+
+  const styles = StyleSheet.create({
+    container: {
+      marginVertical: 8,
+      zIndex: 10,
+    },
+    selector: {
+      padding: 14,
+      borderWidth: 0.6,
+      borderRadius: 10,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    selectorText: {
+      flex: 1,
+      fontSize: 16,
+      marginRight: 10,
+    },
+    selectorIcons: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    badge: {
+      borderRadius: 10,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      marginRight: 8,
+    },
+    badgeText: {
+      color: THEME.buttonText,
+      fontSize: 12,
+      fontWeight: 'bold',
+    },
+    dropdown: {
+      borderWidth: 0.6,
+      borderRadius: 10,
+      marginTop: 8,
+      maxHeight: 350,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      flexGrow: 0,
+    },
+    list: {
+      flexGrow: 1,
+      flexShrink: 1,
+    },
+    searchContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+    },
+    searchIcon: {
+      marginRight: 8,
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 16,
+      paddingVertical: 8,
+    },
+    clearButton: {
+      padding: 4,
+      marginLeft: 8,
+    },
+
+    itemContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      borderBottomWidth: 1,
+      borderColor: THEME.divider
+    },
+    checkboxContainer: {
+      marginRight: 12,
+      borderColor: THEME.primary,
+    },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      borderWidth: 1,
+      borderColor: THEME.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioContainer: {
+      width: 22,
+      height: 22,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioOuter: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: THEME.primary,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioInner: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      borderColor: THEME.primary,
+      color: THEME.primary,
+    },
+    itemLabel: {
+      flex: 1,
+      fontSize: 16,
+      color: THEME.text,
+    },
+    emptyContainer: {
+      padding: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyText: {
+      marginTop: 8,
+      color: THEME.placeholder,
+      fontSize: 16,
+    },
+    footer: {
+      padding: 25,
+      paddingBottom: 20,
+    },
+    button: {
+      borderRadius: 8,
+      height: 48,
+    },
+    buttonLabel: {
+      color: THEME.buttonText,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    buttonIcon: {
+      marginRight: 8,
+      color: THEME.buttonText,
+    },
+    loadingIcon: {
+      marginBottom: 10,
+    },
+  })
 
   return (
     <View style={[styles.container, style]}>
@@ -178,7 +355,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           style={[
             styles.selectorText,
             {
-              color: selected.length ? THEME.text : THEME.placeholder,
+              color: 'black',
             },
           ]}
           numberOfLines={1}
@@ -187,7 +364,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         </Text>
 
         <View style={styles.selectorIcons}>
-          {selected.length > 0 && isMulti && (
+          {selected?.length > 0 && isMulti && (
             <View style={[styles.badge, { backgroundColor: THEME.primary }]}>
               <Text style={styles.badgeText}>{selected.length}</Text>
             </View>
@@ -231,10 +408,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 },
               ]}
               placeholder="Search..."
-              placeholderTextColor={THEME.placeholder}
+              placeholderTextColor={effectivePlaceholderTextColor}
               value={searchText}
               onChangeText={setSearchText}
-              autoFocus={true}
             />
             {searchText ? (
               <TouchableOpacity
@@ -256,12 +432,30 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             nestedScrollEnabled={true}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Icon
-                  name="search-outline"
-                  size={40}
-                  color={THEME.placeholder}
-                />
-                <Text style={styles.emptyText}>No options found</Text>
+                {loading ? (
+                  <>
+                    <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                      <Icon
+                        name="refresh-outline"
+                        size={40}
+                        color={THEME.primary}
+                        style={styles.loadingIcon}
+                      />
+                    </Animated.View>
+                    <Text style={[styles.emptyText, { color: THEME.primary }]}>
+                      Loading options...
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Icon
+                      name="search-outline"
+                      size={40}
+                      color={THEME.placeholder}
+                    />
+                    <Text style={styles.emptyText}>No options found</Text>
+                  </>
+                )}
               </View>
             }
           />
@@ -270,7 +464,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             <Button
               label="Done"
               onPress={() => setVisible(false)}
-              backgroundColor={Colors.green5}
+              backgroundColor={THEME.button}
               labelStyle={styles.buttonLabel}
               style={styles.button}
               iconSource={() => (
@@ -289,148 +483,11 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    marginVertical: 8,
-    zIndex: 10,
-  },
-  selector: {
-    padding: 14,
-    borderWidth: 0.6,
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  selectorText: {
-    flex: 1,
-    fontSize: 16,
-    marginRight: 10,
-  },
-  selectorIcons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  badge: {
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginRight: 8,
-  },
-  badgeText: {
-    color: THEME.buttonText,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  dropdown: {
-    borderWidth: 0.6,
-    borderRadius: 10,
-    marginTop: 8,
-    maxHeight: 350,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    flexGrow: 0,
-  },
-  list: {
-    flexGrow: 1,
-    flexShrink: 1,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-  },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    paddingVertical: 8,
-  },
-  clearButton: {
-    padding: 4,
-    marginLeft: 8,
-  },
-
-  itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderColor: THEME.divider,
-  },
-  checkboxContainer: {
-    marginRight: 12,
-    borderColor: Colors.green5,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: Colors.green5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioContainer: {
-    width: 22,
-    height: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioOuter: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: Colors.green5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    borderColor: Colors.green5,
-    color: Colors.green5,
-  },
-  itemLabel: {
-    flex: 1,
-    fontSize: 16,
-    color: THEME.text,
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyText: {
-    marginTop: 8,
-    color: THEME.placeholder,
-    fontSize: 16,
-  },
-  footer: {
-    padding: 25,
-    paddingBottom: 20,
-  },
-  button: {
-    borderRadius: 8,
-    height: 48,
-  },
-  buttonLabel: {
-    color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  buttonIcon: {
-    marginRight: 8,
-    color: Colors.white,
-  },
-})
+CustomSelect.defaultProps = {
+  placeholder: 'Select items...',
+  placeholderTextColor: undefined,
+  style: {},
+  loading: false,
+}
 
 export default CustomSelect
