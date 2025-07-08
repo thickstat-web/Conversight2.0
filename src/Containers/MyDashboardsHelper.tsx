@@ -284,7 +284,7 @@ export const DashboardFilters = ({
         const ojbKey2 = Object.keys(firstItem)[1]
         const values = response.data
           .map((item: any) => item[ojbKey2] || item[ojbKey])
-          .filter(value => value !== null && value !== undefined && value !== '')
+          .filter((value: any) => value !== null && value !== undefined && value !== '')
         setUniqueValues(values)
       } else {
         setUniqueValues([])
@@ -299,17 +299,77 @@ export const DashboardFilters = ({
   const handleFilterValueClick = (columnItem: ColumnItem) => {
     setUniqueValues([])
     setSelectedColumn(columnItem);
-    setSelectedValues([]);
-    setTextInputValue('');
-    // Don't reset operator value here to prevent flickering
-    setDateFilter('all');
-    setSelectedDateRange({ startDate: undefined, endDate: undefined });
+
+    const existingFilter = topMenuFilters.find(
+      f => f.columnId === columnItem.columnId
+    );
+
+    if (existingFilter) {
+      setOperatorValue(existingFilter.operator || '');
+      setSelectedValues(
+        Array.isArray(existingFilter.value)
+          ? existingFilter.value.map((v: any) => (typeof v === 'object' ? v.id : v))
+          : existingFilter.value ? [existingFilter.value] : []
+      );
+      setTextInputValue(
+        typeof existingFilter.value === 'string' ? existingFilter.value : ''
+      );
+      if (columnItem.category === 'dateFilter') {
+        if (existingFilter.value === 'between' && existingFilter.operator === 'between') {
+          setDateFilter('between');
+          const match = (existingFilter.value || '').match(/(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/);
+          if (match) {
+            setSelectedDateRange({
+              startDate: match[1],
+              endDate: match[2],
+            });
+          } else {
+            setSelectedDateRange({ startDate: undefined, endDate: undefined });
+          }
+        } else if (existingFilter.value) {
+          setDateFilter(existingFilter.value);
+          setSelectedDateRange({ startDate: undefined, endDate: undefined });
+        } else {
+          setDateFilter('all');
+          setSelectedDateRange({ startDate: undefined, endDate: undefined });
+        }
+      } else {
+        setDateFilter('all');
+        setSelectedDateRange({ startDate: undefined, endDate: undefined });
+      }
+    } else {
+      setOperatorValue('');
+      setSelectedValues([]);
+      setTextInputValue('');
+      setDateFilter('all');
+      setSelectedDateRange({ startDate: undefined, endDate: undefined });
+    }
+
     setShowPeriodPicker(false);
     if (columnItem.category !== 'dateFilter') {
       fetchUniqueValues(columnItem.columnName);
     }
     setModalVisible(true);
   }
+
+  const handleResetFilters = () => {
+    const resetFilters = topMenuFilters.map(filter => ({
+      ...filter,
+      value: '',
+      operator: '', 
+    }));
+
+    setTopMenuFilters(resetFilters);
+    setSelectedValues([]);
+    setTextInputValue('');
+    setDateFilter('all');
+    setSelectedDateRange({ startDate: undefined, endDate: undefined });
+    setOperatorValue('');
+    setSelectedColumn(null);
+    setModalVisible(false);
+    onFilterChange(resetFilters);
+    toggleFilterModal(resetFilters);
+  };
 
   const handleDone = () => {
     if (selectedColumn) {
@@ -319,7 +379,7 @@ export const DashboardFilters = ({
       const dateFilterFromMenu = topMenuFilters.find(f => f.category === 'dateFilter');
       const reportPeriodFromMenu = topMenuFilters.find(f => f.columnName === "Report Period")
 
-      const dimensionFilterFromMenu: DimensionFilter = topMenuFilters.find((f: any) =>
+      const dimensionFilterFromMenu = topMenuFilters.find((f: any) =>
         f.category === 'dimensions' &&
         f.columnId !== selectedColumn.columnId
       );
@@ -367,13 +427,12 @@ export const DashboardFilters = ({
           vocabulary: null
         });
       }
-      if (dimensionFilterFromMenu) {
-
+      if (dimensionFilterFromMenu && typeof dimensionFilterFromMenu.value === 'string') {
         const valueArray = dimensionFilterFromMenu.value
           ?.split(',')
-          .map((item: any) => item.trim())
+          .map((item: string) => item.trim())
           .filter(Boolean)
-          .map((value: any) => ({ id: value, name: value }))
+          .map((value: string) => ({ id: value, name: value }))
 
         retainFilters.push({
           category: 'dimensions',
@@ -450,7 +509,7 @@ export const DashboardFilters = ({
           operator: '',
           processedID: '',
           processedRequestID: '',
-          value: dateFilter === 'between' ? 'between' : dateFilter,
+          value: dateFilter === 'all dates' ? [] : (dateFilter === 'between' ? 'between' : dateFilter),
           vocabulary: null
         };
 
@@ -653,13 +712,26 @@ export const DashboardFilters = ({
           paddingH-16
           style={{ backgroundColor: Colors.WHITE, width: '100%' }}
         >
-          <FlatList
-            data={topMenuFilters}
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            keyExtractor={item => `${item.columnId}-${item.columnName}-${item.value}`}
-            renderItem={renderFilter}
-          />
+          <View style={styles.filterContainer}>
+            <View style={styles.filterListContainer}>
+              <FlatList
+                data={topMenuFilters}
+                showsHorizontalScrollIndicator={false}
+                horizontal
+                keyExtractor={item => `${item.columnId}-${item.columnName}-${item.value}`}
+                renderItem={renderFilter}
+              />
+            </View>
+            {topMenuFilters.length > 0 && (
+              <TouchableOpacity
+                style={styles.resetButton}
+                onPress={handleResetFilters}
+              >
+                <Icon name="refresh-outline" size={16} color={Colors.WHITE} />
+                <Text style={styles.resetButtonText}>Reset</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </View>
       <Modal visible={modalVisible} transparent animationType="slide">
@@ -887,7 +959,6 @@ export const DashboardFilters = ({
 }
 
 const styles = StyleSheet.create({
-
   icon: {
     marginHorizontal: 6,
     backgroundColor: Colors.GREEN_MAIN,
@@ -1137,5 +1208,29 @@ const styles = StyleSheet.create({
   selectedDateText: {
     fontSize: 16,
     color: Colors.DARK_TEXT,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  filterListContainer: {
+    flex: 1,
+  },
+  resetButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.GREEN_DARK,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginLeft: 8,
+  },
+  resetButtonText: {
+    color: Colors.WHITE,
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
   },
 })
