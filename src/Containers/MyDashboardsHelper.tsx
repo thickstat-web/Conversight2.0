@@ -807,7 +807,7 @@ export const DashboardFilters = ({
           operator: filter.operator === 'not equal to' ? '!=' : '=',
           processedID: filter.processedID,
           processedRequestID: '',
-          value: filter.value,
+          value: Array.isArray(filter.value) ? filter.value[0] : filter.value,
           vocabulary: getVocabulary(),
         };
       }
