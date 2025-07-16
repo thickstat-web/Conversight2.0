@@ -743,6 +743,31 @@ export const DashboardFilters = ({
           vocabulary: null,
         };
       }
+      if (filter.category === 'date') {
+        const [dateValueFrom, dateValueTo] = filter?.value?.split(" - ");
+        const dateValues = filter.operator === 'between' ? [{ dateValueFrom: dateValueFrom, dateValueTo: dateValueTo }] : [];
+
+        return {
+          category: filter.category,
+          data_set: filter.dataSetId,
+          dateValueFrom: '',
+          dateValues: dateValues,
+          dateValueTo: '',
+          globalFilter: {
+            enabled: false,
+            name: ""
+          },
+          id: filter.id || filter.columnId,
+          isDefault: false,
+          isDisable: false,
+          isSingleValue: false,
+          operator: filter.operator || '',
+          processedID: filter.processedID,
+          processedRequestID: '',
+          value: filter.operator === 'between' ? 'between' : filter.value,
+          vocabulary: getVocabulary(),
+        };
+      }
 
       if (filter.category === 'calculated dimension') {
         return {
@@ -791,14 +816,10 @@ export const DashboardFilters = ({
       }
       if (filter.category === 'dimensions') {
         // Always store value as array of strings for multi-select
-        let values: string[] = [];
+        let values: { id: string; name: string }[] = [];
         if (Array.isArray(filter.value)) {
-          values = filter.value.map((v: any) => typeof v === 'object' ? v.id || v.value || v.name : v);
-        } else if (typeof filter.value === 'string') {
-          // If the string contains commas, split, else treat as single value array
-          values = filter.value.includes(',') ? filter.value.split(',').map((v: string) => v.trim()) : [filter.value];
+          values = filter.value.map((v: any) => { return { id: v, name: v } });
         }
-
         return {
           category: filter.category,
           data_set: filter.dataSetId,
@@ -878,8 +899,8 @@ export const DashboardFilters = ({
             ellipsizeMode="tail"
           >
             {(filter.category === 'date' || filter.category === 'dateFilter') &&
-             typeof filter.value === 'string' &&
-             filter.value.startsWith('between ')
+              typeof filter.value === 'string' &&
+              filter.value.startsWith('between ')
               ? filter.value
               : `${filter.operator} ${formatValue(filter.value, filter.operator, filter.category)}`
             }
@@ -1010,12 +1031,12 @@ export const DashboardFilters = ({
                                 )}
                               />
                               <Button
-                              label="Cancel"
-                              onPress={() => {
-                              // Only close the modal, do not reset or change any date value
-                              setShowPeriodPicker(false);
-                              }}
-                              style={{ marginTop: 20, backgroundColor: Colors.GREEN_DARK }}
+                                label="Cancel"
+                                onPress={() => {
+                                  // Only close the modal, do not reset or change any date value
+                                  setShowPeriodPicker(false);
+                                }}
+                                style={{ marginTop: 20, backgroundColor: Colors.GREEN_DARK }}
                               />
                             </View>
                           </View>
@@ -1100,39 +1121,39 @@ export const DashboardFilters = ({
                             </View>
                             {/* Native Spinner Date Picker (no custom modal) */}
                             {nativePicker && (
-                            <DateTimePicker
-                            value={tempDate || new Date()}
-                            display="spinner"
-                            minimumDate={nativePicker === 'end' && selectedDateRange.startDate ? new Date(selectedDateRange.startDate) : undefined}
-                            maximumDate={nativePicker === 'start' && selectedDateRange.endDate ? new Date(selectedDateRange.endDate) : undefined}
-                            onChange={(event: DateTimePickerEvent, date?: Date) => {
-                            const pickerType = nativePicker; // Save current value
-                            setNativePicker(false);
-                            if (event.type === 'dismissed') return;
-                            if (!date) return;
-                            setTempDate(date); // Always update tempDate for UI feedback
-                            if (event.type === 'set') {
-                            const picked = dayjs(date).startOf('day');
-                            if (pickerType === 'start') {
-                            // Prevent same date as end
-                            if (selectedDateRange.endDate && picked.isSame(dayjs(selectedDateRange.endDate), 'day')) return;
-                            setSelectedDateRange(range => ({
-                            ...range,
-                            startDate: picked.toISOString(),
-                            // If endDate is before new startDate, reset endDate
-                            endDate: range.endDate && picked.isAfter(dayjs(range.endDate)) ? undefined : range.endDate,
-                            }));
-                            } else {
-                            // Prevent same date as start
-                            if (selectedDateRange.startDate && picked.isSame(dayjs(selectedDateRange.startDate), 'day')) return;
-                            setSelectedDateRange(range => ({
-                            ...range,
-                            endDate: picked.toISOString(),
-                            }));
-                            }
-                            }
-                            }}
-                            />
+                              <DateTimePicker
+                                value={tempDate || new Date()}
+                                display="spinner"
+                                minimumDate={nativePicker === 'end' && selectedDateRange.startDate ? new Date(selectedDateRange.startDate) : undefined}
+                                maximumDate={nativePicker === 'start' && selectedDateRange.endDate ? new Date(selectedDateRange.endDate) : undefined}
+                                onChange={(event: DateTimePickerEvent, date?: Date) => {
+                                  const pickerType = nativePicker; // Save current value
+                                  setNativePicker(false);
+                                  if (event.type === 'dismissed') return;
+                                  if (!date) return;
+                                  setTempDate(date); // Always update tempDate for UI feedback
+                                  if (event.type === 'set') {
+                                    const picked = dayjs(date).startOf('day');
+                                    if (pickerType === 'start') {
+                                      // Prevent same date as end
+                                      if (selectedDateRange.endDate && picked.isSame(dayjs(selectedDateRange.endDate), 'day')) return;
+                                      setSelectedDateRange(range => ({
+                                        ...range,
+                                        startDate: picked.toISOString(),
+                                        // If endDate is before new startDate, reset endDate
+                                        endDate: range.endDate && picked.isAfter(dayjs(range.endDate)) ? undefined : range.endDate,
+                                      }));
+                                    } else {
+                                      // Prevent same date as start
+                                      if (selectedDateRange.startDate && picked.isSame(dayjs(selectedDateRange.startDate), 'day')) return;
+                                      setSelectedDateRange(range => ({
+                                        ...range,
+                                        endDate: picked.toISOString(),
+                                      }));
+                                    }
+                                  }
+                                }}
+                              />
                             )}
                           </View>
                         )}
@@ -1182,17 +1203,17 @@ export const DashboardFilters = ({
                             </View>
                           )}
                           <CustomSelect
-                             mode={selectedColumn?.category === 'flag' ? 'SINGLE' : (multiSelect ? 'MULTI' : 'SINGLE')}
-                             options={Array.from(new Set([
-                               ...ensureArrayOfStrings(selectedValues),
-                               ...uniqueValues,
-                             ])).map(v => ({ label: v, value: v }))}
-                             value={ensureArrayOfStrings(selectedValues)}
-                             onChange={setSelectedValues}
-                             placeholder="Select value(s)"
-                             loading={loading}
-                             showSearch={selectedColumn?.category !== 'flag'}
-                           />
+                            mode={selectedColumn?.category === 'flag' ? 'SINGLE' : (multiSelect ? 'MULTI' : 'SINGLE')}
+                            options={Array.from(new Set([
+                              ...ensureArrayOfStrings(selectedValues),
+                              ...uniqueValues,
+                            ])).map(v => ({ label: v, value: v }))}
+                            value={ensureArrayOfStrings(selectedValues)}
+                            onChange={setSelectedValues}
+                            placeholder="Select value(s)"
+                            loading={loading}
+                            showSearch={selectedColumn?.category !== 'flag'}
+                          />
                         </>
                       ) : (
                         <View style={styles.textInputContainer}>
