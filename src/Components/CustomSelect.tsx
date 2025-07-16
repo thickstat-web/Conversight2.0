@@ -27,6 +27,7 @@ interface CustomSelectProps {
   placeholderTextColor?: string
   style?: any
   loading?: boolean
+  showSearch?: boolean
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -38,6 +39,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   placeholderTextColor,
   style,
   loading,
+  showSearch = true,
 }) => {
   const { Colors } = useTheme()
 
@@ -116,7 +118,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       .map(opt => opt.label)
 
     return isMulti
-      ? `${selectedLabels.length} selected`
+      ? `${selected?.length} selected`
       : selectedLabels[0] || placeholder
   }, [selected, options, placeholder, isMulti])
 
@@ -178,7 +180,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
              { color: THEME.selectedText, fontWeight: '600' },
           ]}
         >
-          {item.label.trim()}
+          {item?.label?.trim()}
         </Text>
 
         {isSelected && !isMulti && (
@@ -388,39 +390,41 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             },
           ]}
         >
-          <View
-            style={[
-              styles.searchContainer,
-              { borderBottomColor: THEME.divider },
-            ]}
-          >
-            <Icon
-              name="search"
-              size={18}
-              color={THEME.placeholder}
-              style={styles.searchIcon}
-            />
-            <TextInput
+          {showSearch && (
+            <View
               style={[
-                styles.searchInput,
-                {
-                  color: THEME.text,
-                },
+                styles.searchContainer,
+                { borderBottomColor: THEME.divider },
               ]}
-              placeholder="Search..."
-              placeholderTextColor={effectivePlaceholderTextColor}
-              value={searchText}
-              onChangeText={setSearchText}
-            />
-            {searchText ? (
-              <TouchableOpacity
-                onPress={() => setSearchText('')}
-                style={styles.clearButton}
-              >
-                <Icon name="close-circle" size={18} color={THEME.placeholder} />
-              </TouchableOpacity>
-            ) : null}
-          </View>
+            >
+              <Icon
+                name="search"
+                size={18}
+                color={THEME.placeholder}
+                style={styles.searchIcon}
+              />
+              <TextInput
+                style={[
+                  styles.searchInput,
+                  {
+                    color: THEME.text,
+                  },
+                ]}
+                placeholder="Search..."
+                placeholderTextColor={effectivePlaceholderTextColor}
+                value={searchText}
+                onChangeText={setSearchText}
+              />
+              {searchText ? (
+                <TouchableOpacity
+                  onPress={() => setSearchText('')}
+                  style={styles.clearButton}
+                >
+                  <Icon name="close-circle" size={18} color={THEME.placeholder} />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          )}
 
           <FlatList
             data={filteredOptions}
