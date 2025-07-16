@@ -4,35 +4,85 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Modal,
   Switch,
   TextInput,
   Platform,
+  KeyboardAvoidingView,
+  Keyboard,
+  ScrollView,
 } from 'react-native'
 import { View, Checkbox, Button } from 'react-native-ui-lib'
-import DateTimePicker, { DateType, useDefaultStyles } from 'react-native-ui-datepicker'
-import Icon from 'react-native-vector-icons/Ionicons'
-import { useTheme } from '@/Hooks'
-import { DateValue, Filter, FilterValue } from '@/Types/Pinboard'
-import { properCase } from '@/Utils/common'
-import { Colors } from '@/Theme/Variables'
-import { LayoutNoInternet } from '@/Components'
-import { useNetInfo } from '@react-native-community/netinfo'
-import { useConverseResponseMutation } from '@/Services/modules/ingress'
-import CustomSelect from '@/Components/CustomSelect'
-import { getLocalStore } from '@/Utils/asyncStorage'
-import dayjs from 'dayjs'
-// Community DateTimePicker already imported above
-import { reportPeriodsValues } from '@/Constants/reportPeriodsValues'
+import dayjs, { Dayjs } from 'dayjs';
+import { properCase } from '@/Utils/common';
+import { reportPeriodsValues } from '@/Constants/reportPeriodsValues';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '@/Hooks';
+import { DateValue, Filter, FilterValue } from '@/Types/Pinboard';
+import { Colors } from '@/Theme/Variables';
+import { LayoutNoInternet } from '@/Components';
+import { useNetInfo } from '@react-native-community/netinfo';
+import { useConverseResponseMutation } from '@/Services/modules/ingress';
+import CustomSelect from '@/Components/CustomSelect';
+import { getLocalStore } from '@/Utils/asyncStorage';
+import { name, sortBy } from 'lodash';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
-export type DasboardFilter = {
-  type: string
-  columnId: string
-  columnName: string
-  operator: string
-  value: string
-  dataSetId?: string
-  category: string
+type DateType = string | Date | Dayjs | null | undefined;
+
+// Utility: normalize dimensions to always be arrays
+const normalizeDimensionFilters = (filters: DasboardFilter[]) => {
+  return filters.map(f => {
+    if (f.category === 'dimensions') {
+      if (Array.isArray(f.value)) {
+        return f;
+      } else if (typeof f.value === 'string') {
+        return {
+          ...f,
+          value: f.value.includes(',') ? f.value.split(',').map(v => v.trim()) : [f.value],
+        };
+      }
+    }
+    return f;
+  });
+};
+
+// Utility: ensure selected values are always an array of individual strings
+const ensureArrayOfStrings = (values: string[] | string): string[] => {
+  if (Array.isArray(values)) {
+    if (values.length === 1 && typeof values[0] === 'string' && values[0].includes(',')) {
+      return values[0]
+        .split(',')
+        .map(v => v.trim())
+        .filter(v => v.length > 0);
+    }
+    return values.map(v => (typeof v === 'string' ? v.trim() : v)).filter(v => typeof v === 'string' && v.length > 0);
+  } else if (typeof values === 'string') {
+    return values
+      .split(',')
+      .map(v => v.trim())
+      .filter(v => v.length > 0);
+  }
+  return [];
+};
+
+interface DasboardFilter {
+  type: string;
+  columnId: string;
+  columnName: string;
+  operator: string;
+  value: string | string[];
+  dataSetId?: string;
+  category: string;
+  id?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  dateValues?: any;
+  processedID: string;
+  processedRequestID?: string;
+  vocabulary?: string[] | null | string;
 }
 
 const dateValueMapper = (value: DateValue) =>
@@ -48,14 +98,17 @@ function buildFilterValues(value: string | FilterValue[]): string {
     : value
 }
 const filterMapper = (filter: Filter) => {
+
   let generatedFilter: DasboardFilter | null = null
   if (filter.category === 'dateFilter') {
-    const { value, dateFrom, dateTo } = filter
+    const { value, dateFrom, dateTo, resolvedColumn } = filter
     generatedFilter = {
       type: 'globalDateFilter',
       columnId: '',
       columnName: 'Report Period',
       operator: value !== 'between' ? 'is' : '',
+      processedID: resolvedColumn,
+      processedRequestID: '',
       value:
         value === 'between'
           ? `between ${dateFrom} - ${dateTo}`
@@ -73,6 +126,7 @@ const filterMapper = (filter: Filter) => {
       columnId: column,
       columnName: resolvedColumn,
       operator: dateValues && dateValues.length > 0 ? 'between' : operator,
+      processedID: resolvedColumn,
       value:
         dateValues && dateValues.length > 0
           ? dateValues.map(dateValueMapper).join(' AND ')
@@ -87,6 +141,7 @@ const filterMapper = (filter: Filter) => {
       columnId: column,
       columnName: resolvedColumn,
       operator: operator === '' ? 'is' : operator,
+      processedID: resolvedColumn,
       value: buildFilterValues(value),
       dataSetId: filter.datasetId || '',
       category: filter.category,
@@ -98,11 +153,25 @@ const filterMapper = (filter: Filter) => {
       columnId: column,
       columnName: resolvedColumn,
       operator: operator === '' ? 'is' : operator,
+      processedID: resolvedColumn,
+      value: buildFilterValues(value),
+      dataSetId: filter.datasetId || '',
+      category: filter.category,
+    }
+  } else if (filter.category === 'flag') {
+    const { category, column, resolvedColumn, operator, value } = filter
+    generatedFilter = {
+      type: category,
+      columnId: column,
+      columnName: resolvedColumn,
+      operator: operator === '' ? 'is' : operator,
+      processedID: resolvedColumn,
       value: buildFilterValues(value),
       dataSetId: filter.datasetId || '',
       category: filter.category,
     }
   }
+
   return generatedFilter
 }
 
@@ -128,6 +197,8 @@ type ColumnItem = {
   dataSetId?: string
   dateFrom?: string
   dateTo?: string
+  vocabulary?: string
+  processedID?: string
 }
 
 export interface DimensionFilter {
@@ -164,6 +235,22 @@ export const DashboardFilters = ({
   data,
   onFilterChange,
 }: DashboardFiltersProps) => {
+  // Normalize dimension filter values to always be arrays
+  const normalizedFilters = filters.map(f => {
+    if (f.category === 'dimensions') {
+      if (Array.isArray(f.value)) {
+        return f;
+      } else if (typeof f.value === 'string') {
+        // If the string contains commas, split, else treat as single value array
+        return {
+          ...f,
+          value: f.value.includes(',') ? f.value.split(',').map(v => v.trim()) : [f.value],
+        };
+      }
+    }
+    return f;
+  });
+
   const { Fonts } = useTheme()
   const [uniqueValues, setUniqueValues] = useState<string[]>([])
   const [selectedColumn, setSelectedColumn] = useState<ColumnItem | null>(null)
@@ -173,24 +260,41 @@ export const DashboardFilters = ({
   const [operatorValue, setOperatorValue] = useState('')
   const [multiSelect, setMultiSelect] = useState(true)
   const [selectedValues, setSelectedValues] = useState<string[]>([])
+  const [pendingSelectedValues, setPendingSelectedValues] = useState<string[] | null>(null);
   const [operators, setOperators] = useState<any>({})
   const [dateFilter, setDateFilter] = useState('all')
-  const [selectedDateRange, setSelectedDateRange] = useState<{ startDate: DateType, endDate: DateType }>({ startDate: selectedColumn?.dateFrom, endDate: selectedColumn?.dateTo })
-  const [showPeriodPicker, setShowPeriodPicker] = useState(false)
-  const [topMenuFilters, setTopMenuFilters] = useState<DasboardFilter[]>(filters)
+  const [selectedDateRange, setSelectedDateRange] = useState<{ startDate: string | undefined, endDate: string | undefined }>({
+    startDate: selectedColumn?.dateFrom ? String(selectedColumn.dateFrom) : undefined,
+    endDate: selectedColumn?.dateTo ? String(selectedColumn.dateTo) : undefined
+  })
+  const [showPeriodPicker, setShowPeriodPicker] = useState<false | 'start' | 'end'>(false)
+  const [topMenuFilters, setTopMenuFilters] = useState<DasboardFilter[]>(normalizedFilters)
   const [textInputValue, setTextInputValue] = useState('')
   const inputValueRef = useRef<string | null>(null);
+  // Add state for native picker
+  const [nativePicker, setNativePicker] = useState<false | 'start' | 'end'>(false);
+  const [tempDate, setTempDate] = useState<Date | undefined>(undefined);
+
+  console.log('selected column is ', selectedColumn)
 
   useEffect(() => {
     setLoading(true)
     const loadConfig = async () => {
       const configData = (await getLocalStore('conversight.dataset.config')) || {}
-      console.log('config data is ',configData)
+      console.log('config data is ', configData)
       setOperators(configData?.operators)
       setLoading(false)
     }
     loadConfig()
   }, [])
+
+  // Synchronize selectedValues with pendingSelectedValues (no filtering)
+  useEffect(() => {
+    if (pendingSelectedValues) {
+      setSelectedValues(pendingSelectedValues);
+      setPendingSelectedValues(null);
+    }
+  }, [pendingSelectedValues]);
 
   // Set initial operator when selectedColumn changes
   useEffect(() => {
@@ -297,6 +401,7 @@ export const DashboardFilters = ({
   }
 
   const handleFilterValueClick = (columnItem: ColumnItem) => {
+    console.log('column item is ', columnItem)
     setUniqueValues([])
     setSelectedColumn(columnItem);
 
@@ -306,28 +411,60 @@ export const DashboardFilters = ({
 
     if (existingFilter) {
       setOperatorValue(existingFilter.operator || '');
-      setSelectedValues(
-        Array.isArray(existingFilter.value)
-          ? existingFilter.value.map((v: any) => (typeof v === 'object' ? v.id : v))
-          : existingFilter.value ? [existingFilter.value] : []
-      );
-      setTextInputValue(
-        typeof existingFilter.value === 'string' ? existingFilter.value : ''
-      );
-      if (columnItem.category === 'dateFilter') {
-        if (existingFilter.value === 'between' && existingFilter.operator === 'between') {
+      // Always normalize to array for dimensions and multi-select
+      let normalizedValues: string[] = [];
+      if (selectedColumn && selectedColumn.category === 'dimensions') {
+        if (Array.isArray(existingFilter.value)) {
+          normalizedValues = existingFilter.value.map((v: any) => typeof v === 'object' ? v.id || v.value || v.name : v);
+        } else if (typeof existingFilter.value === 'string') {
+          // If the string contains commas, split, else treat as single value
+          normalizedValues = existingFilter.value.includes(',') ? existingFilter.value.split(',').map((v: string) => v.trim()) : [existingFilter.value];
+        }
+      } else {
+        if (Array.isArray(existingFilter.value)) {
+          normalizedValues = existingFilter.value.map((v: any) => typeof v === 'object' ? v.id || v.value || v.name : v);
+        } else if (typeof existingFilter.value === 'string' && existingFilter.value.includes(',')) {
+          normalizedValues = existingFilter.value.split(',').map(v => v.trim());
+        } else if (existingFilter.value) {
+          normalizedValues = [typeof existingFilter.value === 'object' ? existingFilter.value.id || existingFilter.value.value || existingFilter.value.name : existingFilter.value];
+        }
+      }
+      // Always ensure array for multi-select
+      if (multiSelect && normalizedValues.length === 1 && normalizedValues[0].includes(',')) {
+        normalizedValues = normalizedValues[0].split(',').map((v: string) => v.trim());
+      }
+      setPendingSelectedValues(normalizedValues);
+      const textValue = normalizedValues.join(', ');
+      setTextInputValue(textValue);
+      // --- Retain date range for both dateFilter and date ---
+      if (columnItem.category === 'dateFilter' || columnItem.category === 'date') {
+        // Try to get from dateFrom/dateTo first
+        if (existingFilter.dateFrom && existingFilter.dateTo) {
           setDateFilter('between');
+          setSelectedDateRange({
+            startDate: existingFilter.dateFrom,
+            endDate: existingFilter.dateTo,
+          });
+        } else if (existingFilter.value === 'between' && existingFilter.operator === 'between') {
+          // Fallback: parse from value string if present
           const match = (existingFilter.value || '').match(/(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/);
           if (match) {
+            setDateFilter('between');
             setSelectedDateRange({
               startDate: match[1],
               endDate: match[2],
             });
           } else {
+            setDateFilter('between');
             setSelectedDateRange({ startDate: undefined, endDate: undefined });
           }
         } else if (existingFilter.value) {
-          setDateFilter(existingFilter.value);
+          // Try to map display text back to value if needed
+          let filterValue = Array.isArray(existingFilter.value)
+            ? existingFilter.value[0]
+            : existingFilter.value;
+          const matchedPeriod = reportPeriodsValues.find(p => p.text === filterValue || p.value === filterValue);
+          setDateFilter(matchedPeriod ? matchedPeriod.value : String(filterValue || 'all'));
           setSelectedDateRange({ startDate: undefined, endDate: undefined });
         } else {
           setDateFilter('all');
@@ -353,333 +490,375 @@ export const DashboardFilters = ({
   }
 
   const handleResetFilters = () => {
-    const resetFilters = topMenuFilters.map(filter => ({
-      ...filter,
-      value: '',
-      operator: '', 
-    }));
-
-    setTopMenuFilters(resetFilters);
-    setSelectedValues([]);
-    setTextInputValue('');
-    setDateFilter('all');
-    setSelectedDateRange({ startDate: undefined, endDate: undefined });
-    setOperatorValue('');
-    setSelectedColumn(null);
-    setModalVisible(false);
-    onFilterChange(resetFilters);
-    toggleFilterModal(resetFilters);
+    setTopMenuFilters(normalizeDimensionFilters(filters));
   };
 
   const handleDone = () => {
-    if (selectedColumn) {
-      if (['like', 'not like'].includes(operatorValue) && textInputValue) {
-        setSelectedValues([textInputValue]);
+    if (!selectedColumn) return;
+
+
+    console.log('top menu filters is ', topMenuFilters)
+
+    console.log('selected column is ', selectedColumn)
+
+    // Get the value based on the input type
+
+    let filterValue: string | string[] = '';
+    if (multiSelect) {
+      // Always send as array for multi-select, even if only one selected
+      filterValue = Array.isArray(selectedValues) ? selectedValues.filter(v => v !== undefined && v !== null && v !== '') : [];
+    } else if (selectedValues.length === 1) {
+      filterValue = selectedValues[0];
+    } else if (textInputValue) {
+      filterValue = textInputValue;
+    }
+
+
+    // Debug the dateFilter value
+    console.log('Current dateFilter value:', dateFilter);
+
+    // Get the selected period text
+    const selectedPeriod = reportPeriodsValues.find(p => p.value === dateFilter);
+    const displayValue = selectedPeriod ? selectedPeriod.text : 'All Dates';
+
+    // Format custom date range string
+    const customDateRangeString = (start: string | undefined, end: string | undefined) => {
+      if (start && end) {
+        return `${dayjs(start).format('MM/DD/YYYY')} - ${dayjs(end).format('MM/DD/YYYY')}`;
       }
-      const dateFilterFromMenu = topMenuFilters.find(f => f.category === 'dateFilter');
-      const reportPeriodFromMenu = topMenuFilters.find(f => f.columnName === "Report Period")
+      return '';
+    };
 
-      const dimensionFilterFromMenu = topMenuFilters.find((f: any) =>
-        f.category === 'dimensions' &&
-        f.columnId !== selectedColumn.columnId
-      );
-
-      console.log('dimensionFilterFromMenu is ', dimensionFilterFromMenu)
-
-      const dateRangeMatch = dateFilterFromMenu?.value?.match(/(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/);
-      let retainFilters: any[] = [];
-
-      // Add date filter if it exists in the data
-      if (dateRangeMatch) {
-        retainFilters.push({
-          category: 'dateFilter',
-          data_set: '',
-          dateValueFrom: dateRangeMatch[1],
-          dateValueTo: dateRangeMatch[2],
-          dateValues: null,
-          globalFilter: null,
-          id: '',
-          isDefault: true,
-          isDisable: false,
-          isSingleValue: false,
-          operator: '',
-          processedID: '',
-          processedRequestID: '',
-          value: [],
-          vocabulary: null
-        });
-      } else if (reportPeriodFromMenu?.value) {
-        retainFilters.push({
-          category: "dateFilter",
-          data_set: "",
-          dateValueFrom: "",
-          dateValues: null,
-          dateValueTo: "",
-          globalFilter: null,
-          id: "",
-          isDefault: true,
-          isDisable: false,
-          isSingleValue: false,
-          operator: "",
-          processedID: "",
-          processedRequestID: "",
-          value: reportPeriodFromMenu.value,
-          vocabulary: null
-        });
-      }
-      if (dimensionFilterFromMenu && typeof dimensionFilterFromMenu.value === 'string') {
-        const valueArray = dimensionFilterFromMenu.value
-          ?.split(',')
-          .map((item: string) => item.trim())
-          .filter(Boolean)
-          .map((value: string) => ({ id: value, name: value }))
-
-        retainFilters.push({
-          category: 'dimensions',
-          data_set: dimensionFilterFromMenu.dataSetId,
-          dateValueFrom: "",
-          dateValues: null,
-          dateValueTo: "",
-          globalFilter: {
-            enabled: false,
-            name: ""
-          },
-          id: dimensionFilterFromMenu.columnId,
-          isDefault: false,
-          isDisable: false,
-          isSingleValue: false,
-          operator: dimensionFilterFromMenu.operator,
-          processedID: dimensionFilterFromMenu.columnName,
-          processedRequestID: '',
-          value: valueArray,
-          vocabulary: [dimensionFilterFromMenu.columnId]
-        });
-      }
-
-      const addedFilterIds = new Set();
-
-      data.forEach((item: any) => {
-        if (item.category !== 'dateFilter' &&
-          item.id !== selectedColumn.columnId &&
-          item.category === 'dimensions' &&
-          !addedFilterIds.has(item.id)) {
-          addedFilterIds.add(item.id);
-
-          retainFilters.push({
-            category: item.category,
-            data_set: item.data_set || '',
-            dateValueFrom: '',
-            dateValues: null,
-            dateValueTo: '',
-            globalFilter: {
-              enabled: false,
-              name: ""
-            },
-            id: item.id || '',
-            isDefault: false,
-            isDisable: false,
-            isSingleValue: false,
-            operator: item.operator || 'is',
-            processedID: `${item.data_set ? `${item.data_set.split('-')[0]}_Data.` : ''}${item.columnName}`,
-            processedRequestID: '',
-            value: item.value || [],
-            vocabulary: item.vocabulary || [item.id]
-          });
-        }
-      });
-
-      // Create new filter item based on selected column type
-      let innerItem: any;
-
-      if (selectedColumn.category === 'dateFilter') {
-        // Create date filter with exact expected structure
-        innerItem = {
-          category: 'dateFilter',
-          data_set: '',
-          dateValueFrom: dateFilter === 'between' && selectedDateRange.startDate ?
-            dayjs(selectedDateRange.startDate).format('MM/DD/YYYY') : '',
-          dateValues: null,
-          dateValueTo: dateFilter === 'between' && selectedDateRange.endDate ?
-            dayjs(selectedDateRange.endDate).format('MM/DD/YYYY') : '',
-          globalFilter: null,
-          id: '',
-          isDefault: true,
-          isDisable: false,
-          isSingleValue: false,
-          operator: '',
-          processedID: '',
-          processedRequestID: '',
-          value: dateFilter === 'all dates' ? [] : (dateFilter === 'between' ? 'between' : dateFilter),
-          vocabulary: null
-        };
-
-        // Update the first item in retainFilters (the dateFilter)
-        if (retainFilters.length > 0 && retainFilters[0].category === 'dateFilter') {
-          retainFilters[0] = innerItem;
-        } else {
-          // If somehow the dateFilter is not first, add this as a new filter
-          retainFilters.push(innerItem);
-        }
-      } else if (selectedColumn.category === 'dimensions') {
-        // Create dimensions filter with exact expected structure
-        innerItem = {
-          category: 'dimensions',
-          data_set: selectedColumn.dataSetId || '',
-          dateValueFrom: '',
-          dateValues: null,
-          dateValueTo: '',
-          globalFilter: {
-            enabled: false,
-            name: ""
-          },
-          id: selectedColumn.columnId || '',
-          isDefault: false,
-          isDisable: false,
-          isSingleValue: false,
-          operator: operatorValue || 'is',
-          processedID: selectedColumn.columnName || '',
-          processedRequestID: '',
-          value: selectedValues.map(value => ({
-            id: value,
-            name: value
-          })),
-          vocabulary: [selectedColumn.columnId]
-        };
-        retainFilters.push(innerItem);
-      } else {
-        // For other filter types
-        innerItem = {
-          category: selectedColumn.category,
-          data_set: selectedColumn.dataSetId || '',
-          dateValueFrom: '',
-          dateValues: null,
-          dateValueTo: '',
-          globalFilter: {
-            enabled: false,
-            name: ""
-          },
-          id: selectedColumn.columnId || '',
-          isDefault: false,
-          isDisable: false,
-          isSingleValue: !multiSelect,
-          operator: operatorValue || 'is',
-          processedID: selectedColumn.columnId || '',
-          processedRequestID: '',
-          value: [],
-          vocabulary: null,
-        };
-        retainFilters.push(innerItem);
-      }
-
-      // For other filter categories that need special handling
-      if (selectedColumn.category === 'date') {
-        if (operatorValue === 'between') {
-          innerItem.value = selectedValues;
-        } else {
-          innerItem.value = selectedValues[0];
-        }
-      } else if (selectedColumn.category === 'flag') {
-        innerItem.value = selectedValues;
-      }
-
-      // Filter out dimension filters with 'all' value
-      retainFilters = retainFilters.filter(filter => {
-        if (filter.category === 'dimensions' && filter.value && Array.isArray(filter.value)) {
-          return !filter.value.some((v: any) => v.id === 'all' || v.name === 'all');
-        }
-        return true;
-      });
-
-      // No need to push innerItem again as it was already added above
-
-      const newTopMenuFilters: DasboardFilter[] = [...topMenuFilters];
-      const dateFilterIndex = newTopMenuFilters.findIndex(f => f.category === 'dateFilter');
-
-      // Preserve existing dimension filters when selecting date filter
-      const existingDimensionFilters = topMenuFilters.filter(f => f.category === 'dimensions');
-
-      // Handle the date filter based on the current selection
-      if (selectedColumn.category === 'dateFilter') {
-        if (dateFilter === 'all') {
-          // If 'All Dates' is selected, remove the date filter if it exists
-          if (dateFilterIndex >= 0) {
-            newTopMenuFilters.splice(dateFilterIndex, 1);
-          }
-          // Keep existing dimension filters
-          onFilterChange?.([...existingDimensionFilters, ...retainFilters]);
-          return;
-        } else {
-          // If a specific date filter (predefined or custom) is selected, update or add it
-          const newDateFilter = {
-            category: 'dateFilter',
-            columnId: '',
-            columnName: 'Report Period',
-            dataSetId: '',
-            operator: dateFilter === 'between' ? 'between' : '',
-            type: 'globalDateFilter',
-            value: dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate
-              ? `${dayjs(selectedDateRange.startDate).format('MM/DD/YYYY')} - ${dayjs(selectedDateRange.endDate).format('MM/DD/YYYY')}`
-              : dateFilter
-          };
-
-          // Update or add the date filter while preserving dimension filters
-          if (dateFilterIndex >= 0) {
-            newTopMenuFilters[dateFilterIndex] = newDateFilter;
-          } else {
-            newTopMenuFilters.unshift(newDateFilter);
-          }
-
-          // Combine existing dimension filters with the new date filter
-          onFilterChange?.([...existingDimensionFilters, ...newTopMenuFilters]);
-          // setModalVisible(false);
-
-        }
-      } else { // Handle other column filters
-        // Update or add the selected column filter
-        const columnFilterIndex = newTopMenuFilters.findIndex(f => f.columnId === selectedColumn.columnId);
-        const newColumnFilter = {
+    // Create a new filter object based on the selected column and values
+    let newFilter: DasboardFilter;
+    if (selectedColumn.category === 'date') {
+      // Handle period or custom range for date filter
+      if (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate) {
+        newFilter = {
           category: selectedColumn.category,
           columnId: selectedColumn.columnId,
           columnName: selectedColumn.columnName,
-          dataSetId: selectedColumn.dataSetId || '',
-          operator: operatorValue || 'is',
-          type: selectedColumn.category,
-          value: Array.isArray(innerItem.value)
-            ? innerItem.value.map((v: any) => v.name || v).join(', ')
-            : innerItem.value
+          dataSetId: selectedColumn.dataSetId,
+          operator: 'between',
+          type: selectedColumn.type,
+          value: `between ${customDateRangeString(selectedDateRange.startDate, selectedDateRange.endDate)}`,
+          id: selectedColumn.columnId || Date.now().toString(),
+          dateFrom: selectedDateRange.startDate,
+          dateTo: selectedDateRange.endDate,
+          dateValues: [{ dateValueFrom: dayjs(selectedDateRange.startDate).format('MM/DD/YYYY'), dateValueTo: dayjs(selectedDateRange.endDate).format('MM/DD/YYYY') }],
+          processedID: selectedColumn.processedID || '',
+          processedRequestID: '',
+          vocabulary: selectedColumn.vocabulary || '',
         };
-
-        if (columnFilterIndex >= 0) {
-          newTopMenuFilters[columnFilterIndex] = newColumnFilter;
+      } else if (dateFilter !== 'all') {
+        // Period selected
+        const selectedPeriod = reportPeriodsValues.find(p => p.value === dateFilter);
+        newFilter = {
+          category: selectedColumn.category,
+          columnId: selectedColumn.columnId,
+          columnName: selectedColumn.columnName,
+          dataSetId: selectedColumn.dataSetId,
+          operator: 'is',
+          type: selectedColumn.type,
+          value: selectedPeriod ? selectedPeriod.text : dateFilter,
+          id: selectedColumn.columnId || Date.now().toString(),
+          dateFrom: undefined,
+          dateTo: undefined,
+          dateValues: undefined,
+          processedID: selectedColumn.processedID || '',
+          processedRequestID: '',
+          vocabulary: selectedColumn.vocabulary || '',
+        };
+      } else {
+        // No period or range selected
+        newFilter = {
+          category: selectedColumn.category,
+          columnId: selectedColumn.columnId,
+          columnName: selectedColumn.columnName,
+          dataSetId: selectedColumn.dataSetId,
+          operator: 'is',
+          type: selectedColumn.type,
+          value: 'All Dates',
+          id: selectedColumn.columnId || Date.now().toString(),
+          dateFrom: undefined,
+          dateTo: undefined,
+          dateValues: undefined,
+          processedID: selectedColumn.processedID || '',
+          processedRequestID: '',
+          vocabulary: selectedColumn.vocabulary || '',
+        };
+      }
+    } else if (selectedColumn.category === 'dateFilter') {
+      // For report period settings
+      if (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate) {
+        newFilter = {
+          category: selectedColumn.category,
+          columnId: selectedColumn.columnId,
+          columnName: selectedColumn.columnName,
+          dataSetId: selectedColumn.dataSetId,
+          operator: 'between',
+          type: 'globalDateFilter',
+          value: `between ${customDateRangeString(selectedDateRange.startDate, selectedDateRange.endDate)}`,
+          id: selectedColumn.columnId || Date.now().toString(),
+          dateFrom: selectedDateRange.startDate,
+          dateTo: selectedDateRange.endDate,
+          dateValues: [{ dateValueFrom: dayjs(selectedDateRange.startDate).format('MM/DD/YYYY'), dateValueTo: dayjs(selectedDateRange.endDate).format('MM/DD/YYYY') }],
+          processedID: selectedColumn.processedID || '',
+          processedRequestID: '',
+          vocabulary: selectedColumn.vocabulary || '',
+        };
+      } else if (dateFilter !== 'all') {
+        const selectedPeriod = reportPeriodsValues.find(p => p.value === dateFilter);
+        newFilter = {
+          category: selectedColumn.category,
+          columnId: selectedColumn.columnId,
+          columnName: selectedColumn.columnName,
+          dataSetId: selectedColumn.dataSetId,
+          operator: 'is',
+          type: 'globalDateFilter',
+          value: selectedPeriod ? selectedPeriod.text : dateFilter,
+          id: selectedColumn.columnId || Date.now().toString(),
+          dateFrom: undefined,
+          dateTo: undefined,
+          dateValues: undefined,
+          processedID: selectedColumn.processedID || '',
+          processedRequestID: '',
+          vocabulary: selectedColumn.vocabulary || '',
+        };
+      } else {
+        newFilter = {
+          category: selectedColumn.category,
+          columnId: selectedColumn.columnId,
+          columnName: selectedColumn.columnName,
+          dataSetId: selectedColumn.dataSetId,
+          operator: 'is',
+          type: 'globalDateFilter',
+          value: 'All Dates',
+          id: selectedColumn.columnId || Date.now().toString(),
+          dateFrom: undefined,
+          dateTo: undefined,
+          dateValues: undefined,
+          processedID: selectedColumn.processedID || '',
+          processedRequestID: '',
+          vocabulary: selectedColumn.vocabulary || '',
+        };
+      }
+    } else {
+      // Always store value as array for dimensions
+      let valueToStore = filterValue;
+      if (selectedColumn.category === 'dimensions') {
+        if (Array.isArray(filterValue)) {
+          valueToStore = filterValue;
+        } else if (typeof filterValue === 'string') {
+          // If the string contains commas, split, else treat as single value array
+          valueToStore = filterValue.includes(',') ? filterValue.split(',').map((v: string) => v.trim()) : [filterValue];
         } else {
-          newTopMenuFilters.push(newColumnFilter);
+          valueToStore = [];
         }
       }
-
-      setTopMenuFilters(newTopMenuFilters);
-      onFilterChange({
-        column: selectedColumn,
-        value: selectedValues,
+      newFilter = {
+        category: selectedColumn.category,
+        columnId: selectedColumn.columnId,
+        columnName: selectedColumn.columnName,
+        dataSetId: selectedColumn.dataSetId,
         operator: operatorValue,
-        dateRange: selectedDateRange,
-        retainFilters
-      });
-
-      setModalVisible(false);
-      setSelectedColumn(null);
-      setSelectedValues([]);
-      setMultiSelect(false);
-      setDateFilter('all');
-      setSelectedDateRange({ startDate: undefined, endDate: undefined });
-      toggleFilterModal(retainFilters);
+        type: selectedColumn.type,
+        value: selectedColumn.columnName === 'Report Period' ? [displayValue] : valueToStore,
+        id: selectedColumn.columnId || Date.now().toString(),
+        dateFrom: selectedDateRange.startDate,
+        dateTo: selectedDateRange.endDate,
+        dateValues: selectedDateRange.startDate && selectedDateRange.endDate
+          ? { start: selectedDateRange.startDate, end: selectedDateRange.endDate }
+          : undefined,
+        processedID: selectedColumn.processedID || '',
+        processedRequestID: '',
+        vocabulary: selectedColumn.vocabulary || '',
+      };
     }
-  }
+
+
+    // Create a new array with updated or added filter
+    let updatedFilters = [...topMenuFilters];
+
+
+    // Special handling for Report Period which might have empty columnId
+    const isReportPeriod = selectedColumn.columnName === 'Report Period';
+
+    // Find existing filter index
+
+
+    const existingFilterIndex = updatedFilters.findIndex(f => {
+      if (isReportPeriod) {
+        return f.columnName === 'Report Period' && f.type === 'globalDateFilter';
+      }
+      // For calculated dimensions, check by columnId and type to be extra safe
+      return f.columnId === selectedColumn.columnId && f.type === selectedColumn.type;
+    });
+
+
+
+    if (existingFilterIndex >= 0) {
+      // Update existing filter
+      updatedFilters[existingFilterIndex] = newFilter;
+    } else if (newFilter.value) {
+      // Add new filter if it has a value
+      updatedFilters.push(newFilter);
+    }
+
+
+
+
+    // Update the state
+    setTopMenuFilters(updatedFilters);
+
+    // Prepare filters for the parent component
+    const retainFilters = updatedFilters.map(filter => {
+      const getVocabulary = () => {
+        const processedID = filter.processedID || '';
+        const isCalcDim = filter.category === 'calculated dimension';
+        const base: any =
+          isCalcDim
+            ? processedID.replace(/^cd_/, '')
+            : processedID.includes('.') ? processedID.split('.').pop() : processedID;
+
+        return [base.replaceAll('_', ' '), base.replaceAll('_', ' ')];
+      };
+
+      if (filter.category === 'dateFilter') {
+        return {
+          category: filter.category,
+          data_set: '',
+          dateValueFrom: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : filter.dateFrom || dayjs().format('MM/DD/YYYY'),
+          dateValues: null,
+          dateValueTo: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : filter.dateTo || dayjs().format('MM/DD/YYYY'),
+          globalFilter: null,
+          id: '',
+          isDefault: true,
+          isDisable: false,
+          isSingleValue: false,
+          operator: '',
+          processedID: '',
+          processedRequestID: '',
+          value: typeof filter.value === 'string' ? filter.value : Array.isArray(filter.value) ? filter.value[0] : '',
+          vocabulary: null,
+        };
+      }
+
+      if (filter.category === 'calculated dimension') {
+        return {
+          category: filter.category,
+          data_set: filter.dataSetId,
+          dateValueFrom: '',
+          dateValues: null,
+          dateValueTo: '',
+          globalFilter: { enabled: false, name: '' },
+          id: filter.id || filter.columnId,
+          isDefault: false,
+          isDisable: false,
+          isSingleValue: false,
+          operator: filter.operator,
+          processedID: filter.processedID,
+          processedRequestID: '',
+          value: Array.isArray(filter.value)
+            ? filter.value.map((v: any) => ({ id: v?.id || v, name: v?.name || v }))
+            : [{ id: filter.value, name: filter.value }],
+          vocabulary: getVocabulary(),
+        };
+      }
+
+      if (filter.category === 'flag') {
+        return {
+          category: filter.category,
+          data_set: filter.dataSetId,
+          dateValueFrom: '',
+          dateValues: null,
+          dateValueTo: '',
+          globalFilter: { enabled: false, name: '' },
+          id: filter.id || filter.columnId,
+          isDefault: false,
+          isDisable: false,
+          isSingleValue: false,
+          operator: filter.operator,
+          processedID: filter.processedID,
+          processedRequestID: '',
+          value: typeof filter.value === 'string'
+            ? filter.value
+            : Array.isArray(filter.value)
+              ? { id: filter.value[0], name: filter.value[0] }
+              : { id: filter.value, name: filter.value },
+          vocabulary: getVocabulary(),
+        };
+      }
+      if (filter.category === 'dimensions') {
+        // Always store value as array of strings for multi-select
+        let values: string[] = [];
+        if (Array.isArray(filter.value)) {
+          values = filter.value.map((v: any) => typeof v === 'object' ? v.id || v.value || v.name : v);
+        } else if (typeof filter.value === 'string') {
+          // If the string contains commas, split, else treat as single value array
+          values = filter.value.includes(',') ? filter.value.split(',').map((v: string) => v.trim()) : [filter.value];
+        }
+
+        return {
+          category: filter.category,
+          data_set: filter.dataSetId,
+          dateValueFrom: '',
+          dateValues: null,
+          dateValueTo: '',
+          globalFilter: { enabled: false, name: '' },
+          id: filter.id || filter.columnId,
+          isDefault: false,
+          isDisable: false,
+          isSingleValue: false,
+          operator: filter.operator,
+          processedID: filter.processedID,
+          processedRequestID: '',
+          value: values,
+          vocabulary: getVocabulary(),
+        };
+      }
+
+      return null;
+    }).filter(Boolean);
+
+
+
+
+    // Update parent component and close modal
+    onFilterChange(retainFilters);
+    toggleFilterModal(retainFilters);
+    setModalVisible(false);
+
+    // // Reset form
+    // setSelectedValues([]);
+    // setTextInputValue('');
+    // setDateFilter('all');
+    // setSelectedDateRange({ startDate: undefined, endDate: undefined });
+    // setOperatorValue('');
+    // setSelectedColumn(null);
+  };
 
   const renderFilter = ({ item: filter }: { item: DasboardFilter }) => {
+    // Format the value for display
+    const formatValue = (value: any, operator: string, category: string) => {
+      // Custom date range display for date/dateFilter
+      if ((category === 'date' || category === 'dateFilter') && typeof value === 'string' && value.startsWith('between ')) {
+        // value is like 'between MM/DD/YYYY - MM/DD/YYYY'
+        return value;
+      }
+      if (Array.isArray(value)) {
+        return value.filter((v: string) => typeof v === 'string' && v.trim().length > 0).join(', ');
+      }
+      if (typeof value === 'string') {
+        return value.trim().length > 0 ? value : '';
+      }
+      return '';
+    };
+
     return (
       <TouchableOpacity
         style={styles.filterPressable}
-        onPress={() => handleFilterValueClick(filter)}
+        onPress={() => handleFilterValueClick(filter as any)}
       >
         <View
           row
@@ -690,11 +869,20 @@ export const DashboardFilters = ({
           <View style={styles.icon}>
             <Icon name="checkmark-circle-outline" size={18} color={Colors.WHITE} />
           </View>
-          <Text style={[Fonts.textSmall, styles.filterColumnName]}>
+          <Text style={[Fonts.textSmall, styles.filterColumnName]} numberOfLines={1}>
             {properCase(filter.columnName)}
           </Text>
-          <Text style={[Fonts.textSmall, styles.filterValueText]}>
-            {filter.operator} {filter.value}
+          <Text
+            style={[Fonts.textSmall, styles.filterValueText]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {(filter.category === 'date' || filter.category === 'dateFilter') &&
+             typeof filter.value === 'string' &&
+             filter.value.startsWith('between ')
+              ? filter.value
+              : `${filter.operator} ${formatValue(filter.value, filter.operator, filter.category)}`
+            }
           </Text>
         </View>
       </TouchableOpacity>
@@ -734,225 +922,316 @@ export const DashboardFilters = ({
           </View>
         </View>
       </View>
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={styles.reportPeriodDropdown}>
-            {/* Modal Header */}
-            <View style={styles.modalHeader}>
-              <Text style={styles.sectionTitle}>Report Period Settings</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Icon name="close-circle-outline" size={24} color={Colors.GREEN_DARK} />
-              </TouchableOpacity>
-            </View>
-            {selectedColumn?.category === 'dateFilter' ? (
-              <View>
-                <View style={styles.section}>
-                  <TouchableOpacity
-                    style={[
-                      styles.selectButton,
-                      dateFilter === 'between' && styles.inactiveSelectButton,
-                    ]}
-                    onPress={() => {
-                      if (dateFilter !== 'between') {
-                        setShowPeriodPicker(true)
-                      }
-                    }}
-                  >
-                    <Text
-                      style={[
-                        styles.selectButtonText,
-                        dateFilter === 'between' && styles.inactiveSelectButtonText,
-                      ]}
-                    >
-                      {dateFilter === 'between'
-                        ? 'Select a period'
-                        : dateFilter === 'all'
-                          ? 'Select a period'
-                          : reportPeriodsValues.find(p => p.value === dateFilter)?.text || 'Select period'}
-                    </Text>
-                    <Icon
-                      name="chevron-down"
-                      size={24}
-                      color={dateFilter === 'between' ? Colors.GRAY : Colors.GREEN_DARK}
-                    />
-                  </TouchableOpacity>
-                  <Modal visible={showPeriodPicker} transparent animationType="slide">
-                    <View style={styles.modalOverlay}>
-                      <View style={styles.dropdown}>
-                        <Text style={styles.sectionTitle}>Select Period</Text>
-                        <FlatList
-                          data={reportPeriodsValues}
-                          keyExtractor={item => item.value}
-                          renderItem={({ item }) => (
-                            <TouchableOpacity
-                              style={styles.periodOption}
-                              onPress={() => {
-                                setDateFilter(item.value)
-                                setShowPeriodPicker(false)
-                              }}
-                            >
-                              <Text style={styles.periodOptionText}>{item.text}</Text>
-                            </TouchableOpacity>
-                          )}
-                        />
-                        <Button
-                          label="Cancel"
-                          onPress={() => setShowPeriodPicker(false)}
-                          style={{ marginTop: 20, backgroundColor: Colors.GREEN_DARK }}
-                        />
-                      </View>
-                    </View>
-                  </Modal>
-                </View>
-                <View style={styles.orSeparator}>
-                  <View style={styles.orLine} />
-                  <Text style={styles.orText}>OR</Text>
-                  <View style={styles.orLine} />
-                </View>
-                <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Custom Date Range</Text>
-                  <View style={styles.customDateRangeContainer}>
-                    <Checkbox
-                      value={dateFilter === 'between'}
-                      onValueChange={(value: boolean) => {
-                        setDateFilter(value ? 'between' : 'all')
-                        if (!value) {
-                          setSelectedDateRange({ startDate: undefined, endDate: undefined })
-                        }
-                      }}
-                      color={Colors.GREEN_MAIN}
-                      style={styles.checkbox}
-                    />
-                    <Text style={styles.customDateRangeLabel}>
-                      Enable custom date range
-                    </Text>
+      <Modal
+        animationType="slide"
+        presentationStyle='pageSheet'
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView
+              contentContainerStyle={{ flexGrow: 1 }}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={[styles.modalOverlay]}>
+                <View style={styles.reportPeriodDropdown}>
+                  <View style={styles.modalHeader}>
+                    {selectedColumn?.category === 'dateFilter' ? (
+                      <Text style={styles.sectionTitle}>Report Period Settings</Text>
+                    ) : (
+                      <Text style={styles.sectionTitle}>Filter Settings</Text>
+                    )}
+                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                      <Icon name="close-circle-outline" size={24} color={Colors.GREEN_DARK} />
+                    </TouchableOpacity>
                   </View>
-                  {dateFilter === 'between' && (
+                  {selectedColumn?.category === 'dateFilter' || selectedColumn?.category === 'date' ? (
                     <View>
-                      <View style={styles.selectedDateDisplay}>
-                        <Text style={styles.selectedDateLabel}>Selected Range:</Text>
-                        <Text style={styles.selectedDateText}>
-                          {selectedDateRange.startDate && selectedDateRange.endDate
-                            ? `${dayjs(selectedDateRange.startDate).format('MMM D, YYYY')} - ${dayjs(selectedDateRange.endDate).format('MMM D, YYYY')}`
-                            : selectedDateRange.startDate
-                              ? `${dayjs(selectedDateRange.startDate).format('MMM D, YYYY')} - Select end date`
-                              : 'Select date range'}
-                        </Text>
-                      </View>
-                      <View style={{ height: '30%' }}>
-                        <View style={{ maxHeight: '20%' }}>
-
-                          <DateTimePicker
-                            mode="range"
-                            styles={{
-                              selected: { backgroundColor: Colors.GREEN_MAIN },
-                              disabled: { backgroundColor: Colors.GRAY_DARK }
-                            }}
-                            startDate={selectedDateRange.startDate}
-                            endDate={selectedDateRange.endDate}
-                            onChange={(range) => {
-                              if (range.endDate && dayjs(range.endDate).isAfter(dayjs())) {
-                                setSelectedDateRange({ startDate: range.startDate, endDate: dayjs() });
+                      <View style={styles.section}>
+                        <TouchableOpacity
+                          style={[
+                            styles.selectButton,
+                            dateFilter === 'between' && styles.inactiveSelectButton,
+                          ]}
+                          onPress={() => {
+                            if (dateFilter !== 'between') {
+                              setShowPeriodPicker('start');
+                            }
+                          }}
+                        >
+                          <Text
+                            style={[
+                              styles.selectButtonText,
+                              dateFilter === 'between' && styles.inactiveSelectButtonText,
+                            ]}
+                          >
+                            {/* Show selected period or custom range, or 'All Dates' if 'all' */}
+                            {(() => {
+                              if (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate) {
+                                return `${dayjs(selectedDateRange.startDate).format('MMM D, YYYY')} - ${dayjs(selectedDateRange.endDate).format('MMM D, YYYY')}`;
+                              } else if (dateFilter === 'all') {
+                                return 'All Dates';
                               } else {
-                                setSelectedDateRange(range);
+                                const period = reportPeriodsValues.find(p => p.value === dateFilter);
+                                return period ? period.text : 'Select period';
+                              }
+                            })()}
+                          </Text>
+                          <Icon
+                            name="chevron-down"
+                            size={24}
+                            color={dateFilter === 'between' ? Colors.GRAY : Colors.GREEN_DARK}
+                          />
+                        </TouchableOpacity>
+                        <Modal visible={showPeriodPicker === 'start'} transparent animationType="slide">
+                          <View style={styles.modalOverlay}>
+                            <View style={styles.dropdown}>
+                              <Text style={styles.sectionTitle}>Select Period</Text>
+                              <FlatList
+                                data={reportPeriodsValues}
+                                keyExtractor={item => item.value}
+                                renderItem={({ item }) => (
+                                  <TouchableOpacity
+                                    style={styles.periodOption}
+                                    onPress={() => {
+                                      setDateFilter(item.value)
+                                      setShowPeriodPicker(false)
+                                    }}
+                                  >
+                                    <Text style={styles.periodOptionText}>{item.text}</Text>
+                                  </TouchableOpacity>
+                                )}
+                              />
+                              <Button
+                              label="Cancel"
+                              onPress={() => {
+                              // Only close the modal, do not reset or change any date value
+                              setShowPeriodPicker(false);
+                              }}
+                              style={{ marginTop: 20, backgroundColor: Colors.GREEN_DARK }}
+                              />
+                            </View>
+                          </View>
+                        </Modal>
+                      </View>
+                      <View style={styles.orSeparator}>
+                        <View style={styles.orLine} />
+                        <Text style={styles.orText}>OR</Text>
+                        <View style={styles.orLine} />
+                      </View>
+                      <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Custom Date Range</Text>
+                        <View style={styles.customDateRangeContainer}>
+                          <Checkbox
+                            value={dateFilter === 'between'}
+                            onValueChange={(value: boolean) => {
+                              setDateFilter(value ? 'between' : 'all')
+                              if (!value) {
+                                setSelectedDateRange({ startDate: undefined, endDate: undefined })
                               }
                             }}
-                            maxDate={dayjs().endOf('day').toDate()}
-                            disabledDates={(date) => dayjs(date).isAfter(dayjs(), 'day')}
+                            color={Colors.GREEN_MAIN}
+                            style={styles.checkbox}
                           />
+                          <Text style={styles.customDateRangeLabel}>
+                            Enable custom date range
+                          </Text>
                         </View>
-                        <View>
-                        </View>
+                        {dateFilter === 'between' && (
+                          <View>
+                            {/* Selected Range Display moved up */}
+                            <View style={styles.selectedDateDisplay}>
+                              <Text style={styles.selectedDateLabel}>Selected Range:</Text>
+                              <Text style={styles.selectedDateText}>
+                                {selectedDateRange.startDate && selectedDateRange.endDate
+                                  ? `${dayjs(selectedDateRange.startDate).format('MMM D, YYYY')} - ${dayjs(selectedDateRange.endDate).format('MMM D, YYYY')}`
+                                  : selectedDateRange.startDate
+                                    ? `${dayjs(selectedDateRange.startDate).format('MMM D, YYYY')} - Select end date`
+                                    : 'Select date range'}
+                              </Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
+                              {/* Start Date Box */}
+                              <TouchableOpacity
+                                style={[
+                                  styles.dateBox,
+                                  { marginRight: 8 },
+                                  !selectedDateRange.startDate && styles.dateBoxPlaceholder,
+                                ]}
+                                onPress={() => {
+                                  setTempDate(selectedDateRange.startDate ? new Date(selectedDateRange.startDate) : new Date());
+                                  setNativePicker('start');
+                                }}
+                              >
+                                <Text style={styles.dateBoxLabel}>Start Date</Text>
+                                <Text style={styles.dateBoxValue}>
+                                  {selectedDateRange.startDate
+                                    ? dayjs(selectedDateRange.startDate).format('MMM D, YYYY')
+                                    : 'Select'}
+                                </Text>
+                              </TouchableOpacity>
+                              {/* End Date Box */}
+                              <TouchableOpacity
+                                style={[
+                                  styles.dateBox,
+                                  { marginLeft: 8 },
+                                  !selectedDateRange.endDate && styles.dateBoxPlaceholder,
+                                ]}
+                                onPress={() => {
+                                  setTempDate(selectedDateRange.endDate ? new Date(selectedDateRange.endDate) : new Date());
+                                  setNativePicker('end');
+                                }}
+                                disabled={!selectedDateRange.startDate}
+                              >
+                                <Text style={styles.dateBoxLabel}>End Date</Text>
+                                <Text style={styles.dateBoxValue}>
+                                  {selectedDateRange.endDate
+                                    ? dayjs(selectedDateRange.endDate).format('MMM D, YYYY')
+                                    : 'Select'}
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
+                            {/* Native Spinner Date Picker (no custom modal) */}
+                            {nativePicker && (
+                            <DateTimePicker
+                            value={tempDate || new Date()}
+                            display="spinner"
+                            minimumDate={nativePicker === 'end' && selectedDateRange.startDate ? new Date(selectedDateRange.startDate) : undefined}
+                            maximumDate={nativePicker === 'start' && selectedDateRange.endDate ? new Date(selectedDateRange.endDate) : undefined}
+                            onChange={(event: DateTimePickerEvent, date?: Date) => {
+                            const pickerType = nativePicker; // Save current value
+                            setNativePicker(false);
+                            if (event.type === 'dismissed') return;
+                            if (!date) return;
+                            setTempDate(date); // Always update tempDate for UI feedback
+                            if (event.type === 'set') {
+                            const picked = dayjs(date).startOf('day');
+                            if (pickerType === 'start') {
+                            // Prevent same date as end
+                            if (selectedDateRange.endDate && picked.isSame(dayjs(selectedDateRange.endDate), 'day')) return;
+                            setSelectedDateRange(range => ({
+                            ...range,
+                            startDate: picked.toISOString(),
+                            // If endDate is before new startDate, reset endDate
+                            endDate: range.endDate && picked.isAfter(dayjs(range.endDate)) ? undefined : range.endDate,
+                            }));
+                            } else {
+                            // Prevent same date as start
+                            if (selectedDateRange.startDate && picked.isSame(dayjs(selectedDateRange.startDate), 'day')) return;
+                            setSelectedDateRange(range => ({
+                            ...range,
+                            endDate: picked.toISOString(),
+                            }));
+                            }
+                            }
+                            }}
+                            />
+                            )}
+                          </View>
+                        )}
                       </View>
                     </View>
-                  )}
-                </View>
-              </View>
 
-            ) : (
-              <View>
-                <View style={styles.operatorContainer}>
-                  <Text style={styles.operatorLabel}>Operator</Text>
-                  <View style={styles.operatorOptions}>
-                    {selectedColumn?.category && operators?.[selectedColumn.category]?.map((option: any) => (
-                      <TouchableOpacity
-                        key={option.id}
-                        style={[
-                          styles.operatorOption,
-                          operatorValue === option.id && styles.selectedOperator,
-                        ]}
-                        onPress={() => {
-                          setOperatorValue(option.id);
-                        }}
-                      >
-                        <Text
-                          style={[
-                            styles.operatorText,
-                            operatorValue === option.id && styles.selectedOperatorText,
-                          ]}
-                        >
-                          {option.name || option.id}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
+                  ) : (
+                    <View>
+                      <View style={styles.operatorContainer}>
+                        <Text style={styles.operatorLabel}>Operator</Text>
+                        <View style={styles.operatorOptions}>
+                          {selectedColumn?.category && operators?.[selectedColumn.category]?.map((option: any) => (
+                            <TouchableOpacity
+                              key={option.id}
+                              style={[
+                                styles.operatorOption,
+                                operatorValue === option.id && styles.selectedOperator,
+                              ]}
+                              onPress={() => {
+                                setOperatorValue(option.id);
+                              }}
+                            >
+                              <Text
+                                style={[
+                                  styles.operatorText,
+                                  operatorValue === option.id && styles.selectedOperatorText,
+                                ]}
+                              >
+                                {option.name || option.id}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </View>
+                      {!['like', 'not like'].includes(operatorValue) ? (
+                        <>
+                          {selectedColumn?.category !== 'flag' && (
+                            <View style={styles.toggleRow}>
+                              <Text style={styles.sectionTitle}>Enable Multi-Select</Text>
+                              <Switch
+                                value={multiSelect}
+                                onValueChange={setMultiSelect}
+                                trackColor={{ false: Colors.GRAY_LIGHT, true: Colors.GREEN_MAIN }}
+                                thumbColor={Colors.GREEN_LIGHTEST}
+                                style={styles.toggleSwitch}
+                              />
+                            </View>
+                          )}
+                          <CustomSelect
+                             mode={selectedColumn?.category === 'flag' ? 'SINGLE' : (multiSelect ? 'MULTI' : 'SINGLE')}
+                             options={Array.from(new Set([
+                               ...ensureArrayOfStrings(selectedValues),
+                               ...uniqueValues,
+                             ])).map(v => ({ label: v, value: v }))}
+                             value={ensureArrayOfStrings(selectedValues)}
+                             onChange={setSelectedValues}
+                             placeholder="Select value(s)"
+                             loading={loading}
+                             showSearch={selectedColumn?.category !== 'flag'}
+                           />
+                        </>
+                      ) : (
+                        <View style={styles.textInputContainer}>
+                          <TextInput
+                            style={styles.textInput}
+                            value={textInputValue}
+                            onChangeText={setTextInputValue}
+                            placeholder="Enter the value"
+                            placeholderTextColor={Colors.GRAY_DARK}
+                          />
+                          {textInputValue ? (
+                            <TouchableOpacity
+                              style={styles.clearButton}
+                              onPress={() => setTextInputValue('')}
+                            >
+                              <Icon name="close-circle" size={20} color={Colors.TEXT_BLACK} />
+                            </TouchableOpacity>
+                          ) : null}
+                        </View>
+                      )}
+                    </View>
+                  )}
+                  <View style={dateFilter === 'all' ? { marginBottom: '6.5%' } : { marginTop: '20%' }}>
+                    <Button
+                      label="Apply"
+                      onPress={handleDone}
+                      style={{
+                        backgroundColor: Colors.GREEN_DARK,
+                        marginTop: 20,
+                        opacity: (selectedColumn?.category === 'dateFilter' && !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate))) ? 0.5 : 1
+                      }}
+                      disabled={selectedColumn?.category === 'dateFilter' && !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate))}
+                    />
                   </View>
                 </View>
-                {!['like', 'not like'].includes(operatorValue) ? (
-                  <>
-                    <View style={styles.toggleRow}>
-                      <Text style={styles.sectionTitle}>Enable Multi-Select</Text>
-                      <Switch
-                        value={multiSelect}
-                        onValueChange={setMultiSelect}
-                        trackColor={{ false: Colors.GRAY_LIGHT, true: Colors.GREEN_MAIN }}
-                        thumbColor={Colors.GREEN_LIGHTEST}
-                        style={styles.toggleSwitch}
-                      />
-                    </View>
-                    <CustomSelect
-                      mode={multiSelect ? 'MULTI' : 'SINGLE'}
-                      options={uniqueValues.map(v => ({ label: v, value: v }))}
-                      value={selectedValues}
-                      onChange={setSelectedValues}
-                      placeholder="Select value(s)"
-                      loading={loading}
-                    />
-                  </>
-                ) : (
-                  <View style={styles.textInputContainer}>
-                    <TextInput
-                      style={styles.textInput}
-                      value={textInputValue}
-                      onChangeText={setTextInputValue}
-                      placeholder="Enter the value"
-                      placeholderTextColor={Colors.GRAY_DARK}
-                    />
-                    {textInputValue ? (
-                      <TouchableOpacity
-                        style={styles.clearButton}
-                        onPress={() => setTextInputValue('')}
-                      >
-                        <Icon name="close-circle" size={20} color={Colors.TEXT_BLACK} />
-                      </TouchableOpacity>
-                    ) : null}
-                  </View>
-                )}
               </View>
-            )}
-            <View style={dateFilter === 'all' ? { marginBottom: '6.5%' } : { marginTop: '20%' }}>
-              <Button
-                label="Apply"
-                onPress={handleDone}
-                style={{
-                  backgroundColor: Colors.GREEN_DARK,
-                  marginTop: 20,
-                  opacity: (selectedColumn?.category === 'dateFilter' && !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate))) ? 0.5 : 1 // Dim when disabled
-                }}
-                disabled={selectedColumn?.category === 'dateFilter' && !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate))}
-              />
-            </View>
-          </View>
-        </View>
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   )
@@ -1067,7 +1346,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
-    color:Colors.GREEN_DARK
+    color: Colors.GREEN_DARK
   },
   operatorOptions: {
     flexDirection: 'row',
@@ -1085,7 +1364,7 @@ const styles = StyleSheet.create({
   },
   operatorText: {
     fontSize: 14,
-    color:Colors.TEXT_BLACK,
+    color: Colors.TEXT_BLACK,
   },
   textInputContainer: {
     flexDirection: 'row',
@@ -1116,7 +1395,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   toggleSwitch: {
-    marginBottom:10,
+    marginBottom: 10,
     transform: [{ scaleX: Platform.OS === 'android' ? 1.2 : 0.8 }, { scaleY: Platform.OS === 'android' ? 1.2 : 0.8 }],
   },
   sectionTitle: {
@@ -1232,5 +1511,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginLeft: 4,
+  },
+  dateBox: {
+    flex: 1,
+    backgroundColor: Colors.WHITE,
+    borderWidth: 1,
+    borderColor: Colors.GREEN_DARK,
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    minHeight: 56,
+  },
+  dateBoxPlaceholder: {
+    borderColor: Colors.GRAY,
+  },
+  dateBoxLabel: {
+    fontSize: 12,
+    color: Colors.GREEN_DARK,
+    marginBottom: 4,
+  },
+  dateBoxValue: {
+    fontSize: 16,
+    color: Colors.DARK_TEXT,
   },
 })

@@ -27,7 +27,6 @@ module.exports = async () => {
       // Add module resolution for DatePickerIOS
       extraNodeModules: {
         // This redirects DatePickerIOS imports to our mock file
-        'react-native/Libraries/Components/DatePicker/DatePickerIOS': require.resolve('./src/Utils/DatePickerIOSMock.js'),
       },
     },
   }

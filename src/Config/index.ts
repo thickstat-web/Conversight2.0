@@ -17,7 +17,7 @@ const env = {
  * Sets the target environment based on the build type (Debug or Release Build)
  */
 export const { CS_API_HOST, BOT_API_HOST, INGRESS_API_HOST } = __DEV__
-  ? env.PRODUCTION
+  ? env.STAGING
   : env.PRODUCTION
 
 export const Config = {

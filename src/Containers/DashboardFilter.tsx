@@ -403,9 +403,9 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(
                 { color: isSelected ? Colors.WHITE : textColor },
               ]}
             >
-              {item.vocabulary?.[0]
-                ? toTitleCase(item.vocabulary[0])
-                : item.label || item.processedID}
+              {item?.vocabulary?.[0]
+                ? toTitleCase(item?.vocabulary?.[0])
+                : item?.label || item?.processedID}
             </Text>
             {isSelected && (
               <Icon
@@ -460,7 +460,7 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(
                     <View style={styles.infoSection}>
                       <Text style={styles.sectionTitle}>Synonyms</Text>
                       <View style={styles.synonymsContainer}>
-                        {item.vocabulary.map((syn: string, index: number) => (
+                        {item?.vocabulary?.map((syn: string, index: number) => (
                           <View key={index} style={styles.synonymTag}>
                             <Text style={styles.synonymText}>{syn}</Text>
                           </View>
@@ -1217,7 +1217,7 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(
                       showsHorizontalScrollIndicator={false}
                       contentContainerStyle={styles.activeFiltersScroll}
                     >
-                      {filterItems.map(item => (
+                      {filterItems?.map(item => (
                         <View key={item.processedID} style={styles.filterCard}>
                           <View style={styles.filterCardHeader}>
                             <Text
@@ -1225,9 +1225,9 @@ const DashboardFilters = React.forwardRef<any, DashboardFiltersProps>(
                               numberOfLines={1}
                               ellipsizeMode="tail"
                             >
-                              {item.vocabulary?.[0]
+                              {item?.vocabulary?.[0]
                                 ? toTitleCase(item.vocabulary[0])
-                                : item.label || item.processedID}
+                                : item?.label || item?.processedID}
                             </Text>
                             <TouchableOpacity
                               style={styles.removeFilterButton}
