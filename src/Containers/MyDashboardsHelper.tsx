@@ -728,9 +728,9 @@ export const DashboardFilters = ({
         return {
           category: filter.category,
           data_set: '',
-          dateValueFrom: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : filter.dateFrom || dayjs().format('MM/DD/YYYY'),
+          dateValueFrom: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : dayjs(filter.dateFrom).format('MM/DD/YYYY') || dayjs().format('MM/DD/YYYY'),
           dateValues: null,
-          dateValueTo: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : filter.dateTo || dayjs().format('MM/DD/YYYY'),
+          dateValueTo: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : dayjs(filter.dateTo).format('MM/DD/YYYY')  || dayjs().format('MM/DD/YYYY'),
           globalFilter: null,
           id: '',
           isDefault: true,
@@ -739,12 +739,13 @@ export const DashboardFilters = ({
           operator: '',
           processedID: '',
           processedRequestID: '',
-          value: typeof filter.value === 'string' ? filter.value : Array.isArray(filter.value) ? filter.value[0] : '',
+          value: filter.value === 'All Dates' ? [] : (filter.operator === 'between' ? 'between' :  (typeof filter.value === 'string' ? filter.value : Array.isArray(filter.value) ? filter.value[0] : '')),
           vocabulary: null,
         };
       }
       if (filter.category === 'date') {
-        const [dateValueFrom, dateValueTo] = filter?.value?.split(" - ");
+        const value = filter?.value?.replace("between ", "") || "";
+        const [dateValueFrom, dateValueTo] = value.split(" - ");
         const dateValues = filter.operator === 'between' ? [{ dateValueFrom: dateValueFrom, dateValueTo: dateValueTo }] : [];
 
         return {
@@ -764,7 +765,7 @@ export const DashboardFilters = ({
           operator: filter.operator || '',
           processedID: filter.processedID,
           processedRequestID: '',
-          value: filter.operator === 'between' ? 'between' : filter.value,
+          value: filter.value === 'All Dates' ? [] : (filter.operator === 'between' ? 'between' : filter.value),
           vocabulary: getVocabulary(),
         };
       }
@@ -803,14 +804,10 @@ export const DashboardFilters = ({
           isDefault: false,
           isDisable: false,
           isSingleValue: false,
-          operator: filter.operator,
+          operator: filter.operator === 'not equal to' ? '!=' : '=',
           processedID: filter.processedID,
           processedRequestID: '',
-          value: typeof filter.value === 'string'
-            ? filter.value
-            : Array.isArray(filter.value)
-              ? { id: filter.value[0], name: filter.value[0] }
-              : { id: filter.value, name: filter.value },
+          value: filter.value[0],
           vocabulary: getVocabulary(),
         };
       }
@@ -876,6 +873,11 @@ export const DashboardFilters = ({
       return '';
     };
 
+    let operatorDisplay = filter.operator;
+    if (filter.category === 'flag') {
+      operatorDisplay = filter.operator === 'not equal to' ? '!=' : '=';
+    }
+
     return (
       <TouchableOpacity
         style={styles.filterPressable}
@@ -902,7 +904,7 @@ export const DashboardFilters = ({
               typeof filter.value === 'string' &&
               filter.value.startsWith('between ')
               ? filter.value
-              : `${filter.operator} ${formatValue(filter.value, filter.operator, filter.category)}`
+              : `${operatorDisplay} ${formatValue(filter.value, operatorDisplay, filter.category)}`
             }
           </Text>
         </View>
