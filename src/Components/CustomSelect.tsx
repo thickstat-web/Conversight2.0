@@ -87,6 +87,12 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
   const isMulti = mode === 'MULTI'
 
+  useEffect(() => {
+    if (!isMulti && Array.isArray(value) && value.length > 1) {
+      onChange(value.length ? [value[0]] : [])
+    }
+  }, [mode])
+
   const selected: string[] = useMemo(() => {
     return Array.isArray(value) ? value : value ? [value] : []
   }, [value])
