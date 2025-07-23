@@ -721,7 +721,7 @@ export const DashboardFilters = ({
             ? processedID.replace(/^cd_/, '')
             : processedID.includes('.') ? processedID.split('.').pop() : processedID;
 
-        return [base.replaceAll('_', ' '), base.replaceAll('_', ' ')];
+        return [base.replaceAll('_', ' ')];
       };
 
       if (filter.category === 'dateFilter') {
@@ -815,7 +815,15 @@ export const DashboardFilters = ({
         // Always store value as array of strings for multi-select
         let values: { id: string; name: string }[] = [];
         if (Array.isArray(filter.value)) {
-          values = filter.value.map((v: any) => { return { id: v, name: v } });
+          if (filter.value.length === 1 && filter.value[0] === 'all') {
+            values = [];
+          } else {
+            values = filter.value
+              .filter((v: any) => v !== 'all')
+              .map((v: any) => ({ id: v, name: v }));
+          }
+        } else if (typeof filter.value === 'string' && filter.value === 'all') {
+          values = [];
         }
         return {
           category: filter.category,
