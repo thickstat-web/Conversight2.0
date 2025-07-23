@@ -434,8 +434,8 @@ export const DashboardFilters = ({
         normalizedValues = normalizedValues[0].split(',').map((v: string) => v.trim());
       }
       setPendingSelectedValues(normalizedValues);
-      const textValue = normalizedValues.join(', ');
-      setTextInputValue(textValue);
+      // const textValue = normalizedValues.join(', ');
+      // setTextInputValue(textValue);
       // --- Retain date range for both dateFilter and date ---
       if (columnItem.category === 'dateFilter' || columnItem.category === 'date') {
         // Try to get from dateFrom/dateTo first
@@ -489,9 +489,162 @@ export const DashboardFilters = ({
     setModalVisible(true);
   }
 
+  const mapFiltersForParent = (filters: DasboardFilter[]) => {
+    return filters.map(filter => {
+      const getVocabulary = () => {
+        const processedID = filter.processedID || '';
+        const isCalcDim = filter.category === 'calculated dimension';
+        const base: any =
+          isCalcDim
+            ? processedID.replace(/^cd_/, '')
+            : processedID.includes('.') ? processedID.split('.').pop() : processedID;
+
+        return [base.replaceAll('_', ' ')];
+      };
+
+      if (filter.category === 'dateFilter') {
+        return {
+          category: filter.category,
+          data_set: '',
+          dateValueFrom: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : dayjs(filter.dateFrom).format('MM/DD/YYYY') || dayjs().format('MM/DD/YYYY'),
+          dateValues: null,
+          dateValueTo: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : dayjs(filter.dateTo).format('MM/DD/YYYY')  || dayjs().format('MM/DD/YYYY'),
+          globalFilter: null,
+          id: '',
+          isDefault: true,
+          isDisable: false,
+          isSingleValue: false,
+          operator: '',
+          processedID: '',
+          processedRequestID: '',
+          value: filter.value === 'All Dates' ? [] : (filter.operator === 'between' ? 'between' :  (typeof filter.value === 'string' ? filter.value : Array.isArray(filter.value) ? filter.value[0] : '')),
+          vocabulary: null,
+        };
+      }
+      if (filter.category === 'date') {
+        const value = typeof filter.value === 'string' ? filter.value.replace("between ", "") : "";
+        const [dateValueFrom, dateValueTo] = value.split(" - ");
+        const dateValues = filter.operator === 'between' ? [{ dateValueFrom: dateValueFrom, dateValueTo: dateValueTo }] : [];
+
+        return {
+          category: filter.category,
+          data_set: filter.dataSetId,
+          dateValueFrom: '',
+          dateValues: dateValues,
+          dateValueTo: '',
+          globalFilter: {
+            enabled: false,
+            name: ""
+          },
+          id: filter.id || filter.columnId,
+          isDefault: false,
+          isDisable: false,
+          isSingleValue: false,
+          operator: filter.operator || '',
+          processedID: filter.processedID,
+          processedRequestID: '',
+          value: filter.value === 'All Dates' ? 'all' : (filter.operator === 'between' ? 'between' : filter.value),
+          vocabulary: getVocabulary(),
+        };
+      }
+
+      if (filter.category === 'calculated dimension') {
+        let values: { id: string; name: string }[] = [];
+        if (Array.isArray(filter.value)) {
+          if (filter.value.length === 1 && filter.value[0] === 'all') {
+            values = [];
+          } else {
+            values = filter.value
+              .filter((v: any) => v !== 'all')
+              .map((v: any) => ({ id: v, name: v }));
+          }
+        } else if (typeof filter.value === 'string' && filter.value === 'all') {
+          values = [];
+        } else if (filter.value) {
+          values = [{ id: filter.value, name: filter.value }];
+        }
+        return {
+          category: filter.category,
+          data_set: filter.dataSetId,
+          dateValueFrom: '',
+          dateValues: null,
+          dateValueTo: '',
+          globalFilter: { enabled: false, name: '' },
+          id: filter.id || filter.columnId,
+          isDefault: false,
+          isDisable: false,
+          isSingleValue: false,
+          operator: filter.operator,
+          processedID: filter.processedID,
+          processedRequestID: '',
+          value: values,
+          vocabulary: getVocabulary(),
+        };
+      }
+
+      if (filter.category === 'flag') {
+        return {
+          category: filter.category,
+          data_set: filter.dataSetId,
+          dateValueFrom: '',
+          dateValues: null,
+          dateValueTo: '',
+          globalFilter: { enabled: false, name: '' },
+          id: filter.id || filter.columnId,
+          isDefault: false,
+          isDisable: false,
+          isSingleValue: false,
+          operator: filter.operator === 'not equal to' ? '!=' : '=',
+          processedID: filter.processedID,
+          processedRequestID: '',
+          value: Array.isArray(filter.value) ? filter.value[0] : filter.value,
+          vocabulary: getVocabulary(),
+        };
+      }
+      if (filter.category === 'dimensions') {
+        // Always store value as array of strings for multi-select
+        let values: { id: string; name: string }[] = [];
+        if (Array.isArray(filter.value)) {
+          if (filter.value.length === 1 && filter.value[0] === 'all') {
+            values = [];
+          } else {
+            values = filter.value
+              .filter((v: any) => v !== 'all')
+              .map((v: any) => ({ id: v, name: v }));
+          }
+        } else if (typeof filter.value === 'string' && filter.value === 'all') {
+          values = [];
+        }
+        return {
+          category: filter.category,
+          data_set: filter.dataSetId,
+          dateValueFrom: '',
+          dateValues: null,
+          dateValueTo: '',
+          globalFilter: { enabled: false, name: '' },
+          id: filter.id || filter.columnId,
+          isDefault: false,
+          isDisable: false,
+          isSingleValue: false,
+          operator: filter.operator,
+          processedID: filter.processedID,
+          processedRequestID: '',
+          value: values,
+          vocabulary: getVocabulary(),
+        };
+      }
+
+      return null;
+    }).filter(Boolean);
+  };
+
   const handleResetFilters = () => {
-    setTopMenuFilters(normalizeDimensionFilters(filters));
-    handleDone();
+    const normalized = normalizeDimensionFilters(filters);
+    setTopMenuFilters(normalized);
+    const retainFilters = mapFiltersForParent(normalized);
+    onFilterChange(retainFilters);
+    toggleFilterModal(retainFilters);
+    setModalVisible(false);
   };
 
   const handleDone = () => {
@@ -713,155 +866,7 @@ export const DashboardFilters = ({
     setTopMenuFilters(updatedFilters);
 
     // Prepare filters for the parent component
-    const retainFilters = updatedFilters.map(filter => {
-      const getVocabulary = () => {
-        const processedID = filter.processedID || '';
-        const isCalcDim = filter.category === 'calculated dimension';
-        const base: any =
-          isCalcDim
-            ? processedID.replace(/^cd_/, '')
-            : processedID.includes('.') ? processedID.split('.').pop() : processedID;
-
-        return [base.replaceAll('_', ' ')];
-      };
-
-      if (filter.category === 'dateFilter') {
-        return {
-          category: filter.category,
-          data_set: '',
-          dateValueFrom: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : dayjs(filter.dateFrom).format('MM/DD/YYYY') || dayjs().format('MM/DD/YYYY'),
-          dateValues: null,
-          dateValueTo: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : dayjs(filter.dateTo).format('MM/DD/YYYY')  || dayjs().format('MM/DD/YYYY'),
-          globalFilter: null,
-          id: '',
-          isDefault: true,
-          isDisable: false,
-          isSingleValue: false,
-          operator: '',
-          processedID: '',
-          processedRequestID: '',
-          value: filter.value === 'All Dates' ? [] : (filter.operator === 'between' ? 'between' :  (typeof filter.value === 'string' ? filter.value : Array.isArray(filter.value) ? filter.value[0] : '')),
-          vocabulary: null,
-        };
-      }
-      if (filter.category === 'date') {
-        const value = filter?.value?.replace("between ", "") || "";
-        const [dateValueFrom, dateValueTo] = value.split(" - ");
-        const dateValues = filter.operator === 'between' ? [{ dateValueFrom: dateValueFrom, dateValueTo: dateValueTo }] : [];
-
-        return {
-          category: filter.category,
-          data_set: filter.dataSetId,
-          dateValueFrom: '',
-          dateValues: dateValues,
-          dateValueTo: '',
-          globalFilter: {
-            enabled: false,
-            name: ""
-          },
-          id: filter.id || filter.columnId,
-          isDefault: false,
-          isDisable: false,
-          isSingleValue: false,
-          operator: filter.operator || '',
-          processedID: filter.processedID,
-          processedRequestID: '',
-          value: filter.value === 'All Dates' ? 'all' : (filter.operator === 'between' ? 'between' : filter.value),
-          vocabulary: getVocabulary(),
-        };
-      }
-
-      if (filter.category === 'calculated dimension') {
-        let values: { id: string; name: string }[] = [];
-        if (Array.isArray(filter.value)) {
-          if (filter.value.length === 1 && filter.value[0] === 'all') {
-            values = [];
-          } else {
-            values = filter.value
-              .filter((v: any) => v !== 'all')
-              .map((v: any) => ({ id: v, name: v }));
-          }
-        } else if (typeof filter.value === 'string' && filter.value === 'all') {
-          values = [];
-        } else if (filter.value) {
-          values = [{ id: filter.value, name: filter.value }];
-        }
-        return {
-          category: filter.category,
-          data_set: filter.dataSetId,
-          dateValueFrom: '',
-          dateValues: null,
-          dateValueTo: '',
-          globalFilter: { enabled: false, name: '' },
-          id: filter.id || filter.columnId,
-          isDefault: false,
-          isDisable: false,
-          isSingleValue: false,
-          operator: filter.operator,
-          processedID: filter.processedID,
-          processedRequestID: '',
-          value: values,
-          vocabulary: getVocabulary(),
-        };
-      }
-
-      if (filter.category === 'flag') {
-        return {
-          category: filter.category,
-          data_set: filter.dataSetId,
-          dateValueFrom: '',
-          dateValues: null,
-          dateValueTo: '',
-          globalFilter: { enabled: false, name: '' },
-          id: filter.id || filter.columnId,
-          isDefault: false,
-          isDisable: false,
-          isSingleValue: false,
-          operator: filter.operator === 'not equal to' ? '!=' : '=',
-          processedID: filter.processedID,
-          processedRequestID: '',
-          value: Array.isArray(filter.value) ? filter.value[0] : filter.value,
-          vocabulary: getVocabulary(),
-        };
-      }
-      if (filter.category === 'dimensions') {
-        // Always store value as array of strings for multi-select
-        let values: { id: string; name: string }[] = [];
-        if (Array.isArray(filter.value)) {
-          if (filter.value.length === 1 && filter.value[0] === 'all') {
-            values = [];
-          } else {
-            values = filter.value
-              .filter((v: any) => v !== 'all')
-              .map((v: any) => ({ id: v, name: v }));
-          }
-        } else if (typeof filter.value === 'string' && filter.value === 'all') {
-          values = [];
-        }
-        return {
-          category: filter.category,
-          data_set: filter.dataSetId,
-          dateValueFrom: '',
-          dateValues: null,
-          dateValueTo: '',
-          globalFilter: { enabled: false, name: '' },
-          id: filter.id || filter.columnId,
-          isDefault: false,
-          isDisable: false,
-          isSingleValue: false,
-          operator: filter.operator,
-          processedID: filter.processedID,
-          processedRequestID: '',
-          value: values,
-          vocabulary: getVocabulary(),
-        };
-      }
-
-      return null;
-    }).filter(Boolean);
-
-
-
+    const retainFilters = mapFiltersForParent(updatedFilters);
 
     // Update parent component and close modal
     onFilterChange(retainFilters);
@@ -1146,7 +1151,7 @@ export const DashboardFilters = ({
                             {nativePicker && (
                               <DateTimePicker
                                 value={tempDate || new Date()}
-                                display="spinner"
+                                display="default"
                                 minimumDate={nativePicker === 'end' && selectedDateRange.startDate ? new Date(selectedDateRange.startDate) : undefined}
                                 maximumDate={nativePicker === 'start' && selectedDateRange.endDate ? new Date(selectedDateRange.endDate) : undefined}
                                 onChange={(event: DateTimePickerEvent, date?: Date) => {
@@ -1231,18 +1236,22 @@ export const DashboardFilters = ({
                           </TouchableOpacity>
                           <CustomSelect
                             mode={selectedColumn?.category === 'flag' ? 'SINGLE' : (multiSelect ? 'MULTI' : 'SINGLE')}
-                            options={(() => {
-                              let baseOptions = Array.from(new Set([
-                                ...ensureArrayOfStrings(selectedValues),
-                                ...uniqueValues,
-                              ]));
-                              if (multiSelect) {
-                                if (!baseOptions.includes('all')) baseOptions.unshift('all');
-                              } else {
-                                baseOptions = baseOptions.filter(v => v !== 'all');
-                              }
-                              return baseOptions.map(v => ({ label: v, value: v }));
-                            })()}
+                            options={
+                              loading
+                                ? []
+                                : (() => {
+                                    let baseOptions = Array.from(new Set([
+                                      ...ensureArrayOfStrings(selectedValues),
+                                      ...uniqueValues,
+                                    ]));
+                                    if (multiSelect) {
+                                      if (!baseOptions.includes('all')) baseOptions.unshift('all');
+                                    } else {
+                                      baseOptions = baseOptions.filter(v => v !== 'all');
+                                    }
+                                    return baseOptions.map(v => ({ label: v, value: v }));
+                                  })()
+                            }
                             value={ensureArrayOfStrings(selectedValues)}
                             onChange={(vals) => {
                               if (multiSelect) {
