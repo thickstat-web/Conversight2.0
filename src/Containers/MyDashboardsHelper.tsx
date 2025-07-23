@@ -503,12 +503,35 @@ export const DashboardFilters = ({
       };
 
       if (filter.category === 'dateFilter') {
+        let dateValueFrom = '';
+        let dateValueTo = '';
+        let value: any = '';
+        if (typeof filter.value === 'string' && filter.value.startsWith('between ')) {
+          const match = filter.value.match(/between (\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/);
+          if (match) {
+            dateValueFrom = match[1];
+            dateValueTo = match[2];
+            value = 'between';
+          } else {
+            dateValueFrom = filter.dateFrom ? dayjs(filter.dateFrom).format('MM/DD/YYYY') : dayjs().format('MM/DD/YYYY');
+            dateValueTo = filter.dateTo ? dayjs(filter.dateTo).format('MM/DD/YYYY') : dayjs().format('MM/DD/YYYY');
+            value = filter.operator === 'between' ? 'between' : (typeof filter.value === 'string' ? filter.value : Array.isArray(filter.value) ? filter.value[0] : '');
+          }
+        } else if (filter.value === 'All Dates') {
+          dateValueFrom = dayjs().format('MM/DD/YYYY');
+          dateValueTo = dayjs().format('MM/DD/YYYY');
+          value = [];
+        } else {
+          dateValueFrom = filter.dateFrom ? dayjs(filter.dateFrom).format('MM/DD/YYYY') : dayjs().format('MM/DD/YYYY');
+          dateValueTo = filter.dateTo ? dayjs(filter.dateTo).format('MM/DD/YYYY') : dayjs().format('MM/DD/YYYY');
+          value = filter.operator === 'between' ? 'between' : (typeof filter.value === 'string' ? filter.value : Array.isArray(filter.value) ? filter.value[0] : '');
+        }
         return {
           category: filter.category,
           data_set: '',
-          dateValueFrom: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : dayjs(filter.dateFrom).format('MM/DD/YYYY') || dayjs().format('MM/DD/YYYY'),
+          dateValueFrom,
           dateValues: null,
-          dateValueTo: filter.value === 'All Dates' ? dayjs().format('MM/DD/YYYY') : dayjs(filter.dateTo).format('MM/DD/YYYY')  || dayjs().format('MM/DD/YYYY'),
+          dateValueTo,
           globalFilter: null,
           id: '',
           isDefault: true,
@@ -517,7 +540,7 @@ export const DashboardFilters = ({
           operator: '',
           processedID: '',
           processedRequestID: '',
-          value: filter.value === 'All Dates' ? [] : (filter.operator === 'between' ? 'between' :  (typeof filter.value === 'string' ? filter.value : Array.isArray(filter.value) ? filter.value[0] : '')),
+          value,
           vocabulary: null,
         };
       }
@@ -551,15 +574,19 @@ export const DashboardFilters = ({
       if (filter.category === 'calculated dimension') {
         let values: { id: string; name: string }[] = [];
         if (Array.isArray(filter.value)) {
-          if (filter.value.length === 1 && filter.value[0] === 'all') {
-            values = [];
+          let arr: string[] = [];
+          if (filter.value.length === 1 && typeof filter.value[0] === 'string' && filter.value[0].includes(',')) {
+            arr = filter.value[0].split(',').map((v: string) => v.trim());
           } else {
-            values = filter.value
-              .filter((v: any) => v !== 'all')
-              .map((v: any) => ({ id: v, name: v }));
+            arr = filter.value as string[];
           }
+          values = arr
+            .filter((v: any) => v !== 'all')
+            .map((v: any) => ({ id: v, name: v }));
         } else if (typeof filter.value === 'string' && filter.value === 'all') {
           values = [];
+        } else if (typeof filter.value === 'string' && filter.value.includes(',')) {
+          values = filter.value.split(',').map((v: string) => ({ id: v.trim(), name: v.trim() }));
         } else if (filter.value) {
           values = [{ id: filter.value, name: filter.value }];
         }
@@ -583,6 +610,24 @@ export const DashboardFilters = ({
       }
 
       if (filter.category === 'flag') {
+        let flagValue: any = [];
+        if (Array.isArray(filter.value)) {
+          if (filter.value.length === 0 || (filter.value.length === 1 && filter.value[0] === 'all')) {
+            flagValue = [];
+          } else {
+            flagValue = filter.value[0];
+          }
+        } else if (filter.value === 'all' || !filter.value) {
+          flagValue = [];
+        } else {
+          flagValue = filter.value;
+        }
+        let newOperator = filter.operator;
+        if (filter.operator === 'equal to') {
+          newOperator = '=';
+        } else if (filter.operator === 'not equal to') {
+          newOperator = '!=';
+        }
         return {
           category: filter.category,
           data_set: filter.dataSetId,
@@ -594,26 +639,29 @@ export const DashboardFilters = ({
           isDefault: false,
           isDisable: false,
           isSingleValue: false,
-          operator: filter.operator === 'not equal to' ? '!=' : '=',
+          operator: newOperator,
           processedID: filter.processedID,
           processedRequestID: '',
-          value: Array.isArray(filter.value) ? filter.value[0] : filter.value,
+          value: flagValue,
           vocabulary: getVocabulary(),
         };
       }
       if (filter.category === 'dimensions') {
-        // Always store value as array of strings for multi-select
         let values: { id: string; name: string }[] = [];
         if (Array.isArray(filter.value)) {
-          if (filter.value.length === 1 && filter.value[0] === 'all') {
-            values = [];
+          let arr: string[] = [];
+          if (filter.value.length === 1 && typeof filter.value[0] === 'string' && filter.value[0].includes(',')) {
+            arr = filter.value[0].split(',').map((v: string) => v.trim());
           } else {
-            values = filter.value
-              .filter((v: any) => v !== 'all')
-              .map((v: any) => ({ id: v, name: v }));
+            arr = filter.value as string[];
           }
+          values = arr
+            .filter((v: any) => v !== 'all')
+            .map((v: any) => ({ id: v, name: v }));
         } else if (typeof filter.value === 'string' && filter.value === 'all') {
           values = [];
+        } else if (typeof filter.value === 'string' && filter.value.includes(',')) {
+          values = filter.value.split(',').map((v: string) => ({ id: v.trim(), name: v.trim() }));
         }
         return {
           category: filter.category,
@@ -655,11 +703,9 @@ export const DashboardFilters = ({
 
     console.log('selected column is ', selectedColumn)
 
-    // Get the value based on the input type
 
     let filterValue: string | string[] = '';
     if (multiSelect) {
-      // Always send as array for multi-select, even if only one selected
       filterValue = Array.isArray(selectedValues) ? selectedValues.filter(v => v !== undefined && v !== null && v !== '') : [];
     } else if (selectedValues.length === 1) {
       filterValue = selectedValues[0];
@@ -890,6 +936,12 @@ export const DashboardFilters = ({
         // value is like 'between MM/DD/YYYY - MM/DD/YYYY'
         return value;
       }
+      if (category === 'flag') {
+        if (!value || value === 'all' || (Array.isArray(value) && (value.length === 0 || (value.length === 1 && value[0] === 'all')))) {
+          return '';
+        }
+        return value;
+      }
       if (Array.isArray(value)) {
         return value.filter((v: string) => typeof v === 'string' && v.trim().length > 0).join(', ');
       }
@@ -901,7 +953,11 @@ export const DashboardFilters = ({
 
     let operatorDisplay = filter.operator;
     if (filter.category === 'flag') {
-      operatorDisplay = filter.operator === 'not equal to' ? '!=' : '=';
+      if (filter.operator === 'equal to') {
+        operatorDisplay = '=';
+      } else if (filter.operator === 'not equal to') {
+        operatorDisplay = '!=';
+      }
     }
 
     return (
@@ -1244,8 +1300,12 @@ export const DashboardFilters = ({
                                       ...ensureArrayOfStrings(selectedValues),
                                       ...uniqueValues,
                                     ]));
-                                    if (multiSelect) {
-                                      if (!baseOptions.includes('all')) baseOptions.unshift('all');
+                                    if (selectedColumn?.category !== 'flag') {
+                                      if (multiSelect) {
+                                        if (!baseOptions.includes('all')) baseOptions.unshift('all');
+                                      } else {
+                                        baseOptions = baseOptions.filter(v => v !== 'all');
+                                      }
                                     } else {
                                       baseOptions = baseOptions.filter(v => v !== 'all');
                                     }
@@ -1266,13 +1326,15 @@ export const DashboardFilters = ({
                             }}
                             disabledOptions={multiSelect ? (() => {
                               const selected = ensureArrayOfStrings(selectedValues);
-                              if (selected.includes('all')) {
-                                return ((options) => options.filter(v => v !== 'all'))(Array.from(new Set([
-                                  ...ensureArrayOfStrings(selectedValues),
-                                  ...uniqueValues,
-                                ])));
-                              } else if (selected.length > 0) {
-                                return ['all'];
+                              if (selectedColumn?.category !== 'flag') {
+                                if (selected.includes('all')) {
+                                  return ((options) => options.filter(v => v !== 'all'))(Array.from(new Set([
+                                    ...ensureArrayOfStrings(selectedValues),
+                                    ...uniqueValues,
+                                  ])));
+                                } else if (selected.length > 0) {
+                                  return ['all'];
+                                }
                               }
                               return [];
                             })() : []}
