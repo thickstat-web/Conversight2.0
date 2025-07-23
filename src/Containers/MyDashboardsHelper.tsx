@@ -491,6 +491,7 @@ export const DashboardFilters = ({
 
   const handleResetFilters = () => {
     setTopMenuFilters(normalizeDimensionFilters(filters));
+    handleDone();
   };
 
   const handleDone = () => {
@@ -765,12 +766,26 @@ export const DashboardFilters = ({
           operator: filter.operator || '',
           processedID: filter.processedID,
           processedRequestID: '',
-          value: filter.value === 'All Dates' ? [] : (filter.operator === 'between' ? 'between' : filter.value),
+          value: filter.value === 'All Dates' ? 'all' : (filter.operator === 'between' ? 'between' : filter.value),
           vocabulary: getVocabulary(),
         };
       }
 
       if (filter.category === 'calculated dimension') {
+        let values: { id: string; name: string }[] = [];
+        if (Array.isArray(filter.value)) {
+          if (filter.value.length === 1 && filter.value[0] === 'all') {
+            values = [];
+          } else {
+            values = filter.value
+              .filter((v: any) => v !== 'all')
+              .map((v: any) => ({ id: v, name: v }));
+          }
+        } else if (typeof filter.value === 'string' && filter.value === 'all') {
+          values = [];
+        } else if (filter.value) {
+          values = [{ id: filter.value, name: filter.value }];
+        }
         return {
           category: filter.category,
           data_set: filter.dataSetId,
@@ -785,9 +800,7 @@ export const DashboardFilters = ({
           operator: filter.operator,
           processedID: filter.processedID,
           processedRequestID: '',
-          value: Array.isArray(filter.value)
-            ? filter.value.map((v: any) => ({ id: v?.id || v, name: v?.name || v }))
-            : [{ id: filter.value, name: filter.value }],
+          value: values,
           vocabulary: getVocabulary(),
         };
       }
