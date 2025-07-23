@@ -191,7 +191,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           style={[
             styles.itemLabel,
              { color: THEME.selectedText, fontWeight: '600' },
-             isDisabled && { color: '#aaa' },
+             isDisabled && { color: Colors.GRAY_DARK },
           ]}
         >
           {item?.label?.trim()}
