@@ -158,7 +158,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                   backgroundColor: Colors.green20,
                   borderColor: Colors.green5,
                 },
-                isDisabled && { backgroundColor: '#eee', borderColor: '#ccc' },
+                isDisabled && { backgroundColor: Colors.GRAY_DARK, borderColor: Colors.GRAY_DARK },
               ]}
             >
               {isSelected && !isDisabled && (
@@ -171,7 +171,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 style={[
                   styles.radioOuter,
                   isSelected && { borderColor: THEME.primary },
-                  isDisabled && { borderColor: '#ccc' },
+                  isDisabled && { borderColor: Colors.GRAY_DARK },
                 ]}
               >
                 {isSelected && !isDisabled && (
