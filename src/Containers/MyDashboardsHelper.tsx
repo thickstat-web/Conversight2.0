@@ -1192,26 +1192,60 @@ export const DashboardFilters = ({
                       </View>
                       {!['like', 'not like'].includes(operatorValue) ? (
                         <>
-                          {selectedColumn?.category !== 'flag' && (
-                            <View style={styles.toggleRow}>
-                              <Text style={styles.sectionTitle}>Enable Multi-Select</Text>
-                              <Switch
-                                value={multiSelect}
-                                onValueChange={setMultiSelect}
-                                trackColor={{ false: Colors.GRAY_LIGHT, true: Colors.GREEN_MAIN }}
-                                thumbColor={Colors.GREEN_LIGHTEST}
-                                style={styles.toggleSwitch}
-                              />
-                            </View>
-                          )}
+                          <TouchableOpacity
+                            style={styles.toggleRow}
+                            onPress={() => setMultiSelect(!multiSelect)}
+                          >
+                            <Text style={styles.sectionTitle}>Enable Multi-Select</Text>
+                            <Switch
+                              value={multiSelect}
+                              onValueChange={setMultiSelect}
+                              trackColor={{
+                                false: Colors.GRAY_LIGHT,
+                                true: Colors.GREEN_MAIN,
+                              }}
+                              thumbColor={Colors.GREEN_LIGHTEST}
+                              style={styles.toggleSwitch}
+                            />
+                          </TouchableOpacity>
                           <CustomSelect
                             mode={selectedColumn?.category === 'flag' ? 'SINGLE' : (multiSelect ? 'MULTI' : 'SINGLE')}
-                            options={Array.from(new Set([
-                              ...ensureArrayOfStrings(selectedValues),
-                              ...uniqueValues,
-                            ])).map(v => ({ label: v, value: v }))}
+                            options={(() => {
+                              let baseOptions = Array.from(new Set([
+                                ...ensureArrayOfStrings(selectedValues),
+                                ...uniqueValues,
+                              ]));
+                              if (multiSelect) {
+                                if (!baseOptions.includes('all')) baseOptions.unshift('all');
+                              } else {
+                                baseOptions = baseOptions.filter(v => v !== 'all');
+                              }
+                              return baseOptions.map(v => ({ label: v, value: v }));
+                            })()}
                             value={ensureArrayOfStrings(selectedValues)}
-                            onChange={setSelectedValues}
+                            onChange={(vals) => {
+                              if (multiSelect) {
+                                if (vals.includes('all')) {
+                                  setSelectedValues(['all']);
+                                } else {
+                                  setSelectedValues(vals.filter(v => v !== 'all'));
+                                }
+                              } else {
+                                setSelectedValues(vals);
+                              }
+                            }}
+                            disabledOptions={multiSelect ? (() => {
+                              const selected = ensureArrayOfStrings(selectedValues);
+                              if (selected.includes('all')) {
+                                return ((options) => options.filter(v => v !== 'all'))(Array.from(new Set([
+                                  ...ensureArrayOfStrings(selectedValues),
+                                  ...uniqueValues,
+                                ])));
+                              } else if (selected.length > 0) {
+                                return ['all'];
+                              }
+                              return [];
+                            })() : []}
                             placeholder="Select value(s)"
                             loading={loading}
                             showSearch={selectedColumn?.category !== 'flag'}
