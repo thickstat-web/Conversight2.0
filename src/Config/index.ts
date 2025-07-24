@@ -18,7 +18,7 @@ const env = {
  */
 export const { CS_API_HOST, BOT_API_HOST, INGRESS_API_HOST } = __DEV__
   ? env.STAGING
-  : env.PRODUCTION
+  : env.STAGING
 
 export const Config = {
   CS_API_HOST,

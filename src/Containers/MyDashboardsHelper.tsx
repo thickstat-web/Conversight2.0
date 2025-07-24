@@ -946,8 +946,7 @@ export const DashboardFilters = ({
         </View>
       </View>
       <Modal
-        animationType="slide"
-        presentationStyle='pageSheet'
+        animationType='slide'
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
