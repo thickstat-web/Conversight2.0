@@ -28,6 +28,7 @@ interface CustomSelectProps {
   style?: any
   loading?: boolean
   showSearch?: boolean
+  disabledOptions?: string[]
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -40,6 +41,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   style,
   loading,
   showSearch = true,
+  disabledOptions = [],
 }) => {
   const { Colors } = useTheme()
 
@@ -130,10 +132,11 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
   const renderItem = ({ item }: { item: Option }) => {
     const isSelected = selected.includes(item.value)
+    const isDisabled = disabledOptions.includes(item.value)
 
     return (
       <TouchableOpacity
-        onPress={() => handleToggle(item)}
+        onPress={() => { if (!isDisabled) handleToggle(item) }}
         style={[  
           styles.itemContainer,
           isSelected && {
@@ -141,8 +144,10 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             borderLeftWidth: 3,
             borderLeftColor: Colors.GREEN_DARK,
           },
+          isDisabled && { opacity: 0.5 },
         ]}
-        activeOpacity={0.7}
+        activeOpacity={isDisabled ? 1 : 0.7}
+        disabled={isDisabled}
       >
         <View style={styles.checkboxContainer}>
           {isMulti ? (
@@ -153,9 +158,10 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                   backgroundColor: Colors.green20,
                   borderColor: Colors.green5,
                 },
+                isDisabled && { backgroundColor: Colors.GRAY_DARK, borderColor: Colors.GRAY_DARK },
               ]}
             >
-              {isSelected && (
+              {isSelected && !isDisabled && (
                 <Icon name="checkmark" size={16} color={THEME.primary} />
               )}
             </View>
@@ -165,9 +171,10 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                 style={[
                   styles.radioOuter,
                   isSelected && { borderColor: THEME.primary },
+                  isDisabled && { borderColor: Colors.GRAY_DARK },
                 ]}
               >
-                {isSelected && (
+                {isSelected && !isDisabled && (
                   <View
                     style={[
                       styles.radioInner,
@@ -184,12 +191,13 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           style={[
             styles.itemLabel,
              { color: THEME.selectedText, fontWeight: '600' },
+             isDisabled && { color: Colors.GRAY_DARK },
           ]}
         >
           {item?.label?.trim()}
         </Text>
 
-        {isSelected && !isMulti && (
+        {isSelected && !isMulti && !isDisabled && (
           <Icon name="checkmark" size={20} color={THEME.primary} />
         )}
       </TouchableOpacity>
