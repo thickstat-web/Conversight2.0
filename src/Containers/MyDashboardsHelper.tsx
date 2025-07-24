@@ -410,7 +410,12 @@ export const DashboardFilters = ({
     );
 
     if (existingFilter) {
-      setOperatorValue(existingFilter.operator || '');
+      let op = existingFilter.operator || '';
+      if (columnItem.category === 'flag') {
+        if (op === 'equal to') op = '=';
+        if (op === 'not equal to') op = '!=';
+      }
+      setOperatorValue(op);
       // Always normalize to array for dimensions and multi-select
       let normalizedValues: string[] = [];
       if (selectedColumn && selectedColumn.category === 'dimensions') {
@@ -713,6 +718,11 @@ export const DashboardFilters = ({
       filterValue = textInputValue;
     }
 
+    if (selectedColumn.category === 'flag') {
+      if (Array.isArray(selectedValues) && selectedValues.includes('all')) {
+        filterValue = [];
+      }
+    }
 
     // Debug the dateFilter value
     console.log('Current dateFilter value:', dateFilter);
@@ -938,7 +948,7 @@ export const DashboardFilters = ({
       }
       if (category === 'flag') {
         if (!value || value === 'all' || (Array.isArray(value) && (value.length === 0 || (value.length === 1 && value[0] === 'all')))) {
-          return '';
+          return 'all';
         }
         return value;
       }
@@ -1249,47 +1259,60 @@ export const DashboardFilters = ({
                       <View style={styles.operatorContainer}>
                         <Text style={styles.operatorLabel}>Operator</Text>
                         <View style={styles.operatorOptions}>
-                          {selectedColumn?.category && operators?.[selectedColumn.category]?.map((option: any) => (
-                            <TouchableOpacity
-                              key={option.id}
-                              style={[
-                                styles.operatorOption,
-                                operatorValue === option.id && styles.selectedOperator,
-                              ]}
-                              onPress={() => {
-                                setOperatorValue(option.id);
-                              }}
-                            >
-                              <Text
+                          {selectedColumn?.category && operators?.[selectedColumn.category]?.map((option: any) => {
+                            const isSelected =
+                              operatorValue === option.id ||
+                              (operatorValue === '=' && (option.id === 'equal to' || option.id === '=')) ||
+                              (operatorValue === '!=' && (option.id === 'not equal to' || option.id === '!='));
+                            return (
+                              <TouchableOpacity
+                                key={option.id}
                                 style={[
-                                  styles.operatorText,
-                                  operatorValue === option.id && styles.selectedOperatorText,
+                                  styles.operatorOption,
+                                  isSelected && styles.selectedOperator,
                                 ]}
+                                onPress={() => {
+                                  let op = option.id;
+                                  if (selectedColumn?.category === 'flag') {
+                                    if (op === 'equal to') op = '=';
+                                    if (op === 'not equal to') op = '!=';
+                                  }
+                                  setOperatorValue(op);
+                                }}
                               >
-                                {option.name || option.id}
-                              </Text>
-                            </TouchableOpacity>
-                          ))}
+                                <Text
+                                  style={[
+                                    styles.operatorText,
+                                    isSelected && styles.selectedOperatorText,
+                                  ]}
+                                >
+                                  {option.name || option.id}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
                         </View>
                       </View>
                       {!['like', 'not like'].includes(operatorValue) ? (
                         <>
-                          <TouchableOpacity
-                            style={styles.toggleRow}
-                            onPress={() => setMultiSelect(!multiSelect)}
-                          >
-                            <Text style={styles.sectionTitle}>Enable Multi-Select</Text>
-                            <Switch
-                              value={multiSelect}
-                              onValueChange={setMultiSelect}
-                              trackColor={{
-                                false: Colors.GRAY_LIGHT,
-                                true: Colors.GREEN_MAIN,
-                              }}
-                              thumbColor={Colors.GREEN_LIGHTEST}
-                              style={styles.toggleSwitch}
-                            />
-                          </TouchableOpacity>
+                          {selectedColumn?.category !== 'flag' && (
+                            <TouchableOpacity
+                              style={styles.toggleRow}
+                              onPress={() => setMultiSelect(!multiSelect)}
+                            >
+                              <Text style={styles.sectionTitle}>Enable Multi-Select</Text>
+                              <Switch
+                                value={multiSelect}
+                                onValueChange={setMultiSelect}
+                                trackColor={{
+                                  false: Colors.GRAY_LIGHT,
+                                  true: Colors.GREEN_MAIN,
+                                }}
+                                thumbColor={Colors.GREEN_LIGHTEST}
+                                style={styles.toggleSwitch}
+                              />
+                            </TouchableOpacity>
+                          )}
                           <CustomSelect
                             mode={selectedColumn?.category === 'flag' ? 'SINGLE' : (multiSelect ? 'MULTI' : 'SINGLE')}
                             options={
@@ -1300,21 +1323,23 @@ export const DashboardFilters = ({
                                       ...ensureArrayOfStrings(selectedValues),
                                       ...uniqueValues,
                                     ]));
-                                    if (selectedColumn?.category !== 'flag') {
+                                    if (selectedColumn?.category === 'flag') {
+                                      if (!baseOptions.includes('all')) baseOptions.unshift('all');
+                                    } else {
                                       if (multiSelect) {
                                         if (!baseOptions.includes('all')) baseOptions.unshift('all');
                                       } else {
                                         baseOptions = baseOptions.filter(v => v !== 'all');
                                       }
-                                    } else {
-                                      baseOptions = baseOptions.filter(v => v !== 'all');
                                     }
                                     return baseOptions.map(v => ({ label: v, value: v }));
                                   })()
                             }
                             value={ensureArrayOfStrings(selectedValues)}
                             onChange={(vals) => {
-                              if (multiSelect) {
+                              if (selectedColumn?.category === 'flag') {
+                                setSelectedValues(vals);
+                              } else if (multiSelect) {
                                 if (vals.includes('all')) {
                                   setSelectedValues(['all']);
                                 } else {
