@@ -35,6 +35,7 @@ import NewLabel from '@/Assets/Images/iconsSVG/newLabel.svg'
 import OrgPassword from './OrgPassword'
 import { Org } from '@/Types/VerifyEmailResponse'
 import { ENTER_CASDOOR_SCREEN } from '@/Constants/screens'
+import SearchBar from '@/Components/SearchBar'
 
 interface Props {
   navigation: any
@@ -59,6 +60,7 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
   const dispatch = useAppDispatch()
   const [openModal, setOpenModal] = useState(false)
   const openModalAnim = useRef(new Animated.Value(0)).current
+  const [searchText, setSearchText] = useState('')
 
   const toggleModal = useCallback(
     (toValue = 0) => {
@@ -89,6 +91,10 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
       navigation.navigate(ENTER_CASDOOR_SCREEN, { redirectURL: redirectURL?.domain[0]?.domainURL })
     }
   }
+
+  const filteredOrganizations = organizations.filter(org =>
+    org.name.toLowerCase().includes(searchText.trim().toLowerCase())
+  )
 
   const renderCustomPickerModal = ({
     visible,
@@ -140,8 +146,20 @@ const ChooseOrganizationContainer = ({ navigation }: Props) => {
           >
             {MODAL_TITLE}
           </Text>
-
-          <FlatList data={organizations} renderItem={renderItem} />
+          <View style={{ marginHorizontal: 16, marginBottom: 8 }}>
+            <SearchBar
+              searchText={searchText}
+              setSearchText={setSearchText}
+              placeholderTextColor={Colors.GRAY_DARK}
+              placeholderText="Search organizations..."
+              selectionColor={Colors.GREEN_MAIN}
+              cursorColor={Colors.GREEN_MAIN}
+              textColor={Colors.GREEN_DARK}
+              iconColor={Colors.GREEN_DARK}
+              style={{ borderColor: Colors.GREEN_DARK, marginBottom: 8 }}
+            />
+          </View>
+          <FlatList data={filteredOrganizations} renderItem={renderItem} />
         </Animated.View>
       </Modal>
     )
@@ -297,7 +315,8 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontFamily: 'Montserrat-SemiBold',
     alignSelf: 'center',
-    top: -40,
+    paddingTop: 30,
+    paddingBottom: 30,
     fontSize: 18,
   },
 })
