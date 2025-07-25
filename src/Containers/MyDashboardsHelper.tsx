@@ -1058,7 +1058,7 @@ export const DashboardFilters = ({
         </View>
       </View>
       <Modal
-        animationType='slide'
+        animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
@@ -1232,41 +1232,93 @@ export const DashboardFilters = ({
                                 </Text>
                               </TouchableOpacity>
                             </View>
-                            {/* Native Spinner Date Picker (no custom modal) */}
                             {nativePicker && (
-                              <DateTimePicker
-                                value={tempDate || new Date()}
-                                display="default"
-                                minimumDate={nativePicker === 'end' && selectedDateRange.startDate ? new Date(selectedDateRange.startDate) : undefined}
-                                maximumDate={nativePicker === 'start' && selectedDateRange.endDate ? new Date(selectedDateRange.endDate) : undefined}
-                                onChange={(event: DateTimePickerEvent, date?: Date) => {
-                                  const pickerType = nativePicker; // Save current value
-                                  setNativePicker(false);
-                                  if (event.type === 'dismissed') return;
-                                  if (!date) return;
-                                  setTempDate(date); // Always update tempDate for UI feedback
-                                  if (event.type === 'set') {
-                                    const picked = dayjs(date).startOf('day');
-                                    if (pickerType === 'start') {
-                                      // Prevent same date as end
-                                      if (selectedDateRange.endDate && picked.isSame(dayjs(selectedDateRange.endDate), 'day')) return;
-                                      setSelectedDateRange(range => ({
-                                        ...range,
-                                        startDate: picked.toISOString(),
-                                        // If endDate is before new startDate, reset endDate
-                                        endDate: range.endDate && picked.isAfter(dayjs(range.endDate)) ? undefined : range.endDate,
-                                      }));
-                                    } else {
-                                      // Prevent same date as start
-                                      if (selectedDateRange.startDate && picked.isSame(dayjs(selectedDateRange.startDate), 'day')) return;
-                                      setSelectedDateRange(range => ({
-                                        ...range,
-                                        endDate: picked.toISOString(),
-                                      }));
+                              Platform.OS === 'ios' ? (
+                                <Modal visible={!!nativePicker} transparent animationType="slide">
+                                  <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                                    <View style={{ backgroundColor: Colors.WHITE, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 16 }}>
+                                      <DateTimePicker
+                                        value={tempDate || new Date()}
+                                        display="spinner"
+                                        mode="date"
+                                        onChange={(event, date) => {
+                                          if (date) setTempDate(date);
+                                        }}
+                                        minimumDate={nativePicker === 'end' && selectedDateRange.startDate ? new Date(selectedDateRange.startDate) : undefined}
+                                        maximumDate={nativePicker === 'start' && selectedDateRange.endDate ? new Date(selectedDateRange.endDate) : undefined}
+                                      />
+                                      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 16 }}>
+                                        <Button
+                                          label="Cancel"
+                                          onPress={() => {
+                                            setNativePicker(false);
+                                            setTempDate(undefined);
+                                          }}
+                                          style={{ marginRight: 8, backgroundColor: Colors.GREEN_DARK, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 8, minWidth: 80 }}
+                                          labelStyle={{ color: Colors.WHITE, fontWeight: '600' }}
+                                        />
+                                        <Button
+                                          label="OK"
+                                          onPress={() => {
+                                            if (tempDate) {
+                                              if (nativePicker === 'start') {
+                                                setSelectedDateRange(range => ({
+                                                  ...range,
+                                                  startDate: tempDate.toISOString(),
+                                                  endDate: range.endDate && tempDate > new Date(range.endDate) ? undefined : range.endDate,
+                                                }));
+                                              } else {
+                                                setSelectedDateRange(range => ({
+                                                  ...range,
+                                                  endDate: tempDate.toISOString(),
+                                                }));
+                                              }
+                                            }
+                                            setNativePicker(false);
+                                            setTempDate(undefined);
+                                          }}
+                                          style={{ backgroundColor: Colors.GREEN_DARK, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 8, minWidth: 80 }}
+                                          labelStyle={{ color: Colors.WHITE, fontWeight: '600' }}
+                                        />
+                                      </View>
+                                    </View>
+                                  </View>
+                                </Modal>
+                              ) : (
+                                <DateTimePicker
+                                  value={tempDate || new Date()}
+                                  display="default"
+                                  minimumDate={nativePicker === 'end' && selectedDateRange.startDate ? new Date(selectedDateRange.startDate) : undefined}
+                                  maximumDate={nativePicker === 'start' && selectedDateRange.endDate ? new Date(selectedDateRange.endDate) : undefined}
+                                  onChange={(event: DateTimePickerEvent, date?: Date) => {
+                                    const pickerType = nativePicker; // Save current value
+                                    setNativePicker(false);
+                                    if (event.type === 'dismissed') return;
+                                    if (!date) return;
+                                    setTempDate(date); // Always update tempDate for UI feedback
+                                    if (event.type === 'set') {
+                                      const picked = dayjs(date).startOf('day');
+                                      if (pickerType === 'start') {
+                                        // Prevent same date as end
+                                        if (selectedDateRange.endDate && picked.isSame(dayjs(selectedDateRange.endDate), 'day')) return;
+                                        setSelectedDateRange(range => ({
+                                          ...range,
+                                          startDate: picked.toISOString(),
+                                          // If endDate is before new startDate, reset endDate
+                                          endDate: range.endDate && picked.isAfter(dayjs(range.endDate)) ? undefined : range.endDate,
+                                        }));
+                                      } else {
+                                        // Prevent same date as start
+                                        if (selectedDateRange.startDate && picked.isSame(dayjs(selectedDateRange.startDate), 'day')) return;
+                                        setSelectedDateRange(range => ({
+                                          ...range,
+                                          endDate: picked.toISOString(),
+                                        }));
+                                      }
                                     }
-                                  }
-                                }}
-                              />
+                                  }}
+                                />
+                              )
                             )}
                           </View>
                         )}
