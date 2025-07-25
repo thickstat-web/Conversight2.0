@@ -400,6 +400,20 @@ export const DashboardFilters = ({
     }
   }
 
+  const isApplyDisabled = () => {
+    if (selectedColumn?.category === 'dateFilter') {
+      return !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate));
+    }
+    if (
+      selectedColumn?.category === 'dimensions' ||
+      selectedColumn?.category === 'calculated dimension' ||
+      selectedColumn?.category === 'flag'
+    ) {
+      return !selectedValues || selectedValues.length === 0;
+    }
+    return false;
+  };
+
   const handleFilterValueClick = (columnItem: ColumnItem) => {
     console.log('column item is ', columnItem)
     setUniqueValues([])
@@ -1396,9 +1410,9 @@ export const DashboardFilters = ({
                       style={{
                         backgroundColor: Colors.GREEN_DARK,
                         marginTop: 20,
-                        opacity: (selectedColumn?.category === 'dateFilter' && !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate))) ? 0.5 : 1
+                        opacity: isApplyDisabled() ? 0.5 : 1
                       }}
-                      disabled={selectedColumn?.category === 'dateFilter' && !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate))}
+                      disabled={isApplyDisabled()}
                     />
                   </View>
                 </View>
