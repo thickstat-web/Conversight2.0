@@ -401,8 +401,11 @@ export const DashboardFilters = ({
   }
 
   const isApplyDisabled = () => {
-    if (selectedColumn?.category === 'dateFilter') {
-      return !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate));
+    if (selectedColumn?.category === 'dateFilter' || selectedColumn?.category === 'date') {
+      if (dateFilter === 'between') {
+        return !(selectedDateRange.startDate && selectedDateRange.endDate);
+      }
+      return dateFilter === 'all';
     }
     if (
       selectedColumn?.category === 'dimensions' ||
@@ -941,6 +944,9 @@ export const DashboardFilters = ({
     // Update parent component and close modal
     onFilterChange(retainFilters);
     toggleFilterModal(retainFilters);
+    if (operatorValue === 'like' || operatorValue === 'not like') {
+      setTextInputValue('');
+    }
     setModalVisible(false);
 
     // // Reset form
