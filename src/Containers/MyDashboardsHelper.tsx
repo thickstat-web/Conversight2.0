@@ -26,7 +26,6 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import { useConverseResponseMutation } from '@/Services/modules/ingress';
 import CustomSelect from '@/Components/CustomSelect';
 import { getLocalStore } from '@/Utils/asyncStorage';
-import { name, sortBy } from 'lodash';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
@@ -648,12 +647,12 @@ export const DashboardFilters = ({
         let flagValue: any = null;
         if (Array.isArray(filter.value)) {
           if (filter.value.length === 0 || (filter.value.length === 1 && filter.value[0] === 'all')) {
-            flagValue = null; // was []
+            flagValue = null; 
           } else {
             flagValue = filter.value[0];
           }
         } else if (filter.value === 'all' || !filter.value) {
-          flagValue = null; // was []
+          flagValue = null; 
         } else {
           flagValue = filter.value;
         }
@@ -750,7 +749,7 @@ export const DashboardFilters = ({
 
     if (selectedColumn.category === 'flag') {
       if (Array.isArray(selectedValues) && selectedValues.includes('all')) {
-        filterValue = null; // was []
+        filterValue = null; 
       }
     }
 
