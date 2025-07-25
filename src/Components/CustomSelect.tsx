@@ -477,24 +477,6 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               </View>
             }
           />
-
-          <View style={[styles.footer, { borderTopColor: THEME.divider }]}>
-            <Button
-              label="Done"
-              onPress={() => setVisible(false)}
-              backgroundColor={THEME.button}
-              labelStyle={styles.buttonLabel}
-              style={styles.button}
-              iconSource={() => (
-                <Icon
-                  name="checkmark-done"
-                  size={20}
-                  color={THEME.buttonText}
-                  style={styles.buttonIcon}
-                />
-              )}
-            />
-          </View>
         </View>
       )}
     </View>
