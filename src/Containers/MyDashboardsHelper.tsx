@@ -26,7 +26,6 @@ import { useNetInfo } from '@react-native-community/netinfo';
 import { useConverseResponseMutation } from '@/Services/modules/ingress';
 import CustomSelect from '@/Components/CustomSelect';
 import { getLocalStore } from '@/Utils/asyncStorage';
-import { name, sortBy } from 'lodash';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
@@ -73,7 +72,7 @@ interface DasboardFilter {
   columnId: string;
   columnName: string;
   operator: string;
-  value: string | string[];
+  value: string | string[] | null;
   dataSetId?: string;
   category: string;
   id?: string;
@@ -435,7 +434,20 @@ export const DashboardFilters = ({
       setOperatorValue(op);
       // Always normalize to array for dimensions and multi-select
       let normalizedValues: string[] = [];
-      if (selectedColumn && selectedColumn.category === 'dimensions') {
+      if (columnItem.category === 'flag') {
+        if (
+          (Array.isArray(existingFilter.value) && (existingFilter.value.includes('all') || existingFilter.value.length === 0)) ||
+          existingFilter.value === 'all' ||
+          existingFilter.value === undefined ||
+          existingFilter.value === null
+        ) {
+          normalizedValues = ['all'];
+        } else if (Array.isArray(existingFilter.value)) {
+          normalizedValues = existingFilter.value.map((v: any) => typeof v === 'object' ? v.id || v.value || v.name : v);
+        } else if (typeof existingFilter.value === 'string') {
+          normalizedValues = [existingFilter.value];
+        }
+      } else if (selectedColumn && selectedColumn.category === 'dimensions') {
         if (Array.isArray(existingFilter.value)) {
           normalizedValues = existingFilter.value.map((v: any) => typeof v === 'object' ? v.id || v.value || v.name : v);
         } else if (typeof existingFilter.value === 'string') {
@@ -632,15 +644,15 @@ export const DashboardFilters = ({
       }
 
       if (filter.category === 'flag') {
-        let flagValue: any = [];
+        let flagValue: any = null;
         if (Array.isArray(filter.value)) {
           if (filter.value.length === 0 || (filter.value.length === 1 && filter.value[0] === 'all')) {
-            flagValue = [];
+            flagValue = null; 
           } else {
             flagValue = filter.value[0];
           }
         } else if (filter.value === 'all' || !filter.value) {
-          flagValue = [];
+          flagValue = null; 
         } else {
           flagValue = filter.value;
         }
@@ -726,7 +738,7 @@ export const DashboardFilters = ({
     console.log('selected column is ', selectedColumn)
 
 
-    let filterValue: string | string[] = '';
+    let filterValue: string | string[] | null = '';
     if (multiSelect) {
       filterValue = Array.isArray(selectedValues) ? selectedValues.filter(v => v !== undefined && v !== null && v !== '') : [];
     } else if (selectedValues.length === 1) {
@@ -737,7 +749,7 @@ export const DashboardFilters = ({
 
     if (selectedColumn.category === 'flag') {
       if (Array.isArray(selectedValues) && selectedValues.includes('all')) {
-        filterValue = [];
+        filterValue = null; 
       }
     }
 
@@ -1406,10 +1418,22 @@ export const DashboardFilters = ({
                                     return baseOptions.map(v => ({ label: v, value: v }));
                                   })()
                             }
-                            value={ensureArrayOfStrings(selectedValues)}
+                            value={(() => {
+                              if (selectedColumn?.category === 'flag') {
+                                if (!selectedValues || selectedValues.length === 0 || selectedValues.includes('all')) {
+                                  return ['all'];
+                                }
+                                return selectedValues;
+                              }
+                              return ensureArrayOfStrings(selectedValues);
+                            })()}
                             onChange={(vals) => {
                               if (selectedColumn?.category === 'flag') {
-                                setSelectedValues(vals);
+                                if (vals.includes('all')) {
+                                  setSelectedValues(['all']);
+                                } else {
+                                  setSelectedValues(vals.filter(v => v !== 'all'));
+                                }
                               } else if (multiSelect) {
                                 if (vals.includes('all')) {
                                   setSelectedValues(['all']);
