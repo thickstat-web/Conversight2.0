@@ -400,6 +400,23 @@ export const DashboardFilters = ({
     }
   }
 
+  const isApplyDisabled = () => {
+    if (selectedColumn?.category === 'dateFilter' || selectedColumn?.category === 'date') {
+      if (dateFilter === 'between') {
+        return !(selectedDateRange.startDate && selectedDateRange.endDate);
+      }
+      return dateFilter === 'all';
+    }
+    if (
+      selectedColumn?.category === 'dimensions' ||
+      selectedColumn?.category === 'calculated dimension' ||
+      selectedColumn?.category === 'flag'
+    ) {
+      return !selectedValues || selectedValues.length === 0;
+    }
+    return false;
+  };
+
   const handleFilterValueClick = (columnItem: ColumnItem) => {
     console.log('column item is ', columnItem)
     setUniqueValues([])
@@ -927,6 +944,9 @@ export const DashboardFilters = ({
     // Update parent component and close modal
     onFilterChange(retainFilters);
     toggleFilterModal(retainFilters);
+    if (operatorValue === 'like' || operatorValue === 'not like') {
+      setTextInputValue('');
+    }
     setModalVisible(false);
 
     // // Reset form
@@ -1395,9 +1415,9 @@ export const DashboardFilters = ({
                       style={{
                         backgroundColor: Colors.GREEN_DARK,
                         marginTop: 20,
-                        opacity: (selectedColumn?.category === 'dateFilter' && !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate))) ? 0.5 : 1
+                        opacity: isApplyDisabled() ? 0.5 : 1
                       }}
-                      disabled={selectedColumn?.category === 'dateFilter' && !((dateFilter !== 'all' && dateFilter !== 'between') || (dateFilter === 'between' && selectedDateRange.startDate && selectedDateRange.endDate))}
+                      disabled={isApplyDisabled()}
                     />
                   </View>
                 </View>
