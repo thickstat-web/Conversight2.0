@@ -404,7 +404,7 @@ export const DashboardFilters = ({
       if (dateFilter === 'between') {
         return !(selectedDateRange.startDate && selectedDateRange.endDate);
       }
-      return dateFilter === 'all';
+      return false;
     }
     if (
       selectedColumn?.category === 'dimensions' ||
