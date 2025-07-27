@@ -404,13 +404,16 @@ export const DashboardFilters = ({
       if (dateFilter === 'between') {
         return !(selectedDateRange.startDate && selectedDateRange.endDate);
       }
-      return dateFilter === 'all';
+      return false;
     }
     if (
       selectedColumn?.category === 'dimensions' ||
       selectedColumn?.category === 'calculated dimension' ||
       selectedColumn?.category === 'flag'
     ) {
+      if (operatorValue === 'like' || operatorValue === 'not like') {
+        return !textInputValue || textInputValue.trim() === '';
+      }
       return !selectedValues || selectedValues.length === 0;
     }
     return false;
@@ -420,6 +423,7 @@ export const DashboardFilters = ({
     console.log('column item is ', columnItem)
     setUniqueValues([])
     setSelectedColumn(columnItem);
+    setTextInputValue('');
 
     const existingFilter = topMenuFilters.find(
       f => f.columnId === columnItem.columnId
@@ -1073,7 +1077,10 @@ export const DashboardFilters = ({
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        onRequestClose={() => {
+          setModalVisible(false);
+          setTextInputValue('');
+        }}
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -1094,7 +1101,10 @@ export const DashboardFilters = ({
                     ) : (
                       <Text style={styles.sectionTitle}>Filter Settings</Text>
                     )}
-                    <TouchableOpacity onPress={() => setModalVisible(false)}>
+                    <TouchableOpacity onPress={() => {
+                      setModalVisible(false);
+                      setTextInputValue('');
+                    }}>
                       <Icon name="close-circle-outline" size={24} color={Colors.GREEN_DARK} />
                     </TouchableOpacity>
                   </View>
@@ -1361,6 +1371,9 @@ export const DashboardFilters = ({
                                     if (op === 'not equal to') op = '!=';
                                   }
                                   setOperatorValue(op);
+                                  if (!['like', 'not like'].includes(op)) {
+                                    setTextInputValue('');
+                                  }
                                 }}
                               >
                                 <Text
