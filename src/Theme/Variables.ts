@@ -40,6 +40,7 @@ export const Colors: ThemeColors = {
   TOGGLE_TRACK_OFF: '#E0E0E0',
   TOGGLE_TRACK_ON: '#00AA39',
   TOGGLE_THUMB: '#FFFFFF',
+  PURE_BLACK: '#000000',
 }
 
 export const NavigationColors: Partial<ThemeNavigationColors> = {

@@ -61,7 +61,7 @@ const OrgPassword = ({ navigation }: { navigation: any }) => {
         password: password.trim(),
         deviceId: await getUniqueId(),
         deviceName: DEVICE_NAME,
-        orgId: signInOrg?.orgId,
+        origin: signInOrg?.orgId || '',
       }
       signIn(authData)
     }

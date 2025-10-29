@@ -3,5 +3,5 @@ export interface SignInRequestData {
   password: string
   deviceId: string
   deviceName: string
-  orgId: string
+  origin: string
 }

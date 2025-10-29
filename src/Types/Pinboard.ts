@@ -27,6 +27,7 @@ export interface Filter {
   value: string | FilterValue[]
   dateValues: DateValue[]
   isDefault: boolean
+  vocabulary: string[]
 }
 
 export interface Pinboard {

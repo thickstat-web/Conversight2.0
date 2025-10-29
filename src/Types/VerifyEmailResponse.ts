@@ -25,7 +25,7 @@ export interface OrgData {
   userId: string
   name: string
   accessList: string[]
-  apiConfig: ApiConfig
+  apiConfig: ApiConfig | null
   isCasdoorOrg: boolean
 }
 
@@ -39,6 +39,18 @@ export interface VerifyEmailResponse {
   code: ResponseCode
   errors: ErrorMessage[]
   orgData: OrgData[]
+}
+
+export interface NewOrgData {
+  domain: Domain[]
+  name: string
+  isCasdoorOrg: boolean
+}
+
+export interface NewVerifyEmailResponse {
+  code: ResponseCode
+  errors: ErrorMessage[]
+  orgData: NewOrgData[]
 }
 
 export interface Org {

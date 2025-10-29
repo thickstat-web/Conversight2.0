@@ -274,13 +274,10 @@ export const DashboardFilters = ({
   const [nativePicker, setNativePicker] = useState<false | 'start' | 'end'>(false);
   const [tempDate, setTempDate] = useState<Date | undefined>(undefined);
 
-  console.log('selected column is ', selectedColumn)
-
   useEffect(() => {
     setLoading(true)
     const loadConfig = async () => {
       const configData = (await getLocalStore('conversight.dataset.config')) || {}
-      console.log('config data is ', configData)
       setOperators(configData?.operators)
       setLoading(false)
     }
@@ -420,7 +417,7 @@ export const DashboardFilters = ({
   };
 
   const handleFilterValueClick = (columnItem: ColumnItem) => {
-    console.log('column item is ', columnItem)
+
     setUniqueValues([])
     setSelectedColumn(columnItem);
     setTextInputValue('');
@@ -1258,9 +1255,10 @@ export const DashboardFilters = ({
                               Platform.OS === 'ios' ? (
                                 <Modal visible={!!nativePicker} transparent animationType="slide">
                                   <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                                    <View style={{ backgroundColor: Colors.WHITE, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 16 }}>
+                                    <View style={{ backgroundColor: Colors.WHITE, borderTopLeftRadius: 16, borderTopRightRadius: 16, padding: 16 ,  }}>
                                       <DateTimePicker
                                         value={tempDate || new Date()}
+                                        textColor={Colors.PURE_BLACK}             
                                         display="spinner"
                                         mode="date"
                                         onChange={(event, date) => {
