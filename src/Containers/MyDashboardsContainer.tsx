@@ -266,9 +266,6 @@ const MyDashboardsContainer = ({ navigation, route }) => {
         dispatch(kbnetApiSlice.endpoints.defaultData.initiate('')).unwrap(),
         dispatch(kbnetApiSlice.endpoints.operators.initiate('')).unwrap(),
       ]);
-      console.log('defaultConfig is ', defaultConfig)
-      console.log('defaultData is ', defaultData)
-      console.log('operators is ', operators)
       mergeDatasetConfigResponses(defaultConfig, defaultData, operators);
     } catch (error) {
       console.error('Failed to fetch data:', error);
