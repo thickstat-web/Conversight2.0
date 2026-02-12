@@ -287,7 +287,7 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
           let orderedColumns: string[] = []
           let colType = { dim: [], date: [], metrics: [] }
           if (colTypeString) {
-            colType = JSON.parse(colTypeString)
+            colType = colTypeString ? JSON.parse(colTypeString) :{}
             orderedColumns = buildOrderedColumns(
               isColumnReorder,
               colType,
@@ -298,15 +298,15 @@ export const fetchPinnedItemData = (build: EndpointBuilder<any, any, any>) => {
           if (status !== 'failed') {
             rawData = {
               id: ID,
-              columnMetadata: JSON.parse(data?.colMetadata),
+              columnMetadata: data?.colMetadata ? JSON.parse(data?.colMetadata) : {},
               columns,
               orderedColumns,
               colType,
               createdAt,
               base64Data: val,
-              text: atob(data.questiontext),
+              text: data?.questiontext ? atob(data.questiontext) : '',
               pinboardItemId: id,
-              utterance: utterance.length ? utterance : displayUtterance,
+              utterance: utterance?.length ? utterance : displayUtterance,
               status,
             }
           }

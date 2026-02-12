@@ -107,10 +107,8 @@ type RouteParams = {
 
 const DashboardContainer = ({ route }: any) => {
   const { pinboardId, appliedFilters } = route.params as RouteParams
-  console.log('applied filters is ',appliedFilters)
   const { Colors } = useTheme()
   const filters = buildDashboardFilters(appliedFilters)
-  console.log('constructed filters is ',filters)
   const [crossRetainFilter, setCrossRetainFilter] = useState([])
   const retainFiltersRef = useRef<any>(null)
   const { data } = useFetchPinboardsQuery()
