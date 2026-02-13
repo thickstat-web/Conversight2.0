@@ -395,7 +395,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
             followupData.push({ type: 'WebURL', data: urlFollowupData })
           } else {
             const coverseData = tmpData as FollowupComponentData
-            if (coverseData && coverseData.status !== 'failed') {
+            if (coverseData) {
               const {
                 columns = [],
                 column_metadata = {},
@@ -419,7 +419,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
                 ),
                 colType,
                 createdAt,
-                base64Data: val,
+                base64Data: val ?? "w10=",
                 text,
                 utterance,
                 status,
@@ -429,7 +429,7 @@ export const fetchFollowupData = (build: EndpointBuilder<any, any, any>) => {
           }
         }
       }
-
+      
       return {
         success: code === '200' && message === 'success',
         data: followupData,
