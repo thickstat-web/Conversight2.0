@@ -45,15 +45,17 @@ export default function ({
       let ids: string[] = []
       let components: PinboardItem[] = []
       pinboardData.forEach(item => {
-        const { id, title } = item
-        ids.push(id)
-        const pinItem: PinboardItem = {
-          id,
-          title,
-          loading: true,
-          isTextCard: false,
+        const { id, title, renderType: mode } = item
+        if(mode !== 'story'){
+          ids.push(id)
+          const pinItem: PinboardItem = {
+            id,
+            title,
+            loading: true,
+            isTextCard: false,
+          }
+          components.push(pinItem)
         }
-        components.push(pinItem)
       })
       setPinboardComponents(components)
 

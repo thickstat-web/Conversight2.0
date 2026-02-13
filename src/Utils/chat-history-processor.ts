@@ -146,8 +146,8 @@ const normalizeConverseData = (
 ): ProcessedResponse => {
   // console.log('[response-processor] Process response...')
   // Decode base64 to array of values
-  const decoded = atob(base64Value)
-  const valueArr = JSON.parse(decoded)
+  const decoded = base64Value ? atob(base64Value) : ''
+  const valueArr = decoded ? JSON.parse(decoded) : []
 
   // Cleanse column names
   const cleansedColumns = columns.map(column => cleanseColumn(column))
