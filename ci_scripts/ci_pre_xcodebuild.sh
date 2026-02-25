@@ -80,8 +80,17 @@ fi
 if [ -f "yarn.lock" ]; then
     echo "Using Yarn to install dependencies..."
     if ! command -v yarn &> /dev/null; then
-        echo "❌ Error: yarn command not found"
-        exit 1
+        echo "⚠️  Yarn not found, installing via npm..."
+        if ! command -v npm &> /dev/null; then
+            echo "❌ Error: npm command not found"
+            exit 1
+        fi
+        npm install -g yarn
+        if ! command -v yarn &> /dev/null; then
+            echo "❌ Error: Failed to install yarn"
+            exit 1
+        fi
+        echo "✅ Yarn installed successfully"
     fi
     yarn install --frozen-lockfile
 else
