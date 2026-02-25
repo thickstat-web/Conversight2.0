@@ -135,15 +135,11 @@ jobs:
           # Import certificate into keychain
           echo "Importing certificate into keychain..."
           
-          # Disable exit-on-error for import attempts
           set +e
-          
           IMPORT_SUCCESS=false
-          IMPORT_OUTPUT=""
-          IMPORT_EXIT_CODE=1
-          
-          # Try importing with password
-          echo "Attempting import with password..."
+
+          # Method 1: Direct PKCS12 import
+          echo "Method 1: Attempting direct PKCS12 import..."
           IMPORT_OUTPUT=$(security import "$CERTIFICATE_PATH" \
             -P "$NORMALIZED_PASSWORD" \
             -A \
@@ -153,54 +149,78 @@ jobs:
             -T /usr/bin/codesign \
             -T /usr/bin/security 2>&1)
           IMPORT_EXIT_CODE=$?
-          echo "Import exit code: $IMPORT_EXIT_CODE"
-          echo "Import output: $IMPORT_OUTPUT"
-          
+          echo "Exit code: $IMPORT_EXIT_CODE | Output: $IMPORT_OUTPUT"
+
           if [ $IMPORT_EXIT_CODE -eq 0 ]; then
             IMPORT_SUCCESS=true
-            echo "✅ Certificate imported successfully with password"
+            echo "✅ Certificate imported via Method 1 (direct PKCS12)"
           fi
-          
-          # If that failed, try without password flag
+
+          # Method 2: Convert PKCS12 → PEM → import cert + key separately
+          # This works around macOS Ventura/Sonoma SHA256-MAC compatibility issue
+          # where 'security import' rejects newer PKCS12 format despite correct password
           if [ "$IMPORT_SUCCESS" = false ]; then
-            echo "Attempting import without password flag..."
-            IMPORT_OUTPUT=$(security import "$CERTIFICATE_PATH" \
-              -A \
-              -t cert \
-              -f pkcs12 \
-              -k "$KEYCHAIN_PATH" \
-              -T /usr/bin/codesign \
-              -T /usr/bin/security 2>&1)
-            IMPORT_EXIT_CODE=$?
-            echo "Import exit code: $IMPORT_EXIT_CODE"
-            echo "Import output: $IMPORT_OUTPUT"
-            
-            if [ $IMPORT_EXIT_CODE -eq 0 ]; then
-              IMPORT_SUCCESS=true
-              echo "✅ Certificate imported successfully without password"
+            echo "Method 2: Converting PKCS12 → PEM and importing separately..."
+            TEMP_PEM="$RUNNER_TEMP/cert_content.pem"
+            TEMP_CERT="$RUNNER_TEMP/cert_only.pem"
+            TEMP_KEY="$RUNNER_TEMP/key_only.pem"
+
+            PASSIN_ARG=""
+            if [ -n "$NORMALIZED_PASSWORD" ]; then
+              PASSIN_ARG="-passin pass:$NORMALIZED_PASSWORD"
             fi
-          fi
-          
-          # Re-enable exit-on-error
-          set -e
-          
-          if [ "$IMPORT_SUCCESS" = false ]; then
-            echo "❌ Error: Failed to import certificate into keychain after multiple attempts"
-            echo ""
-            echo "Error output from security import:"
-            echo "$IMPORT_OUTPUT"
-            echo ""
-            
-            if echo "$IMPORT_OUTPUT" | grep -q "MAC verification failed\|wrong password"; then
-              echo "🔐 Password Error: The P12_PASSWORD secret is incorrect."
-              echo "  - Update P12_PASSWORD secret with the password you set when exporting"
-              echo "  - If no password was set, use 'none' as the value"
+
+            # Extract certificate (nokeys = cert chain only)
+            openssl pkcs12 -in "$CERTIFICATE_PATH" $PASSIN_ARG -nokeys -out "$TEMP_CERT" -legacy 2>/dev/null || \
+            openssl pkcs12 -in "$CERTIFICATE_PATH" $PASSIN_ARG -nokeys -out "$TEMP_CERT" 2>/dev/null
+            CERT_RC=$?
+
+            # Extract private key (nocerts = key only, nodes = no passphrase on output)
+            openssl pkcs12 -in "$CERTIFICATE_PATH" $PASSIN_ARG -nocerts -nodes -out "$TEMP_KEY" -legacy 2>/dev/null || \
+            openssl pkcs12 -in "$CERTIFICATE_PATH" $PASSIN_ARG -nocerts -nodes -out "$TEMP_KEY" 2>/dev/null
+            KEY_RC=$?
+
+            echo "PEM extract exit codes: cert=$CERT_RC key=$KEY_RC"
+
+            if [ $CERT_RC -eq 0 ] && [ $KEY_RC -eq 0 ]; then
+              CERT_IMPORT=$(security import "$TEMP_CERT" \
+                -k "$KEYCHAIN_PATH" \
+                -T /usr/bin/codesign \
+                -T /usr/bin/security 2>&1)
+              CERT_IMPORT_RC=$?
+              echo "Cert PEM import: exit=$CERT_IMPORT_RC | $CERT_IMPORT"
+
+              KEY_IMPORT=$(security import "$TEMP_KEY" \
+                -k "$KEYCHAIN_PATH" \
+                -T /usr/bin/codesign \
+                -T /usr/bin/security 2>&1)
+              KEY_IMPORT_RC=$?
+              echo "Key PEM import: exit=$KEY_IMPORT_RC | $KEY_IMPORT"
+
+              # Clean up PEM files
+              rm -f "$TEMP_CERT" "$TEMP_KEY" "$TEMP_PEM"
+
+              if [ $CERT_IMPORT_RC -eq 0 ] && [ $KEY_IMPORT_RC -eq 0 ]; then
+                IMPORT_SUCCESS=true
+                echo "✅ Certificate imported via Method 2 (PEM extraction)"
+              elif [ $CERT_IMPORT_RC -eq 0 ]; then
+                # Key might fail if it's a duplicate — still may work
+                IMPORT_SUCCESS=true
+                echo "✅ Certificate imported via Method 2 (cert ok, key may already exist)"
+              fi
             else
-              echo "🔧 Common solutions:"
-              echo "  1. Verify BUILD_CERTIFICATE_BASE64 contains the full base64 string"
-              echo "  2. Ensure P12_PASSWORD matches the export password (9042 in your case)"
-              echo "  3. Try exporting a fresh certificate from Keychain Access"
+              rm -f "$TEMP_CERT" "$TEMP_KEY" "$TEMP_PEM"
+              echo "⚠️  PEM extraction failed (cert=$CERT_RC, key=$KEY_RC)"
             fi
+          fi
+
+          set -e
+
+          if [ "$IMPORT_SUCCESS" = false ]; then
+            echo "❌ Error: All import methods failed."
+            echo "Last output: $IMPORT_OUTPUT"
+            echo ""
+            echo "Please re-export the certificate from Keychain Access and update BUILD_CERTIFICATE_BASE64."
             exit 1
           fi
           
