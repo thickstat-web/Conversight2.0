@@ -215,18 +215,13 @@ jobs:
 
           # Import certificate into keychain
           echo "Importing certificate into keychain..."
-          if [ -z "$NORMALIZED_PASSWORD" ]; then
-            # Certificate has no password - import without password flag
-            echo "Importing certificate without password..."
-            IMPORT_OUTPUT=$(security import $CERTIFICATE_PATH \
-              -A \
-              -t cert \
-              -f pkcs12 \
-              -k $KEYCHAIN_PATH \
-              -T /usr/bin/codesign \
-              -T /usr/bin/security 2>&1)
-          else
-            # Certificate has a password
+          IMPORT_SUCCESS=false
+          IMPORT_OUTPUT=""
+          IMPORT_EXIT_CODE=1
+          
+          # Try importing with password first
+          if [ -n "$NORMALIZED_PASSWORD" ]; then
+            echo "Attempting import with password..."
             IMPORT_OUTPUT=$(security import $CERTIFICATE_PATH \
               -P "$NORMALIZED_PASSWORD" \
               -A \
@@ -235,12 +230,58 @@ jobs:
               -k $KEYCHAIN_PATH \
               -T /usr/bin/codesign \
               -T /usr/bin/security 2>&1)
+            IMPORT_EXIT_CODE=$?
+            
+            if [ $IMPORT_EXIT_CODE -eq 0 ]; then
+              IMPORT_SUCCESS=true
+              echo "✅ Certificate imported successfully with password"
+            fi
           fi
-          IMPORT_EXIT_CODE=$?
           
-          if [ $IMPORT_EXIT_CODE -ne 0 ]; then
-            echo "❌ Error: Failed to import certificate into keychain"
+          # If that failed, try without password flag (for certificates with no password)
+          if [ "$IMPORT_SUCCESS" = false ]; then
+            echo "Attempting import without password flag..."
+            IMPORT_OUTPUT=$(security import $CERTIFICATE_PATH \
+              -A \
+              -t cert \
+              -f pkcs12 \
+              -k $KEYCHAIN_PATH \
+              -T /usr/bin/codesign \
+              -T /usr/bin/security 2>&1)
+            IMPORT_EXIT_CODE=$?
+            
+            if [ $IMPORT_EXIT_CODE -eq 0 ]; then
+              IMPORT_SUCCESS=true
+              echo "✅ Certificate imported successfully without password"
+            fi
+          fi
+          
+          # If still failed, try with interactive mode (might prompt for password)
+          if [ "$IMPORT_SUCCESS" = false ]; then
+            echo "Attempting import with interactive mode..."
+            IMPORT_OUTPUT=$(security import $CERTIFICATE_PATH \
+              -A \
+              -t cert \
+              -f pkcs12 \
+              -k $KEYCHAIN_PATH \
+              -T /usr/bin/codesign \
+              -T /usr/bin/security \
+              -P "$NORMALIZED_PASSWORD" 2>&1)
+            IMPORT_EXIT_CODE=$?
+            
+            if [ $IMPORT_EXIT_CODE -eq 0 ]; then
+              IMPORT_SUCCESS=true
+              echo "✅ Certificate imported successfully"
+            fi
+          fi
+          
+          if [ "$IMPORT_SUCCESS" = false ]; then
+            echo "❌ Error: Failed to import certificate into keychain after multiple attempts"
             echo ""
+            echo "Error output from security import:"
+            echo "$IMPORT_OUTPUT"
+            echo ""
+            
             if echo "$IMPORT_OUTPUT" | grep -q "MAC verification failed\|wrong password"; then
               echo "🔐 Password Error: The P12_PASSWORD secret is incorrect."
               echo ""
@@ -272,18 +313,37 @@ jobs:
               echo "    - Encode it: base64 -i YourCertificate.p12 | pbcopy"
               echo "    - Update BUILD_CERTIFICATE_BASE64 (paste base64) and P12_PASSWORD (the password you just set)"
             else
-              echo "Error details:"
-              echo "$IMPORT_OUTPUT"
+              # Other types of import errors
+              echo "🔧 Troubleshooting non-password import errors:"
               echo ""
-              echo "Please verify:"
-              echo "  1. The certificate file is a valid .p12 file"
-              echo "  2. The P12_PASSWORD secret matches the certificate password"
-              echo "  3. The BUILD_CERTIFICATE_BASE64 secret contains the complete base64-encoded certificate"
+              
+              if echo "$IMPORT_OUTPUT" | grep -q "keychain"; then
+                echo "Keychain-related error detected. Possible issues:"
+                echo "  - Keychain permissions"
+                echo "  - Keychain not properly unlocked"
+                echo "  - Keychain path issues"
+              fi
+              
+              if echo "$IMPORT_OUTPUT" | grep -q "format\|Format"; then
+                echo "Format error detected. The certificate file might be corrupted."
+                echo "  - Try re-exporting the certificate from Keychain Access"
+                echo "  - Verify the base64 encoding is complete"
+              fi
+              
+              echo ""
+              echo "Common solutions:"
+              echo "  1. Verify the certificate file is complete and valid"
+              echo "  2. Check that BUILD_CERTIFICATE_BASE64 contains the full base64 string"
+              echo "  3. Ensure P12_PASSWORD matches the export password (9042 in your case)"
+              echo "  4. Try exporting a fresh certificate from Keychain Access"
+              echo ""
+              echo "Full error details:"
+              echo "$IMPORT_OUTPUT"
             fi
             exit 1
           fi
           
-          echo "✅ Certificate imported successfully"
+          # Success message is already printed above
           
           # Set keychain as default
           security list-keychain -d user -s $KEYCHAIN_PATH
