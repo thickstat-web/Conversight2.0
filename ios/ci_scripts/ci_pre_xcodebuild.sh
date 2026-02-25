@@ -258,8 +258,50 @@ if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
     exit 1
 fi
 
+NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
 echo "✅ Node.js version: $(node --version)"
 echo "✅ npm version: $(npm --version)"
+
+# Ensure Node.js 20 is used
+if [ "${NODE_VERSION}" != "20" ]; then
+    echo "⚠️  Node.js version is ${NODE_VERSION}, but Node.js 20 is required"
+    echo "Attempting to install/switch to Node.js 20..."
+    
+    # Try nvm if available
+    if [ -s "$HOME/.nvm/nvm.sh" ]; then
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        nvm install 20
+        nvm use 20
+        export PATH="$NVM_DIR/versions/node/v20.*/bin:${PATH}"
+    # Try installing via Homebrew
+    elif command -v brew &> /dev/null; then
+        echo "Installing Node.js 20 via Homebrew..."
+        brew install node@20 || brew upgrade node@20
+        BREW_PREFIX=$(brew --prefix)
+        export PATH="${BREW_PREFIX}/opt/node@20/bin:${PATH}"
+    # Try downloading Node.js 20 directly
+    elif command -v curl &> /dev/null; then
+        echo "Downloading Node.js 20..."
+        NODE_VERSION="20.11.0"
+        NODE_DIR="/tmp/nodejs20"
+        mkdir -p "${NODE_DIR}"
+        curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-darwin-x64.tar.gz" -o "${NODE_DIR}/node.tar.gz"
+        if [ -f "${NODE_DIR}/node.tar.gz" ]; then
+            cd "${NODE_DIR}"
+            tar -xzf node.tar.gz
+            export PATH="${NODE_DIR}/node-v${NODE_VERSION}-darwin-x64/bin:${PATH}"
+        fi
+    fi
+    
+    # Verify Node.js 20 is now active
+    NEW_NODE_VERSION=$(node --version | cut -d'v' -f2 | cut -d'.' -f1)
+    if [ "${NEW_NODE_VERSION}" = "20" ]; then
+        echo "✅ Switched to Node.js 20: $(node --version)"
+    else
+        echo "⚠️  Warning: Could not switch to Node.js 20, using current version: $(node --version)"
+    fi
+fi
 
 # Install Node.js dependencies
 echo "📦 Installing Node.js dependencies..."
@@ -308,10 +350,42 @@ fi
 if [ -f "${PROJECT_ROOT}/Gemfile" ]; then
     echo "Installing Bundler gems..."
     cd "${PROJECT_ROOT}"
-    if ! command -v bundle &> /dev/null; then
+    
+    # Check if bundler is installed and if it's the correct version
+    if command -v bundle &> /dev/null; then
+        BUNDLER_VERSION=$(bundle --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+        echo "Current bundler version: ${BUNDLER_VERSION}"
+        
+        # Check if we need version 2.1.4
+        if [ -f "Gemfile.lock" ] && grep -q "BUNDLED WITH" Gemfile.lock; then
+            REQUIRED_BUNDLER=$(grep "BUNDLED WITH" Gemfile.lock | awk '{print $NF}')
+            echo "Required bundler version: ${REQUIRED_BUNDLER}"
+            
+            if [ "${BUNDLER_VERSION}" != "${REQUIRED_BUNDLER}" ]; then
+                echo "⚠️  Bundler version mismatch, installing bundler ${REQUIRED_BUNDLER}..."
+                gem install bundler -v "${REQUIRED_BUNDLER}"
+            fi
+        fi
+    else
         echo "⚠️  Warning: bundle command not found, installing bundler..."
-        gem install bundler
+        # Check Gemfile.lock for required version
+        if [ -f "Gemfile.lock" ] && grep -q "BUNDLED WITH" Gemfile.lock; then
+            REQUIRED_BUNDLER=$(grep "BUNDLED WITH" Gemfile.lock | awk '{print $NF}')
+            echo "Installing bundler version ${REQUIRED_BUNDLER} as specified in Gemfile.lock..."
+            gem install bundler -v "${REQUIRED_BUNDLER}"
+        else
+            echo "Installing latest bundler..."
+            gem install bundler
+        fi
     fi
+    
+    # Verify bundler is available
+    if ! command -v bundle &> /dev/null; then
+        echo "❌ Error: Failed to install bundler"
+        exit 1
+    fi
+    
+    echo "✅ Using bundler version: $(bundle --version)"
     bundle install
     cd "${IOS_DIR}"
 fi
