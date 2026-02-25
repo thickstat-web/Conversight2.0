@@ -32,10 +32,40 @@ jobs:
         run: yarn install --frozen-lockfile
       
       - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '2.7.5'
-          bundler-cache: true
+        run: |
+          # Check if Ruby 2.7.5 is available
+          if ! ruby -v | grep -q "2.7.5"; then
+            echo "Ruby 2.7.5 not found, checking available versions..."
+            ruby -v || echo "Ruby not found"
+            
+            # Try to install Ruby 2.7.5 via Homebrew/rbenv if available
+            if command -v rbenv &> /dev/null; then
+              echo "Installing Ruby 2.7.5 via rbenv..."
+              rbenv install 2.7.5 || true
+              rbenv global 2.7.5 || rbenv local 2.7.5
+            elif command -v brew &> /dev/null; then
+              echo "Installing Ruby via Homebrew..."
+              brew install ruby@2.7 || true
+            fi
+          fi
+          
+          # Verify Ruby version
+          ruby -v
+          
+          # Install bundler if not available
+          if ! command -v bundle &> /dev/null; then
+            echo "Installing bundler..."
+            gem install bundler
+          fi
+          
+          # Install correct bundler version from Gemfile.lock
+          if [ -f "Gemfile.lock" ] && grep -q "BUNDLED WITH" Gemfile.lock; then
+            REQUIRED_BUNDLER=$(grep "BUNDLED WITH" Gemfile.lock | awk '{print $NF}')
+            echo "Installing bundler version ${REQUIRED_BUNDLER}..."
+            gem install bundler -v "${REQUIRED_BUNDLER}"
+          fi
+          
+          bundle --version
       
       - name: Install CocoaPods dependencies
         working-directory: ios
