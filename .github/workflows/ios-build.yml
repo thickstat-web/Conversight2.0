@@ -174,28 +174,6 @@ jobs:
           export PATH="${GEM_BIN_DIR}:${PATH}"
           echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
           
-          # Check if ffi is already installed (from bundle install)
-          if gem list ffi 2>/dev/null | grep -q ffi; then
-            echo "✅ ffi is already installed"
-            gem list ffi
-          else
-            # Install compatible ffi version first (for Ruby 2.7.5)
-            # ffi 1.15.5 is the version in Gemfile.lock and works with Ruby 2.7.5
-            echo "Installing compatible ffi version (1.15.5) for Ruby 2.7.5..."
-            gem install ffi -v "1.15.5" --user-install --no-document 2>&1 || {
-              echo "⚠️  Failed with --no-document, trying without..."
-              gem install ffi -v "1.15.5" --user-install 2>&1 || {
-                echo "⚠️  Failed to install ffi 1.15.5, trying older compatible version..."
-                # Try even older versions that work with Ruby 2.7
-                gem install ffi -v "1.15.0" --user-install 2>&1 || {
-                  gem install ffi -v "1.14.2" --user-install 2>&1 || {
-                    echo "⚠️  Failed to install ffi, but continuing - CocoaPods may work without it"
-                  }
-                }
-              }
-            }
-          fi
-          
           # Check if CocoaPods is available via bundle
           if [ "${BUNDLE_INSTALL_SUCCESS}" = "true" ] && bundle list 2>/dev/null | grep -q cocoapods; then
             echo "✅ CocoaPods is available via bundle"
