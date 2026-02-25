@@ -181,9 +181,7 @@ jobs:
             echo "CocoaPods version from bundle: ${COCOAPODS_VERSION}"
           else
             # Install CocoaPods directly to ensure we have >= 1.12.0
-            # Note: This may fail if CocoaPods tries to install ffi >= 1.17.3 which requires Ruby 3.0+
             echo "Installing CocoaPods >= 1.12.0 directly..."
-            echo "⚠️  Note: This may fail due to ffi dependency requiring Ruby 3.0+"
             gem install cocoapods -v ">= 1.12.0" --user-install --no-document 2>&1 || {
               echo "⚠️  Failed with --no-document, trying without..."
               gem install cocoapods -v ">= 1.12.0" --user-install 2>&1 || {
