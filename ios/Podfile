@@ -59,6 +59,14 @@ target 'ConverSight' do
         # 3. Fix for macOS Sonoma script errors
         # Disables Sandboxing so React Native scripts can bundle images/code
         config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+
+        # 4. Disable code signing for all Pod targets
+        # Pod targets are static libraries — they must NOT be signed
+        # Signing them causes "does not support provisioning profiles" errors
+        config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+        config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
+        config.build_settings['CODE_SIGN_IDENTITY'] = ''
+        config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = ''
       end
     end
   end

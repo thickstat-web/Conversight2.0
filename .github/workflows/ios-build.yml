@@ -384,7 +384,7 @@ jobs:
             -configuration Release \
             -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
             CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_UUID" \
             clean archive
