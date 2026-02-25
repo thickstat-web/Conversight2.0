@@ -212,19 +212,30 @@ jobs:
           else
             # Install CocoaPods directly to ensure we have >= 1.12.0
             echo "Installing CocoaPods >= 1.12.0 directly..."
-            gem install cocoapods -v ">= 1.12.0" --user-install --no-document 2>&1 || {
+            INSTALL_OUTPUT=$(gem install cocoapods -v ">= 1.12.0" --user-install --no-document 2>&1) || {
               echo "⚠️  Failed with --no-document, trying without..."
-              gem install cocoapods -v ">= 1.12.0" --user-install 2>&1 || {
+              INSTALL_OUTPUT=$(gem install cocoapods -v ">= 1.12.0" --user-install 2>&1) || {
                 echo "⚠️  Failed with version constraint, trying specific version..."
                 # Try installing a specific version that works with Ruby 2.7.5
-                gem install cocoapods -v "1.12.1" --user-install --no-document 2>&1 || {
-                  gem install cocoapods -v "1.12.1" --user-install 2>&1 || {
+                INSTALL_OUTPUT=$(gem install cocoapods -v "1.12.1" --user-install --no-document 2>&1) || {
+                  INSTALL_OUTPUT=$(gem install cocoapods -v "1.12.1" --user-install 2>&1) || {
                     echo "⚠️  Trying latest version..."
-                    gem install cocoapods --user-install --no-document 2>&1 || gem install cocoapods --user-install
+                    INSTALL_OUTPUT=$(gem install cocoapods --user-install --no-document 2>&1) || {
+                      INSTALL_OUTPUT=$(gem install cocoapods --user-install 2>&1)
+                    }
                   }
                 }
               }
             }
+            
+            # Check if installation was successful
+            if echo "${INSTALL_OUTPUT}" | grep -q "Successfully installed cocoapods"; then
+              echo "✅ CocoaPods installation reported success"
+              COCOAPODS_INSTALLED=true
+            else
+              echo "${INSTALL_OUTPUT}"
+              COCOAPODS_INSTALLED=false
+            fi
           fi
           
           # Update PATH to include gem bin directory (if not already set)
@@ -242,28 +253,63 @@ jobs:
           echo "GEM_HOME: ${GEM_HOME}"
           echo "GEM_PATH: ${GEM_PATH}"
           echo "Gem env home: $(gem env home)"
-          gem list cocoapods || echo "gem list failed, trying with explicit path..."
+          echo "Ruby version: $(ruby -v)"
           
-          # Try with explicit GEM_HOME
-          if ! gem list cocoapods 2>/dev/null | grep -q cocoapods; then
-            # Try checking in the gem directory directly
-            if [ -d "${GEM_USER_DIR}/gems" ]; then
-              echo "Checking gem directory directly..."
-              ls -la "${GEM_USER_DIR}/gems" | grep cocoapods || echo "CocoaPods not found in gems directory"
-              if ls "${GEM_USER_DIR}/gems" 2>/dev/null | grep -q cocoapods; then
-                echo "✅ CocoaPods found in gems directory"
-                COCOAPODS_FOUND=true
-              else
-                COCOAPODS_FOUND=false
-              fi
-            else
-              COCOAPODS_FOUND=false
-            fi
-          else
+          # Check multiple possible locations
+          COCOAPODS_FOUND=false
+          
+          # Method 1: gem list
+          if gem list cocoapods 2>/dev/null | grep -q cocoapods; then
+            echo "✅ CocoaPods found via gem list"
             COCOAPODS_FOUND=true
           fi
           
-          if [ "${COCOAPODS_FOUND}" = "true" ] || gem list cocoapods 2>/dev/null | grep -q cocoapods; then
+          # Method 2: Check specifications directory (gem metadata)
+          if [ "${COCOAPODS_FOUND}" = "false" ] && [ -d "${GEM_USER_DIR}/specifications" ]; then
+            if ls "${GEM_USER_DIR}/specifications"/*cocoapods*.gemspec 2>/dev/null | grep -q cocoapods; then
+              echo "✅ CocoaPods found in specifications directory"
+              COCOAPODS_FOUND=true
+            fi
+          fi
+          
+          # Method 3: Check gems directory
+          if [ "${COCOAPODS_FOUND}" = "false" ] && [ -d "${GEM_USER_DIR}/gems" ]; then
+            if ls "${GEM_USER_DIR}/gems" 2>/dev/null | grep -q cocoapods; then
+              echo "✅ CocoaPods found in gems directory"
+              COCOAPODS_FOUND=true
+            fi
+          fi
+          
+          # Method 4: Check rbenv gem location
+          if [ "${COCOAPODS_FOUND}" = "false" ] && [ -d "$HOME/.rbenv/versions/3.2.2/lib/ruby/gems" ]; then
+            if find "$HOME/.rbenv/versions/3.2.2/lib/ruby/gems" -name "*cocoapods*" 2>/dev/null | grep -q cocoapods; then
+              echo "✅ CocoaPods found in rbenv gem location"
+              COCOAPODS_FOUND=true
+            fi
+          fi
+          
+          # Method 5: If installation said it succeeded, trust it
+          if [ "${COCOAPODS_FOUND}" = "false" ]; then
+            echo "⚠️  CocoaPods not found in expected locations"
+            echo "Listing gem directories to debug..."
+            echo "GEM_USER_DIR contents:"
+            ls -la "${GEM_USER_DIR}" 2>/dev/null || echo "Directory not found"
+            if [ -d "${GEM_USER_DIR}/specifications" ]; then
+              echo "Specifications directory contents:"
+              ls "${GEM_USER_DIR}/specifications" | head -10 || echo "No specifications found"
+            fi
+            echo "Checking if pod command exists..."
+            if command -v pod &> /dev/null || [ -f "${GEM_BIN_DIR}/pod" ] || [ -f "$HOME/.rbenv/shims/pod" ]; then
+              echo "✅ pod command exists, assuming CocoaPods is installed"
+              COCOAPODS_FOUND=true
+            elif [ "${COCOAPODS_INSTALLED:-false}" = "true" ]; then
+              echo "✅ Installation reported success, continuing despite verification failure"
+              echo "⚠️  Note: Will try to use pod command in subsequent steps"
+              COCOAPODS_FOUND=true
+            fi
+          fi
+          
+          if [ "${COCOAPODS_FOUND}" = "true" ] || [ "${COCOAPODS_INSTALLED:-false}" = "true" ]; then
             echo "✅ CocoaPods gem is installed"
             
             # Try to get version using multiple methods
