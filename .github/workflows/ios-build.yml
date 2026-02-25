@@ -1,436 +1,95 @@
-name: iOS Build
+name: iOS Build & Upload
 
 on:
   push:
-    branches:
-      - cloud
-      - main
-      - develop
-  pull_request:
-    branches:
-      - cloud
-      - main
-      - develop
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build-ios:
-    name: Build iOS App
-    runs-on: self-hosted
-    
+  ios-build:
+    runs-on: macos-13
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: '20'
-          cache: 'yarn'
-      
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-      
-      - name: Setup Ruby
-        run: |
-          # Install rbenv if not available
-          if ! command -v rbenv &> /dev/null; then
-            echo "Installing rbenv..."
-            if command -v brew &> /dev/null; then
-              brew install rbenv ruby-build
-            else
-              echo "⚠️  Homebrew not found, trying to install rbenv manually..."
-              # Fallback: try to use existing rbenv if in PATH but not in command
-              export PATH="$HOME/.rbenv/bin:$PATH" || true
-            fi
-          fi
-          
-          # Initialize rbenv
-          export RBENV_ROOT="$HOME/.rbenv"
-          export PATH="$RBENV_ROOT/bin:$PATH"
-          eval "$(rbenv init -)" || {
-            # If rbenv init fails, try to set it up manually
-            export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
-          }
-          
-          # Install Ruby 3.1.6 if not available
-          if ! rbenv versions | grep -q "3.1.6"; then
-            echo "Installing Ruby 3.1.6 via rbenv..."
-            rbenv install 3.1.6 || {
-              echo "⚠️  rbenv install failed, checking if ruby-build is available..."
-              if ! command -v ruby-build &> /dev/null && command -v brew &> /dev/null; then
-                brew install ruby-build
-                rbenv install 3.1.6
-              else
-                echo "❌ Failed to install Ruby 3.1.6"
-                exit 1
-              fi
-            }
-          fi
-          
-          # Set Ruby 3.1.6 as global version
-          rbenv global 3.1.6
-          rbenv rehash
-          
-          # Verify Ruby version
-          ruby -v
-          if ! ruby -v | grep -q "3.2"; then
-            echo "❌ Error: Ruby 3.2 not active"
-            exit 1
-          fi
-          
-          # Configure gem to use user directory
-          RUBY_VERSION_SHORT=$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')
-          GEM_USER_DIR="$HOME/.gem/ruby/${RUBY_VERSION_SHORT}"
-          GEM_BIN_DIR="${GEM_USER_DIR}/bin"
-          
-          # Create gem user directory if it doesn't exist
-          mkdir -p "${GEM_USER_DIR}"
-          mkdir -p "${GEM_BIN_DIR}"
-          
-          # Set GEM_HOME to user directory to force user installs
-          export GEM_HOME="${GEM_USER_DIR}"
-          export GEM_PATH="${GEM_USER_DIR}"
-          
-          # Add rbenv and gem bin directory to PATH
-          export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:${GEM_BIN_DIR}:$PATH"
-          echo "$RBENV_ROOT/bin" >> $GITHUB_PATH
-          echo "$RBENV_ROOT/shims" >> $GITHUB_PATH
-          echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
-          export PATH="${GEM_BIN_DIR}:${PATH}"
-          
-          echo "Gem user directory: ${GEM_USER_DIR}"
-          echo "Gem bin directory: ${GEM_BIN_DIR}"
-          echo "GEM_HOME: ${GEM_HOME}"
-          
-          # Install bundler to user directory
-          if ! command -v bundle &> /dev/null; then
-            echo "Installing bundler to user directory..."
-            gem install bundler --no-document || {
-              echo "⚠️  Failed with --no-document, trying without..."
-              gem install bundler
-            }
-          fi
-          
-          # Install correct bundler version from Gemfile.lock
-          if [ -f "Gemfile.lock" ] && grep -q "BUNDLED WITH" Gemfile.lock; then
-            # Get the version from the line after "BUNDLED WITH"
-            REQUIRED_BUNDLER=$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -1 | xargs)
-            if [ -n "${REQUIRED_BUNDLER}" ] && [[ "${REQUIRED_BUNDLER}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "Installing bundler version ${REQUIRED_BUNDLER} to user directory..."
-              # Check if correct version is already installed
-              if bundle --version 2>/dev/null | grep -q "${REQUIRED_BUNDLER}"; then
-                echo "✅ Bundler ${REQUIRED_BUNDLER} already installed"
-              else
-                gem install bundler -v "${REQUIRED_BUNDLER}" --no-document || {
-                  echo "⚠️  Failed with --no-document, trying without..."
-                  gem install bundler -v "${REQUIRED_BUNDLER}"
-                }
-              fi
-            else
-              echo "⚠️  Could not parse bundler version from Gemfile.lock, using latest"
-              gem install bundler --no-document || gem install bundler
-            fi
-          else
-            echo "Installing latest bundler to user directory..."
-            gem install bundler --no-document || gem install bundler
-          fi
-          
-          # Verify bundler is accessible
-          export PATH="${GEM_BIN_DIR}:${PATH}"
-          if ! command -v bundle &> /dev/null; then
-            echo "⚠️  Bundler not found in PATH, checking installation..."
-            ls -la "${GEM_BIN_DIR}/" || echo "Gem bin directory not found"
-            echo "Current PATH: ${PATH}"
-            echo "Looking for bundle in: ${GEM_BIN_DIR}"
-            find "${GEM_USER_DIR}" -name "bundle" -type f 2>/dev/null || echo "Bundle not found"
-            exit 1
-          fi
-          
-          echo "✅ Bundler installed successfully"
-          bundle --version
-      
-      - name: Install CocoaPods dependencies
-        working-directory: ios
-        run: |
-          # Configure bundle to use user directory and avoid RVM
-          RUBY_VERSION_SHORT=$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')
-          GEM_USER_DIR="$HOME/.gem/ruby/${RUBY_VERSION_SHORT}"
-          GEM_BIN_DIR="${GEM_USER_DIR}/bin"
-          
-          # Unset RVM variables that might interfere
-          unset GEM_HOME GEM_PATH
-          unset MY_RUBY_HOME IRBRC
-          unset rvm_bin_path rvm_path rvm_prefix rvm_version
-          
-          # Set gem environment to user directory
-          export GEM_HOME="${GEM_USER_DIR}"
-          export GEM_PATH="${GEM_USER_DIR}"
-          export PATH="${GEM_BIN_DIR}:${PATH}"
-          
-          # Create directories if they don't exist
-          mkdir -p "${GEM_USER_DIR}"
-          mkdir -p "${GEM_BIN_DIR}"
-          
-          # Configure bundle to install to user directory
-          bundle config set --local path "${GEM_USER_DIR}"
-          bundle config set --local deployment false
-          bundle config unset system
-          
-          echo "GEM_HOME: ${GEM_HOME}"
-          echo "GEM_PATH: ${GEM_PATH}"
-          echo "Bundle path: $(bundle config get path)"
-          echo "Ruby version: $(ruby -v)"
-          echo "Gem env home: $(gem env home)"
-          
-          # Try to install gems, but don't fail if there are dependency conflicts
-          echo "Installing gems from Gemfile..."
-          BUNDLE_INSTALL_SUCCESS=false
-          if bundle install --path "${GEM_USER_DIR}" 2>&1 | tee /tmp/bundle-install.log; then
-            echo "✅ bundle install succeeded"
-            BUNDLE_INSTALL_SUCCESS=true
-          else
-            echo "⚠️  bundle install had dependency issues (likely Ruby version conflicts)"
-            # Check if CocoaPods was still installed despite errors
-            if bundle list 2>/dev/null | grep -q cocoapods; then
-              echo "✅ CocoaPods is available via bundle despite errors"
-              BUNDLE_INSTALL_SUCCESS=true
-            else
-              echo "⚠️  CocoaPods not available via bundle, will install directly"
-            fi
-          fi
-          
-          # Set PATH before installing gems
-          export PATH="${GEM_BIN_DIR}:${PATH}"
-          echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
-          
-          # Check if CocoaPods is available via bundle
-          if [ "${BUNDLE_INSTALL_SUCCESS}" = "true" ] && bundle list 2>/dev/null | grep -q cocoapods; then
-            echo "✅ CocoaPods is available via bundle"
-            COCOAPODS_VERSION=$(bundle exec pod --version 2>/dev/null || echo "0.0.0")
-            echo "CocoaPods version from bundle: ${COCOAPODS_VERSION}"
-          else
-            # Install CocoaPods directly to ensure we have >= 1.12.0
-            echo "Installing CocoaPods >= 1.12.0 directly..."
-            INSTALL_OUTPUT=$(gem install cocoapods -v ">= 1.12.0" --user-install --no-document 2>&1) || {
-              echo "⚠️  Failed with --no-document, trying without..."
-              INSTALL_OUTPUT=$(gem install cocoapods -v ">= 1.12.0" --user-install 2>&1) || {
-                echo "⚠️  Failed with version constraint, trying specific version..."
-                # Try installing a specific version that works with Ruby 3.1.6
-                INSTALL_OUTPUT=$(gem install cocoapods -v "1.12.1" --user-install --no-document 2>&1) || {
-                  INSTALL_OUTPUT=$(gem install cocoapods -v "1.12.1" --user-install 2>&1) || {
-                    echo "⚠️  Trying latest version..."
-                    INSTALL_OUTPUT=$(gem install cocoapods --user-install --no-document 2>&1) || {
-                      INSTALL_OUTPUT=$(gem install cocoapods --user-install 2>&1)
-                    }
-                  }
-                }
-              }
-            }
-            
-            # Check if installation was successful
-            if echo "${INSTALL_OUTPUT}" | grep -q "Successfully installed cocoapods"; then
-              echo "✅ CocoaPods installation reported success"
-              COCOAPODS_INSTALLED=true
-            else
-              echo "${INSTALL_OUTPUT}"
-              COCOAPODS_INSTALLED=false
-            fi
-          fi
-          
-          # Update PATH to include gem bin directory (if not already set)
-          export PATH="${GEM_BIN_DIR}:${PATH}"
-          echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
-          
-          # Verify CocoaPods installation
-          # Ensure we're using the same gem environment as installation
-          export GEM_HOME="${GEM_USER_DIR}"
-          export GEM_PATH="${GEM_USER_DIR}"
-          export PATH="${GEM_BIN_DIR}:${PATH}"
-          
-          # First check if CocoaPods gem is installed
-          echo "Checking CocoaPods installation..."
-          echo "GEM_HOME: ${GEM_HOME}"
-          echo "GEM_PATH: ${GEM_PATH}"
-          echo "Gem env home: $(gem env home)"
-          echo "Ruby version: $(ruby -v)"
-          
-          # Check multiple possible locations
-          COCOAPODS_FOUND=false
-          
-          # Method 1: gem list
-          if gem list cocoapods 2>/dev/null | grep -q cocoapods; then
-            echo "✅ CocoaPods found via gem list"
-            COCOAPODS_FOUND=true
-          fi
-          
-          # Method 2: Check specifications directory (gem metadata)
-          if [ "${COCOAPODS_FOUND}" = "false" ] && [ -d "${GEM_USER_DIR}/specifications" ]; then
-            if ls "${GEM_USER_DIR}/specifications"/*cocoapods*.gemspec 2>/dev/null | grep -q cocoapods; then
-              echo "✅ CocoaPods found in specifications directory"
-              COCOAPODS_FOUND=true
-            fi
-          fi
-          
-          # Method 3: Check gems directory
-          if [ "${COCOAPODS_FOUND}" = "false" ] && [ -d "${GEM_USER_DIR}/gems" ]; then
-            if ls "${GEM_USER_DIR}/gems" 2>/dev/null | grep -q cocoapods; then
-              echo "✅ CocoaPods found in gems directory"
-              COCOAPODS_FOUND=true
-            fi
-          fi
-          
-          # Method 4: Check rbenv gem location
-          if [ "${COCOAPODS_FOUND}" = "false" ] && [ -d "$HOME/.rbenv/versions/3.1.6/lib/ruby/gems" ]; then
-            if find "$HOME/.rbenv/versions/3.1.6/lib/ruby/gems" -name "*cocoapods*" 2>/dev/null | grep -q cocoapods; then
-              echo "✅ CocoaPods found in rbenv gem location"
-              COCOAPODS_FOUND=true
-            fi
-          fi
-          
-          # Method 5: If installation said it succeeded, trust it
-          if [ "${COCOAPODS_FOUND}" = "false" ]; then
-            echo "⚠️  CocoaPods not found in expected locations"
-            echo "Listing gem directories to debug..."
-            echo "GEM_USER_DIR contents:"
-            ls -la "${GEM_USER_DIR}" 2>/dev/null || echo "Directory not found"
-            if [ -d "${GEM_USER_DIR}/specifications" ]; then
-              echo "Specifications directory contents:"
-              ls "${GEM_USER_DIR}/specifications" | head -10 || echo "No specifications found"
-            fi
-            echo "Checking if pod command exists..."
-            if command -v pod &> /dev/null || [ -f "${GEM_BIN_DIR}/pod" ] || [ -f "$HOME/.rbenv/shims/pod" ]; then
-              echo "✅ pod command exists, assuming CocoaPods is installed"
-              COCOAPODS_FOUND=true
-            elif [ "${COCOAPODS_INSTALLED:-false}" = "true" ]; then
-              echo "✅ Installation reported success, continuing despite verification failure"
-              echo "⚠️  Note: Will try to use pod command in subsequent steps"
-              COCOAPODS_FOUND=true
-            fi
-          fi
-          
-          if [ "${COCOAPODS_FOUND}" = "true" ] || [ "${COCOAPODS_INSTALLED:-false}" = "true" ]; then
-            echo "✅ CocoaPods gem is installed"
-            
-            # Try to get version using multiple methods
-            COCOAPODS_VERSION="0.0.0"
-            
-            # Method 1: Try pod command directly
-            if command -v pod &> /dev/null; then
-              COCOAPODS_VERSION=$(pod --version 2>/dev/null || echo "0.0.0")
-            fi
-            
-            # Method 2: Try gem bin directory
-            if [ "${COCOAPODS_VERSION}" = "0.0.0" ] && [ -f "${GEM_BIN_DIR}/pod" ]; then
-              COCOAPODS_VERSION=$("${GEM_BIN_DIR}/pod" --version 2>/dev/null || echo "0.0.0")
-            fi
-            
-            # Method 3: Try bundle exec
-            if [ "${COCOAPODS_VERSION}" = "0.0.0" ] && command -v bundle &> /dev/null && bundle list 2>/dev/null | grep -q cocoapods; then
-              COCOAPODS_VERSION=$(bundle exec pod --version 2>/dev/null || echo "0.0.0")
-            fi
-            
-            # Method 4: Find pod binary in gem directories
-            if [ "${COCOAPODS_VERSION}" = "0.0.0" ]; then
-              POD_BINARY=$(find "${GEM_USER_DIR}" -name "pod" -type f 2>/dev/null | head -1)
-              if [ -n "${POD_BINARY}" ] && [ -x "${POD_BINARY}" ]; then
-                COCOAPODS_VERSION=$("${POD_BINARY}" --version 2>/dev/null || echo "0.0.0")
-              fi
-            fi
-            
-            # Method 5: Try rbenv shims
-            if [ "${COCOAPODS_VERSION}" = "0.0.0" ] && [ -d "$HOME/.rbenv/shims" ]; then
-              if [ -f "$HOME/.rbenv/shims/pod" ]; then
-                COCOAPODS_VERSION=$("$HOME/.rbenv/shims/pod" --version 2>/dev/null || echo "0.0.0")
-              fi
-            fi
-            
-            echo "CocoaPods version detected: ${COCOAPODS_VERSION}"
-            
-            # Check if version is >= 1.12.0
-            VERSION_OK=false
-            if [ "${COCOAPODS_VERSION}" != "0.0.0" ] && [ "${COCOAPODS_VERSION}" != "" ]; then
-              MAJOR=$(echo "${COCOAPODS_VERSION}" | cut -d. -f1)
-              MINOR=$(echo "${COCOAPODS_VERSION}" | cut -d. -f2)
-              if [ "${MAJOR}" -gt 1 ] || ([ "${MAJOR}" -eq 1 ] && [ "${MINOR}" -ge 12 ]); then
-                VERSION_OK=true
-              fi
-            fi
-            
-            if [ "${VERSION_OK}" = "true" ]; then
-              echo "✅ CocoaPods version ${COCOAPODS_VERSION} meets requirements (>= 1.12.0)"
-            else
-              echo "⚠️  Could not verify CocoaPods version (got: ${COCOAPODS_VERSION})"
-              echo "⚠️  But CocoaPods gem is installed, so continuing..."
-              echo "⚠️  The pod command may need rbenv rehash or PATH update"
-              
-              # Try rbenv rehash to refresh shims
-              if command -v rbenv &> /dev/null; then
-                echo "Running rbenv rehash to refresh shims..."
-                rbenv rehash
-                # Try again after rehash
-                if command -v pod &> /dev/null; then
-                  COCOAPODS_VERSION=$(pod --version 2>/dev/null || echo "0.0.0")
-                  echo "CocoaPods version after rehash: ${COCOAPODS_VERSION}"
-                fi
-              fi
-            fi
-          else
-            echo "❌ Error: CocoaPods gem not found in gem list"
-            exit 1
-          fi
-          
-          # Update CocoaPods repo to get latest podspecs
-          echo "Updating CocoaPods repo..."
-          bundle exec pod repo update || echo "⚠️  pod repo update failed, continuing..."
-          
-          # Install pods with repo update to resolve version conflicts
-          echo "Installing CocoaPods dependencies..."
-          bundle exec pod install --repo-update || {
-            echo "⚠️  pod install --repo-update failed, trying pod update..."
-            # If pod install fails, try updating the conflicting pod
-            bundle exec pod update TOCropViewController || {
-              echo "⚠️  pod update failed, trying without Podfile.lock..."
-              # Last resort: remove Podfile.lock and reinstall
-              if [ -f "Podfile.lock" ]; then
-                echo "Removing Podfile.lock and reinstalling..."
-                rm -f Podfile.lock
-                bundle exec pod install --repo-update
-              else
-                bundle exec pod install
-              fi
-            }
-          }
-      
-      - name: Build iOS
-        working-directory: ios
-        run: |
-          xcodebuild clean build \
-            -workspace ConverSight.xcworkspace \
-            -scheme ConverSight \
-            -configuration Release \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-      
-      - name: Archive iOS
-        working-directory: ios
-        run: |
-          xcodebuild archive \
-            -workspace ConverSight.xcworkspace \
-            -scheme ConverSight \
-            -configuration Release \
-            -archivePath build/ConverSight.xcarchive \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-      
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        if: success()
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Node Modules
+        run: npm install
+
+      - name: Select Xcode 14.2
+        uses: maxim-lobanov/setup-xcode@v1
         with:
-          name: ios-build
-          path: ios/build/ConverSight.xcarchive
+          xcode-version: '14.2'
+
+      - name: Verify Xcode Version
+        run: xcodebuild -version
+
+      - name: Install CocoaPods Dependencies
+        run: |
+          cd ios
+          pod install --repo-update
+          cd ..
+
+      - name: Install Apple Certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" \
+            -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Install Provisioning Profile
+        env:
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+
+      - name: Build Archive
+        run: |
+          xcodebuild -workspace ios/ConverSight.xcworkspace \
+            -scheme ConverSight \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }} \
+            clean archive
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath $RUNNER_TEMP/output
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: ConverSight-iOS-Release
+          path: ${{ runner.temp }}/output/*.ipa
           retention-days: 7
+
+      - name: Cleanup Keychain
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
