@@ -34,16 +34,17 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '2.7.6'
-          bundler-cache: true
+
+      - name: Install CocoaPods
+        run: gem install cocoapods
 
       - name: Install CocoaPods Dependencies
         run: |
-          # Fix File.exists? issue for Ruby 3.x in all podspecs
-          find ../node_modules -name "*.podspec" | xargs grep -l "File\.exists?" | \
+          # Fix File.exists? issue
+          find node_modules -name "*.podspec" | xargs grep -l "File\.exists?" | \
             xargs sed -i 's/File\.exists?/File\.exist?/g'
           cd ios
           pod install --repo-update
-          cd ..
 
       - name: Install Apple Certificate
         env:
