@@ -53,23 +53,23 @@ jobs:
             export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
           }
           
-          # Install Ruby 3.2.2 if not available
-          if ! rbenv versions | grep -q "3.2.2"; then
-            echo "Installing Ruby 3.2.2 via rbenv..."
-            rbenv install 3.2.2 || {
+          # Install Ruby 3.1.6 if not available
+          if ! rbenv versions | grep -q "3.1.6"; then
+            echo "Installing Ruby 3.1.6 via rbenv..."
+            rbenv install 3.1.6 || {
               echo "⚠️  rbenv install failed, checking if ruby-build is available..."
               if ! command -v ruby-build &> /dev/null && command -v brew &> /dev/null; then
                 brew install ruby-build
-                rbenv install 3.2.2
+                rbenv install 3.1.6
               else
-                echo "❌ Failed to install Ruby 3.2.2"
+                echo "❌ Failed to install Ruby 3.1.6"
                 exit 1
               fi
             }
           fi
           
-          # Set Ruby 3.2.2 as global version
-          rbenv global 3.2.2
+          # Set Ruby 3.1.6 as global version
+          rbenv global 3.1.6
           rbenv rehash
           
           # Verify Ruby version
@@ -216,7 +216,7 @@ jobs:
               echo "⚠️  Failed with --no-document, trying without..."
               INSTALL_OUTPUT=$(gem install cocoapods -v ">= 1.12.0" --user-install 2>&1) || {
                 echo "⚠️  Failed with version constraint, trying specific version..."
-                # Try installing a specific version that works with Ruby 3.2.2
+                # Try installing a specific version that works with Ruby 3.1.6
                 INSTALL_OUTPUT=$(gem install cocoapods -v "1.12.1" --user-install --no-document 2>&1) || {
                   INSTALL_OUTPUT=$(gem install cocoapods -v "1.12.1" --user-install 2>&1) || {
                     echo "⚠️  Trying latest version..."
@@ -281,8 +281,8 @@ jobs:
           fi
           
           # Method 4: Check rbenv gem location
-          if [ "${COCOAPODS_FOUND}" = "false" ] && [ -d "$HOME/.rbenv/versions/3.2.2/lib/ruby/gems" ]; then
-            if find "$HOME/.rbenv/versions/3.2.2/lib/ruby/gems" -name "*cocoapods*" 2>/dev/null | grep -q cocoapods; then
+          if [ "${COCOAPODS_FOUND}" = "false" ] && [ -d "$HOME/.rbenv/versions/3.1.6/lib/ruby/gems" ]; then
+            if find "$HOME/.rbenv/versions/3.1.6/lib/ruby/gems" -name "*cocoapods*" 2>/dev/null | grep -q cocoapods; then
               echo "✅ CocoaPods found in rbenv gem location"
               COCOAPODS_FOUND=true
             fi
