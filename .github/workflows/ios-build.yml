@@ -35,13 +35,27 @@ jobs:
         with:
           ruby-version: '3.0'
 
+      - name: Fix podspec File.exists issue
+        run: |
+          python3 -c "
+          import os, re
+
+          def fix_file(path):
+              with open(path, 'r') as f:
+                  content = f.read()
+              if 'File.exists?' in content:
+                  content = content.replace('File.exists?', 'File.exist?')
+                  with open(path, 'w') as f:
+                      f.write(content)
+                  print(f'Fixed: {path}')
+
+          for root, dirs, files in os.walk('node_modules'):
+              for file in files:
+                  if file.endswith('.podspec'):
+                      fix_file(os.path.join(root, file))"
+
       - name: Install CocoaPods Dependencies
         run: |
-          # Fix File.exists? issue directly in specific podspec files
-          perl -pi -e 's/File\.exists\?/File.exist?/g' \
-            node_modules/react-native-gesture-handler/RNGestureHandler.podspec
-          perl -pi -e 's/File\.exists\?/File.exist?/g' \
-            node_modules/react-native-reanimated/RNReanimated.podspec
           cd ios
           pod install --repo-update
 
