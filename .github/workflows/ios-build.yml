@@ -123,7 +123,40 @@ jobs:
       - name: Install CocoaPods dependencies
         working-directory: ios
         run: |
-          bundle install
+          # Configure bundle to use user directory and avoid RVM
+          RUBY_VERSION_SHORT=$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')
+          GEM_USER_DIR="$HOME/.gem/ruby/${RUBY_VERSION_SHORT}"
+          GEM_BIN_DIR="${GEM_USER_DIR}/bin"
+          
+          # Unset RVM variables that might interfere
+          unset GEM_HOME GEM_PATH
+          unset MY_RUBY_HOME IRBRC
+          unset rvm_bin_path rvm_path rvm_prefix rvm_version
+          
+          # Set gem environment to user directory
+          export GEM_HOME="${GEM_USER_DIR}"
+          export GEM_PATH="${GEM_USER_DIR}"
+          export PATH="${GEM_BIN_DIR}:${PATH}"
+          
+          # Create directories if they don't exist
+          mkdir -p "${GEM_USER_DIR}"
+          mkdir -p "${GEM_BIN_DIR}"
+          
+          # Configure bundle to install to user directory
+          bundle config set --local path "${GEM_USER_DIR}"
+          bundle config set --local deployment false
+          bundle config unset system
+          
+          echo "GEM_HOME: ${GEM_HOME}"
+          echo "GEM_PATH: ${GEM_PATH}"
+          echo "Bundle path: $(bundle config get path)"
+          echo "Ruby version: $(ruby -v)"
+          echo "Gem env home: $(gem env home)"
+          
+          # Install gems to user directory
+          bundle install --path "${GEM_USER_DIR}"
+          
+          # Verify bundle can find gems
           bundle exec pod install
       
       - name: Build iOS
