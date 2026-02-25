@@ -52,10 +52,12 @@ jobs:
           # Verify Ruby version
           ruby -v
           
-          # Install bundler if not available
+          # Install bundler to user directory to avoid permission issues
           if ! command -v bundle &> /dev/null; then
-            echo "Installing bundler..."
-            gem install bundler
+            echo "Installing bundler to user directory..."
+            gem install bundler --user-install
+            # Add user gem bin directory to PATH
+            export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
           fi
           
           # Install correct bundler version from Gemfile.lock
@@ -63,15 +65,25 @@ jobs:
             # Get the version from the line after "BUNDLED WITH"
             REQUIRED_BUNDLER=$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -1 | xargs)
             if [ -n "${REQUIRED_BUNDLER}" ] && [[ "${REQUIRED_BUNDLER}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "Installing bundler version ${REQUIRED_BUNDLER}..."
-              gem install bundler -v "${REQUIRED_BUNDLER}"
+              echo "Installing bundler version ${REQUIRED_BUNDLER} to user directory..."
+              gem install bundler -v "${REQUIRED_BUNDLER}" --user-install
+              # Add user gem bin directory to PATH
+              export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
             else
               echo "⚠️  Could not parse bundler version from Gemfile.lock, using latest"
-              gem install bundler
+              gem install bundler --user-install
+              export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
             fi
           else
-            echo "Installing latest bundler..."
-            gem install bundler
+            echo "Installing latest bundler to user directory..."
+            gem install bundler --user-install
+            export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
+          fi
+          
+          # Verify bundler is accessible
+          if ! command -v bundle &> /dev/null; then
+            echo "⚠️  Bundler not in PATH, adding user gem directory..."
+            export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
           fi
           
           bundle --version
