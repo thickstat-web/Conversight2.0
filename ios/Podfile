@@ -45,5 +45,18 @@ target 'ConverSight' do
       :mac_catalyst_enabled => false
     )
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
+
+    # Fix deployment target warnings: some pods declare 11.0 but Xcode 15
+    # requires a minimum of 12.0. Bump every pod target up to 12.4 to match
+    # the app's platform setting and silence all IPHONEOS_DEPLOYMENT_TARGET
+    # warnings that would otherwise cause the archive to fail.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        current = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if current.to_f < 12.4
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.4'
+        end
+      end
+    end
   end
 end
