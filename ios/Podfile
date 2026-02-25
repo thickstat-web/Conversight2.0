@@ -40,24 +40,26 @@ target 'ConverSight' do
   post_install do |installer|
     react_native_post_install(
       installer,
+      # Set `mac_catalyst_enabled` to `true` in order to apply patches
+      # necessary for Mac Catalyst builds
       :mac_catalyst_enabled => false
     )
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        # 1. Force the deployment target (Your current logic)
+        # 1. Fix the Deployment Target for ALL pods (including GoogleUtilities)
+        # This removes the 'IPHONEOS_DEPLOYMENT_TARGET is set to 11.0' warning
         config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '12.4'
 
-        # 2. FIX FOR XCODE 15.4 LINKER (Crucial for CI)
-        # Without this, you will likely get "Duplicate Symbols" or "Linker Command Failed"
+        # 2. Fix for Xcode 15+ Linker errors (ld_classic)
+        # Essential for React Native 0.70.x to avoid 'Linker command failed'
         config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -Wl,-ld_classic'
 
-        # 3. FIX FOR SONOMA SANDBOXING
-        # Xcode 15+ on Sonoma often fails on "Bundle React Native code" script
+        # 3. Fix for macOS Sonoma script errors
+        # Disables Sandboxing so React Native scripts can bundle images/code
         config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
       end
     end
-  end
   end
 end
