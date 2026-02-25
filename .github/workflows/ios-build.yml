@@ -38,10 +38,10 @@ jobs:
 
       - name: Install CocoaPods Dependencies
         run: |
+          # Fix File.exists? issue for Ruby 3.x in all podspecs
+          find ../node_modules -name "*.podspec" | xargs grep -l "File\.exists?" | \
+            xargs sed -i 's/File\.exists?/File\.exist?/g'
           cd ios
-          # Fix File.exists? issue for Ruby 3.x
-          find ../node_modules -name "*.podspec" -exec \
-            sed -i '' 's/File\.exists?/File\.exist?/g' {} \;
           pod install --repo-update
           cd ..
 
