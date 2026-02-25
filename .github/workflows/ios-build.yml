@@ -146,13 +146,37 @@ jobs:
           FILE_TYPE=$(file "$CERTIFICATE_PATH" 2>/dev/null || echo "unknown")
           echo "File type: $FILE_TYPE"
           
-          # Try to validate it's a PKCS12 file using openssl (if available)
+          # Validate password before import using openssl (if available)
           if command -v openssl &> /dev/null; then
+            echo "Validating certificate password..."
             if openssl pkcs12 -info -in "$CERTIFICATE_PATH" -passin pass:"$P12_PASSWORD" -noout &>/dev/null; then
-              echo "✅ Certificate file is a valid PKCS12 format"
+              echo "✅ Certificate file is a valid PKCS12 format and password is correct"
             else
-              echo "⚠️  Warning: openssl validation failed (this might be due to password or file format)"
+              OPENSSL_ERROR=$(openssl pkcs12 -info -in "$CERTIFICATE_PATH" -passin pass:"$P12_PASSWORD" -noout 2>&1)
+              if echo "$OPENSSL_ERROR" | grep -q "Mac verify error\|invalid password\|bad password"; then
+                echo "❌ Error: Certificate password is incorrect"
+                echo ""
+                echo "The P12_PASSWORD secret does not match the password used when the .p12 certificate was created."
+                echo ""
+                echo "To fix this:"
+                echo "  1. Find the password you used when exporting the certificate from Keychain Access"
+                echo "  2. Or check if the certificate was exported without a password (try empty string)"
+                echo "  3. Update the P12_PASSWORD secret in GitHub with the correct password"
+                echo ""
+                echo "If you don't remember the password, you'll need to:"
+                echo "  - Export a new certificate from Keychain Access with a known password"
+                echo "  - Update both BUILD_CERTIFICATE_BASE64 and P12_PASSWORD secrets"
+                exit 1
+              else
+                echo "⚠️  Warning: openssl validation failed (checking if password is required)"
+                # Try without password in case certificate has no password
+                if openssl pkcs12 -info -in "$CERTIFICATE_PATH" -passin pass:"" -noout &>/dev/null; then
+                  echo "ℹ️  Certificate appears to have no password. Try setting P12_PASSWORD to empty string."
+                fi
+              fi
             fi
+          else
+            echo "⚠️  openssl not available, skipping password validation"
           fi
 
           # Create keychain
@@ -162,23 +186,46 @@ jobs:
 
           # Import certificate into keychain
           echo "Importing certificate into keychain..."
-          security import $CERTIFICATE_PATH \
+          IMPORT_OUTPUT=$(security import $CERTIFICATE_PATH \
             -P "$P12_PASSWORD" \
             -A \
             -t cert \
             -f pkcs12 \
             -k $KEYCHAIN_PATH \
             -T /usr/bin/codesign \
-            -T /usr/bin/security
+            -T /usr/bin/security 2>&1)
+          IMPORT_EXIT_CODE=$?
           
-          if [ $? -ne 0 ]; then
+          if [ $IMPORT_EXIT_CODE -ne 0 ]; then
             echo "❌ Error: Failed to import certificate into keychain"
-            echo "Please verify:"
-            echo "  1. The certificate file is a valid .p12 file"
-            echo "  2. The P12_PASSWORD secret matches the certificate password"
-            echo "  3. The BUILD_CERTIFICATE_BASE64 secret contains the complete base64-encoded certificate"
+            echo ""
+            if echo "$IMPORT_OUTPUT" | grep -q "MAC verification failed\|wrong password"; then
+              echo "🔐 Password Error: The P12_PASSWORD secret is incorrect."
+              echo ""
+              echo "This error means the password in your P12_PASSWORD secret doesn't match"
+              echo "the password that was used when the .p12 certificate was created."
+              echo ""
+              echo "Solutions:"
+              echo "  1. If you remember the password: Update P12_PASSWORD secret with the correct password"
+              echo "  2. If certificate has no password: Set P12_PASSWORD to an empty string"
+              echo "  3. If you don't remember: Export a new certificate from Keychain Access:"
+              echo "     - Open Keychain Access"
+              echo "     - Find your certificate"
+              echo "     - Right-click → Export → Choose a password (remember it!)"
+              echo "     - Update BUILD_CERTIFICATE_BASE64 and P12_PASSWORD secrets"
+            else
+              echo "Error details:"
+              echo "$IMPORT_OUTPUT"
+              echo ""
+              echo "Please verify:"
+              echo "  1. The certificate file is a valid .p12 file"
+              echo "  2. The P12_PASSWORD secret matches the certificate password"
+              echo "  3. The BUILD_CERTIFICATE_BASE64 secret contains the complete base64-encoded certificate"
+            fi
             exit 1
           fi
+          
+          echo "✅ Certificate imported successfully"
           
           # Set keychain as default
           security list-keychain -d user -s $KEYCHAIN_PATH
@@ -224,22 +271,94 @@ jobs:
           fi
 
       - name: Build Archive
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          echo "Building iOS archive..."
+          echo "Workspace: ios/ConverSight.xcworkspace"
+          echo "Scheme: ConverSight"
+          echo "Configuration: Release"
+          echo "Team ID: $APPLE_TEAM_ID"
+          
           xcodebuild -workspace ios/ConverSight.xcworkspace \
             -scheme ConverSight \
             -sdk iphoneos \
             -configuration Release \
             -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
             CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }} \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             clean archive
+          
+          # Verify archive was created
+          if [ ! -d "$RUNNER_TEMP/ConverSight.xcarchive" ]; then
+            echo "❌ Error: Archive was not created"
+            exit 1
+          fi
+          
+          echo "✅ Archive created successfully at $RUNNER_TEMP/ConverSight.xcarchive"
+          ls -lh "$RUNNER_TEMP/ConverSight.xcarchive"
+
+      - name: Create ExportOptions.plist
+        run: |
+          # Create ExportOptions.plist if it doesn't exist
+          if [ ! -f "ios/ExportOptions.plist" ]; then
+            echo "Creating ExportOptions.plist..."
+            cat > ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>${{ secrets.APPLE_TEAM_ID }}</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>compileBitcode</key>
+              <false/>
+              <key>signingStyle</key>
+              <string>manual</string>
+          </dict>
+          </plist>
+          EOF
+            echo "✅ ExportOptions.plist created"
+          else
+            echo "✅ ExportOptions.plist already exists"
+          fi
 
       - name: Export IPA
         run: |
+          echo "Exporting IPA from archive..."
+          
+          # Verify archive exists
+          if [ ! -d "$RUNNER_TEMP/ConverSight.xcarchive" ]; then
+            echo "❌ Error: Archive not found at $RUNNER_TEMP/ConverSight.xcarchive"
+            exit 1
+          fi
+          
+          # Verify ExportOptions.plist exists
+          if [ ! -f "ios/ExportOptions.plist" ]; then
+            echo "❌ Error: ExportOptions.plist not found"
+            exit 1
+          fi
+          
+          # Export IPA
           xcodebuild -exportArchive \
             -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
             -exportOptionsPlist ios/ExportOptions.plist \
             -exportPath $RUNNER_TEMP/output
+          
+          # Verify IPA was created
+          IPA_FILE=$(find $RUNNER_TEMP/output -name "*.ipa" | head -1)
+          if [ -z "$IPA_FILE" ]; then
+            echo "❌ Error: IPA file was not created"
+            exit 1
+          fi
+          
+          echo "✅ IPA exported successfully: $IPA_FILE"
+          ls -lh "$IPA_FILE"
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
