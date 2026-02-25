@@ -64,6 +64,31 @@ jobs:
               f.write(content)
           print('Fixed Podfile')"
 
+      - name: Fix boost.podspec URL for checksum issue
+        run: |
+          BOOST_PODSPEC="node_modules/react-native/third-party-podspecs/boost.podspec"
+          if [ -f "$BOOST_PODSPEC" ]; then
+            echo "Fixing boost.podspec URL to resolve checksum verification issue..."
+            # Replace the problematic jfrog.io URL with archives.boost.io
+            sed -i '' "s|https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2|https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2|g" "$BOOST_PODSPEC"
+            # Also handle any variations with quotes
+            sed -i '' "s|'https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2'|'https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2'|g" "$BOOST_PODSPEC"
+            sed -i '' 's|"https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2"|"https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2"|g' "$BOOST_PODSPEC"
+            echo "✅ Fixed boost.podspec URL"
+            # Verify the change
+            if grep -q "archives.boost.io" "$BOOST_PODSPEC"; then
+              echo "✅ Verification: boost.podspec URL updated successfully"
+              echo "Updated URL found in boost.podspec:"
+              grep "archives.boost.io" "$BOOST_PODSPEC" | head -1
+            else
+              echo "⚠️  Warning: Could not verify URL change in boost.podspec"
+            fi
+          else
+            echo "⚠️  Warning: boost.podspec not found at $BOOST_PODSPEC"
+            echo "Searching for boost.podspec in node_modules..."
+            find node_modules -name "boost.podspec" -type f 2>/dev/null | head -5 || echo "No boost.podspec found"
+          fi
+
       - name: Install CocoaPods Dependencies
         run: |
           cd ios
