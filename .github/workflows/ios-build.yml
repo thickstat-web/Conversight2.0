@@ -215,40 +215,46 @@ jobs:
 
           # Import certificate into keychain
           echo "Importing certificate into keychain..."
+          
+          # Disable exit-on-error for import attempts
+          set +e
+          
           IMPORT_SUCCESS=false
           IMPORT_OUTPUT=""
           IMPORT_EXIT_CODE=1
           
-          # Try importing with password first
-          if [ -n "$NORMALIZED_PASSWORD" ]; then
-            echo "Attempting import with password..."
-            IMPORT_OUTPUT=$(security import $CERTIFICATE_PATH \
-              -P "$NORMALIZED_PASSWORD" \
-              -A \
-              -t cert \
-              -f pkcs12 \
-              -k $KEYCHAIN_PATH \
-              -T /usr/bin/codesign \
-              -T /usr/bin/security 2>&1)
-            IMPORT_EXIT_CODE=$?
-            
-            if [ $IMPORT_EXIT_CODE -eq 0 ]; then
-              IMPORT_SUCCESS=true
-              echo "✅ Certificate imported successfully with password"
-            fi
+          # Try importing with password
+          echo "Attempting import with password..."
+          IMPORT_OUTPUT=$(security import "$CERTIFICATE_PATH" \
+            -P "$NORMALIZED_PASSWORD" \
+            -A \
+            -t cert \
+            -f pkcs12 \
+            -k "$KEYCHAIN_PATH" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security 2>&1)
+          IMPORT_EXIT_CODE=$?
+          echo "Import exit code: $IMPORT_EXIT_CODE"
+          echo "Import output: $IMPORT_OUTPUT"
+          
+          if [ $IMPORT_EXIT_CODE -eq 0 ]; then
+            IMPORT_SUCCESS=true
+            echo "✅ Certificate imported successfully with password"
           fi
           
-          # If that failed, try without password flag (for certificates with no password)
+          # If that failed, try without password flag
           if [ "$IMPORT_SUCCESS" = false ]; then
             echo "Attempting import without password flag..."
-            IMPORT_OUTPUT=$(security import $CERTIFICATE_PATH \
+            IMPORT_OUTPUT=$(security import "$CERTIFICATE_PATH" \
               -A \
               -t cert \
               -f pkcs12 \
-              -k $KEYCHAIN_PATH \
+              -k "$KEYCHAIN_PATH" \
               -T /usr/bin/codesign \
               -T /usr/bin/security 2>&1)
             IMPORT_EXIT_CODE=$?
+            echo "Import exit code: $IMPORT_EXIT_CODE"
+            echo "Import output: $IMPORT_OUTPUT"
             
             if [ $IMPORT_EXIT_CODE -eq 0 ]; then
               IMPORT_SUCCESS=true
@@ -256,14 +262,18 @@ jobs:
             fi
           fi
           
+          # Re-enable exit-on-error
+          set -e
+          
           # If still failed, try with interactive mode (might prompt for password)
           if [ "$IMPORT_SUCCESS" = false ]; then
             echo "Attempting import with interactive mode..."
-            IMPORT_OUTPUT=$(security import $CERTIFICATE_PATH \
+            set +e
+            IMPORT_OUTPUT=$(security import "$CERTIFICATE_PATH" \
               -A \
               -t cert \
               -f pkcs12 \
-              -k $KEYCHAIN_PATH \
+              -k "$KEYCHAIN_PATH" \
               -T /usr/bin/codesign \
               -T /usr/bin/security \
               -P "$NORMALIZED_PASSWORD" 2>&1)
@@ -345,15 +355,25 @@ jobs:
           
           # Success message is already printed above
           
-          # Set keychain as default
-          security list-keychain -d user -s $KEYCHAIN_PATH
+          # Set keychain as default and include in search list
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          
+          # CRITICAL: Allow codesign to access the private key without UI prompts
+          # This is required on GitHub-hosted macOS runners
+          echo "Setting key partition list for codesign access..."
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH"
+          echo "✅ Key partition list set"
           
           # Verify certificate was imported
           echo "Verifying certificate import..."
-          security find-certificate -c "Apple Development" $KEYCHAIN_PATH 2>/dev/null || \
-          security find-certificate -c "iPhone Developer" $KEYCHAIN_PATH 2>/dev/null || \
-          security find-certificate -c "Apple Distribution" $KEYCHAIN_PATH 2>/dev/null || \
-          echo "⚠️  Warning: Could not verify certificate import (this may be normal if certificate name differs)"
+          security find-certificate -c "Apple Distribution" "$KEYCHAIN_PATH" 2>/dev/null || \
+          security find-certificate -c "Apple Development" "$KEYCHAIN_PATH" 2>/dev/null || \
+          security find-certificate -c "iPhone Developer" "$KEYCHAIN_PATH" 2>/dev/null || \
+          echo "⚠️  Warning: Could not verify certificate import by name"
           
           echo "✅ Certificate installation completed"
 
