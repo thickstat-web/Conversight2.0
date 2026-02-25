@@ -271,10 +271,22 @@ jobs:
           if [ -n "$UUID" ]; then
             cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/"$UUID.mobileprovision"
             echo "✅ Provisioning profile installed as $UUID.mobileprovision"
+            echo "PROVISIONING_PROFILE_UUID=$UUID" >> $GITHUB_ENV
           else
             # Fallback: use a generic name
-            cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
+            cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
             echo "✅ Provisioning profile installed (UUID not found, using generic name)"
+          fi
+
+          # Check if profile includes Push Notifications capability
+          if security cms -D -i "$PP_PATH" 2>/dev/null | grep -q "aps-environment\|com.apple.developer.aps-environment"; then
+            echo "✅ Provisioning profile includes Push Notifications (APNs) capability"
+          else
+            echo "⚠️  WARNING: Provisioning profile does NOT include Push Notifications capability!"
+            echo "   This will cause the archive to fail because the app entitlements require APNs."
+            echo "   Fix: Go to Apple Developer Portal → Certificates, IDs & Profiles"
+            echo "   → Edit your App ID to enable Push Notifications"
+            echo "   → Regenerate the provisioning profile and update PROVISIONING_PROFILE_BASE64 secret"
           fi
 
       - name: Setup Node.js
@@ -370,6 +382,7 @@ jobs:
             -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
             CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_UUID" \
             clean archive
           
           # Verify archive was created
