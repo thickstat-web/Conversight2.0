@@ -232,49 +232,79 @@ jobs:
           echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
           
           # Verify CocoaPods installation
-          # Try multiple methods to find pod command
-          COCOAPODS_VERSION="0.0.0"
-          if command -v pod &> /dev/null; then
-            COCOAPODS_VERSION=$(pod --version 2>/dev/null || echo "0.0.0")
-          elif [ -f "${GEM_BIN_DIR}/pod" ]; then
-            COCOAPODS_VERSION=$("${GEM_BIN_DIR}/pod" --version 2>/dev/null || echo "0.0.0")
-          elif command -v bundle &> /dev/null && bundle list 2>/dev/null | grep -q cocoapods; then
-            COCOAPODS_VERSION=$(bundle exec pod --version 2>/dev/null || echo "0.0.0")
-          else
-            # Try to find pod in gem directories
-            POD_BINARY=$(find "${GEM_USER_DIR}" -name "pod" -type f 2>/dev/null | head -1)
-            if [ -n "${POD_BINARY}" ] && [ -x "${POD_BINARY}" ]; then
-              COCOAPODS_VERSION=$("${POD_BINARY}" --version 2>/dev/null || echo "0.0.0")
-            fi
-          fi
+          # First check if CocoaPods gem is installed
+          echo "Checking CocoaPods installation..."
+          gem list cocoapods
           
-          echo "CocoaPods version: ${COCOAPODS_VERSION}"
-          
-          # Check if version is >= 1.12.0
-          VERSION_OK=false
-          if [ "${COCOAPODS_VERSION}" != "0.0.0" ] && [ "${COCOAPODS_VERSION}" != "" ]; then
-            MAJOR=$(echo "${COCOAPODS_VERSION}" | cut -d. -f1)
-            MINOR=$(echo "${COCOAPODS_VERSION}" | cut -d. -f2)
-            if [ "${MAJOR}" -gt 1 ] || ([ "${MAJOR}" -eq 1 ] && [ "${MINOR}" -ge 12 ]); then
-              VERSION_OK=true
-            fi
-          fi
-          
-          if [ "${VERSION_OK}" = "false" ]; then
-            echo "⚠️  CocoaPods version ${COCOAPODS_VERSION} does not meet requirement (>= 1.12.0) or not found"
-            echo "Checking if CocoaPods was installed successfully..."
-            gem list cocoapods || echo "CocoaPods not found in gem list"
+          if gem list cocoapods 2>/dev/null | grep -q cocoapods; then
+            echo "✅ CocoaPods gem is installed"
             
-            # If CocoaPods gems were installed, assume it's working even if version check failed
-            if gem list cocoapods 2>/dev/null | grep -q cocoapods; then
-              echo "✅ CocoaPods gems are installed, continuing despite version check failure"
-              echo "⚠️  Note: Version verification failed, but CocoaPods appears to be installed"
+            # Try to get version using multiple methods
+            COCOAPODS_VERSION="0.0.0"
+            
+            # Method 1: Try pod command directly
+            if command -v pod &> /dev/null; then
+              COCOAPODS_VERSION=$(pod --version 2>/dev/null || echo "0.0.0")
+            fi
+            
+            # Method 2: Try gem bin directory
+            if [ "${COCOAPODS_VERSION}" = "0.0.0" ] && [ -f "${GEM_BIN_DIR}/pod" ]; then
+              COCOAPODS_VERSION=$("${GEM_BIN_DIR}/pod" --version 2>/dev/null || echo "0.0.0")
+            fi
+            
+            # Method 3: Try bundle exec
+            if [ "${COCOAPODS_VERSION}" = "0.0.0" ] && command -v bundle &> /dev/null && bundle list 2>/dev/null | grep -q cocoapods; then
+              COCOAPODS_VERSION=$(bundle exec pod --version 2>/dev/null || echo "0.0.0")
+            fi
+            
+            # Method 4: Find pod binary in gem directories
+            if [ "${COCOAPODS_VERSION}" = "0.0.0" ]; then
+              POD_BINARY=$(find "${GEM_USER_DIR}" -name "pod" -type f 2>/dev/null | head -1)
+              if [ -n "${POD_BINARY}" ] && [ -x "${POD_BINARY}" ]; then
+                COCOAPODS_VERSION=$("${POD_BINARY}" --version 2>/dev/null || echo "0.0.0")
+              fi
+            fi
+            
+            # Method 5: Try rbenv shims
+            if [ "${COCOAPODS_VERSION}" = "0.0.0" ] && [ -d "$HOME/.rbenv/shims" ]; then
+              if [ -f "$HOME/.rbenv/shims/pod" ]; then
+                COCOAPODS_VERSION=$("$HOME/.rbenv/shims/pod" --version 2>/dev/null || echo "0.0.0")
+              fi
+            fi
+            
+            echo "CocoaPods version detected: ${COCOAPODS_VERSION}"
+            
+            # Check if version is >= 1.12.0
+            VERSION_OK=false
+            if [ "${COCOAPODS_VERSION}" != "0.0.0" ] && [ "${COCOAPODS_VERSION}" != "" ]; then
+              MAJOR=$(echo "${COCOAPODS_VERSION}" | cut -d. -f1)
+              MINOR=$(echo "${COCOAPODS_VERSION}" | cut -d. -f2)
+              if [ "${MAJOR}" -gt 1 ] || ([ "${MAJOR}" -eq 1 ] && [ "${MINOR}" -ge 12 ]); then
+                VERSION_OK=true
+              fi
+            fi
+            
+            if [ "${VERSION_OK}" = "true" ]; then
+              echo "✅ CocoaPods version ${COCOAPODS_VERSION} meets requirements (>= 1.12.0)"
             else
-              echo "❌ Error: CocoaPods installation appears to have failed"
-              exit 1
+              echo "⚠️  Could not verify CocoaPods version (got: ${COCOAPODS_VERSION})"
+              echo "⚠️  But CocoaPods gem is installed, so continuing..."
+              echo "⚠️  The pod command may need rbenv rehash or PATH update"
+              
+              # Try rbenv rehash to refresh shims
+              if command -v rbenv &> /dev/null; then
+                echo "Running rbenv rehash to refresh shims..."
+                rbenv rehash
+                # Try again after rehash
+                if command -v pod &> /dev/null; then
+                  COCOAPODS_VERSION=$(pod --version 2>/dev/null || echo "0.0.0")
+                  echo "CocoaPods version after rehash: ${COCOAPODS_VERSION}"
+                fi
+              fi
             fi
           else
-            echo "✅ CocoaPods version ${COCOAPODS_VERSION} meets requirements (>= 1.12.0)"
+            echo "❌ Error: CocoaPods gem not found in gem list"
+            exit 1
           fi
           
           # Update CocoaPods repo to get latest podspecs
