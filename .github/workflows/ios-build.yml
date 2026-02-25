@@ -1,0 +1,77 @@
+name: iOS Build
+
+on:
+  push:
+    branches:
+      - cloud
+      - main
+      - develop
+  pull_request:
+    branches:
+      - cloud
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: Build iOS App
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7.5'
+          bundler-cache: true
+      
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: |
+          bundle install
+          bundle exec pod install
+      
+      - name: Build iOS
+        working-directory: ios
+        run: |
+          xcodebuild clean build \
+            -workspace ConverSight.xcworkspace \
+            -scheme ConverSight \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+      
+      - name: Archive iOS
+        working-directory: ios
+        run: |
+          xcodebuild archive \
+            -workspace ConverSight.xcworkspace \
+            -scheme ConverSight \
+            -configuration Release \
+            -archivePath build/ConverSight.xcarchive \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ios-build
+          path: ios/build/ConverSight.xcarchive
+          retention-days: 7
