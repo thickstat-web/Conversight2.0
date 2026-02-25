@@ -127,7 +127,8 @@ if command -v node &> /dev/null; then
     echo "✅ Node.js found in PATH: ${NODE_BINARY}"
 else
     echo "⚠️  Node.js not in PATH, searching..."
-    NODE_BINARY="$(find_node)"
+    # Use || true to prevent script exit if find_node returns 1
+    NODE_BINARY="$(find_node || echo "")"
     if [ -n "${NODE_BINARY}" ]; then
         echo "✅ Found Node.js at: ${NODE_BINARY}"
         NODE_DIR="$(dirname "${NODE_BINARY}")"
