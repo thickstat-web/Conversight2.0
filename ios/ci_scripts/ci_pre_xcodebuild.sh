@@ -135,25 +135,42 @@ else
         echo "✅ Added ${NODE_DIR} to PATH"
     else
         echo "⚠️  Node.js not found in standard locations, attempting to install..."
+        echo "📋 Diagnostic information:"
+        echo "   - PATH: ${PATH}"
+        echo "   - HOME: ${HOME}"
+        echo "   - USER: ${USER}"
+        echo "   - Available commands:"
+        echo "     * brew: $(command -v brew || echo 'NOT FOUND')"
+        echo "     * curl: $(command -v curl || echo 'NOT FOUND')"
+        echo "     * wget: $(command -v wget || echo 'NOT FOUND')"
         
         # Try to install Node.js via Homebrew if available
         if command -v brew &> /dev/null; then
-            echo "Installing Node.js via Homebrew..."
-            brew install node
+            echo "🍺 Installing Node.js via Homebrew..."
+            brew install node || {
+                echo "⚠️  Homebrew install failed, trying to locate existing installation..."
+                # Check if Homebrew has node installed but not in PATH
+                BREW_PREFIX=$(brew --prefix)
+                if [ -f "${BREW_PREFIX}/bin/node" ]; then
+                    export PATH="${BREW_PREFIX}/bin:${PATH}"
+                    NODE_BINARY="${BREW_PREFIX}/bin/node"
+                    echo "✅ Found Node.js in Homebrew at: ${NODE_BINARY}"
+                else
+                    echo "❌ Error: Failed to install Node.js via Homebrew"
+                    exit 1
+                fi
+            }
             if command -v node &> /dev/null; then
                 NODE_BINARY="$(command -v node)"
                 echo "✅ Node.js installed and found at: ${NODE_BINARY}"
-            else
-                echo "❌ Error: Failed to install Node.js via Homebrew"
-                exit 1
             fi
         # Try to use nvm if available
         elif [ -s "$HOME/.nvm/nvm.sh" ]; then
-            echo "Loading nvm..."
+            echo "📦 Loading nvm..."
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm install node
-            nvm use node
+            nvm install node || nvm install --lts
+            nvm use node || nvm use --lts
             if command -v node &> /dev/null; then
                 NODE_BINARY="$(command -v node)"
                 echo "✅ Node.js loaded via nvm at: ${NODE_BINARY}"
@@ -161,11 +178,41 @@ else
                 echo "❌ Error: Failed to load Node.js via nvm"
                 exit 1
             fi
-        else
-            echo "❌ Error: Node.js not found and no installation method available"
+        # Try downloading Node.js directly
+        elif command -v curl &> /dev/null || command -v wget &> /dev/null; then
+            echo "📥 Attempting to download and install Node.js..."
+            NODE_VERSION="20.11.0"
+            NODE_DIR="/tmp/nodejs"
+            mkdir -p "${NODE_DIR}"
+            
+            if command -v curl &> /dev/null; then
+                curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-darwin-x64.tar.gz" -o "${NODE_DIR}/node.tar.gz" || {
+                    echo "⚠️  Failed to download Node.js, trying alternative method..."
+                }
+            fi
+            
+            if [ -f "${NODE_DIR}/node.tar.gz" ]; then
+                cd "${NODE_DIR}"
+                tar -xzf node.tar.gz
+                export PATH="${NODE_DIR}/node-v${NODE_VERSION}-darwin-x64/bin:${PATH}"
+                if command -v node &> /dev/null; then
+                    NODE_BINARY="$(command -v node)"
+                    echo "✅ Node.js installed from download at: ${NODE_BINARY}"
+                fi
+            fi
+        fi
+        
+        # Final check
+        if [ -z "${NODE_BINARY}" ] || ! command -v node &> /dev/null; then
+            echo "❌ Error: Node.js not found and installation attempts failed"
             echo "Xcode Cloud should have Node.js available for React Native projects"
             echo "Please check your Xcode Cloud workflow configuration"
-            echo "PATH: ${PATH}"
+            echo ""
+            echo "Available directories:"
+            ls -la /usr/local/bin/ 2>/dev/null | head -10 || echo "Cannot list /usr/local/bin"
+            echo ""
+            echo "Searching for any node executable..."
+            find /usr /opt /Library -name "node" -type f 2>/dev/null | head -5 || echo "No node found"
             exit 1
         fi
     fi
