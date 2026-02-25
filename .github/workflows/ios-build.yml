@@ -156,8 +156,27 @@ jobs:
           # Install gems to user directory
           bundle install --path "${GEM_USER_DIR}"
           
-          # Verify bundle can find gems
-          bundle exec pod install
+          # Update CocoaPods repo to get latest podspecs
+          echo "Updating CocoaPods repo..."
+          bundle exec pod repo update || echo "⚠️  pod repo update failed, continuing..."
+          
+          # Install pods with repo update to resolve version conflicts
+          echo "Installing CocoaPods dependencies..."
+          bundle exec pod install --repo-update || {
+            echo "⚠️  pod install --repo-update failed, trying pod update..."
+            # If pod install fails, try updating the conflicting pod
+            bundle exec pod update TOCropViewController || {
+              echo "⚠️  pod update failed, trying without Podfile.lock..."
+              # Last resort: remove Podfile.lock and reinstall
+              if [ -f "Podfile.lock" ]; then
+                echo "Removing Podfile.lock and reinstalling..."
+                rm -f Podfile.lock
+                bundle exec pod install --repo-update
+              else
+                bundle exec pod install
+              fi
+            }
+          }
       
       - name: Build iOS
         working-directory: ios
