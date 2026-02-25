@@ -237,12 +237,9 @@ jobs:
             "$KEYCHAIN_PATH"
           echo "✅ Key partition list set"
           
-          # Verify certificate was imported
-          echo "Verifying certificate import..."
-          security find-certificate -c "Apple Distribution" "$KEYCHAIN_PATH" 2>/dev/null || \
-          security find-certificate -c "Apple Development" "$KEYCHAIN_PATH" 2>/dev/null || \
-          security find-certificate -c "iPhone Developer" "$KEYCHAIN_PATH" 2>/dev/null || \
-          echo "⚠️  Warning: Could not verify certificate import by name"
+          # Show all imported certificates so we know the exact name
+          echo "Certificates in keychain:"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH" 2>/dev/null || true
           
           echo "✅ Certificate installation completed"
 
@@ -387,6 +384,7 @@ jobs:
             -configuration Release \
             -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
             CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_UUID" \
             clean archive
