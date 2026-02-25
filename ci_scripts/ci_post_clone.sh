@@ -50,7 +50,9 @@ find_node() {
     return 1
 }
 
-NODE_BINARY=$(find_node)
+# Call find_node but don't fail if it returns 1
+NODE_BINARY=""
+NODE_BINARY=$(find_node || echo "")
 
 if [ -n "${NODE_BINARY}" ]; then
     NODE_DIR="$(dirname "${NODE_BINARY}")"
