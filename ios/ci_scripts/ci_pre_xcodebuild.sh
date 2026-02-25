@@ -11,18 +11,48 @@ echo "Current directory: $(pwd)"
 
 # In Xcode Cloud, CI_WORKSPACE points to the directory containing the .xcodeproj/.xcworkspace
 # For React Native projects, this is typically the ios/ directory
-# We need to go up one level to reach the project root
-if [ -d "${CI_WORKSPACE}/ios" ]; then
-    # CI_WORKSPACE is already at project root
-    PROJECT_ROOT="${CI_WORKSPACE}"
-    IOS_DIR="${CI_WORKSPACE}/ios"
-    echo "Detected: CI_WORKSPACE is at project root"
+# Since the script is in ios/ci_scripts/, we need to determine paths correctly
+CURRENT_DIR="$(pwd)"
+CURRENT_DIR_ABS="$(cd "${CURRENT_DIR}" && pwd)"
+
+# If CI_WORKSPACE is set and not empty, use it
+if [ -n "${CI_WORKSPACE}" ] && [ -d "${CI_WORKSPACE}" ]; then
+    CI_WORKSPACE_ABS="$(cd "${CI_WORKSPACE}" && pwd)"
+    echo "CI_WORKSPACE (absolute): ${CI_WORKSPACE_ABS}"
+    
+    # Check if CI_WORKSPACE is at project root (has ios/ subdirectory)
+    if [ -d "${CI_WORKSPACE_ABS}/ios" ]; then
+        PROJECT_ROOT="${CI_WORKSPACE_ABS}"
+        IOS_DIR="${CI_WORKSPACE_ABS}/ios"
+        echo "Detected: CI_WORKSPACE is at project root"
+    else
+        # CI_WORKSPACE is at ios/ directory, go up one level
+        PROJECT_ROOT="$(dirname "${CI_WORKSPACE_ABS}")"
+        IOS_DIR="${CI_WORKSPACE_ABS}"
+        echo "Detected: CI_WORKSPACE is at ios/ directory"
+    fi
 else
-    # CI_WORKSPACE is at ios/ directory, go up one level
-    PROJECT_ROOT="$(dirname "${CI_WORKSPACE}")"
-    IOS_DIR="${CI_WORKSPACE}"
-    echo "Detected: CI_WORKSPACE is at ios/ directory"
+    # CI_WORKSPACE is not set or empty, infer from current directory
+    # Script is in ios/ci_scripts/, so go up two levels for project root
+    if [[ "${CURRENT_DIR_ABS}" == */ios/ci_scripts ]]; then
+        PROJECT_ROOT="$(dirname "$(dirname "${CURRENT_DIR_ABS}")")"
+        IOS_DIR="$(dirname "${CURRENT_DIR_ABS}")"
+        echo "Detected: Script is in ios/ci_scripts/, inferred paths"
+    elif [[ "${CURRENT_DIR_ABS}" == */ios ]]; then
+        PROJECT_ROOT="$(dirname "${CURRENT_DIR_ABS}")"
+        IOS_DIR="${CURRENT_DIR_ABS}"
+        echo "Detected: Current directory is ios/, inferred paths"
+    else
+        # Fallback: assume we're at project root
+        PROJECT_ROOT="${CURRENT_DIR_ABS}"
+        IOS_DIR="${CURRENT_DIR_ABS}/ios"
+        echo "Detected: Current directory is project root (fallback)"
+    fi
 fi
+
+# Convert to absolute paths
+PROJECT_ROOT="$(cd "${PROJECT_ROOT}" && pwd)"
+IOS_DIR="$(cd "${IOS_DIR}" && pwd)"
 
 echo "Project root: ${PROJECT_ROOT}"
 echo "iOS directory: ${IOS_DIR}"
