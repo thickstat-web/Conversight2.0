@@ -60,9 +60,18 @@ jobs:
           
           # Install correct bundler version from Gemfile.lock
           if [ -f "Gemfile.lock" ] && grep -q "BUNDLED WITH" Gemfile.lock; then
-            REQUIRED_BUNDLER=$(grep "BUNDLED WITH" Gemfile.lock | awk '{print $NF}')
-            echo "Installing bundler version ${REQUIRED_BUNDLER}..."
-            gem install bundler -v "${REQUIRED_BUNDLER}"
+            # Get the version from the line after "BUNDLED WITH"
+            REQUIRED_BUNDLER=$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -1 | xargs)
+            if [ -n "${REQUIRED_BUNDLER}" ] && [[ "${REQUIRED_BUNDLER}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "Installing bundler version ${REQUIRED_BUNDLER}..."
+              gem install bundler -v "${REQUIRED_BUNDLER}"
+            else
+              echo "⚠️  Could not parse bundler version from Gemfile.lock, using latest"
+              gem install bundler
+            fi
+          else
+            echo "Installing latest bundler..."
+            gem install bundler
           fi
           
           bundle --version
