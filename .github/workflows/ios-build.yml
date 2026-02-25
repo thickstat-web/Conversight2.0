@@ -52,12 +52,34 @@ jobs:
           # Verify Ruby version
           ruby -v
           
-          # Install bundler to user directory to avoid permission issues
+          # Configure gem to use user directory and avoid RVM conflicts
+          RUBY_VERSION_SHORT=$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')
+          GEM_USER_DIR="$HOME/.gem/ruby/${RUBY_VERSION_SHORT}"
+          GEM_BIN_DIR="${GEM_USER_DIR}/bin"
+          
+          # Create gem user directory if it doesn't exist
+          mkdir -p "${GEM_USER_DIR}"
+          mkdir -p "${GEM_BIN_DIR}"
+          
+          # Set GEM_HOME to user directory to force user installs
+          export GEM_HOME="${GEM_USER_DIR}"
+          export GEM_PATH="${GEM_USER_DIR}"
+          
+          # Add user gem bin directory to PATH for this step and subsequent steps
+          echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
+          export PATH="${GEM_BIN_DIR}:${PATH}"
+          
+          echo "Gem user directory: ${GEM_USER_DIR}"
+          echo "Gem bin directory: ${GEM_BIN_DIR}"
+          echo "GEM_HOME: ${GEM_HOME}"
+          
+          # Install bundler to user directory
           if ! command -v bundle &> /dev/null; then
             echo "Installing bundler to user directory..."
-            gem install bundler --user-install
-            # Add user gem bin directory to PATH
-            export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
+            gem install bundler --no-document || {
+              echo "⚠️  Failed with --no-document, trying without..."
+              gem install bundler
+            }
           fi
           
           # Install correct bundler version from Gemfile.lock
@@ -66,26 +88,36 @@ jobs:
             REQUIRED_BUNDLER=$(grep -A 1 "BUNDLED WITH" Gemfile.lock | tail -1 | xargs)
             if [ -n "${REQUIRED_BUNDLER}" ] && [[ "${REQUIRED_BUNDLER}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
               echo "Installing bundler version ${REQUIRED_BUNDLER} to user directory..."
-              gem install bundler -v "${REQUIRED_BUNDLER}" --user-install
-              # Add user gem bin directory to PATH
-              export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
+              # Check if correct version is already installed
+              if bundle --version 2>/dev/null | grep -q "${REQUIRED_BUNDLER}"; then
+                echo "✅ Bundler ${REQUIRED_BUNDLER} already installed"
+              else
+                gem install bundler -v "${REQUIRED_BUNDLER}" --no-document || {
+                  echo "⚠️  Failed with --no-document, trying without..."
+                  gem install bundler -v "${REQUIRED_BUNDLER}"
+                }
+              fi
             else
               echo "⚠️  Could not parse bundler version from Gemfile.lock, using latest"
-              gem install bundler --user-install
-              export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
+              gem install bundler --no-document || gem install bundler
             fi
           else
             echo "Installing latest bundler to user directory..."
-            gem install bundler --user-install
-            export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
+            gem install bundler --no-document || gem install bundler
           fi
           
           # Verify bundler is accessible
+          export PATH="${GEM_BIN_DIR}:${PATH}"
           if ! command -v bundle &> /dev/null; then
-            echo "⚠️  Bundler not in PATH, adding user gem directory..."
-            export PATH="$HOME/.gem/ruby/$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')/bin:$PATH"
+            echo "⚠️  Bundler not found in PATH, checking installation..."
+            ls -la "${GEM_BIN_DIR}/" || echo "Gem bin directory not found"
+            echo "Current PATH: ${PATH}"
+            echo "Looking for bundle in: ${GEM_BIN_DIR}"
+            find "${GEM_USER_DIR}" -name "bundle" -type f 2>/dev/null || echo "Bundle not found"
+            exit 1
           fi
           
+          echo "✅ Bundler installed successfully"
           bundle --version
       
       - name: Install CocoaPods dependencies
