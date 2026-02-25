@@ -22,10 +22,10 @@ jobs:
       - name: Install Node Modules
         run: yarn install --frozen-lockfile
 
-      - name: Select Xcode 14.2
+      - name: Select Xcode 15.4
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '14.2'
+          xcode-version: '15.4'
 
       - name: Verify Xcode Version
         run: xcodebuild -version
