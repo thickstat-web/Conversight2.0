@@ -232,11 +232,38 @@ jobs:
           echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
           
           # Verify CocoaPods installation
+          # Ensure we're using the same gem environment as installation
+          export GEM_HOME="${GEM_USER_DIR}"
+          export GEM_PATH="${GEM_USER_DIR}"
+          export PATH="${GEM_BIN_DIR}:${PATH}"
+          
           # First check if CocoaPods gem is installed
           echo "Checking CocoaPods installation..."
-          gem list cocoapods
+          echo "GEM_HOME: ${GEM_HOME}"
+          echo "GEM_PATH: ${GEM_PATH}"
+          echo "Gem env home: $(gem env home)"
+          gem list cocoapods || echo "gem list failed, trying with explicit path..."
           
-          if gem list cocoapods 2>/dev/null | grep -q cocoapods; then
+          # Try with explicit GEM_HOME
+          if ! gem list cocoapods 2>/dev/null | grep -q cocoapods; then
+            # Try checking in the gem directory directly
+            if [ -d "${GEM_USER_DIR}/gems" ]; then
+              echo "Checking gem directory directly..."
+              ls -la "${GEM_USER_DIR}/gems" | grep cocoapods || echo "CocoaPods not found in gems directory"
+              if ls "${GEM_USER_DIR}/gems" 2>/dev/null | grep -q cocoapods; then
+                echo "✅ CocoaPods found in gems directory"
+                COCOAPODS_FOUND=true
+              else
+                COCOAPODS_FOUND=false
+              fi
+            else
+              COCOAPODS_FOUND=false
+            fi
+          else
+            COCOAPODS_FOUND=true
+          fi
+          
+          if [ "${COCOAPODS_FOUND}" = "true" ] || gem list cocoapods 2>/dev/null | grep -q cocoapods; then
             echo "✅ CocoaPods gem is installed"
             
             # Try to get version using multiple methods
