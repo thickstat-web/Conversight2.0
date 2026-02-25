@@ -155,48 +155,78 @@ jobs:
           
           # Try to install gems, but don't fail if there are dependency conflicts
           echo "Installing gems from Gemfile..."
+          BUNDLE_INSTALL_SUCCESS=false
           if bundle install --path "${GEM_USER_DIR}" 2>&1 | tee /tmp/bundle-install.log; then
             echo "✅ bundle install succeeded"
+            BUNDLE_INSTALL_SUCCESS=true
           else
             echo "⚠️  bundle install had dependency issues (likely Ruby version conflicts)"
-            echo "This is okay - we'll install CocoaPods directly"
+            # Check if CocoaPods was still installed despite errors
+            if bundle list 2>/dev/null | grep -q cocoapods; then
+              echo "✅ CocoaPods is available via bundle despite errors"
+              BUNDLE_INSTALL_SUCCESS=true
+            else
+              echo "⚠️  CocoaPods not available via bundle, will install directly"
+            fi
           fi
           
-          # Install compatible ffi version first (for Ruby 2.7.5)
-          echo "Installing compatible ffi version for Ruby 2.7.5..."
-          gem install ffi -v "1.17.3" --user-install --no-document 2>&1 || {
-            echo "⚠️  Failed with --no-document, trying without..."
-            gem install ffi -v "1.17.3" --user-install 2>&1 || {
-              echo "⚠️  Failed to install ffi 1.17.3, trying any compatible version..."
-              gem install ffi --user-install --no-document 2>&1 || gem install ffi --user-install
-            }
-          }
-          
-          # Update PATH after installing ffi
+          # Set PATH before installing gems
           export PATH="${GEM_BIN_DIR}:${PATH}"
+          echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
           
-          # Always install CocoaPods directly to ensure we have >= 1.12.0
-          echo "Installing CocoaPods >= 1.12.0 directly..."
-          gem install cocoapods -v ">= 1.12.0" --user-install --no-document 2>&1 || {
-            echo "⚠️  Failed with --no-document, trying without..."
-            gem install cocoapods -v ">= 1.12.0" --user-install 2>&1 || {
-              echo "⚠️  Failed with version constraint, trying latest compatible version..."
-              # Try installing a specific version that works with Ruby 2.7.5
-              gem install cocoapods -v "1.12.1" --user-install --no-document 2>&1 || {
-                gem install cocoapods -v "1.12.1" --user-install 2>&1 || {
-                  echo "⚠️  Trying latest version..."
-                  gem install cocoapods --user-install --no-document 2>&1 || gem install cocoapods --user-install
+          # Check if ffi is already installed (from bundle install)
+          if gem list ffi 2>/dev/null | grep -q ffi; then
+            echo "✅ ffi is already installed"
+            gem list ffi
+          else
+            # Install compatible ffi version first (for Ruby 2.7.5)
+            # ffi 1.15.5 is the version in Gemfile.lock and works with Ruby 2.7.5
+            echo "Installing compatible ffi version (1.15.5) for Ruby 2.7.5..."
+            gem install ffi -v "1.15.5" --user-install --no-document 2>&1 || {
+              echo "⚠️  Failed with --no-document, trying without..."
+              gem install ffi -v "1.15.5" --user-install 2>&1 || {
+                echo "⚠️  Failed to install ffi 1.15.5, trying older compatible version..."
+                # Try even older versions that work with Ruby 2.7
+                gem install ffi -v "1.15.0" --user-install 2>&1 || {
+                  gem install ffi -v "1.14.2" --user-install 2>&1 || {
+                    echo "⚠️  Failed to install ffi, but continuing - CocoaPods may work without it"
+                  }
                 }
               }
             }
-          }
+          fi
           
-          # Update PATH to include gem bin directory
+          # Check if CocoaPods is available via bundle
+          if [ "${BUNDLE_INSTALL_SUCCESS}" = "true" ] && bundle list 2>/dev/null | grep -q cocoapods; then
+            echo "✅ CocoaPods is available via bundle"
+            COCOAPODS_VERSION=$(bundle exec pod --version 2>/dev/null || echo "0.0.0")
+            echo "CocoaPods version from bundle: ${COCOAPODS_VERSION}"
+          else
+            # Install CocoaPods directly to ensure we have >= 1.12.0
+            # Note: This may fail if CocoaPods tries to install ffi >= 1.17.3 which requires Ruby 3.0+
+            echo "Installing CocoaPods >= 1.12.0 directly..."
+            echo "⚠️  Note: This may fail due to ffi dependency requiring Ruby 3.0+"
+            gem install cocoapods -v ">= 1.12.0" --user-install --no-document 2>&1 || {
+              echo "⚠️  Failed with --no-document, trying without..."
+              gem install cocoapods -v ">= 1.12.0" --user-install 2>&1 || {
+                echo "⚠️  Failed with version constraint, trying specific version..."
+                # Try installing a specific version that works with Ruby 2.7.5
+                gem install cocoapods -v "1.12.1" --user-install --no-document 2>&1 || {
+                  gem install cocoapods -v "1.12.1" --user-install 2>&1 || {
+                    echo "⚠️  Trying latest version..."
+                    gem install cocoapods --user-install --no-document 2>&1 || gem install cocoapods --user-install
+                  }
+                }
+              }
+            }
+          fi
+          
+          # Update PATH to include gem bin directory (if not already set)
           export PATH="${GEM_BIN_DIR}:${PATH}"
           echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
           
           # Verify CocoaPods installation
-          COCOAPODS_VERSION=$(pod --version 2>/dev/null || echo "0.0.0")
+          COCOAPODS_VERSION=$(pod --version 2>/dev/null || bundle exec pod --version 2>/dev/null || echo "0.0.0")
           echo "CocoaPods version: ${COCOAPODS_VERSION}"
           
           # Check if version is >= 1.12.0
