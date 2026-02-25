@@ -12,87 +12,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'yarn'
-      
-      - name: Install Node Modules
-        run: yarn install --frozen-lockfile
-      
-      - name: Select Xcode 15.4
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '15.4'
-
-      - name: Verify Xcode Version
-        run: xcodebuild -version
-      
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.0'
-
-      - name: Fix podspec File.exists issue
-        run: |
-          python3 -c "
-          import os
-
-          def fix_file(path):
-              with open(path, 'r') as f:
-                  content = f.read()
-              if 'File.exists?' in content:
-                  content = content.replace('File.exists?', 'File.exist?')
-                  with open(path, 'w') as f:
-                      f.write(content)
-                  print(f'Fixed: {path}')
-
-          for root, dirs, files in os.walk('node_modules'):
-              for file in files:
-                  if file.endswith('.podspec') or file.endswith('.rb'):
-                      fix_file(os.path.join(root, file))
-          "
-          # Also fix Podfile itself
-          python3 -c "
-          path = 'ios/Podfile'
-          with open(path, 'r') as f:
-              content = f.read()
-          content = content.replace('File.exists?', 'File.exist?')
-          with open(path, 'w') as f:
-              f.write(content)
-          print('Fixed Podfile')"
-
-      - name: Fix boost.podspec URL for checksum issue
-        run: |
-          BOOST_PODSPEC="node_modules/react-native/third-party-podspecs/boost.podspec"
-          if [ -f "$BOOST_PODSPEC" ]; then
-            echo "Fixing boost.podspec URL to resolve checksum verification issue..."
-            # Replace the problematic jfrog.io URL with archives.boost.io
-            sed -i '' "s|https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2|https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2|g" "$BOOST_PODSPEC"
-            # Also handle any variations with quotes
-            sed -i '' "s|'https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2'|'https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2'|g" "$BOOST_PODSPEC"
-            sed -i '' 's|"https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2"|"https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2"|g' "$BOOST_PODSPEC"
-            echo "✅ Fixed boost.podspec URL"
-            # Verify the change
-            if grep -q "archives.boost.io" "$BOOST_PODSPEC"; then
-              echo "✅ Verification: boost.podspec URL updated successfully"
-              echo "Updated URL found in boost.podspec:"
-              grep "archives.boost.io" "$BOOST_PODSPEC" | head -1
-            else
-              echo "⚠️  Warning: Could not verify URL change in boost.podspec"
-            fi
-          else
-            echo "⚠️  Warning: boost.podspec not found at $BOOST_PODSPEC"
-            echo "Searching for boost.podspec in node_modules..."
-            find node_modules -name "boost.podspec" -type f 2>/dev/null | head -5 || echo "No boost.podspec found"
-          fi
-
-      - name: Install CocoaPods Dependencies
-        run: |
-          cd ios
-          pod install --repo-update
 
       - name: Install Apple Certificate
         env:
@@ -108,7 +27,7 @@ jobs:
           # Validate base64 string is not empty
           if [ -z "$BUILD_CERTIFICATE_BASE64" ]; then
             echo "❌ Error: BUILD_CERTIFICATE_BASE64 secret is empty"
-                exit 1
+            exit 1
           fi
           
           # Check base64 string length (should be substantial for a .p12 file)
@@ -265,26 +184,6 @@ jobs:
           # Re-enable exit-on-error
           set -e
           
-          # If still failed, try with interactive mode (might prompt for password)
-          if [ "$IMPORT_SUCCESS" = false ]; then
-            echo "Attempting import with interactive mode..."
-            set +e
-            IMPORT_OUTPUT=$(security import "$CERTIFICATE_PATH" \
-              -A \
-              -t cert \
-              -f pkcs12 \
-              -k "$KEYCHAIN_PATH" \
-              -T /usr/bin/codesign \
-              -T /usr/bin/security \
-              -P "$NORMALIZED_PASSWORD" 2>&1)
-            IMPORT_EXIT_CODE=$?
-            
-            if [ $IMPORT_EXIT_CODE -eq 0 ]; then
-              IMPORT_SUCCESS=true
-              echo "✅ Certificate imported successfully"
-            fi
-          fi
-          
           if [ "$IMPORT_SUCCESS" = false ]; then
             echo "❌ Error: Failed to import certificate into keychain after multiple attempts"
             echo ""
@@ -294,66 +193,16 @@ jobs:
             
             if echo "$IMPORT_OUTPUT" | grep -q "MAC verification failed\|wrong password"; then
               echo "🔐 Password Error: The P12_PASSWORD secret is incorrect."
-              echo ""
-              echo "⚠️  IMPORTANT: P12_PASSWORD is NOT your Mac login password!"
-              echo ""
-              echo "P12_PASSWORD is the password you set when exporting the .p12 certificate file"
-              echo "from Keychain Access. This is a separate password for the certificate file itself."
-              echo ""
-              echo "When exporting a certificate:"
-              echo "  1. Keychain Access may ask for your Mac password (to allow export) - this is NOT P12_PASSWORD"
-              echo "  2. Then it asks you to set a password for the .p12 file - THIS is what P12_PASSWORD should be"
-              echo ""
-              echo "Solutions (try in this order):"
-              echo ""
-              echo "  Option 1: Certificate has NO password (most likely if you didn't set one)"
-              echo "    - Go to Repository → Settings → Secrets → P12_PASSWORD"
-              echo "    - Enter: none (GitHub doesn't allow empty values, so use 'none' as placeholder)"
-              echo "    - Save and re-run the workflow"
-              echo ""
-              echo "  Option 2: You remember the password"
-              echo "    - Update P12_PASSWORD secret with the password you set when exporting"
-              echo ""
-              echo "  Option 3: Export a new certificate with a known password"
-              echo "    - Open Keychain Access → My Certificates"
-              echo "    - Find your certificate (usually 'Apple Development' or 'Apple Distribution')"
-              echo "    - Right-click → Export 'Certificate Name'"
-              echo "    - Choose a password for the .p12 file (remember this!)"
-              echo "    - Save the .p12 file"
-              echo "    - Encode it: base64 -i YourCertificate.p12 | pbcopy"
-              echo "    - Update BUILD_CERTIFICATE_BASE64 (paste base64) and P12_PASSWORD (the password you just set)"
+              echo "  - Update P12_PASSWORD secret with the password you set when exporting"
+              echo "  - If no password was set, use 'none' as the value"
             else
-              # Other types of import errors
-              echo "🔧 Troubleshooting non-password import errors:"
-              echo ""
-              
-              if echo "$IMPORT_OUTPUT" | grep -q "keychain"; then
-                echo "Keychain-related error detected. Possible issues:"
-                echo "  - Keychain permissions"
-                echo "  - Keychain not properly unlocked"
-                echo "  - Keychain path issues"
-              fi
-              
-              if echo "$IMPORT_OUTPUT" | grep -q "format\|Format"; then
-                echo "Format error detected. The certificate file might be corrupted."
-                echo "  - Try re-exporting the certificate from Keychain Access"
-                echo "  - Verify the base64 encoding is complete"
-              fi
-              
-              echo ""
-              echo "Common solutions:"
-              echo "  1. Verify the certificate file is complete and valid"
-              echo "  2. Check that BUILD_CERTIFICATE_BASE64 contains the full base64 string"
-              echo "  3. Ensure P12_PASSWORD matches the export password (9042 in your case)"
-              echo "  4. Try exporting a fresh certificate from Keychain Access"
-              echo ""
-              echo "Full error details:"
-              echo "$IMPORT_OUTPUT"
+              echo "🔧 Common solutions:"
+              echo "  1. Verify BUILD_CERTIFICATE_BASE64 contains the full base64 string"
+              echo "  2. Ensure P12_PASSWORD matches the export password (9042 in your case)"
+              echo "  3. Try exporting a fresh certificate from Keychain Access"
             fi
             exit 1
           fi
-          
-          # Success message is already printed above
           
           # Set keychain as default and include in search list
           security list-keychain -d user -s "$KEYCHAIN_PATH"
@@ -407,6 +256,82 @@ jobs:
             cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
             echo "✅ Provisioning profile installed (UUID not found, using generic name)"
           fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+      
+      - name: Install Node Modules
+        run: yarn install --frozen-lockfile
+      
+      - name: Select Xcode 15.4
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.4'
+
+      - name: Verify Xcode Version
+        run: xcodebuild -version
+      
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+
+      - name: Fix podspec File.exists issue
+        run: |
+          python3 -c "
+          import os
+
+          def fix_file(path):
+              with open(path, 'r') as f:
+                  content = f.read()
+              if 'File.exists?' in content:
+                  content = content.replace('File.exists?', 'File.exist?')
+                  with open(path, 'w') as f:
+                      f.write(content)
+                  print(f'Fixed: {path}')
+
+          for root, dirs, files in os.walk('node_modules'):
+              for file in files:
+                  if file.endswith('.podspec') or file.endswith('.rb'):
+                      fix_file(os.path.join(root, file))
+          "
+          # Also fix Podfile itself
+          python3 -c "
+          path = 'ios/Podfile'
+          with open(path, 'r') as f:
+              content = f.read()
+          content = content.replace('File.exists?', 'File.exist?')
+          with open(path, 'w') as f:
+              f.write(content)
+          print('Fixed Podfile')"
+
+      - name: Fix boost.podspec URL for checksum issue
+        run: |
+          BOOST_PODSPEC="node_modules/react-native/third-party-podspecs/boost.podspec"
+          if [ -f "$BOOST_PODSPEC" ]; then
+            echo "Fixing boost.podspec URL to resolve checksum verification issue..."
+            sed -i '' "s|https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2|https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2|g" "$BOOST_PODSPEC"
+            sed -i '' "s|'https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2'|'https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2'|g" "$BOOST_PODSPEC"
+            sed -i '' 's|"https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2"|"https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2"|g' "$BOOST_PODSPEC"
+            echo "✅ Fixed boost.podspec URL"
+            if grep -q "archives.boost.io" "$BOOST_PODSPEC"; then
+              echo "✅ Verification: boost.podspec URL updated successfully"
+              grep "archives.boost.io" "$BOOST_PODSPEC" | head -1
+            else
+              echo "⚠️  Warning: Could not verify URL change in boost.podspec"
+            fi
+          else
+            echo "⚠️  Warning: boost.podspec not found at $BOOST_PODSPEC"
+            find node_modules -name "boost.podspec" -type f 2>/dev/null | head -5 || echo "No boost.podspec found"
+          fi
+
+      - name: Install CocoaPods Dependencies
+        run: |
+          cd ios
+          pod install --repo-update
 
       - name: Build Archive
         env:
