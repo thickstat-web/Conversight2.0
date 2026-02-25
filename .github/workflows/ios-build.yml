@@ -33,26 +33,53 @@ jobs:
       
       - name: Setup Ruby
         run: |
-          # Check if Ruby 2.7.5 is available
-          if ! ruby -v | grep -q "2.7.5"; then
-            echo "Ruby 2.7.5 not found, checking available versions..."
-            ruby -v || echo "Ruby not found"
-            
-            # Try to install Ruby 2.7.5 via Homebrew/rbenv if available
-            if command -v rbenv &> /dev/null; then
-              echo "Installing Ruby 2.7.5 via rbenv..."
-              rbenv install 2.7.5 || true
-              rbenv global 2.7.5 || rbenv local 2.7.5
-            elif command -v brew &> /dev/null; then
-              echo "Installing Ruby via Homebrew..."
-              brew install ruby@2.7 || true
+          # Install rbenv if not available
+          if ! command -v rbenv &> /dev/null; then
+            echo "Installing rbenv..."
+            if command -v brew &> /dev/null; then
+              brew install rbenv ruby-build
+            else
+              echo "⚠️  Homebrew not found, trying to install rbenv manually..."
+              # Fallback: try to use existing rbenv if in PATH but not in command
+              export PATH="$HOME/.rbenv/bin:$PATH" || true
             fi
           fi
           
+          # Initialize rbenv
+          export RBENV_ROOT="$HOME/.rbenv"
+          export PATH="$RBENV_ROOT/bin:$PATH"
+          eval "$(rbenv init -)" || {
+            # If rbenv init fails, try to set it up manually
+            export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
+          }
+          
+          # Install Ruby 3.2.2 if not available
+          if ! rbenv versions | grep -q "3.2.2"; then
+            echo "Installing Ruby 3.2.2 via rbenv..."
+            rbenv install 3.2.2 || {
+              echo "⚠️  rbenv install failed, checking if ruby-build is available..."
+              if ! command -v ruby-build &> /dev/null && command -v brew &> /dev/null; then
+                brew install ruby-build
+                rbenv install 3.2.2
+              else
+                echo "❌ Failed to install Ruby 3.2.2"
+                exit 1
+              fi
+            }
+          fi
+          
+          # Set Ruby 3.2.2 as global version
+          rbenv global 3.2.2
+          rbenv rehash
+          
           # Verify Ruby version
           ruby -v
+          if ! ruby -v | grep -q "3.2"; then
+            echo "❌ Error: Ruby 3.2 not active"
+            exit 1
+          fi
           
-          # Configure gem to use user directory and avoid RVM conflicts
+          # Configure gem to use user directory
           RUBY_VERSION_SHORT=$(ruby -e 'puts RUBY_VERSION[/\d+\.\d+/]')
           GEM_USER_DIR="$HOME/.gem/ruby/${RUBY_VERSION_SHORT}"
           GEM_BIN_DIR="${GEM_USER_DIR}/bin"
@@ -65,7 +92,10 @@ jobs:
           export GEM_HOME="${GEM_USER_DIR}"
           export GEM_PATH="${GEM_USER_DIR}"
           
-          # Add user gem bin directory to PATH for this step and subsequent steps
+          # Add rbenv and gem bin directory to PATH
+          export PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:${GEM_BIN_DIR}:$PATH"
+          echo "$RBENV_ROOT/bin" >> $GITHUB_PATH
+          echo "$RBENV_ROOT/shims" >> $GITHUB_PATH
           echo "${GEM_BIN_DIR}" >> $GITHUB_PATH
           export PATH="${GEM_BIN_DIR}:${PATH}"
           
