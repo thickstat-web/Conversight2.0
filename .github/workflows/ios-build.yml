@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
+      
       - name: Install Apple Certificate
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -36,7 +36,7 @@ jobs:
           if [ "$BASE64_LENGTH" -lt 100 ]; then
             echo "❌ Error: Base64 string is too short ($BASE64_LENGTH chars). A valid .p12 certificate should be at least 1000+ characters when base64 encoded."
             echo "Please verify your BUILD_CERTIFICATE_BASE64 secret contains the complete certificate."
-            exit 1
+                exit 1
           fi
           
           # Decode base64 certificate (macOS base64 uses -d flag)
@@ -266,16 +266,22 @@ jobs:
           # Install provisioning profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           
-          # Extract UUID from provisioning profile and use it as filename
-          UUID=$(grep -aA1 UUID "$PP_PATH" | grep -o "[-A-F0-9]\{36\}" | head -1)
+          # Extract UUID from provisioning profile using security cms (handles mixed-case UUIDs)
+          UUID=$(security cms -D -i "$PP_PATH" 2>/dev/null | grep -A1 '<key>UUID</key>' | grep '<string>' | sed 's|.*<string>\(.*\)</string>.*|\1|' | tr -d '[:space:]')
+          # Fallback: grep-based extraction (case-insensitive)
+          if [ -z "$UUID" ]; then
+            UUID=$(grep -aoi "[0-9a-f]\{8\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{12\}" "$PP_PATH" | head -1)
+          fi
+
           if [ -n "$UUID" ]; then
             cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/"$UUID.mobileprovision"
             echo "✅ Provisioning profile installed as $UUID.mobileprovision"
             echo "PROVISIONING_PROFILE_UUID=$UUID" >> $GITHUB_ENV
+            echo "Profile UUID: $UUID"
           else
-            # Fallback: use a generic name
+            # Fallback: use a generic name (xcodebuild will auto-match by bundle ID)
             cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
-            echo "✅ Provisioning profile installed (UUID not found, using generic name)"
+            echo "⚠️  UUID not found — installed with generic name (auto-matching by bundle ID)"
           fi
 
           # Check if profile includes Push Notifications capability
