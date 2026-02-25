@@ -154,7 +154,50 @@ jobs:
           echo "Gem env home: $(gem env home)"
           
           # Install gems to user directory
-          bundle install --path "${GEM_USER_DIR}"
+          echo "Installing gems from Gemfile..."
+          bundle install --path "${GEM_USER_DIR}" || {
+            echo "⚠️  bundle install had issues, continuing..."
+          }
+          
+          # Check CocoaPods version and upgrade if needed
+          COCOAPODS_VERSION=$(bundle exec pod --version 2>/dev/null || pod --version 2>/dev/null || echo "0.0.0")
+          echo "Current CocoaPods version: ${COCOAPODS_VERSION}"
+          
+          # Check if version is >= 1.12.0
+          VERSION_CHECK=$(echo "${COCOAPODS_VERSION}" | awk -F. '{
+            if ($1 > 1) exit 0;
+            if ($1 == 1 && $2 >= 12) exit 0;
+            exit 1
+          }')
+          
+          if [ $? -ne 0 ] || [ "${COCOAPODS_VERSION}" = "0.0.0" ]; then
+            echo "⚠️  CocoaPods version ${COCOAPODS_VERSION} is too old (< 1.12.0) or not found"
+            echo "Installing CocoaPods >= 1.12.0 directly..."
+            gem install cocoapods -v ">= 1.12.0" --user-install --no-document || {
+              echo "⚠️  Failed with --no-document, trying without..."
+              gem install cocoapods -v ">= 1.12.0" --user-install
+            }
+            export PATH="${GEM_BIN_DIR}:${PATH}"
+            NEW_VERSION=$(pod --version 2>/dev/null || bundle exec pod --version 2>/dev/null || echo "unknown")
+            echo "✅ Updated CocoaPods version: ${NEW_VERSION}"
+          else
+            echo "✅ CocoaPods version ${COCOAPODS_VERSION} meets requirements (>= 1.12.0)"
+          fi
+          
+          # Final version verification
+          FINAL_VERSION=$(pod --version 2>/dev/null || bundle exec pod --version 2>/dev/null || echo "unknown")
+          echo "Final CocoaPods version: ${FINAL_VERSION}"
+          
+          # Verify it meets the requirement
+          FINAL_CHECK=$(echo "${FINAL_VERSION}" | awk -F. '{
+            if ($1 > 1) exit 0;
+            if ($1 == 1 && $2 >= 12) exit 0;
+            exit 1
+          }')
+          if [ $? -ne 0 ]; then
+            echo "❌ Error: CocoaPods version ${FINAL_VERSION} still does not meet requirement (>= 1.12.0)"
+            exit 1
+          fi
           
           # Update CocoaPods repo to get latest podspecs
           echo "Updating CocoaPods repo..."
