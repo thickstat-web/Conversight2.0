@@ -1,5 +1,5 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
-import { CS_API_HOST, getAPIUrl } from '@/Config'
+import { CS_API_HOST, getAPIUrl , CLIENT_DATA} from '@/Config'
 import { FCMTokenResponse, LogoutResponse, ResponseType } from '@/Types/Common'
 import { OrgData, NewVerifyEmailResponse } from '@/Types/VerifyEmailResponse'
 import { SignInRequestData } from '@/Types/SignInRequest'
@@ -8,7 +8,6 @@ import {
   ForgotPasswordRequestData,
   ForgotPasswordResponse,
 } from '@/Types/ForgotPassword'
-import { CLIENT_DATA } from '@/Config'
 import { bridgeOrgData } from '@/Utils/orgBridge'
 
 export const verifyEmail = (build: EndpointBuilder<any, any, any>) => {
