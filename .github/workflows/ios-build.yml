@@ -37,9 +37,11 @@ jobs:
 
       - name: Install CocoaPods Dependencies
         run: |
-          # Fix File.exists? issue using perl instead of sed
-          find node_modules -name "*.podspec" -exec \
-            perl -pi -e 's/File\.exists\?/File.exist?/g' {} \;
+          # Fix File.exists? issue directly in specific podspec files
+          perl -pi -e 's/File\.exists\?/File.exist?/g' \
+            node_modules/react-native-gesture-handler/RNGestureHandler.podspec
+          perl -pi -e 's/File\.exists\?/File.exist?/g' \
+            node_modules/react-native-reanimated/RNReanimated.podspec
           cd ios
           pod install --repo-update
 
