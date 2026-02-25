@@ -31,16 +31,43 @@ const buildBaseQueryWithInterceptor = (baseQuery: BaseQuery) => {
   > = async (args, api, extraOptions) => {
     let adjustedArgs = args
 
-    // Inject auth token i.e ?token=<token>
+    // Get auth token
     const state = api.getState() as RootState
-    const token = state.authReducer.authData?.token || await AsyncStorage.getItem('authToken');
-    const urlEnd = typeof args === 'string' ? args : args.url
-    if (token && !isStringExists(urlEnd, 'token=')) {
-      const joinChar = isStringExists(urlEnd, '?') ? '&' : '?'
-      const encodedToken = encodeURIComponent(token)
-      const adjustedUrl = `${urlEnd}${joinChar}token=${encodedToken}`
-      adjustedArgs =
-        typeof args === 'string' ? adjustedUrl : { ...args, url: adjustedUrl }
+    const token =
+      state.authReducer.authData?.token ||
+      (await AsyncStorage.getItem('authToken'))
+
+    if (token) {
+      const urlEnd = typeof args === 'string' ? args : args.url
+
+      // Inject auth token in query parameter i.e ?token=<token>
+      if (!isStringExists(urlEnd, 'token=')) {
+        const joinChar = isStringExists(urlEnd, '?') ? '&' : '?'
+        const encodedToken = encodeURIComponent(token)
+        const adjustedUrl = `${urlEnd}${joinChar}token=${encodedToken}`
+        adjustedArgs =
+          typeof args === 'string' ? adjustedUrl : { ...args, url: adjustedUrl }
+      }
+
+      // Add token to headers
+      if (typeof adjustedArgs === 'string') {
+        // Convert string to FetchArgs object with headers
+        adjustedArgs = {
+          url: adjustedArgs,
+          headers: {
+            Authorization: `${token}`,
+          },
+        }
+      } else {
+        // Merge headers with existing headers
+        adjustedArgs = {
+          ...adjustedArgs,
+          headers: {
+            ...adjustedArgs.headers,
+            Authorization: `${token}`,
+          },
+        }
+      }
     }
 
     let result = await baseQuery(adjustedArgs, api, extraOptions)

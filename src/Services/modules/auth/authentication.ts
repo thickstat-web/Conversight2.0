@@ -1,5 +1,5 @@
 import { EndpointBuilder } from '@reduxjs/toolkit/dist/query/endpointDefinitions'
-import { CS_API_HOST, getAPIUrl , CLIENT_DATA} from '@/Config'
+import { CS_API_HOST, getAPIUrl, CLIENT_DATA_KEY } from '@/Config'
 import { FCMTokenResponse, LogoutResponse, ResponseType } from '@/Types/Common'
 import { OrgData, NewVerifyEmailResponse } from '@/Types/VerifyEmailResponse'
 import { SignInRequestData } from '@/Types/SignInRequest'
@@ -11,7 +11,7 @@ import {
 import { bridgeOrgData } from '@/Utils/orgBridge'
 
 export const verifyEmail = (build: EndpointBuilder<any, any, any>) => {
-  const { client_id, client_secret } = CLIENT_DATA
+  const { client_id, client_secret } = CLIENT_DATA_KEY
   return build.query<ResponseType<OrgData[]>, string>({
     query: email => ({
       url: `https://${CS_API_HOST}/api/v1/v2/userOrg?email=${email}`,

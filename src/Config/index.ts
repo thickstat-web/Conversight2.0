@@ -81,7 +81,3 @@ export const EXPAND_ALL = 'Expand All'
 export const COLLAPSE_ALL = 'Collapse All'
 export const RESET_PREVIEWER = 'Reset Previewer'
 
-export const CLIENT_DATA = {
-  client_id: 'cs-A8C4F2D7B1E9G6H3K5L7M2N8P4R1S9',
-  client_secret: 'F3B9E1C6D4A7H2K8M5N9P3R6S1T7L2',
-}
