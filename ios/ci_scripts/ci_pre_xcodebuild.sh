@@ -85,21 +85,38 @@ find_node() {
         "/opt/homebrew/bin/node"
         "/usr/bin/node"
         "/opt/node/bin/node"
+        "/Library/Developer/Toolchains/node"
+        "$HOME/.nvm/versions/node/*/bin/node"
     )
     
     for NODE_PATH in "${NODE_PATHS[@]}"; do
-        if [ -f "${NODE_PATH}" ] && [ -x "${NODE_PATH}" ]; then
+        # Handle glob patterns
+        if [[ "${NODE_PATH}" == *"*"* ]]; then
+            local GLOB_RESULT=$(ls ${NODE_PATH} 2>/dev/null | head -1)
+            if [ -n "${GLOB_RESULT}" ] && [ -x "${GLOB_RESULT}" ]; then
+                echo "${GLOB_RESULT}"
+                return 0
+            fi
+        elif [ -f "${NODE_PATH}" ] && [ -x "${NODE_PATH}" ]; then
             echo "${NODE_PATH}"
             return 0
         fi
     done
     
-    # Try to find via find command
-    local FOUND=$(find /usr -name "node" -type f -executable 2>/dev/null | head -1)
-    if [ -n "${FOUND}" ]; then
-        echo "${FOUND}"
+    # Check environment variables
+    if [ -n "${NODE_BINARY}" ] && [ -x "${NODE_BINARY}" ]; then
+        echo "${NODE_BINARY}"
         return 0
     fi
+    
+    # Try to find via find command in common directories
+    for SEARCH_DIR in /usr/local /opt /Library /usr; do
+        local FOUND=$(find "${SEARCH_DIR}" -name "node" -type f -executable 2>/dev/null | head -1)
+        if [ -n "${FOUND}" ]; then
+            echo "${FOUND}"
+            return 0
+        fi
+    done
     
     return 1
 }
@@ -117,9 +134,40 @@ else
         export PATH="${NODE_DIR}:${PATH}"
         echo "✅ Added ${NODE_DIR} to PATH"
     else
-        echo "❌ Error: Node.js not found in Xcode Cloud environment"
-        echo "Please ensure Node.js is available or configure it in Xcode Cloud workflow settings"
-        exit 1
+        echo "⚠️  Node.js not found in standard locations, attempting to install..."
+        
+        # Try to install Node.js via Homebrew if available
+        if command -v brew &> /dev/null; then
+            echo "Installing Node.js via Homebrew..."
+            brew install node
+            if command -v node &> /dev/null; then
+                NODE_BINARY="$(command -v node)"
+                echo "✅ Node.js installed and found at: ${NODE_BINARY}"
+            else
+                echo "❌ Error: Failed to install Node.js via Homebrew"
+                exit 1
+            fi
+        # Try to use nvm if available
+        elif [ -s "$HOME/.nvm/nvm.sh" ]; then
+            echo "Loading nvm..."
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install node
+            nvm use node
+            if command -v node &> /dev/null; then
+                NODE_BINARY="$(command -v node)"
+                echo "✅ Node.js loaded via nvm at: ${NODE_BINARY}"
+            else
+                echo "❌ Error: Failed to load Node.js via nvm"
+                exit 1
+            fi
+        else
+            echo "❌ Error: Node.js not found and no installation method available"
+            echo "Xcode Cloud should have Node.js available for React Native projects"
+            echo "Please check your Xcode Cloud workflow configuration"
+            echo "PATH: ${PATH}"
+            exit 1
+        fi
     fi
 fi
 
