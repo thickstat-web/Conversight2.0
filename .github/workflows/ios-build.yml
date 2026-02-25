@@ -35,14 +35,11 @@ jobs:
         with:
           ruby-version: '3.0'
 
-      - name: Install CocoaPods
-        run: gem install cocoapods -v 1.12.1
-
       - name: Install CocoaPods Dependencies
         run: |
-          # Fix File.exists? issue
-          find node_modules -name "*.podspec" | xargs grep -l "File\.exists?" | \
-            xargs sed -i 's/File\.exists?/File\.exist?/g'
+          # Fix File.exists? issue using perl instead of sed
+          find node_modules -name "*.podspec" -exec \
+            perl -pi -e 's/File\.exists\?/File.exist?/g' {} \;
           cd ios
           pod install --repo-update
 
