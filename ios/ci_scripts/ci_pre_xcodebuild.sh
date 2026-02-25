@@ -68,6 +68,103 @@ if [ ! -d "${IOS_DIR}" ]; then
     exit 1
 fi
 
+# Find and setup Node.js/npm
+echo "🔍 Setting up Node.js environment..."
+
+# Function to find Node.js
+find_node() {
+    # First, try command -v
+    if command -v node &> /dev/null; then
+        echo "$(command -v node)"
+        return 0
+    fi
+    
+    # Check common locations
+    local NODE_PATHS=(
+        "/usr/local/bin/node"
+        "/opt/homebrew/bin/node"
+        "/usr/bin/node"
+        "/opt/node/bin/node"
+    )
+    
+    for NODE_PATH in "${NODE_PATHS[@]}"; do
+        if [ -f "${NODE_PATH}" ] && [ -x "${NODE_PATH}" ]; then
+            echo "${NODE_PATH}"
+            return 0
+        fi
+    done
+    
+    # Try to find via find command
+    local FOUND=$(find /usr -name "node" -type f -executable 2>/dev/null | head -1)
+    if [ -n "${FOUND}" ]; then
+        echo "${FOUND}"
+        return 0
+    fi
+    
+    return 1
+}
+
+NODE_BINARY=""
+if command -v node &> /dev/null; then
+    NODE_BINARY="$(command -v node)"
+    echo "✅ Node.js found in PATH: ${NODE_BINARY}"
+else
+    echo "⚠️  Node.js not in PATH, searching..."
+    NODE_BINARY="$(find_node)"
+    if [ -n "${NODE_BINARY}" ]; then
+        echo "✅ Found Node.js at: ${NODE_BINARY}"
+        NODE_DIR="$(dirname "${NODE_BINARY}")"
+        export PATH="${NODE_DIR}:${PATH}"
+        echo "✅ Added ${NODE_DIR} to PATH"
+    else
+        echo "❌ Error: Node.js not found in Xcode Cloud environment"
+        echo "Please ensure Node.js is available or configure it in Xcode Cloud workflow settings"
+        exit 1
+    fi
+fi
+
+# Verify node is accessible
+if ! command -v node &> /dev/null; then
+    echo "❌ Error: Node.js still not accessible after PATH update"
+    exit 1
+fi
+
+# Find npm
+if ! command -v npm &> /dev/null; then
+    echo "⚠️  npm not in PATH, searching..."
+    NODE_DIR="$(dirname "$(command -v node)")"
+    if [ -f "${NODE_DIR}/npm" ]; then
+        export PATH="${NODE_DIR}:${PATH}"
+        echo "✅ Found npm at: ${NODE_DIR}/npm"
+    else
+        # Try to find npm separately
+        NPM_PATHS=(
+            "/usr/local/bin/npm"
+            "/opt/homebrew/bin/npm"
+            "/usr/bin/npm"
+        )
+        for NPM_PATH in "${NPM_PATHS[@]}"; do
+            if [ -f "${NPM_PATH}" ] && [ -x "${NPM_PATH}" ]; then
+                NPM_DIR="$(dirname "${NPM_PATH}")"
+                export PATH="${NPM_DIR}:${PATH}"
+                echo "✅ Found npm at: ${NPM_PATH}"
+                break
+            fi
+        done
+    fi
+fi
+
+# Final verification
+if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
+    echo "❌ Error: Node.js or npm not available"
+    echo "Node.js: $(command -v node || echo 'NOT FOUND')"
+    echo "npm: $(command -v npm || echo 'NOT FOUND')"
+    exit 1
+fi
+
+echo "✅ Node.js version: $(node --version)"
+echo "✅ npm version: $(npm --version)"
+
 # Install Node.js dependencies
 echo "📦 Installing Node.js dependencies..."
 cd "${PROJECT_ROOT}"
