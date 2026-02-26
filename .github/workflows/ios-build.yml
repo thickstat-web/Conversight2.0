@@ -387,6 +387,26 @@ jobs:
             exit 1
           fi
 
+      - name: Patch RNImageCropPicker MobileCoreServices (removed in Xcode 15)
+        run: |
+          FILE="node_modules/react-native-image-crop-picker/ios/src/ImageCropPicker.m"
+          if [ -f "$FILE" ]; then
+            if grep -q "#import <MobileCoreServices/MobileCoreServices.h>" "$FILE"; then
+              echo "Patching ImageCropPicker.m — MobileCoreServices removed in Xcode 15 iOS SDK..."
+              # MobileCoreServices.framework was removed in Xcode 15 (iOS 17 SDK).
+              # UTCoreTypes.h (UniformTypeIdentifiers) still provides kUTTypeMovie etc.
+              # as deprecated aliases, which keeps the rest of the file unchanged.
+              sed -i '' \
+                's|#import <MobileCoreServices/MobileCoreServices.h>|#if __has_include(<MobileCoreServices/MobileCoreServices.h>)\n#import <MobileCoreServices/MobileCoreServices.h>\n#else\n#import <UniformTypeIdentifiers/UTCoreTypes.h>\n#endif|' \
+                "$FILE"
+              echo "✅ ImageCropPicker.m patched — using UTCoreTypes fallback"
+            else
+              echo "✅ MobileCoreServices import not found — already patched or not present"
+            fi
+          else
+            echo "⚠️  ImageCropPicker.m not found at $FILE"
+          fi
+
       - name: Patch TOCropViewController iOS 26 API
         run: |
           FILE="ios/Pods/TOCropViewController/Objective-C/TOCropViewController/TOCropViewController.m"
