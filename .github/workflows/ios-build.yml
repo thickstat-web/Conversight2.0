@@ -387,21 +387,48 @@ jobs:
             exit 1
           fi
 
-      - name: Patch RNImageCropPicker MobileCoreServices (removed in Xcode 15)
+      - name: Patch RNImageCropPicker compatibility (Xcode 15 + TOCropViewController API)
         run: |
           FILE="node_modules/react-native-image-crop-picker/ios/src/ImageCropPicker.m"
           if [ -f "$FILE" ]; then
+            # ── Patch 1: MobileCoreServices removed in Xcode 15 / iOS 17 SDK ──────────────
             if grep -q "#import <MobileCoreServices/MobileCoreServices.h>" "$FILE"; then
-              echo "Patching ImageCropPicker.m — MobileCoreServices removed in Xcode 15 iOS SDK..."
-              # MobileCoreServices.framework was removed in Xcode 15 (iOS 17 SDK).
+              echo "Patching MobileCoreServices import..."
               # UTCoreTypes.h (UniformTypeIdentifiers) still provides kUTTypeMovie etc.
-              # as deprecated aliases, which keeps the rest of the file unchanged.
               sed -i '' \
                 's|#import <MobileCoreServices/MobileCoreServices.h>|#if __has_include(<MobileCoreServices/MobileCoreServices.h>)\n#import <MobileCoreServices/MobileCoreServices.h>\n#else\n#import <UniformTypeIdentifiers/UTCoreTypes.h>\n#endif|' \
                 "$FILE"
-              echo "✅ ImageCropPicker.m patched — using UTCoreTypes fallback"
+              echo "✅ MobileCoreServices → UTCoreTypes fallback applied"
             else
-              echo "✅ MobileCoreServices import not found — already patched or not present"
+              echo "✅ MobileCoreServices already patched"
+            fi
+
+            # ── Patch 2: customAspectRatio removed in TOCropViewController 4.x ─────────────
+            # RNImageCropPicker 0.38.1 uses cropVC.customAspectRatio (a CGSize property).
+            # TOCropViewController ≥ 4.x removed this property, causing a compile error.
+            # Fix: replace the dot-syntax property access with dynamic dispatch via
+            # objc_msgSend so it compiles against ANY version of the pod, and only
+            # calls the setter at runtime when the property actually exists.
+            if grep -q "cropVC\.customAspectRatio = aspectRatio;" "$FILE"; then
+              echo "Patching customAspectRatio — dynamic dispatch for TOCropViewController compatibility..."
+
+              # 2a. Add objc/message.h at the very top of the file (needed for objc_msgSend)
+              if ! grep -q "#include <objc/message.h>" "$FILE"; then
+                sed -i '' '1s|^|#include <objc/message.h>\n|' "$FILE"
+              fi
+
+              # 2b. Replace the direct property access with a respondsToSelector + objc_msgSend call
+              perl -i -pe \
+                's/cropVC\.customAspectRatio = aspectRatio;/{ typedef void(*_SetSz)(id,SEL,CGSize); SEL _s=NSSelectorFromString(@"setCustomAspectRatio:"); if([cropVC respondsToSelector:_s]){((_SetSz)objc_msgSend)(cropVC,_s,aspectRatio);} }/' \
+                "$FILE"
+
+              if grep -q "customAspectRatio" "$FILE" && ! grep -q "cropVC\.customAspectRatio = aspectRatio;" "$FILE"; then
+                echo "✅ customAspectRatio patched — using dynamic dispatch"
+              else
+                echo "⚠️  customAspectRatio patch may not have applied cleanly — check $FILE"
+              fi
+            else
+              echo "✅ customAspectRatio already patched or not present"
             fi
           else
             echo "⚠️  ImageCropPicker.m not found at $FILE"
