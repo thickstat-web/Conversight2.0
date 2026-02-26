@@ -567,6 +567,43 @@ jobs:
           path: ${{ runner.temp }}/output/*.ipa
           retention-days: 7
 
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          # Skip if App Store Connect API secrets are not configured
+          if [ -z "$APP_STORE_CONNECT_KEY_ID" ] || [ -z "$APP_STORE_CONNECT_ISSUER_ID" ] || [ -z "$APP_STORE_CONNECT_PRIVATE_KEY" ]; then
+            echo "⚠️  App Store Connect API secrets not set — skipping TestFlight upload."
+            echo "   To enable automatic upload, add these GitHub Secrets:"
+            echo "   • APP_STORE_CONNECT_KEY_ID"
+            echo "   • APP_STORE_CONNECT_ISSUER_ID"
+            echo "   • APP_STORE_CONNECT_PRIVATE_KEY"
+            echo "   See: https://appstoreconnect.apple.com/access/api"
+            exit 0
+          fi
+
+          IPA_FILE=$(find $RUNNER_TEMP/output -name "*.ipa" | head -1)
+          if [ -z "$IPA_FILE" ]; then
+            echo "❌ IPA not found — skipping TestFlight upload"
+            exit 1
+          fi
+
+          # Write the API key to a temp file
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8
+
+          echo "Uploading $IPA_FILE to TestFlight..."
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_FILE" \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
+            --show-progress
+
+          echo "✅ Upload to TestFlight complete!"
+
       - name: Cleanup Keychain
         if: always()
         run: |
