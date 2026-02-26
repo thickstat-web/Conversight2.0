@@ -16,10 +16,6 @@ target 'ConverSight' do
   pod 'FirebaseCore', :modular_headers => true
   pod 'GoogleUtilities', :modular_headers => true
 
-  # Pin TOCropViewController to last version compatible with Xcode 15.4
-  # Newer versions use UIViewLayoutRegion which is iOS 26 / Xcode 26 only API
-  pod 'TOCropViewController', '~> 2.7.4'
-
   use_react_native!(
     :path => config[:reactNativePath],
     # Hermes is now enabled by default. Disable by setting this flag to false.

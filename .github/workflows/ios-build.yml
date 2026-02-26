@@ -368,6 +368,28 @@ jobs:
           cd ios
           pod install --repo-update
 
+      - name: Patch TOCropViewController iOS 26 API
+        run: |
+          FILE="ios/Pods/TOCropViewController/Objective-C/TOCropViewController/TOCropViewController.m"
+          if [ -f "$FILE" ]; then
+            if grep -q "UIViewLayoutRegion" "$FILE"; then
+              echo "Patching TOCropViewController.m — replacing iOS 26 UIViewLayoutRegion with safeAreaInsets..."
+              # Perl slurp mode (-0) handles the multi-line pattern in a single pass
+              perl -i -0pe \
+                's/UIViewLayoutRegion \*layoutRegion = \[UIViewLayoutRegion safeAreaLayoutRegionWithCornerAdaptation:[^\]]+\];\s*UIEdgeInsets edgeInsets = \[self\.view edgeInsetsForLayoutRegion:layoutRegion\];/UIEdgeInsets edgeInsets = self.view.safeAreaInsets;/g' \
+                "$FILE"
+              if grep -q "UIViewLayoutRegion" "$FILE"; then
+                echo "⚠️  Pattern not fully replaced — inspect the file manually"
+              else
+                echo "✅ TOCropViewController.m patched successfully"
+              fi
+            else
+              echo "✅ TOCropViewController.m does not use UIViewLayoutRegion — no patch needed"
+            fi
+          else
+            echo "⚠️  TOCropViewController.m not found at expected path"
+          fi
+
       - name: Build Archive
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
