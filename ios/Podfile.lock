@@ -503,6 +503,7 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
+  - TOCropViewController (= 3.1.1)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -693,6 +694,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 9002a9b12d8104d7478cdc306d80f0efea7fe2c5
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
 
-PODFILE CHECKSUM: f4c6b3699f1912b455ab6fd9bf7c1c747a1bdff4
+PODFILE CHECKSUM: 706224b58628ff6f26262871a8ed3dcf26a64db7
 
 COCOAPODS: 1.11.3

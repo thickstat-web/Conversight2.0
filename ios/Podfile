@@ -16,6 +16,11 @@ target 'ConverSight' do
   pod 'FirebaseCore', :modular_headers => true
   pod 'GoogleUtilities', :modular_headers => true
 
+  # Pin TOCropViewController to 3.1.1 — the version RNImageCropPicker 0.38.1 was built against.
+  # Newer versions (4.x+) removed the 'customAspectRatio' property used by ImageCropPicker.m.
+  # Without this pin, pod install --repo-update on CI may resolve a newer incompatible version.
+  pod 'TOCropViewController', '3.1.1'
+
   use_react_native!(
     :path => config[:reactNativePath],
     # Hermes is now enabled by default. Disable by setting this flag to false.
