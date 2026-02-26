@@ -1,0 +1,380 @@
+name: iOS Production Build (App Store)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Triggers ONLY on the 'prod' branch.
+# Builds with Xcode 16 (iOS 18 SDK) — required by Apple for App Store uploads.
+#
+# ⚠️  NOTE: Xcode 16 may introduce new build errors with React Native 0.68.2.
+#     If this pipeline fails, the recommended fix is to upgrade React Native
+#     to 0.73+ before using this workflow.
+#
+# GitHub Secrets required (same as ios-build.yml PLUS the ones below):
+#   BUILD_CERTIFICATE_BASE64          — .p12 certificate (base64)
+#   P12_PASSWORD                      — .p12 password
+#   KEYCHAIN_PASSWORD                 — any random string
+#   APPLE_TEAM_ID                     — Apple Team ID
+#   APPSTORE_PROVISIONING_PROFILE_BASE64 — App Store provisioning profile (base64)
+#                                          (different from Ad Hoc profile!)
+# ─────────────────────────────────────────────────────────────────────────────
+
+on:
+  push:
+    branches: [prod]
+  workflow_dispatch:
+
+jobs:
+  ios-prod-build:
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Build & Version Number
+        run: |
+          BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          echo "Setting build number to: $BUILD_NUMBER"
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" \
+            ios/ConverSight.xcodeproj/project.pbxproj
+          echo "Verification:"
+          grep "CURRENT_PROJECT_VERSION" ios/ConverSight.xcodeproj/project.pbxproj
+          echo "✅ Build number set to $BUILD_NUMBER"
+
+      - name: Install Apple Certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          if [ -z "$BUILD_CERTIFICATE_BASE64" ]; then
+            echo "❌ Error: BUILD_CERTIFICATE_BASE64 secret is empty"
+            exit 1
+          fi
+
+          BASE64_LENGTH=${#BUILD_CERTIFICATE_BASE64}
+          echo "Base64 string length: $BASE64_LENGTH characters"
+          if [ "$BASE64_LENGTH" -lt 100 ]; then
+            echo "❌ Error: Base64 string is too short. Verify BUILD_CERTIFICATE_BASE64 secret."
+            exit 1
+          fi
+
+          echo "$BUILD_CERTIFICATE_BASE64" | tr -d '\n\r ' | base64 -d > $CERTIFICATE_PATH
+
+          if [ ! -f "$CERTIFICATE_PATH" ] || [ ! -s "$CERTIFICATE_PATH" ]; then
+            echo "❌ Error: Certificate file is missing or empty after base64 decode"
+            exit 1
+          fi
+
+          FILE_SIZE=$(wc -c < $CERTIFICATE_PATH)
+          echo "Decoded certificate file size: $FILE_SIZE bytes"
+          if [ "$FILE_SIZE" -lt 2048 ]; then
+            echo "❌ Error: Certificate file too small ($FILE_SIZE bytes). Check BUILD_CERTIFICATE_BASE64."
+            exit 1
+          fi
+
+          NORMALIZED_PASSWORD="$P12_PASSWORD"
+          if [ -n "$P12_PASSWORD" ]; then
+            NORMALIZED_PASSWORD=$(echo "$P12_PASSWORD" | tr '[:upper:]' '[:lower:]' | xargs)
+            if [ "$NORMALIZED_PASSWORD" = "none" ] || [ "$NORMALIZED_PASSWORD" = "empty" ] || \
+               [ "$NORMALIZED_PASSWORD" = "nopassword" ] || [ "$NORMALIZED_PASSWORD" = "no-password" ] || \
+               [ -z "$NORMALIZED_PASSWORD" ]; then
+              NORMALIZED_PASSWORD=""
+              echo "ℹ️  Treating P12_PASSWORD placeholder as empty"
+            fi
+          fi
+
+          if command -v openssl &> /dev/null; then
+            echo "Validating certificate password..."
+            if [ -n "$NORMALIZED_PASSWORD" ] && openssl pkcs12 -info -in "$CERTIFICATE_PATH" -passin pass:"$NORMALIZED_PASSWORD" -noout &>/dev/null; then
+              echo "✅ Password validated"
+            elif openssl pkcs12 -info -in "$CERTIFICATE_PATH" -passin pass:"" -noout &>/dev/null; then
+              echo "✅ Certificate has no password"
+              NORMALIZED_PASSWORD=""
+            else
+              echo "❌ Error: Certificate password is incorrect. Update P12_PASSWORD secret."
+              exit 1
+            fi
+          fi
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          set +e
+          IMPORT_SUCCESS=false
+
+          echo "Method 1: Direct PKCS12 import..."
+          IMPORT_OUTPUT=$(security import "$CERTIFICATE_PATH" \
+            -P "$NORMALIZED_PASSWORD" -A -t cert -f pkcs12 \
+            -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security 2>&1)
+          IMPORT_EXIT_CODE=$?
+          echo "Exit code: $IMPORT_EXIT_CODE | Output: $IMPORT_OUTPUT"
+          [ $IMPORT_EXIT_CODE -eq 0 ] && IMPORT_SUCCESS=true && echo "✅ Imported via Method 1"
+
+          if [ "$IMPORT_SUCCESS" = false ]; then
+            echo "Method 2: PKCS12 → PEM fallback..."
+            TEMP_CERT="$RUNNER_TEMP/cert_only.pem"
+            TEMP_KEY="$RUNNER_TEMP/key_only.pem"
+            PASSIN_ARG=""
+            [ -n "$NORMALIZED_PASSWORD" ] && PASSIN_ARG="-passin pass:$NORMALIZED_PASSWORD"
+
+            openssl pkcs12 -in "$CERTIFICATE_PATH" $PASSIN_ARG -nokeys -out "$TEMP_CERT" -legacy 2>/dev/null || \
+            openssl pkcs12 -in "$CERTIFICATE_PATH" $PASSIN_ARG -nokeys -out "$TEMP_CERT" 2>/dev/null
+            CERT_RC=$?
+
+            openssl pkcs12 -in "$CERTIFICATE_PATH" $PASSIN_ARG -nocerts -nodes -out "$TEMP_KEY" -legacy 2>/dev/null || \
+            openssl pkcs12 -in "$CERTIFICATE_PATH" $PASSIN_ARG -nocerts -nodes -out "$TEMP_KEY" 2>/dev/null
+            KEY_RC=$?
+
+            if [ $CERT_RC -eq 0 ] && [ $KEY_RC -eq 0 ]; then
+              security import "$TEMP_CERT" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security 2>&1
+              CERT_IMPORT_RC=$?
+              security import "$TEMP_KEY" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign -T /usr/bin/security 2>&1
+              KEY_IMPORT_RC=$?
+              rm -f "$TEMP_CERT" "$TEMP_KEY"
+              [ $CERT_IMPORT_RC -eq 0 ] && IMPORT_SUCCESS=true && echo "✅ Imported via Method 2 (PEM)"
+            else
+              rm -f "$TEMP_CERT" "$TEMP_KEY"
+            fi
+          fi
+
+          set -e
+
+          if [ "$IMPORT_SUCCESS" = false ]; then
+            echo "❌ All import methods failed. Re-export the certificate and update BUILD_CERTIFICATE_BASE64."
+            exit 1
+          fi
+
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          echo "✅ Certificate installed"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH" 2>/dev/null || true
+
+      - name: Install Provisioning Profile
+        env:
+          # ⚠️  Use APPSTORE_PROVISIONING_PROFILE_BASE64 — NOT the Ad Hoc one!
+          # Create an App Store provisioning profile in Apple Developer Portal and
+          # encode it: base64 -i YourProfile.mobileprovision | pbcopy
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.APPSTORE_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 -d > $PP_PATH
+
+          if [ ! -f "$PP_PATH" ] || [ ! -s "$PP_PATH" ]; then
+            echo "❌ Error: Provisioning profile missing or empty. Check APPSTORE_PROVISIONING_PROFILE_BASE64 secret."
+            exit 1
+          fi
+
+          echo "✅ Provisioning profile decoded ($(wc -c < $PP_PATH) bytes)"
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+
+          UUID=$(security cms -D -i "$PP_PATH" 2>/dev/null | grep -A1 '<key>UUID</key>' | grep '<string>' | sed 's|.*<string>\(.*\)</string>.*|\1|' | tr -d '[:space:]')
+          if [ -z "$UUID" ]; then
+            UUID=$(grep -aoi "[0-9a-f]\{8\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{12\}" "$PP_PATH" | head -1)
+          fi
+
+          if [ -n "$UUID" ]; then
+            cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/"$UUID.mobileprovision"
+            echo "✅ Profile installed as $UUID.mobileprovision"
+            echo "PROVISIONING_PROFILE_UUID=$UUID" >> $GITHUB_ENV
+          else
+            cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+            echo "⚠️  UUID not found — installed with generic name"
+          fi
+
+          if security cms -D -i "$PP_PATH" 2>/dev/null | grep -q "aps-environment\|com.apple.developer.aps-environment"; then
+            echo "✅ Profile includes Push Notifications capability"
+          else
+            echo "⚠️  WARNING: Profile does NOT include Push Notifications — archive may fail!"
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install Node Modules
+        run: yarn install --frozen-lockfile
+
+      - name: Select Xcode 16
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.2'
+
+      - name: Verify Xcode Version
+        run: xcodebuild -version
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+
+      - name: Fix podspec File.exists issue
+        run: |
+          python3 -c "
+          import os
+          def fix_file(path):
+              with open(path, 'r') as f:
+                  content = f.read()
+              if 'File.exists?' in content:
+                  content = content.replace('File.exists?', 'File.exist?')
+                  with open(path, 'w') as f:
+                      f.write(content)
+                  print(f'Fixed: {path}')
+          for root, dirs, files in os.walk('node_modules'):
+              for file in files:
+                  if file.endswith('.podspec') or file.endswith('.rb'):
+                      fix_file(os.path.join(root, file))
+          "
+          python3 -c "
+          path = 'ios/Podfile'
+          with open(path, 'r') as f: content = f.read()
+          content = content.replace('File.exists?', 'File.exist?')
+          with open(path, 'w') as f: f.write(content)
+          print('Fixed Podfile')"
+
+      - name: Fix boost.podspec URL
+        run: |
+          BOOST_PODSPEC="node_modules/react-native/third-party-podspecs/boost.podspec"
+          if [ -f "$BOOST_PODSPEC" ]; then
+            sed -i '' "s|https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2|https://archives.boost.io/release/1.76.0/source/boost_1_76_0.tar.bz2|g" "$BOOST_PODSPEC"
+            echo "✅ Fixed boost.podspec URL"
+          fi
+
+      - name: Install CocoaPods Dependencies
+        run: |
+          cd ios
+          pod install --repo-update
+
+      - name: Patch missing codegen headers (old architecture)
+        run: |
+          REAL="node_modules/react-native-quick-base64/cpp/react-native-quick-base64.h"
+          DEST="node_modules/react-native-quick-base64/ios/react-native-quick-base64.h"
+          if [ -f "$REAL" ]; then
+            cp "$REAL" "$DEST"
+            echo "✅ Copied react-native-quick-base64.h"
+          else
+            echo "❌ Real header not found at $REAL"
+            exit 1
+          fi
+
+      - name: Patch RNImageCropPicker compatibility
+        run: |
+          FILE="node_modules/react-native-image-crop-picker/ios/src/ImageCropPicker.m"
+          if [ -f "$FILE" ]; then
+            if grep -q "#import <MobileCoreServices/MobileCoreServices.h>" "$FILE"; then
+              sed -i '' \
+                's|#import <MobileCoreServices/MobileCoreServices.h>|#if __has_include(<MobileCoreServices/MobileCoreServices.h>)\n#import <MobileCoreServices/MobileCoreServices.h>\n#else\n#import <UniformTypeIdentifiers/UTCoreTypes.h>\n#endif|' \
+                "$FILE"
+              echo "✅ MobileCoreServices patched"
+            fi
+            if grep -q "cropVC\.customAspectRatio = aspectRatio;" "$FILE"; then
+              if ! grep -q "#include <objc/message.h>" "$FILE"; then
+                sed -i '' '1s|^|#include <objc/message.h>\n|' "$FILE"
+              fi
+              perl -i -pe \
+                's/cropVC\.customAspectRatio = aspectRatio;/{ typedef void(*_SetSz)(id,SEL,CGSize); SEL _s=NSSelectorFromString(@"setCustomAspectRatio:"); if([cropVC respondsToSelector:_s]){((_SetSz)objc_msgSend)(cropVC,_s,aspectRatio);} }/' \
+                "$FILE"
+              echo "✅ customAspectRatio patched"
+            fi
+          fi
+
+      - name: Patch TOCropViewController iOS 26 API
+        run: |
+          FILE="ios/Pods/TOCropViewController/Objective-C/TOCropViewController/TOCropViewController.m"
+          if [ -f "$FILE" ] && grep -q "UIViewLayoutRegion" "$FILE"; then
+            perl -i -0pe \
+              's/UIViewLayoutRegion \*layoutRegion = \[UIViewLayoutRegion safeAreaLayoutRegionWithCornerAdaptation:[^\]]+\];\s*UIEdgeInsets edgeInsets = \[self\.view edgeInsetsForLayoutRegion:layoutRegion\];/UIEdgeInsets edgeInsets = self.view.safeAreaInsets;/g' \
+              "$FILE"
+            echo "✅ TOCropViewController patched"
+          fi
+
+      - name: Build Archive
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          echo "Building PRODUCTION archive with Xcode 16..."
+          xcodebuild -workspace ios/ConverSight.xcworkspace \
+            -scheme ConverSight \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROVISIONING_PROFILE_UUID" \
+            clean archive
+
+          if [ ! -d "$RUNNER_TEMP/ConverSight.xcarchive" ]; then
+            echo "❌ Archive was not created"
+            exit 1
+          fi
+          echo "✅ Archive created"
+          ls -lh "$RUNNER_TEMP/ConverSight.xcarchive"
+
+      - name: Create ExportOptions.plist
+        run: |
+          PROFILE_UUID="${PROVISIONING_PROFILE_UUID:-}"
+          echo "Using profile UUID: ${PROFILE_UUID:-<not set>}"
+          cat > ios/ExportOptions.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>teamID</key>
+              <string>${{ secrets.APPLE_TEAM_ID }}</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>signingCertificate</key>
+              <string>Apple Distribution</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>com.thickstat.conversight</key>
+                  <string>${PROFILE_UUID}</string>
+              </dict>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>compileBitcode</key>
+              <false/>
+              <key>stripSwiftSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+          echo "✅ ExportOptions.plist created (method: app-store-connect)"
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath $RUNNER_TEMP/output \
+            -allowProvisioningUpdates
+
+          IPA_FILE=$(find $RUNNER_TEMP/output -name "*.ipa" | head -1)
+          if [ -z "$IPA_FILE" ]; then
+            echo "❌ IPA file was not created"
+            exit 1
+          fi
+          echo "✅ IPA exported: $IPA_FILE"
+          ls -lh "$IPA_FILE"
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ConverSight-Production-IPA
+          path: ${{ runner.temp }}/output/*.ipa
+          retention-days: 30
+
+      - name: Cleanup Keychain
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
