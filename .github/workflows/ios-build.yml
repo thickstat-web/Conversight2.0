@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
+      
       - name: Increment Build Number
         run: |
           # Use the GitHub Actions run number as the build number.
@@ -506,8 +506,8 @@ jobs:
       - name: Create ExportOptions.plist
         run: |
           # Always (re)create ExportOptions.plist so the correct values are used.
-          # 'app-store' was deprecated in Xcode 15 and causes xcodebuild to segfault (exit 139).
-          # The correct method name is 'app-store-connect'.
+          # Using 'ad-hoc' method for direct device installation (no App Store upload needed).
+          # Switch to 'app-store-connect' when uploading to TestFlight/App Store.
           echo "Creating ExportOptions.plist..."
           # PROVISIONING_PROFILE_UUID is set by the 'Install Provisioning Profile' step via GITHUB_ENV
           PROFILE_UUID="${PROVISIONING_PROFILE_UUID:-}"
@@ -518,7 +518,7 @@ jobs:
           <plist version="1.0">
           <dict>
               <key>method</key>
-              <string>app-store-connect</string>
+              <string>ad-hoc</string>
               <key>teamID</key>
               <string>${{ secrets.APPLE_TEAM_ID }}</string>
               <key>signingStyle</key>
@@ -541,7 +541,7 @@ jobs:
           </dict>
           </plist>
           EOF
-          echo "✅ ExportOptions.plist created (method: app-store-connect, profile UUID: ${PROFILE_UUID:-not set})"
+          echo "✅ ExportOptions.plist created (method: ad-hoc, profile UUID: ${PROFILE_UUID:-not set})"
           cat ios/ExportOptions.plist
 
       - name: Export IPA
