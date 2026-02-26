@@ -56,6 +56,11 @@ target 'ConverSight' do
         # Essential for React Native 0.70.x to avoid 'Linker command failed'
         config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -Wl,-ld_classic'
 
+        # 5. Fix for Boost / RCT-Folly C++17 compile error
+        # std::unary_function was removed in C++17 (used by boost/container_hash/hash.hpp)
+        # This flag re-enables it in libc++ without downgrading the C++ standard
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] = '$(inherited) -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION'
+
         # 3. Fix for macOS Sonoma script errors
         # Disables Sandboxing so React Native scripts can bundle images/code
         config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
