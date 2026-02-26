@@ -370,17 +370,21 @@ jobs:
 
       - name: Patch missing codegen headers (old architecture)
         run: |
-          # react-native-quick-base64 imports a codegen-generated header
-          # 'react-native-quick-base64.h' that only exists in new architecture builds.
-          # Since this project uses the OLD architecture (hermes_enabled: false),
-          # that header is never generated. We create a minimal stub so the compiler
-          # finds the file and the build proceeds normally.
-          STUB="node_modules/react-native-quick-base64/ios/react-native-quick-base64.h"
-          if [ ! -f "$STUB" ]; then
-            printf '// Stub — old architecture does not generate this codegen header\n#pragma once\n' > "$STUB"
-            echo "✅ Created stub: $STUB"
+          # react-native-quick-base64:
+          # QuickBase64.h and QuickBase64.mm both import "react-native-quick-base64.h"
+          # The REAL header lives in cpp/ (declares installBase64 / cleanupBase64).
+          # The podspec sets header_mappings_dir = "cpp" but with use_frameworks! :linkage => :static
+          # this doesn't reliably add cpp/ to the search path.
+          # Fix: copy the real cpp/ header into ios/ so the compiler finds it at the
+          # same path level as QuickBase64.h (which is already in the search path).
+          REAL="node_modules/react-native-quick-base64/cpp/react-native-quick-base64.h"
+          DEST="node_modules/react-native-quick-base64/ios/react-native-quick-base64.h"
+          if [ -f "$REAL" ]; then
+            cp "$REAL" "$DEST"
+            echo "✅ Copied real header: cpp/ → ios/react-native-quick-base64.h"
           else
-            echo "✅ Stub already present: $STUB"
+            echo "❌ Real header not found at $REAL — package may be missing or renamed"
+            exit 1
           fi
 
       - name: Patch TOCropViewController iOS 26 API
