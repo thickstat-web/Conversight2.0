@@ -12,6 +12,23 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Increment Build Number
+        run: |
+          # Use the GitHub Actions run number as the build number.
+          # This guarantees a unique, ever-increasing number on every CI run.
+          # GITHUB_RUN_NUMBER starts at 1 and increments with each workflow run.
+          BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          echo "Setting build number to: $BUILD_NUMBER"
+
+          # Update CURRENT_PROJECT_VERSION in both Debug and Release configs
+          sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = $BUILD_NUMBER;/g" \
+            ios/ConverSight.xcodeproj/project.pbxproj
+
+          # Verify the change
+          echo "Verification:"
+          grep "CURRENT_PROJECT_VERSION" ios/ConverSight.xcodeproj/project.pbxproj
+          echo "✅ Build number set to $BUILD_NUMBER"
       
       - name: Install Apple Certificate
         env:
