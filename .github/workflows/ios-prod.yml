@@ -351,6 +351,7 @@ jobs:
           xcodebuild -workspace ios/ConverSight.xcworkspace \
             -scheme ConverSight \
             -sdk iphoneos \
+            -destination "generic/platform=iOS" \
             -configuration Release \
             -archivePath $RUNNER_TEMP/ConverSight.xcarchive \
             CODE_SIGN_STYLE=Manual \
