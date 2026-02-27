@@ -287,10 +287,26 @@ jobs:
         run: |
           STORYBOARD="node_modules/react-native-image-crop-picker/ios/QBImagePicker/QBImagePicker/QBImagePicker.storyboard"
           if [ -f "$STORYBOARD" ]; then
-            # Remove deprecated cocoaTouchSystemColor attribute — removed in iOS 18 SDK / Xcode 16
-            # Without this patch ibtool fails with CompileStoryboard error
+            echo "Before patch (document line):"
+            grep 'toolsVersion' "$STORYBOARD" | head -2
+
+            # 1. Remove deprecated cocoaTouchSystemColor attribute (removed in iOS 18 SDK)
             sed -i '' 's/ cocoaTouchSystemColor="[^"]*"//g' "$STORYBOARD"
-            echo "✅ QBImagePicker storyboard patched (cocoaTouchSystemColor removed)"
+
+            # 2. Update storyboard document toolsVersion from Xcode 9 (14868) → Xcode 16.2 (32823.1)
+            #    Old format is not supported by ibtool when compiling against iOS 18 SDK
+            sed -i '' 's/toolsVersion="14868"/toolsVersion="32823.1"/g' "$STORYBOARD"
+
+            # 3. Update the IBCocoaTouchPlugin version to match
+            sed -i '' 's/identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="32823.1"/g' "$STORYBOARD"
+
+            # 4. Remove the "documents saved in the Xcode 8 format" capability declaration
+            #    Xcode 16 ibtool no longer supports this legacy format flag
+            sed -i '' '/<capability name="documents saved in the Xcode 8 format"/d' "$STORYBOARD"
+
+            echo "After patch (document line):"
+            grep 'toolsVersion' "$STORYBOARD" | head -2
+            echo "✅ QBImagePicker storyboard fully patched for Xcode 16"
           else
             echo "⚠️  Storyboard not found, skipping patch"
           fi
