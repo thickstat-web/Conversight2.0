@@ -343,6 +343,12 @@ jobs:
             echo "✅ TOCropViewController patched"
           fi
 
+      - name: Install iOS 18 Platform
+        run: |
+          echo "Downloading iOS 18 platform support for Xcode 16..."
+          sudo xcodebuild -downloadPlatform iOS
+          echo "✅ iOS platform installed"
+
       - name: Build Archive
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
